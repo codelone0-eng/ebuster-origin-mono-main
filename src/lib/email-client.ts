@@ -1,20 +1,11 @@
+import { API_CONFIG } from '@/config/api';
+
 // Клиент для работы с собственным email API
 class EmailClient {
   private baseUrl: string;
 
   constructor() {
-    // Проверяем, что мы в браузере
-    if (typeof window !== 'undefined') {
-      // В браузере используем фиксированные URL
-      this.baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001/api/email'
-        : 'https://ebuster.ru/api/email';
-    } else {
-      // В Node.js используем переменные окружения
-      this.baseUrl = process.env.API_URL || (process.env.NODE_ENV === 'production' 
-        ? 'https://ebuster.ru/api/email'
-        : 'http://localhost:3001/api/email');
-    }
+    this.baseUrl = API_CONFIG.EMAIL_URL;
   }
 
   // Проверка статуса SMTP

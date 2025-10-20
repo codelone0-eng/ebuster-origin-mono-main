@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { API_CONFIG } from '@/config/api';
 
 // Интерфейсы
 interface User {
@@ -26,9 +27,7 @@ interface AuthContextType {
 }
 
 // API базовый URL
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3001/api/auth'
-  : 'https://ebuster.ru/api/auth';
+const API_BASE_URL = API_CONFIG.AUTH_URL;
 
 // Утилиты для работы с токенами
 const getToken = (): string | null => {
