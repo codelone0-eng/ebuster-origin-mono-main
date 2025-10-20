@@ -49,7 +49,7 @@ export default function ResetPassword() {
       if (!error) {
         setIsSuccess(true);
         setTimeout(() => {
-          navigate('/login');
+          navigate('/');
         }, 2000);
       }
     } catch (error) {
