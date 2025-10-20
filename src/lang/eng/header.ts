@@ -1,0 +1,247 @@
+export const eng = {
+  navigation: [
+    { href: "/", label: "Home" },
+    { 
+      href: "#help", 
+      label: "Help",
+      submenu: {
+        items: [
+          { href: "/documentation", label: "Documentation", description: "Detailed guides and examples" },
+          { href: "/api-docs", label: "API Docs", description: "Interactive API documentation" },
+          { href: "/contacts", label: "Contacts", description: "Contact our support team" }
+        ]
+      }
+    },
+    { href: "/advantages", label: "Advantages" },
+  ],
+  buttons: {
+    premium: "Premium",
+    createAccount: "Create Account",
+    signIn: "Sign In",
+    dashboard: "Dashboard",
+    adminPanel: "Admin Panel",
+    logout: "Logout",
+    language: "EN"
+  },
+  modals: {
+    login: {
+      title: "Welcome Back",
+      description: "Sign in to your account to continue your journey.",
+      email: "Email Address",
+      emailPlaceholder: "Enter your email",
+      password: "Password",
+      passwordPlaceholder: "Enter your password",
+      rememberMe: "Remember me",
+      forgotPassword: "Forgot password?",
+      signIn: "Sign In",
+      signingIn: "Signing in...",
+      noAccount: "Don't have an account?",
+      createOne: "Create one",
+      recentLogins: "Recent Logins"
+    },
+    register: {
+      title: "Create Account",
+      description: "Join the community of professionals who refuse to compromise on quality.",
+      fullName: "Full Name",
+      namePlaceholder: "Enter your full name",
+      email: "Email Address",
+      emailPlaceholder: "Enter your email",
+      password: "Password",
+      passwordPlaceholder: "Create a password",
+      confirmPassword: "Confirm Password",
+      confirmPasswordPlaceholder: "Confirm your password",
+      passwordStrength: "Password Strength",
+      passwordRequirements: {
+        minLength: "Minimum 8 characters",
+        uppercase: "One uppercase letter",
+        lowercase: "One lowercase letter",
+        number: "One number",
+        special: "One special character"
+      },
+      strength: "Strength",
+      passwordsMatch: "Perfect! Passwords match",
+      passwordsDontMatch: "Passwords don't match",
+      createAccount: "Create Account",
+      creatingAccount: "Creating Account...",
+      haveAccount: "Already have an account?",
+      signIn: "Sign in",
+      generate: "Generate",
+      creating: "Creating Account...",
+      passwordMatch: {
+        success: "Perfect! Passwords match",
+        error: "Passwords don't match"
+      }
+    }
+  },
+  dashboard: {
+    title: "Dashboard",
+    welcome: "Welcome,",
+    plan: {
+      free: "Free"
+    },
+    tabs: {
+      scripts: "Script Library",
+      installed: "Installed Scripts", 
+      support: "Support",
+      profile: "Profile Settings",
+      settings: "Settings"
+    },
+    scripts: {
+      title: "Script Library",
+      description: "Find and download useful scripts to enhance your experience",
+      searchPlaceholder: "Search scripts...",
+      allCategories: "All Categories",
+      view: "View",
+      download: "Download",
+      downloadScript: "Download Script",
+      install: "Install",
+      notFound: "No scripts found",
+      notFoundDescription: "Try changing your search parameters or filters",
+      loading: "Loading scripts...",
+      search: "Search scripts...",
+      filters: "Filters",
+      install: "Install",
+      installed: "Installed",
+      installSuccess: "Script Installed!",
+      installSuccessDesc: "Script successfully installed in Ebuster extension",
+      installError: "Installation Error",
+      installErrorDesc: "Failed to install in extension. Downloading file instead.",
+      extensionNotFound: "Extension Not Found",
+      extensionNotFoundDesc: "Install Ebuster extension for automatic script installation",
+      installInstructions: "Installation Instructions",
+      installInstructionsDesc: "Open Ebuster extension to complete script installation",
+      downloads: "downloads",
+      version: "v{version}",
+      updated: "Updated",
+      configure: "Configure",
+      update: "Update",
+      remove: "Remove"
+    },
+    support: {
+      open: "Open",
+      status: "Status",
+      priority: "Priority", 
+      category: "Category",
+      created: "Created",
+      updated: "Updated",
+      attachments: "attachments",
+      createTicket: "Create Ticket"
+    },
+    profile: {
+      personalInfo: "Personal Information",
+      changeAvatar: "Change Avatar",
+      avatarFormat: "JPG, PNG up to 2MB",
+      name: "Name",
+      email: "Email",
+      photo: "Profile Photo",
+      uploading: "Uploading...",
+      uploadImage: "Upload Image",
+      remove: "Remove",
+      recommendation: "Recommended: Square image, minimum 200x200px"
+    },
+    settings: {
+      general: "General Settings",
+      security: "Security",
+      notifications: "Notification Settings",
+      autoUpdate: "Auto-update",
+      autoUpdateDesc: "Automatically update installed scripts",
+      enabled: "Enabled",
+      newScripts: "New script notifications",
+      newScriptsDesc: "Get notifications about new scripts",
+      updateNotifications: "Update notifications",
+      updateNotificationsDesc: "Get notifications when scripts are updated",
+      request2FA: "Request 2FA for:",
+      accountLogin: "Account login",
+      passwordChange: "Password change",
+      emailChange: "Email change",
+      accountDeletion: "Account deletion",
+      changePassword: "Change Password",
+      changeEmail: "Change Email",
+      twoFactorAuth: "Two-factor authentication",
+      disabled: "Disabled",
+      logoutAll: "Logout from all devices",
+      methods2FA: "2FA Methods:",
+      telegramBot: "Telegram Bot",
+      googleAuth: "Google Authenticator",
+      active: "Active",
+      configure: "Configure",
+      saveChanges: "Save Changes",
+      saving: "Saving...",
+      logoutAll: "Logout from all devices"
+    },
+    tickets: {
+      createTicket: "Create Ticket",
+      open: "Open",
+      priority: "Priority",
+      created: "Created",
+      updated: "Updated",
+      high: "High",
+      medium: "Medium",
+      low: "Low",
+      openStatus: "Open",
+      inProgress: "In Progress",
+      resolved: "Resolved",
+      closed: "Closed",
+      technicalIssue: "Technical Issue",
+      featureRequest: "Feature Request",
+      bugReport: "Bug Report",
+      other: "Other",
+      replyToTicket: "Reply to ticket",
+      enterYourReply: "Enter your reply...",
+      attachFile: "Attach file",
+      send: "Send",
+      backToSupport: "Back to support",
+      welcome: "Welcome,",
+      downloads: "downloads",
+      download: "download",
+      downloads2: "downloads",
+      category: "Category",
+      allCategories: "All categories",
+      rating: "Rating",
+      anyRating: "Any rating",
+      status: "Status",
+      allScripts: "All scripts",
+      sortBy: "Sort by",
+      byPopularity: "By popularity",
+      attachments: "attachments",
+      attachment: "attachment",
+      attachments2: "attachments",
+      attachedFiles: "Attached files"
+    },
+    installed: {
+      addScript: "Add Script",
+      configure: "Configure",
+      update: "Update",
+      remove: "Remove"
+    }
+  },
+      cursor: {
+        title: "Choose Cursor",
+        description: "Select your preferred cursor style",
+        options: {
+          default: "Default",
+          sparkles: "Sparkles"
+        },
+        descriptions: {
+          default: "Classic circle",
+          sparkles: "Magical sparkles"
+        },
+        adaptNote: "Cursor will adapt to light and dark themes"
+      },
+      forgotPassword: {
+        backToDashboard: "Back to Dashboard",
+        title: "Forgot Password",
+        description: "Enter your email to receive a password reset link",
+        enterEmail: "Enter Email",
+        enterEmailDescription: "We'll send you a link to reset your password",
+        emailLabel: "Email Address",
+        emailPlaceholder: "Enter your email",
+        sendResetLink: "Send Reset Link",
+        sending: "Sending...",
+        emailSent: "Email Sent!",
+        emailSentDescription: "We've sent a password reset link to {email}",
+        checkSpam: "Check Spam Folder",
+        checkSpamDescription: "If you don't receive the email within 5 minutes, check your spam folder",
+        sendAnother: "Send Another"
+      }
+};

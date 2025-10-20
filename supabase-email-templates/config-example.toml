@@ -1,0 +1,60 @@
+# Supabase Email Templates Configuration
+
+## Для локальной разработки
+
+Скопируйте этот конфиг в ваш `supabase/config.toml`:
+
+```toml
+[auth.email.template.confirm]
+subject = "Добро пожаловать в EBUSTER!"
+content_path = "./supabase/templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "Восстановление пароля - EBUSTER"
+content_path = "./supabase/templates/reset-password.html"
+
+[auth.email.template.email_change]
+subject = "Подтверждение смены email - EBUSTER"
+content_path = "./supabase/templates/change-email.html"
+
+[auth.email.template.invite]
+subject = "Приглашение в команду EBUSTER"
+content_path = "./supabase/templates/invite-user.html"
+
+[auth.email.template.magic_link]
+subject = "Magic Link для входа - EBUSTER"
+content_path = "./supabase/templates/magic-link.html"
+```
+
+## Структура папок
+
+```
+supabase/
+├── config.toml
+└── templates/
+    ├── confirm-signup.html
+    ├── reset-password.html
+    ├── change-email.html
+    ├── invite-user.html
+    └── magic-link.html
+```
+
+## Команды для применения
+
+```bash
+# Остановить Supabase
+supabase stop
+
+# Запустить с новыми шаблонами
+supabase start
+
+# Или перезапустить
+supabase stop && supabase start
+```
+
+## Проверка работы
+
+1. Откройте Supabase Dashboard → Authentication → Email Templates
+2. Проверьте, что шаблоны загружены
+3. Отправьте тестовое письмо
+4. Проверьте отображение в email-клиенте

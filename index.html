@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ebuster - Chrome Extension Reimagined</title>
+    <meta name="description" content="Monochrome minimalist Chrome extension with powerful features" />
+    <meta name="author" content="Ebuster" />
+
+    <meta property="og:title" content="Ebuster - Chrome Extension" />
+    <meta property="og:description" content="Monochrome minimalist Chrome extension" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ebuster" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Axiforma Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: 'Axiforma';
+        src: url('https://fonts.cdnfonts.com/s/19795/Axiforma-Regular.woff') format('woff');
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Axiforma';
+        src: url('https://fonts.cdnfonts.com/s/19795/Axiforma-Medium.woff') format('woff');
+        font-weight: 500;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Axiforma';
+        src: url('https://fonts.cdnfonts.com/s/19795/Axiforma-SemiBold.woff') format('woff');
+        font-weight: 600;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Axiforma';
+        src: url('https://fonts.cdnfonts.com/s/19795/Axiforma-Bold.woff') format('woff');
+        font-weight: 700;
+        font-display: swap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script>
+      // Prevent theme flash on load
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (stored === 'dark' || (!stored && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

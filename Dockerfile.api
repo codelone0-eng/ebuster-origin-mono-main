@@ -1,0 +1,25 @@
+FROM node:20-alpine AS base
+
+WORKDIR /app
+
+# Копируем package files
+COPY package*.json ./
+
+# Устанавливаем зависимости
+RUN npm ci --only=production && npm cache clean --force
+
+# Копируем исходники API
+COPY server.ts ./
+COPY start-server.ts ./
+COPY src/api ./src/api
+COPY src/lib ./src/lib
+COPY src/config ./src/config
+COPY src/services ./src/services
+COPY tsconfig*.json ./
+
+# Устанавливаем tsx для запуска TypeScript
+RUN npm install -g tsx
+
+EXPOSE 3001
+
+CMD ["tsx", "start-server.ts"]

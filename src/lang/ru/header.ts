@@ -1,0 +1,243 @@
+export const ru = {
+  navigation: [
+    { href: "/", label: "Главная" },
+    { 
+      href: "#help", 
+      label: "Помощь",
+      submenu: {
+        items: [
+          { href: "/documentation", label: "Документация", description: "Подробные руководства и примеры" },
+          { href: "/api-docs", label: "API Docs", description: "Интерактивная документация API" },
+          { href: "/contacts", label: "Контакты", description: "Свяжитесь с нашей поддержкой" }
+        ]
+      }
+    },
+    { href: "/advantages", label: "Преимущества" },
+  ],
+  buttons: {
+    premium: "Премиум",
+    createAccount: "Создать аккаунт",
+    signIn: "Войти",
+    dashboard: "Личный кабинет",
+    adminPanel: "Админ-панель",
+    logout: "Выйти",
+    language: "RU"
+  },
+  modals: {
+    login: {
+      title: "Добро пожаловать",
+      description: "Войдите в свой аккаунт, чтобы продолжить путешествие.",
+      email: "Адрес электронной почты",
+      emailPlaceholder: "Введите ваш email",
+      password: "Пароль",
+      passwordPlaceholder: "Введите ваш пароль",
+      rememberMe: "Запомнить меня",
+      forgotPassword: "Забыли пароль?",
+      signIn: "Войти",
+      signingIn: "Вход...",
+      noAccount: "Нет аккаунта?",
+      createOne: "Создать",
+      recentLogins: "Недавние входы"
+    },
+    register: {
+      title: "Создать аккаунт",
+      description: "Присоединяйтесь к сообществу профессионалов, которые отказываются идти на компромиссы в качестве.",
+      fullName: "Полное имя",
+      namePlaceholder: "Введите ваше полное имя",
+      email: "Адрес электронной почты",
+      emailPlaceholder: "Введите ваш email",
+      password: "Пароль",
+      passwordPlaceholder: "Создайте пароль",
+      confirmPassword: "Подтвердите пароль",
+      confirmPasswordPlaceholder: "Подтвердите ваш пароль",
+      passwordStrength: "Надежность пароля",
+      passwordRequirements: {
+        minLength: "Минимум 8 символов",
+        uppercase: "Одна заглавная буква",
+        lowercase: "Одна строчная буква",
+        number: "Одна цифра",
+        special: "Один специальный символ"
+      },
+      strength: "Надежность",
+      passwordsMatch: "Отлично! Пароли совпадают",
+      passwordsDontMatch: "Пароли не совпадают",
+      createAccount: "Создать аккаунт",
+      creatingAccount: "Создание аккаунта...",
+      haveAccount: "Уже есть аккаунт?",
+      signIn: "Войти",
+      generate: "Сгенерировать",
+      creating: "Создание аккаунта...",
+      passwordMatch: {
+        success: "Отлично! Пароли совпадают",
+        error: "Пароли не совпадают"
+      }
+    }
+  },
+  dashboard: {
+    title: "Личный кабинет",
+    welcome: "Добро пожаловать,",
+    plan: {
+      free: "Бесплатно"
+    },
+    tabs: {
+      scripts: "Библиотека скриптов",
+      installed: "Установленные скрипты", 
+      support: "Поддержка",
+      profile: "Настройки профиля",
+      settings: "Настройки"
+    },
+    scripts: {
+      title: "Библиотека скриптов",
+      description: "Найдите и загрузите полезные скрипты для улучшения вашего опыта",
+      searchPlaceholder: "Поиск скриптов...",
+      allCategories: "Все категории",
+      view: "Просмотр",
+      download: "Скачать",
+      downloadScript: "Скачать скрипт",
+      notFound: "Скрипты не найдены",
+      notFoundDescription: "Попробуйте изменить параметры поиска или фильтры",
+      loading: "Загрузка скриптов...",
+      search: "Поиск скриптов...",
+      filters: "Фильтры",
+      install: "Установить",
+      installed: "Установлен",
+      installSuccess: "Скрипт установлен!",
+      installSuccessDesc: "Скрипт успешно установлен в расширение Ebuster",
+      installError: "Ошибка установки",
+      installErrorDesc: "Ошибка установки в расширение. Скачиваем файл.",
+      extensionNotFound: "Расширение не найдено",
+      extensionNotFoundDesc: "Установите расширение Ebuster для автоматической установки скриптов",
+      installInstructions: "Инструкции по установке",
+      installInstructionsDesc: "Откройте расширение Ebuster для завершения установки скрипта",
+      downloads: "загрузок",
+      version: "v{version}",
+      updated: "Обновлен",
+      configure: "Настройки",
+      update: "Обновить",
+      remove: "Удалить"
+    },
+    support: {
+      open: "Открыть",
+      priority: "Приоритет", 
+      created: "Создан",
+      updated: "Обновлен",
+      attachments: "вложений",
+      createTicket: "Создать тикет"
+    },
+    profile: {
+      personalInfo: "Личная информация",
+      changeAvatar: "Изменить аватар",
+      avatarFormat: "JPG, PNG до 2MB",
+      name: "Имя",
+      email: "Email",
+      photo: "Фото профиля",
+      uploading: "Загрузка...",
+      uploadImage: "Загрузить изображение",
+      remove: "Удалить",
+      recommendation: "Рекомендуется: Квадратное изображение, минимум 200x200px"
+    },
+    settings: {
+      general: "Общие настройки",
+      security: "Безопасность",
+      notifications: "Настройки уведомлений",
+      autoUpdate: "Автообновление",
+      autoUpdateDesc: "Автоматически обновлять скрипты",
+      enabled: "Включено",
+      newScripts: "Уведомления о новых скриптах",
+      newScriptsDesc: "Получать уведомления о новых скриптах",
+      updateNotifications: "Уведомления об обновлениях",
+      updateNotificationsDesc: "Получать уведомления при обновлениях скриптов",
+      request2FA: "Запрашивать 2FA для:",
+      accountLogin: "Входа в аккаунт",
+      passwordChange: "Смены пароля",
+      emailChange: "Смены email",
+      accountDeletion: "Удаления аккаунта",
+      changePassword: "Сменить пароль",
+      changeEmail: "Сменить email",
+      twoFactorAuth: "Двухфакторная аутентификация",
+      disabled: "Выключено",
+      logoutAll: "Выйти из всех устройств",
+      methods2FA: "Методы 2FA:",
+      telegramBot: "Telegram Bot",
+      googleAuth: "Google Authenticator",
+      active: "Активен",
+      configure: "Настроить",
+      saveChanges: "Сохранить изменения",
+      saving: "Сохранение..."
+    },
+    tickets: {
+      createTicket: "Создать тикет",
+      open: "Открыть",
+      priority: "Приоритет",
+      created: "Создан",
+      updated: "Обновлен",
+      high: "Высокий",
+      medium: "Средний",
+      low: "Низкий",
+      openStatus: "Открыт",
+      inProgress: "В работе",
+      resolved: "Решен",
+      closed: "Закрыт",
+      technicalIssue: "Техническая проблема",
+      featureRequest: "Запрос функции",
+      bugReport: "Сообщение об ошибке",
+      other: "Другое",
+      replyToTicket: "Ответить в тикет",
+      enterYourReply: "Введите ваш ответ...",
+      attachFile: "Прикрепить файл",
+      send: "Отправить",
+      backToSupport: "Назад к поддержке",
+      welcome: "Добро пожаловать,",
+      downloads: "загрузок",
+      download: "загрузка",
+      downloads2: "загрузки",
+      category: "Категория",
+      allCategories: "Все категории",
+      rating: "Рейтинг",
+      anyRating: "Любой рейтинг",
+      status: "Статус",
+      allScripts: "Все скрипты",
+      sortBy: "Сортировка",
+      byPopularity: "По популярности",
+      attachments: "вложений",
+      attachment: "вложение",
+      attachments2: "вложения",
+      attachedFiles: "Прикрепленные файлы"
+    },
+    installed: {
+      addScript: "Добавить скрипт",
+      configure: "Настройки",
+      update: "Обновить",
+      remove: "Удалить"
+    }
+  },
+      cursor: {
+        title: "Выбор курсора",
+        description: "Выберите стиль курсора",
+        options: {
+          default: "По умолчанию",
+          sparkles: "Блестки"
+        },
+        descriptions: {
+          default: "Классический круг",
+          sparkles: "Магические блестки"
+        },
+        adaptNote: "Курсор адаптируется к светлой и темной темам"
+      },
+      forgotPassword: {
+        backToDashboard: "Назад в личный кабинет",
+        title: "Восстановление пароля",
+        description: "Введите ваш email для получения ссылки на восстановление пароля",
+        enterEmail: "Введите email",
+        enterEmailDescription: "Мы отправим вам ссылку для сброса пароля",
+        emailLabel: "Адрес электронной почты",
+        emailPlaceholder: "Введите ваш email",
+        sendResetLink: "Отправить ссылку",
+        sending: "Отправка...",
+        emailSent: "Письмо отправлено!",
+        emailSentDescription: "Мы отправили ссылку для восстановления пароля на {email}",
+        checkSpam: "Проверьте папку спам",
+        checkSpamDescription: "Если письмо не пришло в течение 5 минут, проверьте папку спам",
+        sendAnother: "Отправить еще раз"
+      }
+};
