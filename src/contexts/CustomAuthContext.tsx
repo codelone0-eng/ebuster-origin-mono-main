@@ -24,6 +24,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error?: Error }>;
   updatePassword: (password: string) => Promise<{ error?: Error }>;
+  updatePasswordWithToken: (token: string, password: string) => Promise<{ error?: Error }>;
 }
 
 // API базовый URL
@@ -245,6 +246,24 @@ const authApi = {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ password }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Ошибка обновления пароля');
+    }
+
+    return data;
+  },
+
+  async updatePasswordWithToken(token: string, password: string) {
+    const response = await fetch(`${API_BASE_URL}/update-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, password }),
     });
 
     const data = await response.json();
@@ -481,6 +500,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updatePasswordWithToken = async (token: string, password: string) => {
+    try {
+      await authApi.updatePasswordWithToken(token, password);
+      
+      const translation = notificationTranslations.auth.updatePasswordSuccess;
+      toast({
+        title: translation.title,
+        description: translation.description,
+        variant: "success"
+      });
+
+      return { error: undefined };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка обновления пароля';
+      
+      toast({
+        title: 'Ошибка',
+        description: errorMessage,
+        variant: "destructive"
+      });
+
+      return { error: error as Error };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
@@ -488,7 +532,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signOut,
     resetPassword,
-    updatePassword
+    updatePassword,
+    updatePasswordWithToken
   };
 
   return (

@@ -15,9 +15,10 @@ import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ResetPassword() {
   const { t } = useLanguage();
-  const { updatePassword } = useAuth();
+  const { updatePasswordWithToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   
   const [formData, setFormData] = useState({
     password: '',
@@ -35,15 +36,20 @@ export default function ResetPassword() {
       return;
     }
 
+    if (!token) {
+      console.error('No reset token found');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      const { error } = await updatePassword(formData.password);
+      const { error } = await updatePasswordWithToken(token, formData.password);
       
       if (!error) {
         setIsSuccess(true);
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/login');
         }, 2000);
       }
     } catch (error) {
