@@ -466,6 +466,147 @@ export const listUsersDebug = async (req: Request, res: Response) => {
   }
 };
 
+// Восстановление пароля (отправка письма)
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email обязателен' });
+    }
+
+    const supabase = getSupabaseAdmin();
+    let user = null;
+
+    if (supabase) {
+      const { data } = await supabase
+        .from('auth_users')
+        .select('*')
+        .eq('email', email)
+        .single();
+      user = data;
+    } else {
+      user = users.find(u => u.email === email);
+    }
+
+    if (!user) {
+      // Не раскрываем существование пользователя
+      return res.json({ 
+        success: true, 
+        message: 'Если пользователь существует, письмо отправлено' 
+      });
+    }
+
+    // Генерируем токен сброса
+    const resetToken = generateConfirmationToken();
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 час
+
+    // Сохраняем токен
+    if (supabase) {
+      await supabase
+        .from('auth_users')
+        .update({ 
+          reset_token: resetToken,
+          reset_token_expiry: resetTokenExpiry.toISOString()
+        })
+        .eq('email', email);
+    } else {
+      const userIndex = users.findIndex(u => u.email === email);
+      if (userIndex !== -1) {
+        (users[userIndex] as any).reset_token = resetToken;
+        (users[userIndex] as any).reset_token_expiry = resetTokenExpiry;
+      }
+    }
+
+    // Отправляем письмо
+    const resetUrl = `${process.env.CLIENT_URL || 'https://ebuster.ru'}/reset-password?token=${resetToken}`;
+    
+    try {
+      await emailService.sendPasswordResetEmail(email, resetUrl);
+      console.log(`✅ Письмо восстановления пароля отправлено: ${email}`);
+    } catch (emailError) {
+      console.error('Ошибка отправки письма:', emailError);
+    }
+
+    return res.json({ 
+      success: true, 
+      message: 'Если пользователь существует, письмо отправлено' 
+    });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    return res.status(500).json({ error: 'Ошибка сброса пароля' });
+  }
+};
+
+// Обновление пароля по токену
+export const updatePasswordWithToken = async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Токен и пароль обязательны' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Пароль должен содержать минимум 6 символов' });
+    }
+
+    const supabase = getSupabaseAdmin();
+    let user = null;
+
+    if (supabase) {
+      const { data } = await supabase
+        .from('auth_users')
+        .select('*')
+        .eq('reset_token', token)
+        .single();
+      user = data;
+    } else {
+      user = users.find((u: any) => u.reset_token === token);
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: 'Неверный или истекший токен' });
+    }
+
+    // Проверяем срок действия токена
+    const tokenExpiry = new Date((user as any).reset_token_expiry);
+    if (tokenExpiry < new Date()) {
+      return res.status(400).json({ error: 'Токен истек' });
+    }
+
+    // Хешируем новый пароль
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Обновляем пароль
+    if (supabase) {
+      await supabase
+        .from('auth_users')
+        .update({ 
+          password_hash: passwordHash,
+          reset_token: null,
+          reset_token_expiry: null
+        })
+        .eq('reset_token', token);
+    } else {
+      const userIndex = users.findIndex((u: any) => u.reset_token === token);
+      if (userIndex !== -1) {
+        users[userIndex].password_hash = passwordHash;
+        delete (users[userIndex] as any).reset_token;
+        delete (users[userIndex] as any).reset_token_expiry;
+      }
+    }
+
+    return res.json({ 
+      success: true, 
+      message: 'Пароль успешно обновлен' 
+    });
+  } catch (error: any) {
+    console.error('Update password error:', error);
+    return res.status(500).json({ error: 'Ошибка обновления пароля' });
+  }
+};
+
 // DEBUG: очистить список пользователей (только не прод)
 export const clearUsersDebug = async (req: Request, res: Response) => {
   if (process.env.NODE_ENV === 'production') {

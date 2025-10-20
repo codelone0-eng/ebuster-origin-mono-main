@@ -5,6 +5,8 @@ import {
   confirmEmail,
   verifyToken,
   logoutUser,
+  resetPassword,
+  updatePasswordWithToken,
   listUsersDebug,
   clearUsersDebug,
 } from './auth.controller';
@@ -25,6 +27,12 @@ router.get('/verify', verifyToken);
 
 // Выход
 router.post('/logout', logoutUser);
+
+// Восстановление пароля
+router.post('/reset-password', resetPassword);
+
+// Обновление пароля по токену
+router.post('/update-password', updatePasswordWithToken);
 
 export default router;
 
