@@ -534,8 +534,8 @@ export const searchUsers = async (req: Request, res: Response) => {
 
     // Поиск пользователей в базе данных
     const { data: users, error } = await supabase
-      .from('users')
-      .select('id, email, name')
+      .from('auth_users')
+      .select('id, email, full_name')
       .ilike('email', `%${email}%`)
       .limit(10);
 

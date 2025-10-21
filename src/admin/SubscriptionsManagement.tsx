@@ -157,12 +157,15 @@ const SubscriptionsManagement: React.FC = () => {
       if (data.success && data.data) {
         const options = data.data.map((user: any) => ({
           value: user.email,
-          label: `${user.email}${user.name ? ` (${user.name})` : ''}`
+          label: `${user.email}${user.full_name ? ` (${user.full_name})` : ''}`
         }));
         setUserOptions(options);
+      } else {
+        setUserOptions([]);
       }
     } catch (error) {
       console.error('Ошибка поиска пользователей:', error);
+      setUserOptions([]);
     } finally {
       setSearchingUsers(false);
     }
