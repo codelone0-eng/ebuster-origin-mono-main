@@ -10,6 +10,16 @@ import {
   getActivityStats
 } from './admin.controller';
 import { getSystemMonitor } from './system-monitor.controller';
+import {
+  getSubscriptions,
+  getSubscriptionStats,
+  createSubscription,
+  updateSubscription,
+  cancelSubscription,
+  renewSubscription,
+  deleteSubscription,
+  checkPremiumAccess
+} from './subscriptions.controller';
 
 const router = Router();
 
@@ -35,5 +45,15 @@ router.get('/activity-stats', getActivityStats);
 
 // Мониторинг системы
 router.get('/system-monitor', getSystemMonitor);
+
+// Управление подписками
+router.get('/subscriptions', getSubscriptions);
+router.get('/subscriptions/stats', getSubscriptionStats);
+router.post('/subscriptions', createSubscription);
+router.put('/subscriptions/:id', updateSubscription);
+router.post('/subscriptions/:id/cancel', cancelSubscription);
+router.post('/subscriptions/:id/renew', renewSubscription);
+router.delete('/subscriptions/:id', deleteSubscription);
+router.get('/subscriptions/check/:user_id', checkPremiumAccess);
 
 export default router;

@@ -19,6 +19,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { notificationTranslations } from '@/lib/notification-translations';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import ScriptsManagement from './ScriptsManagement';
+import SubscriptionsManagement from './SubscriptionsManagement';
 import SystemMonitorChart from './SystemMonitorChart';
 import { 
   Users, 
@@ -525,10 +526,11 @@ const AdminDashboard = () => {
 
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Обзор</TabsTrigger>
               <TabsTrigger value="users">Пользователи</TabsTrigger>
               <TabsTrigger value="scripts">Скрипты</TabsTrigger>
+              <TabsTrigger value="subscriptions">Подписки</TabsTrigger>
               <TabsTrigger value="tickets">Тикеты</TabsTrigger>
               <TabsTrigger value="logs">Логи</TabsTrigger>
             </TabsList>
@@ -755,6 +757,11 @@ const AdminDashboard = () => {
             {/* Скрипты */}
             <TabsContent value="scripts" className="space-y-6">
               <ScriptsManagement />
+            </TabsContent>
+
+            {/* Подписки */}
+            <TabsContent value="subscriptions" className="space-y-6">
+              <SubscriptionsManagement />
             </TabsContent>
 
             {/* Тикеты */}
