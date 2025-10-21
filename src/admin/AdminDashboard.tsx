@@ -124,6 +124,17 @@ const AdminDashboard = () => {
     uptime: 'Loading...'
   });
 
+  // Функция для обновления мониторинга
+  const updateMonitoring = async () => {
+    try {
+      const monitorData = await adminApi.getSystemMonitor();
+      setSystemStatus(monitorData);
+      console.log('✅ Мониторинг обновлен:', monitorData);
+    } catch (error) {
+      console.error('❌ Ошибка обновления мониторинга:', error);
+    }
+  };
+
   // Загрузка данных при монтировании компонента
   useEffect(() => {
     const loadData = async () => {
@@ -149,8 +160,7 @@ const AdminDashboard = () => {
         setActivityStats(activityData);
 
         // Загружаем мониторинг системы
-        const monitorData = await adminApi.getSystemMonitor();
-        setSystemStatus(monitorData);
+        await updateMonitoring();
 
         // Пока используем заглушки для скриптов и тикетов
         setScriptStats([
@@ -177,19 +187,16 @@ const AdminDashboard = () => {
     loadData();
 
     // Автоматическое обновление данных мониторинга каждые 5 секунд
-    const monitorInterval = setInterval(async () => {
-      try {
-        const monitorData = await adminApi.getSystemMonitor();
-        setSystemStatus(monitorData);
-      } catch (error) {
-        console.error('Ошибка обновления мониторинга:', error);
-      }
+    console.log('🔄 Запуск автообновления мониторинга');
+    const monitorInterval = setInterval(() => {
+      updateMonitoring();
     }, 5000);
 
     return () => {
+      console.log('🛑 Остановка автообновления мониторинга');
       clearInterval(monitorInterval);
     };
-  }, []);
+  }, [adminApi]);
 
   // Функции для работы с данными
 

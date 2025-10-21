@@ -12,6 +12,8 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
   const [timeRange, setTimeRange] = useState('1h');
   const [chartData, setChartData] = useState<any[]>([]);
 
+  console.log('📊 SystemMonitorChart rendered, timeRange:', timeRange);
+
   // Генерируем данные для графиков
   useEffect(() => {
     const generateData = () => {
@@ -41,7 +43,10 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
       setChartData(data);
     };
 
+    console.log('📈 Generating chart data for timeRange:', timeRange);
     generateData();
+    console.log('📈 Chart data generated, length:', chartData.length);
+    
     const interval = setInterval(generateData, 30000); // Обновляем каждые 30 секунд
 
     return () => clearInterval(interval);
