@@ -15,8 +15,11 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  console.log('🔐 ProtectedRoute:', { user, loading, requireAdmin, location: location.pathname });
+
   // Show loading spinner while checking auth
   if (loading) {
+    console.log('⏳ ProtectedRoute: Loading...');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -29,13 +32,28 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
 
   // Redirect to login if not authenticated
   if (!user) {
+    console.log('❌ ProtectedRoute: No user, redirecting to login');
+    // Если на поддомене админки, редиректим на главный сайт
+    if (window.location.hostname.includes('admin.')) {
+      window.location.href = 'https://ebuster.ru';
+      return null;
+    }
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // Check admin requirement
   if (requireAdmin && user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
+    console.log('❌ ProtectedRoute: User is not admin, redirecting');
+    console.log('User role:', user?.role);
+    // Если на поддомене админки, редиректим на главный сайт
+    if (window.location.hostname.includes('admin.')) {
+      window.location.href = 'https://ebuster.ru';
+      return null;
+    }
+    return <Navigate to="/403" replace />;
   }
+
+  console.log('✅ ProtectedRoute: Access granted');
 
   // Check if user is banned (if we add this field later)
   // if (user?.is_banned) {
