@@ -87,8 +87,10 @@ import {
 } from 'lucide-react';
 
 const AdminDashboard = () => {
+  console.log('🎯 AdminDashboard component mounted');
   const { toast } = useToast();
   const adminApi = useAdminApi();
+  console.log('🔌 adminApi:', adminApi);
   
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -137,7 +139,9 @@ const AdminDashboard = () => {
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
+    console.log('⚡ useEffect triggered');
     const loadData = async () => {
+      console.log('📥 Starting data load...');
       try {
         // Загружаем статистику системы
         const stats = await adminApi.getSystemStats();
@@ -522,7 +526,9 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Графики мониторинга */}
-          <SystemMonitorChart />
+          <div className="mb-8">
+            <SystemMonitorChart />
+          </div>
 
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
