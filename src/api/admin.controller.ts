@@ -237,7 +237,7 @@ export const getUsers = async (req: Request, res: Response) => {
       const offset = (Number(page) - 1) * Number(limit);
 
       let query = supabase
-        .from('users')
+        .from('auth_users')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -262,7 +262,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
       // Получаем общее количество для пагинации
       const { count } = await supabase
-        .from('users')
+        .from('auth_users')
         .select('*', { count: 'exact', head: true });
 
       res.json({
