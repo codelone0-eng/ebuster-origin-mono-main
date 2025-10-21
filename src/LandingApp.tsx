@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +25,14 @@ import Error403 from "./landing/Error403";
 import BanPage from "./landing/BanPage";
 
 const queryClient = new QueryClient();
+
+// Компонент для редиректа
+const RedirectTo = ({ url }: { url: string }) => {
+  React.useEffect(() => {
+    window.location.replace(url);
+  }, [url]);
+  return null;
+};
 
 const LandingApp = () => (
   <QueryClientProvider client={queryClient}>
@@ -57,7 +66,9 @@ const LandingApp = () => (
                   <Route path="/500" element={<Error500 />} />
                   <Route path="/503" element={<Error503 />} />
                   
-                  {/* Dashboard and admin routes don't exist on landing - show 404 */}
+                  {/* Redirect dashboard and admin to their subdomains */}
+                  <Route path="/dashboard/*" element={<RedirectTo url="https://lk.ebuster.ru/dashboard" />} />
+                  <Route path="/admin/*" element={<RedirectTo url="https://admin.ebuster.ru" />} />
                   
                   <Route path="*" element={<Error404 />} />
                 </Routes>
