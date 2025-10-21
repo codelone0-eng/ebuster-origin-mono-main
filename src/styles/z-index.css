@@ -58,10 +58,13 @@
 [data-radix-hover-card-content] { z-index: var(--z-popover) !important; }
 
 /* Select inside Dialog needs higher z-index */
-[data-radix-dialog-content] [data-radix-select-content] { z-index: 1020 !important; }
-[data-radix-select-content][data-state="open"] { z-index: 1020 !important; }
-/* Force Select portal content above Dialog */
-body > [data-radix-select-content] { z-index: 1020 !important; }
+[data-radix-dialog-content] [data-radix-select-content],
+[data-radix-select-content][data-state="open"],
+[data-radix-select-content][data-state="closed"],
+body > [data-radix-select-content],
+[data-radix-select-content] { 
+  z-index: 9999 !important; 
+}
 
 /* Toasts - lower than cursor */
 ol[data-radix-toast-viewport] { z-index: 2147483646 !important; }

@@ -636,7 +636,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]">
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
                   <SelectItem value="premium">Premium - ${PLAN_PRICES.premium}/мес</SelectItem>
                   <SelectItem value="pro">Pro - ${PLAN_PRICES.pro}/мес</SelectItem>
                   <SelectItem value="enterprise">Enterprise - ${PLAN_PRICES.enterprise}/мес</SelectItem>
@@ -707,7 +707,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]">
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
                   <SelectItem value="free">Free</SelectItem>
                   <SelectItem value="premium">Premium - ${PLAN_PRICES.premium}/мес</SelectItem>
                   <SelectItem value="pro">Pro - ${PLAN_PRICES.pro}/мес</SelectItem>
@@ -724,7 +724,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]">
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
                   <SelectItem value="active">Активна</SelectItem>
                   <SelectItem value="trial">Пробная</SelectItem>
                   <SelectItem value="expired">Истекла</SelectItem>
