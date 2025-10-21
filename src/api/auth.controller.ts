@@ -578,20 +578,22 @@ export const updatePasswordWithToken = async (req: Request, res: Response) => {
     // Хешируем новый пароль
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Обновляем пароль
+    // Обновляем пароль и подтверждаем email
     if (supabase) {
       await supabase
         .from('auth_users')
         .update({ 
           password_hash: passwordHash,
           reset_token: null,
-          reset_token_expiry: null
+          reset_token_expiry: null,
+          email_confirmed: true
         })
         .eq('reset_token', token);
     } else {
       const userIndex = users.findIndex((u: any) => u.reset_token === token);
       if (userIndex !== -1) {
         users[userIndex].password_hash = passwordHash;
+        users[userIndex].email_confirmed = true;
         delete (users[userIndex] as any).reset_token;
         delete (users[userIndex] as any).reset_token_expiry;
       }
