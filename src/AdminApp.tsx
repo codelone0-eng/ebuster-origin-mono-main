@@ -40,7 +40,16 @@ const AdminApp = () => (
                   } />
                   
                   <Route path="/403" element={<Error403 />} />
-                  <Route path="*" element={<Error404 />} />
+                  
+                  {/* Redirect all unknown routes to landing */}
+                  <Route path="*" element={
+                    <div>
+                      {(() => {
+                        window.location.href = `https://ebuster.ru${window.location.pathname}`;
+                        return null;
+                      })()}
+                    </div>
+                  } />
                 </Routes>
               </BrowserRouter>
             </div>

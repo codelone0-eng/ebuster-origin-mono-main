@@ -1,18 +1,18 @@
 export const eng = {
   navigation: [
-    { href: "/", label: "Home" },
+    { href: "https://ebuster.ru/", label: "Home" },
     { 
       href: "#help", 
       label: "Help",
       submenu: {
         items: [
-          { href: "/documentation", label: "Documentation", description: "Detailed guides and examples" },
-          { href: "/api-docs", label: "API Docs", description: "Interactive API documentation" },
-          { href: "/contacts", label: "Contacts", description: "Contact our support team" }
+          { href: "https://ebuster.ru/documentation", label: "Documentation", description: "Detailed guides and examples" },
+          { href: "https://ebuster.ru/api-docs", label: "API Docs", description: "Interactive API documentation" },
+          { href: "https://ebuster.ru/contacts", label: "Contacts", description: "Contact our support team" }
         ]
       }
     },
-    { href: "/advantages", label: "Advantages" },
+    { href: "https://ebuster.ru/advantages", label: "Advantages" },
   ],
   buttons: {
     premium: "Premium",
