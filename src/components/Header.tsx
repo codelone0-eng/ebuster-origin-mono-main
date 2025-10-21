@@ -180,9 +180,9 @@ export const Header = () => {
                     >
                       <div className="space-y-1">
                         {link.submenu.items.map((item, itemIndex) => (
-                          <Link 
+                          <a 
                             key={itemIndex}
-                            to={item.href} 
+                            href={item.href}
                             className="block p-3 rounded-xl hover:bg-accent/20 transition-colors duration-200 group"
                           >
                             <div className="space-y-1">
@@ -193,7 +193,7 @@ export const Header = () => {
                                 {item.description}
                               </p>
                             </div>
-                          </Link>
+                          </a>
                         ))}
                       </div>
                     </PopoverContent>

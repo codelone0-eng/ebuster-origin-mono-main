@@ -57,23 +57,7 @@ const LandingApp = () => (
                   <Route path="/500" element={<Error500 />} />
                   <Route path="/503" element={<Error503 />} />
                   
-                  {/* Redirect dashboard to lk subdomain */}
-                  <Route path="/dashboard" element={
-                    <div>
-                      {(() => {
-                        window.location.href = 'https://lk.ebuster.ru/dashboard';
-                        return null;
-                      })()}
-                    </div>
-                  } />
-                  <Route path="/admin" element={
-                    <div>
-                      {(() => {
-                        window.location.href = 'https://admin.ebuster.ru';
-                        return null;
-                      })()}
-                    </div>
-                  } />
+                  {/* Dashboard and admin routes don't exist on landing - show 404 */}
                   
                   <Route path="*" element={<Error404 />} />
                 </Routes>
