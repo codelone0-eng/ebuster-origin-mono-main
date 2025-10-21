@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Combobox } from '@/components/ui/combobox';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import { 
@@ -87,6 +88,8 @@ const SubscriptionsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [planFilter, setPlanFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [userOptions, setUserOptions] = useState<{ value: string; label: string }[]>([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
 
   // Форма для создания/редактирования подписки
   const [formData, setFormData] = useState<{
@@ -138,6 +141,43 @@ const SubscriptionsManagement: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Поиск пользователей по email
+  const searchUsers = async (query: string) => {
+    if (!query || query.length < 2) {
+      setUserOptions([]);
+      return;
+    }
+
+    try {
+      setSearchingUsers(true);
+      const response = await fetch(`${API_CONFIG.ADMIN_URL}/users/search?email=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        const options = data.data.map((user: any) => ({
+          value: user.email,
+          label: `${user.email}${user.name ? ` (${user.name})` : ''}`
+        }));
+        setUserOptions(options);
+      }
+    } catch (error) {
+      console.error('Ошибка поиска пользователей:', error);
+    } finally {
+      setSearchingUsers(false);
+    }
+  };
+
+  // Debounce для поиска
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.user_email) {
+        searchUsers(formData.user_email);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [formData.user_email]);
 
   // Создание новой подписки
   const handleCreateSubscription = async () => {
@@ -620,11 +660,12 @@ const SubscriptionsManagement: React.FC = () => {
           <div className="space-y-4">
             <div>
               <Label htmlFor="user_email">Email пользователя</Label>
-              <Input
-                id="user_email"
+              <Combobox
+                options={userOptions}
                 value={formData.user_email}
-                onChange={(e) => setFormData({ ...formData, user_email: e.target.value })}
-                placeholder="user@example.com"
+                onValueChange={(value) => setFormData({ ...formData, user_email: value })}
+                placeholder={searchingUsers ? "Поиск..." : "Начните вводить email..."}
+                emptyText="Пользователи не найдены"
               />
             </div>
             <div>

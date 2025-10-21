@@ -7,7 +7,8 @@ import {
   updateUserStatus,
   getSystemLogs,
   getBrowserStats,
-  getActivityStats
+  getActivityStats,
+  searchUsers
 } from './admin.controller';
 import { getSystemMonitor } from './system-monitor.controller';
 import {
@@ -31,6 +32,7 @@ router.get('/stats', getSystemStats);
 
 // Управление пользователями
 router.get('/users', getUsers);
+router.get('/users/search', searchUsers);
 router.get('/users/:id', getUserDetails);
 router.patch('/users/:id/status', updateUserStatus);
 

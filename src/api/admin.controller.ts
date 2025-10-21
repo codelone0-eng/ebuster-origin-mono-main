@@ -509,3 +509,63 @@ export const getActivityStats = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Поиск пользователей по email
+export const searchUsers = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.query;
+
+    if (!email || typeof email !== 'string' || email.length < 2) {
+      return res.json({
+        success: true,
+        data: []
+      });
+    }
+
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      // Mock-данные для тестирования
+      const mockUsers = [
+        { id: '1', email: 'bespredel.owner@mail.ru', name: 'Bespredel Owner' },
+        { id: '2', email: 'test@example.com', name: 'Test User' },
+        { id: '3', email: 'admin@ebuster.ru', name: 'Admin' }
+      ];
+
+      const filtered = mockUsers.filter(user => 
+        user.email.toLowerCase().includes(email.toLowerCase())
+      );
+
+      return res.json({
+        success: true,
+        data: filtered
+      });
+    }
+
+    // Поиск пользователей в базе данных
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, email, name')
+      .ilike('email', `%${email}%`)
+      .limit(10);
+
+    if (error) {
+      console.error('Ошибка поиска пользователей:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Ошибка поиска пользователей'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: users || []
+    });
+  } catch (error) {
+    console.error('Ошибка поиска пользователей:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка поиска пользователей'
+    });
+  }
+};
