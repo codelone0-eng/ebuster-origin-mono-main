@@ -233,6 +233,40 @@ export const loginUser = async (req: Request, res: Response) => {
     // Сохранение сессии
     sessions.set(token, { userId: user.id, email: user.email });
 
+    // Обновляем активность пользователя (browser, location, last_login_at, last_active)
+    if (supabase) {
+      try {
+        // Получаем User-Agent и IP
+        const userAgent = req.headers['user-agent'] || 'Unknown';
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown';
+        
+        // Определяем браузер из User-Agent
+        let browser = 'Unknown';
+        if (userAgent.includes('Chrome')) browser = 'Chrome';
+        else if (userAgent.includes('Firefox')) browser = 'Firefox';
+        else if (userAgent.includes('Safari')) browser = 'Safari';
+        else if (userAgent.includes('Edge')) browser = 'Edge';
+        else if (userAgent.includes('Opera')) browser = 'Opera';
+        
+        // Определяем местоположение (пока просто IP, можно добавить GeoIP)
+        const location = `IP: ${ip}`;
+        
+        await supabase
+          .from('auth_users')
+          .update({
+            last_login_at: new Date().toISOString(),
+            last_active: new Date().toISOString(),
+            browser,
+            location
+          })
+          .eq('id', user.id);
+          
+        console.log(`✅ Updated user activity: ${browser}, ${location}`);
+      } catch (updateError) {
+        console.warn('Failed to update user activity:', updateError);
+      }
+    }
+
     res.json({
       success: true,
       token,
