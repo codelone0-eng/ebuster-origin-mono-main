@@ -32,7 +32,7 @@ export default function EmailConfirmation() {
 
         const baseUrl = window.location.hostname === 'localhost'
           ? 'http://localhost:3001'
-          : 'https://ebuster.ru';
+          : 'https://api.ebuster.ru';
 
         const res = await fetch(`${baseUrl}/api/auth/confirm-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
         const data = await res.json();
