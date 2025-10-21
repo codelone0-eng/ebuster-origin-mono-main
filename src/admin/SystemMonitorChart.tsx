@@ -47,7 +47,7 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
     generateData();
     console.log('📈 Chart data generated, length:', chartData.length);
     
-    const interval = setInterval(generateData, 30000); // Обновляем каждые 30 секунд
+    const interval = setInterval(generateData, 180000); // Обновляем каждые 3 минуты
 
     return () => clearInterval(interval);
   }, [timeRange]);
