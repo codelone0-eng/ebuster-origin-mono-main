@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
+import { API_CONFIG } from '@/config/api';
 
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3001' 
-  : 'https://ebuster.ru';
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 interface SystemStats {
   totalUsers: number;

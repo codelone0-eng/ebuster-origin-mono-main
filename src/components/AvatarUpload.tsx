@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
+import { API_CONFIG } from '@/config/api';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -58,11 +59,7 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
       formData.append('avatar', file);
       formData.append('email', user?.email || '');
 
-      const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://ebuster.ru';
-
-      const response = await fetch(`${baseUrl}/api/user/upload-avatar`, {
+      const response = await fetch(`${API_CONFIG.USER_URL}/upload-avatar`, {
         method: 'POST',
         body: formData,
       });
@@ -106,12 +103,8 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
     try {
       setUploading(true);
 
-      const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://ebuster.ru';
-
       // Отправляем запрос на удаление аватара
-      const response = await fetch(`${baseUrl}/api/user/remove-avatar`, {
+      const response = await fetch(`${API_CONFIG.USER_URL}/remove-avatar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

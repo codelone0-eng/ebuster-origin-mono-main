@@ -18,6 +18,7 @@ import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
+import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
 import { 
   Library, 
@@ -224,11 +225,7 @@ const DashboardContent = () => {
         return;
       }
 
-      const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://ebuster.ru';
-      
-      const response = await fetch(`${baseUrl}/api/user/profile?email=${encodeURIComponent(authUser.email)}`, {
+      const response = await fetch(`${API_CONFIG.USER_URL}/profile?email=${encodeURIComponent(authUser.email)}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -326,9 +323,6 @@ const DashboardContent = () => {
       }
 
       // Вызываем наш кастомный API для обновления профиля
-      const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://ebuster.ru';
       const requestData = {
         id: authUser?.id || 'dummy-id', // ID не важен, генерируется UUID
         email: authUser?.email,
@@ -336,7 +330,7 @@ const DashboardContent = () => {
         avatar_url: user.avatar
       };
       
-      const response = await fetch(`${baseUrl}/api/user/upsert`, {
+      const response = await fetch(`${API_CONFIG.USER_URL}/upsert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
