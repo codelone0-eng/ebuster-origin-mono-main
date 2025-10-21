@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar } from './user.controller';
-import { optionalAuthenticateUser } from './auth.middleware';
+import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads } from './user.controller';
+import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
 import multer from 'multer';
 
 const router = Router();
@@ -40,6 +40,10 @@ const handleMulterError = (err: any, req: any, res: any, next: any) => {
 };
 
 router.post('/upload-avatar', upload.single('avatar'), handleMulterError, uploadAvatar);
+
+// Отслеживание активности
+router.post('/activity', authenticateUser, updateUserActivity);
+router.post('/increment-downloads', authenticateUser, incrementDownloads);
 
 export default router;
 

@@ -114,7 +114,10 @@ export const registerUser = async (req: Request, res: Response) => {
           password_hash,
           full_name: fullName,
           email_confirmed: false,
-          confirmation_token: confirmationToken
+          confirmation_token: confirmationToken,
+          status: 'inactive',
+          downloads: 0,
+          scripts: 0
         })
         .select()
         .single();
@@ -135,7 +138,10 @@ export const registerUser = async (req: Request, res: Response) => {
         full_name: fullName,
         created_at: new Date().toISOString(),
         email_confirmed: false,
-        confirmation_token: confirmationToken
+        confirmation_token: confirmationToken,
+        status: 'inactive',
+        downloads: 0,
+        scripts: 0
       };
       users.push(newUser);
     }
@@ -283,7 +289,8 @@ export const confirmEmail = async (req: Request, res: Response) => {
         .from('auth_users')
         .update({
           email_confirmed: true,
-          confirmation_token: null
+          confirmation_token: null,
+          status: 'active'
         })
         .eq('id', user.id);
 

@@ -400,4 +400,96 @@ export const removeAvatar = async (req: Request, res: Response) => {
   }
 };
 
+// Обновление активности пользователя (browser, location, last_active)
+export const updateUserActivity = async (req: Request, res: Response) => {
+  try {
+    const { browser, location } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase credentials not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Обновляем активность в auth_users
+    const { error } = await admin
+      .from('auth_users')
+      .update({
+        browser,
+        location,
+        last_active: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error updating user activity:', error);
+      return res.status(500).json({ error: 'Failed to update activity' });
+    }
+
+    return res.json({ success: true });
+  } catch (e: any) {
+    console.error('Exception in updateUserActivity:', e);
+    return res.status(500).json({ error: e?.message || 'Server error' });
+  }
+};
+
+// Увеличение счетчика загрузок
+export const incrementDownloads = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase credentials not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Получаем текущее значение
+    const { data: user, error: fetchError } = await admin
+      .from('auth_users')
+      .select('downloads')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching user downloads:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch downloads' });
+    }
+
+    // Увеличиваем счетчик
+    const { error: updateError } = await admin
+      .from('auth_users')
+      .update({
+        downloads: (user?.downloads || 0) + 1,
+        last_active: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error updating downloads:', updateError);
+      return res.status(500).json({ error: 'Failed to update downloads' });
+    }
+
+    return res.json({ success: true, downloads: (user?.downloads || 0) + 1 });
+  } catch (e: any) {
+    console.error('Exception in incrementDownloads:', e);
+    return res.status(500).json({ error: e?.message || 'Server error' });
+  }
+};
+
 

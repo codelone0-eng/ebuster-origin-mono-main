@@ -688,14 +688,14 @@ const AdminDashboard = () => {
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <span>{user.email || 'Не указан'}</span>
                               <span>•</span>
-                              <span>{user.location || 'Не указано'}</span>
+                              <span>{user.location || 'Местоположение не указано'}</span>
                               <span>•</span>
-                              <span>{user.browser || 'Не указан'}</span>
+                              <span>{user.browser || 'Браузер не указан'}</span>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                              <span>Загрузок: {user.downloads || '0'}</span>
-                              <span>Скриптов: {user.scripts || '0'}</span>
-                              <span>Последняя активность: {user.lastActive || user.last_login_at || 'Неизвестно'}</span>
+                              <span>Загрузок: {user.downloads || 0}</span>
+                              <span>Скриптов: {user.scripts || 0}</span>
+                              <span>Последняя активность: {user.last_active ? new Date(user.last_active).toLocaleString('ru-RU') : user.last_login_at ? new Date(user.last_login_at).toLocaleString('ru-RU') : 'Никогда'}</span>
                             </div>
                           </div>
                         </div>
