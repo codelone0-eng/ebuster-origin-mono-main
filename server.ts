@@ -10,6 +10,7 @@ import userRoutes from './src/api/user.routes';
 import adminRoutes from './src/api/admin.routes';
 import scriptsRoutes from './src/api/scripts.routes';
 import extensionAuthRoutes from './src/api/extension-auth.routes';
+import referralRoutes from './src/api/referral.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/scripts', scriptsRoutes);
+app.use('/api/referral', referralRoutes);
 
 // Extension auth routes (без префикса)
 app.use('/', extensionAuthRoutes);
