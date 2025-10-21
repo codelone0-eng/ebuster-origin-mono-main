@@ -52,6 +52,12 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
     return () => clearInterval(interval);
   }, [timeRange]);
 
+  console.log('📊 Rendering SystemMonitorChart, chartData length:', chartData.length);
+
+  if (chartData.length === 0) {
+    console.log('⚠️ No chart data available');
+  }
+
   return (
     <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
       <CardHeader>
@@ -60,6 +66,7 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
               История мониторинга
+              <span className="text-xs text-muted-foreground ml-2">({chartData.length} точек)</span>
             </CardTitle>
             <CardDescription>
               Отслеживание производительности системы в реальном времени
