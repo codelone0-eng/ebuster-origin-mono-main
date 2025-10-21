@@ -161,6 +161,12 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  // Получение мониторинга системы
+  const getSystemMonitor = async () => {
+    const response = await fetchWithAuth('/api/admin/system-monitor');
+    return response.data;
+  };
+
   return {
     loading,
     error,
@@ -170,6 +176,7 @@ export const useAdminApi = () => {
     updateUserStatus,
     getSystemLogs,
     getBrowserStats,
-    getActivityStats
+    getActivityStats,
+    getSystemMonitor
   };
 };

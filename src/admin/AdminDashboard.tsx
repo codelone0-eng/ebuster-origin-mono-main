@@ -116,10 +116,11 @@ const AdminDashboard = () => {
   const [scriptStats, setScriptStats] = useState([]);
   const [ticketStats, setTicketStats] = useState([]);
   const [systemStatus, setSystemStatus] = useState({
-    cpu: 45,
-    memory: 67,
-    disk: 23,
-    network: 89
+    cpu: { usage: 0, model: 'Loading...' },
+    memory: { usage: 0, total: '0GB', used: '0GB' },
+    disk: { usage: 0, total: '0GB' },
+    network: { usage: 0, speed: '0Gbps' },
+    uptime: 'Loading...'
   });
 
   // Загрузка данных при монтировании компонента
@@ -145,6 +146,10 @@ const AdminDashboard = () => {
         // Загружаем статистику активности
         const activityData = await adminApi.getActivityStats();
         setActivityStats(activityData);
+
+        // Загружаем мониторинг системы
+        const monitorData = await adminApi.getSystemMonitor();
+        setSystemStatus(monitorData);
 
         // Пока используем заглушки для скриптов и тикетов
         setScriptStats([
@@ -446,48 +451,48 @@ const AdminDashboard = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">CPU</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.cpu}%</span>
+                    <span className="text-sm text-muted-foreground">{systemStatus.cpu.usage}%</span>
                   </div>
-                  <Progress value={systemStatus.cpu} className="h-2" />
+                  <Progress value={systemStatus.cpu.usage} className="h-2" />
                   <div className="flex items-center gap-2">
                     <Cpu className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Intel i7-12700K</span>
+                    <span className="text-xs text-muted-foreground">{systemStatus.cpu.model}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Память</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.memory}%</span>
+                    <span className="text-sm text-muted-foreground">{systemStatus.memory.usage}%</span>
                   </div>
-                  <Progress value={systemStatus.memory} className="h-2" />
+                  <Progress value={systemStatus.memory.usage} className="h-2" />
                   <div className="flex items-center gap-2">
                     <HardDrive className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">32GB DDR4</span>
+                    <span className="text-xs text-muted-foreground">{systemStatus.memory.total} ({systemStatus.memory.used} used)</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Диск</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.disk}%</span>
+                    <span className="text-sm text-muted-foreground">{systemStatus.disk.usage}%</span>
                   </div>
-                  <Progress value={systemStatus.disk} className="h-2" />
+                  <Progress value={systemStatus.disk.usage} className="h-2" />
                   <div className="flex items-center gap-2">
                     <Database className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">1TB SSD</span>
+                    <span className="text-xs text-muted-foreground">{systemStatus.disk.total}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Сеть</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.network}%</span>
+                    <span className="text-sm text-muted-foreground">{systemStatus.network.usage}%</span>
                   </div>
-                  <Progress value={systemStatus.network} className="h-2" />
+                  <Progress value={systemStatus.network.usage} className="h-2" />
                   <div className="flex items-center gap-2">
                     <Wifi className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">1Gbps</span>
+                    <span className="text-xs text-muted-foreground">{systemStatus.network.speed}</span>
                   </div>
                 </div>
               </div>

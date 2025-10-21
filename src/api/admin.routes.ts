@@ -9,6 +9,7 @@ import {
   getBrowserStats,
   getActivityStats
 } from './admin.controller';
+import { getSystemMonitor } from './system-monitor.controller';
 
 const router = Router();
 
@@ -31,5 +32,8 @@ router.get('/browser-stats', getBrowserStats);
 
 // Статистика активности
 router.get('/activity-stats', getActivityStats);
+
+// Мониторинг системы
+router.get('/system-monitor', getSystemMonitor);
 
 export default router;
