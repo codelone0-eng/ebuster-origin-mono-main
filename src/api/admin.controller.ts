@@ -525,20 +525,10 @@ export const searchUsers = async (req: Request, res: Response) => {
     const supabase = getSupabaseClient();
 
     if (!supabase) {
-      // Mock-данные для тестирования
-      const mockUsers = [
-        { id: '1', email: 'bespredel.owner@mail.ru', name: 'Bespredel Owner' },
-        { id: '2', email: 'test@example.com', name: 'Test User' },
-        { id: '3', email: 'admin@ebuster.ru', name: 'Admin' }
-      ];
-
-      const filtered = mockUsers.filter(user => 
-        user.email.toLowerCase().includes(email.toLowerCase())
-      );
-
-      return res.json({
-        success: true,
-        data: filtered
+      console.error('❌ Supabase client not configured');
+      return res.status(500).json({
+        success: false,
+        error: 'Database not configured'
       });
     }
 

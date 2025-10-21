@@ -29,7 +29,7 @@ export function Combobox({
   value,
   onValueChange,
   placeholder = "Начните вводить...",
-  emptyText = "Ничего не найдено",
+  emptyText = "Ничего не найдены",
   className,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
@@ -39,11 +39,19 @@ export function Combobox({
     setInputValue(value);
   }, [value]);
 
+  // Автоматически открываем dropdown когда появляются опции
+  React.useEffect(() => {
+    if (options.length > 0 && inputValue.length >= 2) {
+      setOpen(true);
+    } else if (options.length === 0 && inputValue.length >= 2) {
+      setOpen(false);
+    }
+  }, [options, inputValue]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     onValueChange(newValue);
-    setOpen(newValue.length > 0 && options.length > 0);
   };
 
   const handleSelect = (selectedValue: string) => {
@@ -59,7 +67,6 @@ export function Combobox({
           <Input
             value={inputValue}
             onChange={handleInputChange}
-            onFocus={() => setOpen(inputValue.length > 0 && options.length > 0)}
             placeholder={placeholder}
             className={cn("w-full", className)}
           />
