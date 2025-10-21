@@ -633,8 +633,8 @@ const SubscriptionsManagement: React.FC = () => {
                 value={formData.plan}
                 onValueChange={(value: any) => setFormData({ ...formData, plan: value })}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="premium">Premium - ${PLAN_PRICES.premium}/мес</SelectItem>
@@ -704,8 +704,8 @@ const SubscriptionsManagement: React.FC = () => {
                 value={formData.plan}
                 onValueChange={(value: any) => setFormData({ ...formData, plan: value })}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">Free</SelectItem>
@@ -721,8 +721,8 @@ const SubscriptionsManagement: React.FC = () => {
                 value={formData.status}
                 onValueChange={(value: any) => setFormData({ ...formData, status: value })}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">Активна</SelectItem>
