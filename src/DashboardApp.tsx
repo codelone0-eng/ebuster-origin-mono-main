@@ -42,15 +42,8 @@ const DashboardApp = () => (
                   {/* Redirect root to dashboard */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   
-                  {/* Redirect all unknown routes to landing */}
-                  <Route path="*" element={
-                    <div>
-                      {(() => {
-                        window.location.href = `https://ebuster.ru${window.location.pathname}`;
-                        return null;
-                      })()}
-                    </div>
-                  } />
+                  {/* Show 404 for unknown routes */}
+                  <Route path="*" element={<Error404 />} />
                 </Routes>
               </BrowserRouter>
             </div>
