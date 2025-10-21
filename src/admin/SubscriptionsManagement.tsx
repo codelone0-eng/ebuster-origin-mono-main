@@ -609,7 +609,7 @@ const SubscriptionsManagement: React.FC = () => {
       </Card>
 
       {/* Диалог создания подписки */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} modal={false}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Создать подписку</DialogTitle>
@@ -636,7 +636,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }} position="popper" sideOffset={5}>
                   <SelectItem value="premium">Premium - ${PLAN_PRICES.premium}/мес</SelectItem>
                   <SelectItem value="pro">Pro - ${PLAN_PRICES.pro}/мес</SelectItem>
                   <SelectItem value="enterprise">Enterprise - ${PLAN_PRICES.enterprise}/мес</SelectItem>
@@ -685,7 +685,7 @@ const SubscriptionsManagement: React.FC = () => {
       </Dialog>
 
       {/* Диалог редактирования подписки */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} modal={false}>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Редактировать подписку</DialogTitle>
@@ -707,7 +707,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите план" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }} position="popper" sideOffset={5}>
                   <SelectItem value="free">Free</SelectItem>
                   <SelectItem value="premium">Premium - ${PLAN_PRICES.premium}/мес</SelectItem>
                   <SelectItem value="pro">Pro - ${PLAN_PRICES.pro}/мес</SelectItem>
@@ -724,7 +724,7 @@ const SubscriptionsManagement: React.FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                <SelectContent className="z-[9999]" style={{ zIndex: 9999 }} position="popper" sideOffset={5}>
                   <SelectItem value="active">Активна</SelectItem>
                   <SelectItem value="trial">Пробная</SelectItem>
                   <SelectItem value="expired">Истекла</SelectItem>
