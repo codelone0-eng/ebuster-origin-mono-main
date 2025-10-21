@@ -57,6 +57,9 @@
 [data-radix-menubar-content] { z-index: var(--z-dropdown) !important; }
 [data-radix-hover-card-content] { z-index: var(--z-popover) !important; }
 
+/* Select inside Dialog needs higher z-index */
+[data-radix-dialog-content] [data-radix-select-content] { z-index: 1020 !important; }
+
 /* Toasts - lower than cursor */
 ol[data-radix-toast-viewport] { z-index: 2147483646 !important; }
 li[data-radix-toast-root] { z-index: 2147483646 !important; }
