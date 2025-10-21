@@ -1,0 +1,89 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BeamsUpstream } from "@/components/ui/beams-upstream";
+import { CustomCursor } from "@/components/CustomCursor";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { CursorProvider } from "@/contexts/CursorContext";
+import { AuthProvider } from "@/contexts/CustomAuthContext";
+import Index from "./landing/Index";
+import ApiDocs from "./landing/ApiDocs";
+import Documentation from "./landing/Documentation";
+import Contacts from "./landing/Contacts";
+import Advantages from "./landing/Advantages";
+import Pricing from "./landing/Pricing";
+import ForgotPassword from "./lk/ForgotPassword";
+import ResetPassword from "./lk/ResetPassword";
+import EmailConfirmation from "./lk/EmailConfirmation";
+import Error404 from "./landing/Error404";
+import Error500 from "./landing/Error500";
+import Error503 from "./landing/Error503";
+import Error403 from "./landing/Error403";
+import BanPage from "./landing/BanPage";
+
+const queryClient = new QueryClient();
+
+const LandingApp = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <CursorProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <BeamsUpstream />
+            <CustomCursor />
+            <div className="relative z-content">
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/api-docs" element={<ApiDocs />} />
+                  <Route path="/documentation" element={<Documentation />} />
+                  <Route path="/contacts" element={<Contacts />} />
+                  <Route path="/advantages" element={<Advantages />} />
+                  <Route path="/price" element={<Pricing />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/confirm-email" element={<EmailConfirmation />} />
+                  <Route path="/ban" element={<BanPage />} />
+                  <Route path="/get-started" element={<Index />} />
+                  <Route path="/signin" element={<Index />} />
+                  
+                  {/* Error pages */}
+                  <Route path="/404" element={<Error404 />} />
+                  <Route path="/403" element={<Error403 />} />
+                  <Route path="/500" element={<Error500 />} />
+                  <Route path="/503" element={<Error503 />} />
+                  
+                  {/* Redirect dashboard to lk subdomain */}
+                  <Route path="/dashboard" element={
+                    <div>
+                      {(() => {
+                        window.location.href = 'https://lk.ebuster.ru/dashboard';
+                        return null;
+                      })()}
+                    </div>
+                  } />
+                  <Route path="/admin" element={
+                    <div>
+                      {(() => {
+                        window.location.href = 'https://admin.ebuster.ru';
+                        return null;
+                      })()}
+                    </div>
+                  } />
+                  
+                  <Route path="*" element={<Error404 />} />
+                </Routes>
+              </BrowserRouter>
+            </div>
+          </TooltipProvider>
+        </AuthProvider>
+      </CursorProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
+);
+
+export default LandingApp;
