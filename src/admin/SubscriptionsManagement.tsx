@@ -609,7 +609,7 @@ const SubscriptionsManagement: React.FC = () => {
       </Card>
 
       {/* Диалог создания подписки */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} modal={false}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Создать подписку</DialogTitle>
@@ -685,7 +685,7 @@ const SubscriptionsManagement: React.FC = () => {
       </Dialog>
 
       {/* Диалог редактирования подписки */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} modal={false}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Редактировать подписку</DialogTitle>
