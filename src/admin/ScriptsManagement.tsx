@@ -23,6 +23,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { API_CONFIG } from '@/config/api';
 
 interface Script {
   id: string;
@@ -89,7 +90,7 @@ const ScriptsManagement: React.FC = () => {
       setLoading(true);
       
       // Загружаем скрипты
-      const scriptsResponse = await fetch('http://localhost:3001/api/scripts/admin');
+      const scriptsResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`);
       const scriptsData = await scriptsResponse.json();
       
       if (scriptsData.success) {
@@ -97,7 +98,7 @@ const ScriptsManagement: React.FC = () => {
       }
 
       // Загружаем статистику
-      const statsResponse = await fetch('http://localhost:3001/api/scripts/admin/stats');
+      const statsResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/stats`);
       const statsData = await statsResponse.json();
       
       if (statsData.success) {
@@ -119,7 +120,7 @@ const ScriptsManagement: React.FC = () => {
     try {
       console.log('Creating script with data:', formData);
       
-      const response = await fetch('http://localhost:3001/api/scripts/admin', {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +148,7 @@ const ScriptsManagement: React.FC = () => {
     if (!selectedScript) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/scripts/admin/${selectedScript.id}`, {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/${selectedScript.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +176,7 @@ const ScriptsManagement: React.FC = () => {
     if (!confirm('Вы уверены, что хотите удалить этот скрипт?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/scripts/admin/${scriptId}`, {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/${scriptId}`, {
         method: 'DELETE',
       });
 

@@ -87,10 +87,8 @@ import {
 } from 'lucide-react';
 
 const AdminDashboard = () => {
-  console.log('🎯 AdminDashboard component mounted');
   const { toast } = useToast();
   const adminApi = useAdminApi();
-  console.log('🔌 adminApi:', adminApi);
   
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,17 +129,14 @@ const AdminDashboard = () => {
     try {
       const monitorData = await adminApi.getSystemMonitor();
       setSystemStatus(monitorData);
-      console.log('✅ Мониторинг обновлен:', monitorData);
     } catch (error) {
-      console.error('❌ Ошибка обновления мониторинга:', error);
+      console.error('Ошибка обновления мониторинга:', error);
     }
   };
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
-    console.log('⚡ useEffect triggered');
     const loadData = async () => {
-      console.log('📥 Starting data load...');
       try {
         // Загружаем статистику системы
         const stats = await adminApi.getSystemStats();
@@ -191,16 +186,14 @@ const AdminDashboard = () => {
     loadData();
 
     // Автоматическое обновление данных мониторинга каждые 3 минуты
-    console.log('🔄 Запуск автообновления мониторинга (каждые 3 минуты)');
     const monitorInterval = setInterval(() => {
       updateMonitoring();
     }, 180000); // 3 минуты = 180000 мс
 
     return () => {
-      console.log('🛑 Остановка автообновления мониторинга');
       clearInterval(monitorInterval);
     };
-  }, [adminApi]);
+  }, []);
 
   // Функции для работы с данными
 
