@@ -30,21 +30,51 @@ interface AuthContextType {
 // API базовый URL
 const API_BASE_URL = API_CONFIG.AUTH_URL;
 
-// Утилиты для работы с токенами
+// Утилиты для работы с токенами и cookies
+const setCookie = (name: string, value: string, days: number = 7): void => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  const isProduction = window.location.hostname !== 'localhost';
+  const domain = isProduction ? ';domain=.ebuster.ru' : '';
+  const secure = isProduction ? ';secure' : '';
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/${domain}${secure};samesite=lax`;
+};
+
+const getCookie = (name: string): string | null => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+const removeCookie = (name: string): void => {
+  const isProduction = window.location.hostname !== 'localhost';
+  const domain = isProduction ? ';domain=.ebuster.ru' : '';
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/${domain}`;
+};
+
 const getToken = (): string | null => {
-  return localStorage.getItem('jwt_token');
+  // Проверяем сначала cookie, потом localStorage
+  return getCookie('jwt_token') || localStorage.getItem('jwt_token');
 };
 
 const setToken = (token: string): void => {
   localStorage.setItem('jwt_token', token);
+  setCookie('jwt_token', token, 7); // 7 дней
 };
 
 const saveToken = (token: string): void => {
   localStorage.setItem('jwt_token', token);
+  setCookie('jwt_token', token, 7);
 };
 
 const removeToken = (): void => {
   localStorage.removeItem('jwt_token');
+  removeCookie('jwt_token');
 };
 
 // API функции

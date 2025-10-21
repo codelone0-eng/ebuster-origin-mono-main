@@ -88,9 +88,15 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
           }
         }
         
-        onClose();
-        // Reset form
-        setFormData({ email: "", password: "" });
+        // Редирект на личный кабинет
+        const isProduction = window.location.hostname !== 'localhost';
+        if (isProduction) {
+          window.location.href = 'https://lk.ebuster.ru/dashboard';
+        } else {
+          onClose();
+          // Reset form
+          setFormData({ email: "", password: "" });
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
