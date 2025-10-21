@@ -11,6 +11,7 @@ import { useLanguage } from "@/hooks/useLanguage"
 import { useAuth } from "@/contexts/CustomAuthContext"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { API_CONFIG } from "@/config/api"
 import {
   Popover,
   PopoverContent,
@@ -85,7 +86,7 @@ export const Header = () => {
           const token = localStorage.getItem('jwt_token');
           if (token) {
             // Проверяем валидность токена
-            const response = await fetch('http://localhost:3001/api/auth/verify', {
+            const response = await fetch(`${API_CONFIG.AUTH_URL}/verify`, {
               headers: {
                 'Authorization': `Bearer ${token}`
               }

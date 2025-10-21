@@ -23,6 +23,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import StarRating from './StarRating';
 import RatingModal from './RatingModal';
 import { useToast } from '../hooks/use-toast';
+import { API_CONFIG } from '@/config/api';
 
 interface Script {
   id: string;
@@ -81,7 +82,7 @@ const ScriptsList: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`http://localhost:3001/api/scripts/public?${params}`, {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/public?${params}`, {
         headers
       });
       const data = await response.json();
@@ -221,7 +222,7 @@ const ScriptsList: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`http://localhost:3001/api/scripts/public/${scriptId}/download`, {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/public/${scriptId}/download`, {
         method: 'POST',
         headers,
         body: JSON.stringify({}) // Убираем user_id, так как он теперь получается из токена
@@ -332,7 +333,7 @@ const ScriptsList: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`http://localhost:3001/api/scripts/public/${selectedScript.id}/rate`, {
+      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/public/${selectedScript.id}/rate`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
