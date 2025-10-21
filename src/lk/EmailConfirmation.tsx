@@ -9,6 +9,7 @@ import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/CustomAuthContext';
+import { API_CONFIG } from '@/config/api';
 export default function EmailConfirmation() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -30,11 +31,7 @@ export default function EmailConfirmation() {
           return;
         }
 
-        const baseUrl = window.location.hostname === 'localhost'
-          ? 'http://localhost:3001'
-          : 'https://api.ebuster.ru';
-
-        const res = await fetch(`${baseUrl}/api/auth/confirm-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+        const res = await fetch(`${API_CONFIG.AUTH_URL}/confirm-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
         const data = await res.json();
 
         if (!res.ok || data?.success !== true) {
