@@ -277,12 +277,17 @@ export const Header = () => {
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start text-muted-foreground hover:text-foreground"
-                        asChild
+                        onClick={() => {
+                          const isProduction = window.location.hostname !== 'localhost';
+                          if (isProduction) {
+                            window.location.href = 'https://lk.ebuster.ru/dashboard';
+                          } else {
+                            window.location.href = '/dashboard';
+                          }
+                        }}
                       >
-                        <Link to="/dashboard">
-                          <User className="h-4 w-4 mr-2" />
-                          {t('header.buttons.dashboard')}
-                        </Link>
+                        <User className="h-4 w-4 mr-2" />
+                        {t('header.buttons.dashboard')}
                       </Button>
                       {user?.role === 'admin' && (
                         <Button
