@@ -19,6 +19,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { notificationTranslations } from '@/lib/notification-translations';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import ScriptsManagement from './ScriptsManagement';
+import SystemMonitorChart from './SystemMonitorChart';
 import { 
   Users, 
   Settings, 
@@ -174,6 +175,20 @@ const AdminDashboard = () => {
     };
 
     loadData();
+
+    // Автоматическое обновление данных мониторинга каждые 5 секунд
+    const monitorInterval = setInterval(async () => {
+      try {
+        const monitorData = await adminApi.getSystemMonitor();
+        setSystemStatus(monitorData);
+      } catch (error) {
+        console.error('Ошибка обновления мониторинга:', error);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(monitorInterval);
+    };
   }, []);
 
   // Функции для работы с данными
@@ -498,6 +513,9 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Графики мониторинга */}
+          <SystemMonitorChart />
 
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
