@@ -476,9 +476,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const language = localStorage.getItem('language');
     const cursorType = localStorage.getItem('cursorType');
     
-    console.log('🚪 Logout: Starting...');
-    console.log('🍪 Cookie before:', document.cookie);
-    
     // Очищаем все данные
     setUser(null);
     
@@ -489,48 +486,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('pending_referral_code');
     localStorage.removeItem('dashboardActiveTab');
     
-    // Агрессивное удаление cookie
-    const cookieName = 'jwt_token';
-    const isProduction = window.location.hostname !== 'localhost';
-    
-    if (isProduction) {
-      // Пробуем все возможные комбинации
-      const variations = [
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru;secure;samesite=lax`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru;secure`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru;samesite=lax`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;secure;samesite=lax`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;secure`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;samesite=lax`,
-        `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`,
-      ];
-      
-      variations.forEach(v => {
-        document.cookie = v;
-      });
-    } else {
-      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-    }
-    
-    console.log('🍪 Cookie after:', document.cookie);
+    // Удаляем cookie с ТОЧНО такими же параметрами как при установке
+    const expires = 'expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = `jwt_token=;${expires};path=/;domain=.ebuster.ru;secure;samesite=lax`;
     
     // Восстанавливаем настройки
     if (theme) localStorage.setItem('theme', theme);
     if (language) localStorage.setItem('language', language);
     if (cursorType) localStorage.setItem('cursorType', cursorType);
 
-    // Вызываем API logout и ждем ответа (чтобы сервер очистил cookie)
+    // Вызываем API logout и ждем ответа
     try {
       await authApi.logout();
-      console.log('🚪 Logout: API success');
     } catch (err) {
       console.error('Logout API error:', err);
     }
-
-    console.log('🚪 Logout: Redirecting...');
     
-    // Редирект после того как сервер очистил cookie
+    // Редирект
     window.location.replace('https://ebuster.ru');
   };
 
