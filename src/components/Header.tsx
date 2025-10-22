@@ -148,6 +148,15 @@ export const Header = () => {
         navigate({ pathname: location.pathname, search: search.toString() }, { replace: true });
       }
     }
+
+    // Открываем модалку регистрации при параметре ?register=true
+    if (search.get('register') === 'true') {
+      setIsRegisterModalOpen(true);
+      setIsLoginModalOpen(false);
+      // Чистим параметр register из URL
+      search.delete('register');
+      navigate({ pathname: location.pathname, search: search.toString() }, { replace: true });
+    }
   }, [location, navigate]);
 
   return (
