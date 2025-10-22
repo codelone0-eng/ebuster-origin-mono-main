@@ -99,9 +99,9 @@ export const ReferralManagement: React.FC = () => {
       setLoading(true);
 
       const [codesRes, usesRes, statsRes] = await Promise.all([
-        fetch(`${API_CONFIG.ADMIN_URL}/referral/admin/codes`),
-        fetch(`${API_CONFIG.ADMIN_URL}/referral/admin/uses`),
-        fetch(`${API_CONFIG.ADMIN_URL}/referral/admin/stats`)
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/admin/codes`),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/admin/uses`),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/admin/stats`)
       ]);
 
       const codesData = await codesRes.json();
@@ -138,7 +138,7 @@ export const ReferralManagement: React.FC = () => {
     if (!selectedCode) return;
 
     try {
-      const response = await fetch(`${API_CONFIG.ADMIN_URL}/referral/admin/codes/${selectedCode.id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/referral/admin/codes/${selectedCode.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm)

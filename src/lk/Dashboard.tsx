@@ -16,6 +16,7 @@ import { AvatarUpload } from '@/components/AvatarUpload';
 import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
+import { ReferralProgram } from '@/lk/ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
@@ -473,7 +474,7 @@ const DashboardContent = () => {
 
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsList className="grid w-full grid-cols-6 mb-8">
               <TabsTrigger value="scripts" className="flex items-center gap-2">
                 <Library className="h-4 w-4" />
                 {t('header.dashboard.tabs.scripts')}
@@ -481,6 +482,10 @@ const DashboardContent = () => {
               <TabsTrigger value="installed" className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 {t('header.dashboard.tabs.installed')}
+              </TabsTrigger>
+              <TabsTrigger value="referral" className="flex items-center gap-2">
+                <Star className="h-4 w-4" />
+                Рефералы
               </TabsTrigger>
               <TabsTrigger value="support" className="flex items-center gap-2">
                 <Headphones className="h-4 w-4" />
@@ -558,6 +563,11 @@ const DashboardContent = () => {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            {/* Реферальная программа */}
+            <TabsContent value="referral" className="space-y-6">
+              <ReferralProgram userId={String(user?.id || '')} />
             </TabsContent>
 
             {/* Поддержка */}

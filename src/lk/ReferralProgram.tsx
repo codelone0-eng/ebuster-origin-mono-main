@@ -73,9 +73,9 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       setLoading(true);
 
       const [codeRes, statsRes, referralsRes] = await Promise.all([
-        fetch(`${API_CONFIG.API_URL}/referral/user/${userId}/code`),
-        fetch(`${API_CONFIG.API_URL}/referral/user/${userId}/stats`),
-        fetch(`${API_CONFIG.API_URL}/referral/user/${userId}/referrals`)
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/code`),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/stats`),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/referrals`)
       ]);
 
       const codeData = await codeRes.json();

@@ -21,6 +21,7 @@ import { useAdminApi } from '@/hooks/useAdminApi';
 import ScriptsManagement from './ScriptsManagement';
 import SubscriptionsManagement from './SubscriptionsManagement';
 import SystemMonitorChart from './SystemMonitorChart';
+import { ReferralManagement } from './ReferralManagement';
 import { 
   Users, 
   Settings, 
@@ -526,11 +527,12 @@ const AdminDashboard = () => {
 
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="overview">Обзор</TabsTrigger>
               <TabsTrigger value="users">Пользователи</TabsTrigger>
               <TabsTrigger value="scripts">Скрипты</TabsTrigger>
               <TabsTrigger value="subscriptions">Подписки</TabsTrigger>
+              <TabsTrigger value="referrals">Рефералы</TabsTrigger>
               <TabsTrigger value="tickets">Тикеты</TabsTrigger>
               <TabsTrigger value="logs">Логи</TabsTrigger>
             </TabsList>
@@ -762,6 +764,11 @@ const AdminDashboard = () => {
             {/* Подписки */}
             <TabsContent value="subscriptions" className="space-y-6">
               <SubscriptionsManagement />
+            </TabsContent>
+
+            {/* Рефералы */}
+            <TabsContent value="referrals" className="space-y-6">
+              <ReferralManagement />
             </TabsContent>
 
             {/* Тикеты */}
