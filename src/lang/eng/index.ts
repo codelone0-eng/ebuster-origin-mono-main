@@ -94,6 +94,37 @@ export const eng = {
     title: "Frequently Asked Questions",
     subtitle: "Everything you need to know about Ebuster"
   },
+  extensionFeatures: {
+    title: "Extension Features",
+    subtitle: "Everything you need",
+    description: "Powerful userscript manager with cloud storage integration",
+    scriptManager: {
+      title: "Script Manager",
+      description: "Create, edit and manage userscripts directly in your browser"
+    },
+    cloudSync: {
+      title: "Cloud Sync",
+      description: "Synchronize scripts across devices through your account"
+    },
+    guestMode: {
+      title: "Guest Mode",
+      description: "Work without authorization with local script storage"
+    },
+    autoUpdates: {
+      title: "Auto Updates",
+      description: "Scripts update automatically from cloud storage"
+    },
+    security: {
+      title: "Security",
+      description: "JWT tokens and encrypted data storage"
+    },
+    profile: {
+      title: "User Profile",
+      description: "View statistics, manage subscription and settings"
+    },
+    tryDemo: "Try Demo",
+    downloadExtension: "Download Extension"
+  },
   cta: {
     title: "Ready to Experience",
     subtitle: "Professional Quality?",

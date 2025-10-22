@@ -8,12 +8,13 @@ import Section from "@/components/Section";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CodeTypewriter } from "@/components/CodeTypewriter";
 import ShimmerTitle from "@/components/ShimmerTitle";
+import { ExtensionDemo } from "@/components/ExtensionDemo";
 // import SpotlightCard from "@/components/SpotlightCard";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { 
   Zap, Shield, Layers, ArrowRight, Code2, Sparkles, 
-  Terminal, Boxes, Puzzle, Orbit, Binary, Cpu, Download
+  Terminal, Boxes, Puzzle, Orbit, Binary, Cpu, Download, Cloud, User, RefreshCw
 } from "lucide-react";
 
 const Index = () => {
@@ -156,6 +157,91 @@ const Index = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </Section>
+
+        {/* Extension Features Section */}
+        <Section className="bg-gradient-to-b from-background via-muted/5 to-background">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-6xl font-bold mb-4 text-foreground">
+              {t('index.extensionFeatures.title')}
+              <span className="gradient-text"> {t('index.extensionFeatures.subtitle')}</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {t('index.extensionFeatures.description')}
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Code2 className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.scriptManager.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.scriptManager.description')}</p>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Cloud className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.cloudSync.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.cloudSync.description')}</p>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.guestMode.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.guestMode.description')}</p>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <RefreshCw className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.autoUpdates.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.autoUpdates.description')}</p>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.security.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.security.description')}</p>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">{t('index.extensionFeatures.profile.title')}</h3>
+              <p className="text-muted-foreground">{t('index.extensionFeatures.profile.description')}</p>
+            </div>
+          </div>
+
+          {/* Interactive Demo */}
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold mb-3 text-foreground">Попробуйте прямо сейчас</h3>
+              <p className="text-muted-foreground">Интерактивная демонстрация расширения</p>
+            </div>
+            <ExtensionDemo />
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="gap-2 text-lg px-8">
+              <Download className="h-5 w-5" />
+              {t('index.extensionFeatures.downloadExtension')}
+            </Button>
+            <Button size="lg" variant="outline" className="gap-2 text-lg px-8">
+              <Code2 className="h-5 w-5" />
+              Документация
+            </Button>
           </div>
         </Section>
 
