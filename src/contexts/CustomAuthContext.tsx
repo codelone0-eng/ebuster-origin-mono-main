@@ -486,9 +486,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('pending_referral_code');
     localStorage.removeItem('dashboardActiveTab');
     
-    // Удаляем cookie с ТОЧНО такими же параметрами как при установке
-    const expires = 'expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = `jwt_token=;${expires};path=/;domain=.ebuster.ru;secure;samesite=lax`;
+    // Удаляем cookie - пробуем разные варианты
+    const expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
+    // Вариант 1: с secure и samesite
+    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=lax`;
+    // Вариант 2: без secure
+    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;samesite=lax`;
+    // Вариант 3: только домен и путь
+    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru`;
+    // Вариант 4: без домена
+    document.cookie = `jwt_token=;expires=${expires};path=/`;
     
     // Восстанавливаем настройки
     if (theme) localStorage.setItem('theme', theme);

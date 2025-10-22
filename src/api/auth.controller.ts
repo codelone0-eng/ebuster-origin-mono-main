@@ -458,10 +458,19 @@ export const logoutUser = async (req: Request, res: Response) => {
       }
     }
 
-    // Очищаем cookie на сервере
+    // Очищаем cookie на сервере - пробуем разные варианты
     res.clearCookie('jwt_token', {
       domain: '.ebuster.ru',
       path: '/',
+      secure: true,
+      sameSite: 'lax'
+    });
+    
+    // Также устанавливаем пустой cookie с истекшим сроком
+    res.cookie('jwt_token', '', {
+      domain: '.ebuster.ru',
+      path: '/',
+      expires: new Date(0),
       secure: true,
       sameSite: 'lax'
     });
