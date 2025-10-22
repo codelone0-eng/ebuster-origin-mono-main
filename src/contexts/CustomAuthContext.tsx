@@ -465,6 +465,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authApi.logout();
       setUser(null);
       removeToken();
+      
+      // Очищаем все данные из localStorage
+      localStorage.removeItem('lastEmail');
+      localStorage.removeItem('referral_code');
+      localStorage.removeItem('pending_referral_code');
+      localStorage.removeItem('dashboardActiveTab');
 
       const translation = notificationTranslations.auth.logoutSuccess;
       toast({
@@ -473,16 +479,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant: "success"
       });
 
-      // Редирект на главную страницу
-      window.location.href = 'https://ebuster.ru';
+      // Небольшая задержка для показа уведомления, затем редирект с перезагрузкой
+      setTimeout(() => {
+        window.location.replace('https://ebuster.ru');
+      }, 500);
     } catch (error) {
       console.error('Logout error:', error);
       // Даже если ошибка, очищаем локальное состояние
       setUser(null);
       removeToken();
       
-      // Редирект на главную страницу
-      window.location.href = 'https://ebuster.ru';
+      // Очищаем все данные из localStorage
+      localStorage.removeItem('lastEmail');
+      localStorage.removeItem('referral_code');
+      localStorage.removeItem('pending_referral_code');
+      localStorage.removeItem('dashboardActiveTab');
+      
+      // Редирект на главную страницу с перезагрузкой
+      setTimeout(() => {
+        window.location.replace('https://ebuster.ru');
+      }, 500);
     }
   };
 
