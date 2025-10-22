@@ -149,12 +149,17 @@ export const Header = () => {
       }
     }
 
-    // Открываем модалку регистрации при параметре ?register=true
-    if (search.get('register') === 'true') {
+    // Открываем модалку регистрации при параметре ?register=true или ?ref=CODE
+    const refParam = search.get('ref');
+    if (search.get('register') === 'true' || refParam) {
       setIsRegisterModalOpen(true);
       setIsLoginModalOpen(false);
-      // Чистим параметр register из URL
+      // Чистим параметры из URL
       search.delete('register');
+      if (refParam) {
+        // Сохраняем реферальный код в localStorage
+        localStorage.setItem('referral_code', refParam);
+      }
       navigate({ pathname: location.pathname, search: search.toString() }, { replace: true });
     }
   }, [location, navigate]);

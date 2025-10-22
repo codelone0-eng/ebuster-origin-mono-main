@@ -14,14 +14,10 @@ const Register = () => {
     }
 
     // Перенаправляем на главную с параметром для открытия модалки регистрации
-    const timer = setTimeout(() => {
-      navigate(`/?register=true${refCode ? `&ref=${refCode}` : ''}`, { replace: true });
-    }, 100);
-
-    return () => clearTimeout(timer);
+    navigate(`/?register=true${refCode ? `&ref=${refCode}` : ''}`, { replace: true });
   }, [refCode, navigate]);
 
-  // Показываем главную страницу пока происходит редирект
+  // Показываем главную страницу
   return <Index />;
 };
 
