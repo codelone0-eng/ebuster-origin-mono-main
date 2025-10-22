@@ -567,7 +567,7 @@ const DashboardContent = () => {
 
             {/* Реферальная программа */}
             <TabsContent value="referral" className="space-y-6">
-              <ReferralProgram userId={String(user?.id || '')} />
+              <ReferralProgram userId={String(authUser?.id || '')} />
             </TabsContent>
 
             {/* Поддержка */}
