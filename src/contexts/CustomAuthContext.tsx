@@ -53,8 +53,17 @@ const getCookie = (name: string): string | null => {
 
 const removeCookie = (name: string): void => {
   const isProduction = window.location.hostname !== 'localhost';
-  const domain = isProduction ? ';domain=.ebuster.ru' : '';
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/${domain}`;
+  
+  if (isProduction) {
+    // Удаляем для всех возможных комбинаций домена и пути
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru`;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=ebuster.ru`;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=lk.ebuster.ru`;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=admin.ebuster.ru`;
+  } else {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
 };
 
 const getToken = (): string | null => {
@@ -461,61 +470,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    try {
-      // Сохраняем настройки темы и языка
-      const theme = localStorage.getItem('theme');
-      const language = localStorage.getItem('language');
-      const cursorType = localStorage.getItem('cursorType');
-      
-      // Очищаем все данные
-      setUser(null);
-      removeToken();
-      
-      // Очищаем токены и пользовательские данные
-      localStorage.removeItem('jwt_token');
-      localStorage.removeItem('lastEmail');
-      localStorage.removeItem('referral_code');
-      localStorage.removeItem('pending_referral_code');
-      localStorage.removeItem('dashboardActiveTab');
-      
-      // Восстанавливаем настройки
-      if (theme) localStorage.setItem('theme', theme);
-      if (language) localStorage.setItem('language', language);
-      if (cursorType) localStorage.setItem('cursorType', cursorType);
-      
-      // Очищаем все cookies для домена
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru";
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=ebuster.ru";
-      }
+    // Сохраняем настройки темы и языка
+    const theme = localStorage.getItem('theme');
+    const language = localStorage.getItem('language');
+    const cursorType = localStorage.getItem('cursorType');
+    
+    // Очищаем все данные
+    setUser(null);
+    
+    // Удаляем токены из localStorage
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('lastEmail');
+    localStorage.removeItem('referral_code');
+    localStorage.removeItem('pending_referral_code');
+    localStorage.removeItem('dashboardActiveTab');
+    
+    // Удаляем токен из cookies (все варианты)
+    removeToken();
+    
+    // Восстанавливаем настройки
+    if (theme) localStorage.setItem('theme', theme);
+    if (language) localStorage.setItem('language', language);
+    if (cursorType) localStorage.setItem('cursorType', cursorType);
 
-      // Вызываем API logout
-      await authApi.logout().catch(err => console.error('Logout API error:', err));
+    // Вызываем API logout (не ждем ответа)
+    authApi.logout().catch(err => console.error('Logout API error:', err));
 
-      const translation = notificationTranslations.auth.logoutSuccess;
-      toast({
-        title: translation.title,
-        description: translation.description,
-        variant: "success"
-      });
-
-      // Немедленный редирект без задержки
-      window.location.replace('https://ebuster.ru');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Даже если ошибка, очищаем все и редиректим
-      setUser(null);
-      removeToken();
-      localStorage.removeItem('jwt_token');
-      
-      // Немедленный редирект
-      window.location.replace('https://ebuster.ru');
-    }
+    // Немедленный редирект
+    window.location.replace('https://ebuster.ru');
   };
 
   const resetPassword = async (email: string) => {
