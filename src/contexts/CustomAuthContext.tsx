@@ -509,8 +509,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout API error:', err);
     }
     
-    // Редирект
-    window.location.replace('https://ebuster.ru');
+    // Редирект с параметром logout для дополнительной очистки на главной
+    window.location.replace('https://ebuster.ru?logout=true');
   };
 
   const resetPassword = async (email: string) => {
