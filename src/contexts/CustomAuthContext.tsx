@@ -462,15 +462,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await authApi.logout();
+      // Сначала очищаем все данные
       setUser(null);
       removeToken();
       
       // Очищаем все данные из localStorage
-      localStorage.removeItem('lastEmail');
-      localStorage.removeItem('referral_code');
-      localStorage.removeItem('pending_referral_code');
-      localStorage.removeItem('dashboardActiveTab');
+      localStorage.clear();
+      
+      // Очищаем все cookies для домена
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru";
+      }
+
+      // Вызываем API logout
+      await authApi.logout().catch(err => console.error('Logout API error:', err));
 
       const translation = notificationTranslations.auth.logoutSuccess;
       toast({
@@ -479,26 +489,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant: "success"
       });
 
-      // Небольшая задержка для показа уведомления, затем редирект с перезагрузкой
+      // Принудительный редирект с полной перезагрузкой
       setTimeout(() => {
-        window.location.replace('https://ebuster.ru');
-      }, 500);
+        window.location.href = 'https://ebuster.ru';
+      }, 300);
     } catch (error) {
       console.error('Logout error:', error);
-      // Даже если ошибка, очищаем локальное состояние
+      // Даже если ошибка, очищаем все
       setUser(null);
       removeToken();
+      localStorage.clear();
       
-      // Очищаем все данные из localStorage
-      localStorage.removeItem('lastEmail');
-      localStorage.removeItem('referral_code');
-      localStorage.removeItem('pending_referral_code');
-      localStorage.removeItem('dashboardActiveTab');
-      
-      // Редирект на главную страницу с перезагрузкой
-      setTimeout(() => {
-        window.location.replace('https://ebuster.ru');
-      }, 500);
+      // Принудительный редирект
+      window.location.href = 'https://ebuster.ru';
     }
   };
 
