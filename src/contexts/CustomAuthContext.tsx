@@ -462,21 +462,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Сначала очищаем все данные
+      // Сохраняем настройки темы и языка
+      const theme = localStorage.getItem('theme');
+      const language = localStorage.getItem('language');
+      const cursorType = localStorage.getItem('cursorType');
+      
+      // Очищаем все данные
       setUser(null);
       removeToken();
       
-      // Очищаем все данные из localStorage
-      localStorage.clear();
+      // Очищаем токены и пользовательские данные
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('lastEmail');
+      localStorage.removeItem('referral_code');
+      localStorage.removeItem('pending_referral_code');
+      localStorage.removeItem('dashboardActiveTab');
+      
+      // Восстанавливаем настройки
+      if (theme) localStorage.setItem('theme', theme);
+      if (language) localStorage.setItem('language', language);
+      if (cursorType) localStorage.setItem('cursorType', cursorType);
       
       // Очищаем все cookies для домена
       const cookies = document.cookie.split(";");
       for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i];
         const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.ebuster.ru";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=ebuster.ru";
       }
 
       // Вызываем API logout
@@ -489,19 +504,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant: "success"
       });
 
-      // Принудительный редирект с полной перезагрузкой
-      setTimeout(() => {
-        window.location.href = 'https://ebuster.ru';
-      }, 300);
+      // Немедленный редирект без задержки
+      window.location.replace('https://ebuster.ru');
     } catch (error) {
       console.error('Logout error:', error);
-      // Даже если ошибка, очищаем все
+      // Даже если ошибка, очищаем все и редиректим
       setUser(null);
       removeToken();
-      localStorage.clear();
+      localStorage.removeItem('jwt_token');
       
-      // Принудительный редирект
-      window.location.href = 'https://ebuster.ru';
+      // Немедленный редирект
+      window.location.replace('https://ebuster.ru');
     }
   };
 
