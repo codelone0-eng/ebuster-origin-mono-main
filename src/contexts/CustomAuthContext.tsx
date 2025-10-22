@@ -472,11 +472,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: translation.description,
         variant: "success"
       });
+
+      // Редирект на главную страницу
+      window.location.href = 'https://ebuster.ru';
     } catch (error) {
       console.error('Logout error:', error);
       // Даже если ошибка, очищаем локальное состояние
       setUser(null);
       removeToken();
+      
+      // Редирект на главную страницу
+      window.location.href = 'https://ebuster.ru';
     }
   };
 
