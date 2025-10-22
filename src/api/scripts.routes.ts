@@ -9,9 +9,14 @@ import {
   getScriptStats,
   rateScript,
   getScriptRatings,
-  deleteScriptRating
+  deleteScriptRating,
+  getUserInstalledScripts,
+  installScriptForUser,
+  uninstallScriptForUser,
+  syncUserScripts,
+  checkScriptUpdates
 } from './scripts.controller';
-import { optionalAuthenticateUser } from './auth.middleware';
+import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
 
 const router = express.Router();
 
@@ -22,6 +27,13 @@ router.post('/public/:id/download', optionalAuthenticateUser, downloadScript); /
 router.post('/public/:id/rate', optionalAuthenticateUser, rateScript); // Оценка скрипта
 router.get('/public/:id/ratings', optionalAuthenticateUser, getScriptRatings); // Получение оценок скрипта
 router.delete('/public/:id/rating', optionalAuthenticateUser, deleteScriptRating); // Удаление оценки скрипта
+
+// Extension Sync Routes (требуют авторизации)
+router.get('/user/installed', authenticateUser, getUserInstalledScripts); // Получить установленные скрипты пользователя
+router.post('/user/install/:id', authenticateUser, installScriptForUser); // Установить скрипт для пользователя
+router.delete('/user/uninstall/:id', authenticateUser, uninstallScriptForUser); // Удалить скрипт у пользователя
+router.post('/user/sync', authenticateUser, syncUserScripts); // Синхронизировать скрипты
+router.get('/user/check-updates', authenticateUser, checkScriptUpdates); // Проверить обновления скриптов
 
 // Админские маршруты (требуют авторизации)
 router.get('/admin/stats', getScriptStats); // Статистика скриптов

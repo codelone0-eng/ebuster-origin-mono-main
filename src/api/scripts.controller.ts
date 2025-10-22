@@ -642,3 +642,256 @@ export const getScriptStats = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Extension Sync Functions
+
+// Получить установленные скрипты пользователя
+export const getUserInstalledScripts = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const supabase = getSupabaseClient();
+
+    // Получаем установленные скрипты пользователя
+    const { data: installedScripts, error } = await supabase
+      .from('user_scripts')
+      .select(`
+        script_id,
+        installed_at,
+        scripts (
+          id,
+          title,
+          description,
+          code,
+          version,
+          author_name,
+          category,
+          tags,
+          updated_at
+        )
+      `)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      scripts: installedScripts?.map((item: any) => ({
+        ...item.scripts,
+        installed_at: item.installed_at
+      })) || []
+    });
+  } catch (error) {
+    console.error('Ошибка получения установленных скриптов:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения установленных скриптов'
+    });
+  }
+};
+
+// Установить скрипт для пользователя (из lk.ebuster.ru)
+export const installScriptForUser = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { id: scriptId } = req.params;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const supabase = getSupabaseClient();
+
+    // Проверяем существует ли скрипт
+    const { data: script, error: scriptError } = await supabase
+      .from('scripts')
+      .select('*')
+      .eq('id', scriptId)
+      .single();
+
+    if (scriptError || !script) {
+      return res.status(404).json({
+        success: false,
+        error: 'Скрипт не найден'
+      });
+    }
+
+    // Добавляем скрипт в установленные
+    const { error: installError } = await supabase
+      .from('user_scripts')
+      .upsert({
+        user_id: userId,
+        script_id: scriptId,
+        installed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,script_id'
+      });
+
+    if (installError) throw installError;
+
+    // Увеличиваем счетчик загрузок
+    await supabase.rpc('increment_downloads', { script_id: scriptId });
+
+    res.json({
+      success: true,
+      message: 'Скрипт установлен',
+      script
+    });
+  } catch (error) {
+    console.error('Ошибка установки скрипта:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка установки скрипта'
+    });
+  }
+};
+
+// Удалить скрипт у пользователя
+export const uninstallScriptForUser = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { id: scriptId } = req.params;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const supabase = getSupabaseClient();
+
+    const { error } = await supabase
+      .from('user_scripts')
+      .delete()
+      .eq('user_id', userId)
+      .eq('script_id', scriptId);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Скрипт удален'
+    });
+  } catch (error) {
+    console.error('Ошибка удаления скрипта:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка удаления скрипта'
+    });
+  }
+};
+
+// Синхронизировать скрипты (отправить список из расширения)
+export const syncUserScripts = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { scriptIds } = req.body; // Массив ID скриптов из расширения
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    if (!Array.isArray(scriptIds)) {
+      return res.status(400).json({
+        success: false,
+        error: 'scriptIds должен быть массивом'
+      });
+    }
+
+    const supabase = getSupabaseClient();
+
+    // Удаляем все старые записи
+    await supabase
+      .from('user_scripts')
+      .delete()
+      .eq('user_id', userId);
+
+    // Добавляем новые
+    if (scriptIds.length > 0) {
+      const records = scriptIds.map(scriptId => ({
+        user_id: userId,
+        script_id: scriptId,
+        installed_at: new Date().toISOString()
+      }));
+
+      const { error } = await supabase
+        .from('user_scripts')
+        .insert(records);
+
+      if (error) throw error;
+    }
+
+    res.json({
+      success: true,
+      message: 'Скрипты синхронизированы'
+    });
+  } catch (error) {
+    console.error('Ошибка синхронизации скриптов:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка синхронизации скриптов'
+    });
+  }
+};
+
+// Проверить обновления скриптов
+export const checkScriptUpdates = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { scripts } = req.query; // Массив объектов {id, version}
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const installedScripts = JSON.parse(scripts as string || '[]');
+    const supabase = getSupabaseClient();
+
+    const updates = [];
+
+    for (const installed of installedScripts) {
+      const { data: script } = await supabase
+        .from('scripts')
+        .select('id, version, updated_at')
+        .eq('id', installed.id)
+        .single();
+
+      if (script && script.version !== installed.version) {
+        updates.push({
+          id: script.id,
+          oldVersion: installed.version,
+          newVersion: script.version,
+          updated_at: script.updated_at
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      updates
+    });
+  } catch (error) {
+    console.error('Ошибка проверки обновлений:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка проверки обновлений'
+    });
+  }
+};
