@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
 import Index from "./landing/Index";
+import Register from "./landing/Register";
 import ApiDocs from "./landing/ApiDocs";
 import Documentation from "./landing/Documentation";
 import Contacts from "./landing/Contacts";
@@ -46,6 +47,7 @@ const App = () => (
               <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/api-docs" element={<ApiDocs />} />
                     <Route path="/documentation" element={<Documentation />} />
                     <Route path="/contacts" element={<Contacts />} />

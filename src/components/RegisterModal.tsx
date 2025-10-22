@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Mail, Lock, User, Eye, EyeOff, Check, X as XIcon, Hash, Type, CaseSensitive, Shield, RefreshCw, Copy } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Lock, User, Eye, EyeOff, Check, X as XIcon, Hash, Type, CaseSensitive, Shield, RefreshCw, Copy, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,10 +30,25 @@ export const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     password: "",
     confirmPassword: "",
   });
+  const [referralCode, setReferralCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
+
+  // Проверяем реферальный код из localStorage или URL
+  useEffect(() => {
+    const savedRefCode = localStorage.getItem('referral_code');
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRefCode = urlParams.get('ref');
+    
+    if (urlRefCode) {
+      setReferralCode(urlRefCode);
+      localStorage.setItem('referral_code', urlRefCode);
+    } else if (savedRefCode) {
+      setReferralCode(savedRefCode);
+    }
+  }, [isOpen]);
 
   // Password validation with professional icons
   const passwordRequirements = [
@@ -138,9 +153,18 @@ export const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModa
         // Save email to localStorage for future logins
         localStorage.setItem('lastEmail', formData.email);
         
+        // Сохраняем реферальный код для применения после подтверждения email
+        if (referralCode && referralCode.length > 0) {
+          localStorage.setItem('pending_referral_code', referralCode);
+        }
+        
+        // Очищаем временный код
+        localStorage.removeItem('referral_code');
+        
         onClose();
         // Reset form
         setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+        setReferralCode('');
         setGeneratedPassword('');
       }
     } catch (error) {
@@ -373,6 +397,31 @@ export const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModa
                   </>
                 )}
               </div>
+            )}
+          </div>
+
+          {/* Реферальный код */}
+          <div className="space-y-2">
+            <Label htmlFor="referralCode" className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Gift className="h-4 w-4" />
+              Реферальный код (опционально)
+            </Label>
+            <div className="relative">
+              <Input
+                id="referralCode"
+                name="referralCode"
+                type="text"
+                placeholder="Введите код, если есть"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                className="pl-4 rounded-xl h-12 uppercase"
+              />
+            </div>
+            {referralCode && (
+              <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                Вы получите скидку при использовании этого кода!
+              </p>
             )}
           </div>
 

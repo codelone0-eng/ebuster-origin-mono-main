@@ -345,3 +345,69 @@ export const getReferralSystemStats = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Ошибка сервера' });
   }
 };
+
+// ADMIN: Инициализация реферальных кодов для существующих пользователей
+export const initializeReferralCodes = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      return res.status(500).json({ success: false, error: 'Database not configured' });
+    }
+
+    // Получаем всех пользователей без реферальных кодов
+    const { data: users } = await supabase
+      .from('auth_users')
+      .select('id, email')
+      .not('id', 'in', `(SELECT user_id FROM referral_codes)`);
+
+    if (!users || users.length === 0) {
+      return res.json({
+        success: true,
+        message: 'Все пользователи уже имеют реферальные коды',
+        created: 0
+      });
+    }
+
+    // Создаем коды для каждого пользователя
+    const codes = users.map(user => {
+      const emailPart = user.email.split('@')[0].substring(0, 6).toUpperCase();
+      const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return {
+        user_id: user.id,
+        code: `${emailPart}${randomPart}`,
+        discount_type: 'percentage',
+        discount_value: 10,
+        is_active: true
+      };
+    });
+
+    const { error: codesError } = await supabase
+      .from('referral_codes')
+      .insert(codes);
+
+    if (codesError) {
+      console.error('Ошибка создания кодов:', codesError);
+      return res.status(500).json({ success: false, error: 'Ошибка создания кодов' });
+    }
+
+    // Создаем статистику
+    const stats = users.map(user => ({ user_id: user.id }));
+    const { error: statsError } = await supabase
+      .from('referral_stats')
+      .insert(stats);
+
+    if (statsError) {
+      console.error('Ошибка создания статистики:', statsError);
+    }
+
+    res.json({
+      success: true,
+      message: `Создано ${users.length} реферальных кодов`,
+      created: users.length
+    });
+  } catch (error) {
+    console.error('Ошибка:', error);
+    res.status(500).json({ success: false, error: 'Ошибка сервера' });
+  }
+};
