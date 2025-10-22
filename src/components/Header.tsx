@@ -234,13 +234,11 @@ export const Header = () => {
             variant="outline" 
             size="sm" 
             className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 rounded-xl px-4 py-2 h-auto group"
-            asChild
+            onClick={() => window.location.href = 'https://ebuster.ru/price'}
           >
-            <Link to="/price">
-              <Star className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              <span className="text-sm font-semibold">{t('header.buttons.premium')}</span>
-              <ArrowUpRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
-            </Link>
+            <Star className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="text-sm font-semibold">{t('header.buttons.premium')}</span>
+            <ArrowUpRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
           </Button>
 
           {/* User Actions */}
@@ -309,12 +307,10 @@ export const Header = () => {
                           variant="ghost"
                           size="sm"
                           className="w-full justify-start text-muted-foreground hover:text-foreground"
-                          asChild
+                          onClick={() => window.location.href = 'https://admin.ebuster.ru'}
                         >
-                          <Link to="/admin">
-                            <Shield className="h-4 w-4 mr-2" />
-                            {t('header.buttons.adminPanel')}
-                          </Link>
+                          <Shield className="h-4 w-4 mr-2" />
+                          {t('header.buttons.adminPanel')}
                         </Button>
                       )}
                       <Button
