@@ -108,15 +108,13 @@ export const eng = {
     components: "Components",
     resources: "Resources",
     documentation: "Documentation",
-    tutorials: "Tutorials",
-    templates: "Templates",
+    support: "Support",
+    faq: "FAQ",
     company: "Company",
     about: "About",
     privacy: "Privacy",
     terms: "Terms",
-    copyright: "© 2024 Ebuster. Engineered with precision.",
-    madeWith: "Made with",
-    builtFor: "Built for"
+    copyright: "© 2025 Ebuster. All rights reserved."
   },
   featuresGrid: {
     structuredLibrary: {

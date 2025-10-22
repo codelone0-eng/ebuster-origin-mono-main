@@ -108,15 +108,13 @@ export const ru = {
     components: "Компоненты",
     resources: "Ресурсы",
     documentation: "Документация",
-    tutorials: "Уроки",
-    templates: "Шаблоны",
+    support: "Поддержка",
+    faq: "FAQ",
     company: "Компания",
     about: "О нас",
     privacy: "Конфиденциальность",
     terms: "Условия",
-    copyright: "© 2024 Ebuster. Создано с точностью.",
-    madeWith: "Сделано с",
-    builtFor: "Создано для"
+    copyright: "© 2025 Ebuster. Все права защищены."
   },
   featuresGrid: {
     structuredLibrary: {

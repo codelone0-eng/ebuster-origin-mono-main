@@ -172,58 +172,42 @@ const Index = () => {
           <div className="grid md:grid-cols-5 gap-8 mb-8">
             <div className="md:col-span-2">
               <h3 className="text-2xl font-bold mb-4 gradient-text">{t('index.hero.title')}</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed">
                 {t('index.footer.description')}
               </p>
-              <div className="flex gap-4">
-                <div className="bg-card/50 backdrop-blur-sm border content-border-50 rounded-lg p-3 hover:bg-accent/20 transition-colors cursor-pointer">
-                  <Code2 className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="bg-card/50 backdrop-blur-sm border content-border-50 rounded-lg p-3 hover:bg-accent/20 transition-colors cursor-pointer">
-                  <Terminal className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="bg-card/50 backdrop-blur-sm border content-border-50 rounded-lg p-3 hover:bg-accent/20 transition-colors cursor-pointer">
-                  <Boxes className="h-5 w-5 text-foreground" />
-                </div>
-              </div>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.product')}</h4>
               <ul className="space-y-3">
-                <li><Link to="/features" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.features')}</Link></li>
-                <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.pricing')}</Link></li>
-                <li><Link to="/components" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.components')}</Link></li>
+                <li><a href="https://ebuster.ru/advantages" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.features')}</a></li>
+                <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.pricing')}</a></li>
+                <li><a href="https://ebuster.ru/documentation" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.components')}</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.resources')}</h4>
               <ul className="space-y-3">
-                <li><Link to="#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</Link></li>
-                <li><Link to="#features" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.tutorials')}</Link></li>
-                <li><Link to="#features" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.templates')}</Link></li>
+                <li><a href="https://ebuster.ru/documentation" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
+                <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.support')}</a></li>
+                <li><a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.faq')}</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.company')}</h4>
               <ul className="space-y-3">
-                <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.about')}</Link></li>
-                <li><Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.privacy')}</Link></li>
-                <li><Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.terms')}</Link></li>
+                <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.about')}</a></li>
+                <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.privacy')}</a></li>
+                <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.terms')}</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-6 border-t content-border flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="pt-6 border-t content-border text-center">
             <div className="text-sm text-muted-foreground">
               {t('index.footer.copyright')}
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <span>{t('index.footer.madeWith')}</span>
-              <span>•</span>
-              <span>{t('index.footer.builtFor')}</span>
             </div>
           </div>
         </div>
