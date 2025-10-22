@@ -520,12 +520,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (language) localStorage.setItem('language', language);
     if (cursorType) localStorage.setItem('cursorType', cursorType);
 
-    // Вызываем API logout (не ждем ответа)
-    authApi.logout().catch(err => console.error('Logout API error:', err));
+    // Вызываем API logout и ждем ответа (чтобы сервер очистил cookie)
+    try {
+      await authApi.logout();
+      console.log('🚪 Logout: API success');
+    } catch (err) {
+      console.error('Logout API error:', err);
+    }
 
     console.log('🚪 Logout: Redirecting...');
     
-    // Немедленный редирект
+    // Редирект после того как сервер очистил cookie
     window.location.replace('https://ebuster.ru');
   };
 
