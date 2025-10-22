@@ -8,7 +8,8 @@ import {
   updateReferralCode,
   getAllReferralUses,
   getReferralSystemStats,
-  initializeReferralCodes
+  initializeReferralCodes,
+  regenerateAllReferralCodes
 } from './referral.controller';
 
 const router = Router();
@@ -25,5 +26,6 @@ router.put('/admin/codes/:id', updateReferralCode);
 router.get('/admin/uses', getAllReferralUses);
 router.get('/admin/stats', getReferralSystemStats);
 router.post('/admin/initialize', initializeReferralCodes);
+router.post('/admin/regenerate', regenerateAllReferralCodes);
 
 export default router;

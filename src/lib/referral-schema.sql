@@ -70,26 +70,26 @@ CREATE INDEX IF NOT EXISTS idx_referral_stats_user_id ON referral_stats(user_id)
 CREATE OR REPLACE FUNCTION generate_referral_code(user_email TEXT)
 RETURNS TEXT AS $$
 DECLARE
-  base_code TEXT;
   final_code TEXT;
   counter INTEGER := 0;
+  chars TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  code_length INTEGER := 10;
+  i INTEGER;
 BEGIN
-  -- Берем первые 6 символов email (до @) и делаем uppercase
-  base_code := UPPER(SUBSTRING(user_email FROM 1 FOR POSITION('@' IN user_email) - 1));
-  base_code := SUBSTRING(base_code FROM 1 FOR 6);
-  
-  -- Добавляем случайные цифры
-  final_code := base_code || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-  
-  -- Проверяем уникальность
-  WHILE EXISTS (SELECT 1 FROM referral_codes WHERE code = final_code) LOOP
-    counter := counter + 1;
-    final_code := base_code || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
+  -- Генерируем случайный код из букв и цифр
+  LOOP
+    final_code := '';
+    FOR i IN 1..code_length LOOP
+      final_code := final_code || SUBSTRING(chars FROM (FLOOR(RANDOM() * LENGTH(chars)) + 1)::INTEGER FOR 1);
+    END LOOP;
     
+    -- Проверяем уникальность
+    EXIT WHEN NOT EXISTS (SELECT 1 FROM referral_codes WHERE code = final_code);
+    
+    counter := counter + 1;
     -- Защита от бесконечного цикла
     IF counter > 100 THEN
-      final_code := 'REF' || LPAD(FLOOR(RANDOM() * 1000000)::TEXT, 6, '0');
-      EXIT;
+      RAISE EXCEPTION 'Не удалось сгенерировать уникальный код после 100 попыток';
     END IF;
   END LOOP;
   

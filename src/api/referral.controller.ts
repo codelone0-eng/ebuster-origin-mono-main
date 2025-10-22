@@ -369,18 +369,24 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
       });
     }
 
+    // Функция генерации случайного кода
+    const generateRandomCode = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 10; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    };
+
     // Создаем коды для каждого пользователя
-    const codes = users.map(user => {
-      const emailPart = user.email.split('@')[0].substring(0, 6).toUpperCase();
-      const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      return {
-        user_id: user.id,
-        code: `${emailPart}${randomPart}`,
-        discount_type: 'percentage',
-        discount_value: 10,
-        is_active: true
-      };
-    });
+    const codes = users.map(user => ({
+      user_id: user.id,
+      code: generateRandomCode(),
+      discount_type: 'percentage',
+      discount_value: 10,
+      is_active: true
+    }));
 
     const { error: codesError } = await supabase
       .from('referral_codes')
@@ -405,6 +411,71 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
       success: true,
       message: `Создано ${users.length} реферальных кодов`,
       created: users.length
+    });
+  } catch (error) {
+    console.error('Ошибка:', error);
+    res.status(500).json({ success: false, error: 'Ошибка сервера' });
+  }
+};
+
+// ADMIN: Перегенерация всех реферальных кодов
+export const regenerateAllReferralCodes = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      return res.status(500).json({ success: false, error: 'Database not configured' });
+    }
+
+    // Функция генерации случайного кода
+    const generateRandomCode = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 10; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    };
+
+    // Получаем все существующие коды
+    const { data: existingCodes, error: fetchError } = await supabase
+      .from('referral_codes')
+      .select('id, user_id');
+
+    if (fetchError) {
+      console.error('Ошибка получения кодов:', fetchError);
+      return res.status(500).json({ success: false, error: 'Ошибка получения кодов' });
+    }
+
+    if (!existingCodes || existingCodes.length === 0) {
+      return res.json({
+        success: true,
+        message: 'Нет кодов для перегенерации',
+        regenerated: 0
+      });
+    }
+
+    // Обновляем каждый код
+    let regenerated = 0;
+    for (const codeRecord of existingCodes) {
+      const newCode = generateRandomCode();
+      
+      const { error: updateError } = await supabase
+        .from('referral_codes')
+        .update({ code: newCode })
+        .eq('id', codeRecord.id);
+
+      if (!updateError) {
+        regenerated++;
+      } else {
+        console.error(`Ошибка обновления кода ${codeRecord.id}:`, updateError);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Перегенерировано ${regenerated} из ${existingCodes.length} кодов`,
+      regenerated
     });
   } catch (error) {
     console.error('Ошибка:', error);
