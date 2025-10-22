@@ -183,7 +183,7 @@ export const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-card backdrop-blur-xl border border-gray-200 dark:border-border rounded-2xl shadow-2xl">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-card backdrop-blur-xl border border-gray-200 dark:border-border rounded-2xl shadow-2xl">
         <DialogHeader className="space-y-3">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold text-foreground">
