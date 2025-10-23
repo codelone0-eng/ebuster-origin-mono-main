@@ -319,10 +319,78 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (user: any) => {
+    // Используем customConfirm для подтверждения
+    const userName = user.full_name || user.name || user.email || 'этого пользователя';
+    const confirmMessage = `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`;
+    const confirmTitle = 'Удаление пользователя';
+    
+    // Создаем Promise для модального окна
+    const confirmed = await new Promise<boolean>((resolve) => {
+      const modal = document.getElementById('customConfirmModal');
+      const titleElement = document.getElementById('confirmTitle');
+      const messageElement = document.getElementById('confirmMessage');
+      const cancelBtn = document.getElementById('confirmCancel');
+      const okBtn = document.getElementById('confirmOk');
+      
+      if (!modal || !titleElement || !messageElement || !cancelBtn || !okBtn) {
+        // Fallback на стандартный confirm
+        resolve(confirm(confirmMessage));
+        return;
+      }
+      
+      // Устанавливаем контент
+      titleElement.textContent = confirmTitle;
+      messageElement.textContent = confirmMessage;
+      okBtn.textContent = 'Удалить';
+      
+      // Показываем модальное окно
+      modal.style.display = 'flex';
+      
+      const handleCancel = () => {
+        modal.style.display = 'none';
+        cleanup();
+        resolve(false);
+      };
+      
+      const handleOk = () => {
+        modal.style.display = 'none';
+        cleanup();
+        resolve(true);
+      };
+      
+      const handleBackdropClick = (e: MouseEvent) => {
+        if (e.target === modal) {
+          handleCancel();
+        }
+      };
+      
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleCancel();
+        }
+      };
+      
+      const cleanup = () => {
+        cancelBtn.removeEventListener('click', handleCancel);
+        okBtn.removeEventListener('click', handleOk);
+        modal.removeEventListener('click', handleBackdropClick);
+        document.removeEventListener('keydown', handleEscape);
+      };
+      
+      cancelBtn.addEventListener('click', handleCancel);
+      okBtn.addEventListener('click', handleOk);
+      modal.addEventListener('click', handleBackdropClick);
+      document.addEventListener('keydown', handleEscape);
+    });
+    
+    if (!confirmed) return;
+    
     try {
+      const userId = typeof user === 'string' ? user : user.id;
+      
       // Пока нет API для удаления пользователей, просто обновляем локальное состояние
-      setRecentUsers(prev => prev.filter(user => user.id !== userId));
+      setRecentUsers(prev => prev.filter(u => u.id !== userId));
       
       const translation = notificationTranslations.admin.userDeleted;
       toast({
@@ -785,7 +853,7 @@ const AdminDashboard = () => {
                               <Ban className="h-4 w-4" />
                             </Button>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                          <Button variant="outline" size="sm" onClick={() => handleDeleteUser(user)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1592,7 +1660,7 @@ const AdminDashboard = () => {
                     <LogOut className="h-4 w-4 mr-2" />
                     Завершить все сессии
                   </Button>
-                  <Button variant="destructive" onClick={() => handleDeleteUser(selectedUserDetails.id)}>
+                  <Button variant="destructive" onClick={() => handleDeleteUser(selectedUserDetails)}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Удалить пользователя
                   </Button>
