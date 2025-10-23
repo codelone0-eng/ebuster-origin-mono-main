@@ -285,6 +285,102 @@ export class EmailService {
       email: newEmail
     });
   }
+
+  // Отправка OTP кода
+  async sendOtpEmail(email: string, otpCode: string, userName: string): Promise<boolean> {
+    try {
+      const mailOptions = {
+        from: `${emailSettings.from.name} <${emailSettings.from.address}>`,
+        to: email,
+        replyTo: emailSettings.replyTo,
+        subject: 'Код подтверждения - EBUSTER',
+        html: `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Код подтверждения - EBUSTER</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #232323; color: #d9d9d9; padding: 20px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #232323; border: 1px solid #404040; border-radius: 8px; padding: 20px;">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; margin-bottom: 8px; font-size: 32px;">EBUSTER</h1>
+            <p style="color: #a0a0a0; margin: 0; font-size: 14px;">Расширение нового поколения</p>
+        </div>
+        
+        <h2 style="color: #ffffff; text-align: center; margin-bottom: 20px; font-size: 24px;">Добро пожаловать, ${userName}!</h2>
+        
+        <p style="color: #d9d9d9; text-align: center; margin-bottom: 30px; font-size: 16px;">
+            Ваш код подтверждения регистрации:
+        </p>
+        
+        <div style="text-align: center; margin: 40px 0;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3px; border-radius: 12px;">
+                <div style="background-color: #1a1a1a; padding: 20px 40px; border-radius: 10px;">
+                    <div style="font-size: 48px; font-weight: 700; letter-spacing: 8px; color: #ffffff; font-family: 'Courier New', monospace;">
+                        ${otpCode}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background-color: #2a2a2a; border: 1px solid #404040; border-radius: 8px; padding: 20px; margin: 30px 0;">
+            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="width: 24px; height: 24px; background-color: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <span style="color: #ffffff; font-size: 16px;">⏱</span>
+                </div>
+                <p style="color: #ffffff; margin: 0; font-weight: 600;">Код действителен 10 минут</p>
+            </div>
+            <p style="color: #a0a0a0; margin: 0; font-size: 14px; line-height: 1.6;">
+                Введите этот код на странице регистрации, чтобы подтвердить ваш email и активировать аккаунт.
+            </p>
+        </div>
+        
+        <div style="background-color: #2a2a2a; border-left: 4px solid #ffc107; border-radius: 4px; padding: 16px; margin: 20px 0;">
+            <p style="color: #ffc107; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">
+                ⚠️ Важно
+            </p>
+            <p style="color: #a0a0a0; margin: 0; font-size: 13px; line-height: 1.5;">
+                Никому не сообщайте этот код. Сотрудники EBUSTER никогда не попросят вас предоставить код подтверждения.
+            </p>
+        </div>
+        
+        <div style="border-top: 1px solid #404040; margin: 30px 0; padding-top: 20px; text-align: center;">
+            <p style="color: #808080; font-size: 13px; margin: 0 0 8px 0;">
+                Не запрашивали код? Просто проигнорируйте это письмо.
+            </p>
+            <p style="color: #808080; font-size: 12px; margin: 0;">
+                Если у вас возникли вопросы, свяжитесь с нашей поддержкой
+            </p>
+        </div>
+        
+        <div style="background-color: #1a1a1a; border-top: 1px solid #404040; margin: 20px -20px -20px -20px; padding: 20px; text-align: center;">
+            <p style="color: #808080; font-size: 12px; margin: 0 0 8px 0;">
+                Это письмо отправлено автоматически, не отвечайте на него
+            </p>
+            <a href="https://ebuster.ru" style="color: #a0a0a0; text-decoration: none; font-size: 12px; font-weight: 600;">ebuster.ru</a>
+        </div>
+        
+    </div>
+</body>
+</html>`,
+        headers: {
+          'X-Mailer': 'EBUSTER Email Service',
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ OTP код отправлен:', result.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки OTP:', error);
+      return false;
+    }
+  }
 }
 
 // Экспортируем singleton instance

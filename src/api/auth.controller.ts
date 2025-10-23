@@ -48,9 +48,9 @@ const getSupabaseAdmin = () => {
 };
 const sessions: Map<string, { userId: string; email: string }> = new Map();
 
-// Генерация токена подтверждения
-const generateConfirmationToken = (): string => {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+// Генерация 6-значного OTP кода
+const generateOtpCode = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 // Регистрация пользователя
@@ -102,7 +102,8 @@ export const registerUser = async (req: Request, res: Response) => {
     const password_hash = await bcrypt.hash(password, 12);
 
     // Создание пользователя
-    const confirmationToken = generateConfirmationToken();
+    const otpCode = generateOtpCode();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP действителен 10 минут
     let newUser;
 
     if (supabase) {
@@ -114,7 +115,8 @@ export const registerUser = async (req: Request, res: Response) => {
           password_hash,
           full_name: fullName,
           email_confirmed: false,
-          confirmation_token: confirmationToken,
+          confirmation_token: otpCode,
+          otp_expiry: otpExpiry.toISOString(),
           status: 'inactive',
           downloads: 0,
           scripts: 0
@@ -138,7 +140,8 @@ export const registerUser = async (req: Request, res: Response) => {
         full_name: fullName,
         created_at: new Date().toISOString(),
         email_confirmed: false,
-        confirmation_token: confirmationToken,
+        confirmation_token: otpCode,
+        otp_expiry: otpExpiry.toISOString(),
         status: 'inactive',
         downloads: 0,
         scripts: 0
@@ -146,10 +149,8 @@ export const registerUser = async (req: Request, res: Response) => {
       users.push(newUser);
     }
 
-    // Отправка письма подтверждения через наш SMTP сервис
-    const baseUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://ebuster.ru' : 'http://localhost:5173');
-    const confirmationUrl = `${baseUrl}/confirm-email?token=${confirmationToken}&email=${encodeURIComponent(email)}`;
-    const emailSent = await emailService.sendConfirmationEmail(email, confirmationUrl);
+    // Отправка OTP кода на email
+    const emailSent = await emailService.sendOtpEmail(email, otpCode, fullName || email);
 
     res.status(201).json({
       success: true,
@@ -163,6 +164,123 @@ export const registerUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
+      error: 'Внутренняя ошибка сервера'
+    });
+  }
+};
+
+// Проверка OTP кода и автоматический вход
+export const verifyOtp = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email и OTP код обязательны'
+      });
+    }
+
+    const supabase = getSupabaseAdmin();
+    let user;
+
+    if (supabase) {
+      // Поиск в Supabase
+      const { data, error: userError } = await supabase
+        .from('auth_users')
+        .select('*')
+        .eq('email', email)
+        .eq('confirmation_token', otp)
+        .single();
+
+      if (userError || !data) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный OTP код или email'
+        });
+      }
+      user = data;
+    } else {
+      // Поиск в in-memory
+      user = users.find(u => u.email === email && u.confirmation_token === otp);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный OTP код или email'
+        });
+      }
+    }
+
+    // Проверка срока действия OTP
+    if (user.otp_expiry && new Date(user.otp_expiry) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        error: 'OTP код истек. Пожалуйста, зарегистрируйтесь заново.'
+      });
+    }
+
+    // Подтверждаем email и активируем пользователя
+    if (supabase) {
+      const { error: updateError } = await supabase
+        .from('auth_users')
+        .update({
+          email_confirmed: true,
+          status: 'active',
+          confirmation_token: null,
+          otp_expiry: null
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Error updating user:', updateError);
+        return res.status(500).json({
+          success: false,
+          error: 'Ошибка подтверждения email'
+        });
+      }
+    } else {
+      // Обновление in-memory
+      const userIndex = users.findIndex(u => u.id === user.id);
+      if (userIndex !== -1) {
+        users[userIndex].email_confirmed = true;
+        users[userIndex].status = 'active';
+        users[userIndex].confirmation_token = null;
+        users[userIndex].otp_expiry = null;
+      }
+    }
+
+    // Создаем JWT токен для автоматического входа
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        role: user.role || 'user'
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Создаем сессию
+    const sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    sessions.set(sessionId, { userId: user.id, email: user.email });
+
+    res.json({
+      success: true,
+      message: 'Email подтвержден! Добро пожаловать!',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role || 'user',
+        status: 'active'
+      }
+    });
+
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).json({
+      success: false,
       error: 'Внутренняя ошибка сервера'
     });
   }

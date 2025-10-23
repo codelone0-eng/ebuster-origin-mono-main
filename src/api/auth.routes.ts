@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   registerUser,
   loginUser,
+  verifyOtp,
   confirmEmail,
   verifyToken,
   logoutUser,
@@ -19,7 +20,10 @@ router.post('/register', registerUser);
 // Авторизация
 router.post('/login', loginUser);
 
-// Подтверждение email
+// Проверка OTP кода
+router.post('/verify-otp', verifyOtp);
+
+// Подтверждение email (старый метод, оставляем для совместимости)
 router.get('/confirm-email', confirmEmail);
 
 // Проверка токена

@@ -390,9 +390,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const translation = notificationTranslations.auth.registerSuccess;
       toast({
         title: translation.title,
-        description: translation.description,
+        description: "Код подтверждения отправлен на ваш email",
         variant: "success"
       });
+
+      // Перенаправляем на страницу ввода OTP
+      setTimeout(() => {
+        window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
+      }, 1500);
 
       return { error: undefined };
     } catch (error) {
