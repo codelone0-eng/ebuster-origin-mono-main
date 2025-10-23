@@ -291,7 +291,8 @@ export const extensionLoginPage = (req: Request, res: Response) => {
                         errorMessage.style.display = 'none';
 
                         // Redirect to main website's login page for OAuth flow
-                        const oauthUrl = \`http://localhost:8080/login?client_id=${client_id}&response_type=code&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=profile scripts\`;
+                        const baseUrl = '${process.env.FRONTEND_URL || 'https://ebuster.ru'}';
+                        const oauthUrl = \`\${baseUrl}/login?client_id=${client_id}&response_type=code&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=profile scripts\`;
                         window.location.href = oauthUrl;
                     } catch (error) {
                         console.error('OAuth initiation failed:', error);

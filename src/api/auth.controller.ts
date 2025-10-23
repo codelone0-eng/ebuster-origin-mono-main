@@ -147,7 +147,7 @@ export const registerUser = async (req: Request, res: Response) => {
     }
 
     // Отправка письма подтверждения через наш SMTP сервис
-    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://ebuster.ru' : 'http://localhost:8080';
+    const baseUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://ebuster.ru' : 'http://localhost:5173');
     const confirmationUrl = `${baseUrl}/confirm-email?token=${confirmationToken}&email=${encodeURIComponent(email)}`;
     const emailSent = await emailService.sendConfirmationEmail(email, confirmationUrl);
 
