@@ -104,11 +104,20 @@ const AdminDashboard = () => {
   const [showScriptDetailsModal, setShowScriptDetailsModal] = useState(false);
   const [showTicketDetailsModal, setShowTicketDetailsModal] = useState(false);
   const [showLogDetailsModal, setShowLogDetailsModal] = useState(false);
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [userToBan, setUserToBan] = useState(null);
   const [selectedUserDetails, setSelectedUserDetails] = useState(null);
   const [selectedScriptDetails, setSelectedScriptDetails] = useState(null);
   const [selectedTicketDetails, setSelectedTicketDetails] = useState(null);
   const [selectedLogDetails, setSelectedLogDetails] = useState(null);
   const [generatedPassword, setGeneratedPassword] = useState('');
+  
+  // Состояния для формы бана
+  const [banReason, setBanReason] = useState('');
+  const [banType, setBanType] = useState<'temporary' | 'permanent'>('temporary');
+  const [banDuration, setBanDuration] = useState(30);
+  const [banDurationUnit, setBanDurationUnit] = useState<'hours' | 'days' | 'months'>('days');
+  const [banContactEmail, setBanContactEmail] = useState('support@ebuster.ru');
   
   // Состояние для реальных данных
   const [systemStats, setSystemStats] = useState(null);
@@ -231,14 +240,45 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleBanUser = async (userId: string) => {
+  const handleBanUser = (user: any) => {
+    setUserToBan(user);
+    setShowBanModal(true);
+    // Сбрасываем форму
+    setBanReason('');
+    setBanType('temporary');
+    setBanDuration(30);
+    setBanDurationUnit('days');
+    setBanContactEmail('support@ebuster.ru');
+  };
+
+  const submitBanUser = async () => {
+    if (!userToBan) return;
+    
+    if (!banReason.trim()) {
+      toast({
+        title: "Ошибка",
+        description: "Укажите причину блокировки",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      await adminApi.updateUserStatus(userId, 'banned', 'Забанен администратором');
+      await adminApi.banUser(userToBan.id, {
+        reason: banReason,
+        banType,
+        duration: banType === 'temporary' ? banDuration : undefined,
+        durationUnit: banType === 'temporary' ? banDurationUnit : undefined,
+        contactEmail: banContactEmail
+      });
       
       // Обновляем локальное состояние
       setRecentUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, status: 'banned' } : user
+        user.id === userToBan.id ? { ...user, status: 'banned' } : user
       ));
+      
+      setShowBanModal(false);
+      setUserToBan(null);
       
       const translation = notificationTranslations.admin.userBanned;
       toast({
@@ -741,7 +781,7 @@ const AdminDashboard = () => {
                               <Unlock className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleBanUser(user.id)}>
+                            <Button variant="outline" size="sm" onClick={() => handleBanUser(user)}>
                               <Ban className="h-4 w-4" />
                             </Button>
                           )}
@@ -965,11 +1005,11 @@ const AdminDashboard = () => {
                                 <Eye className="h-3 w-3" />
                               </Button>
                               {user.status === 'banned' ? (
-                                <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user.id)}>
+                                <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user)}>
                                   <Unlock className="h-3 w-3" />
                                 </Button>
                               ) : (
-                                <Button variant="outline" size="sm" onClick={() => handleBanUser(user.id)}>
+                                <Button variant="outline" size="sm" onClick={() => handleBanUser(user)}>
                                   <Ban className="h-3 w-3" />
                                 </Button>
                               )}
@@ -1535,7 +1575,7 @@ const AdminDashboard = () => {
                       Разбанить пользователя
                     </Button>
                   ) : (
-                    <Button variant="outline" onClick={() => handleBanUser(selectedUserDetails.id)}>
+                    <Button variant="outline" onClick={() => handleBanUser(selectedUserDetails)}>
                       <Ban className="h-4 w-4 mr-2" />
                       Забанить пользователя
                     </Button>
@@ -1812,6 +1852,135 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Модальное окно бана пользователя */}
+      <Dialog open={showBanModal} onOpenChange={setShowBanModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ban className="h-5 w-5 text-destructive" />
+              Блокировка пользователя
+            </DialogTitle>
+            <DialogDescription>
+              Заблокировать пользователя {userToBan?.full_name || userToBan?.name || userToBan?.email}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Тип блокировки */}
+            <div className="space-y-2">
+              <Label htmlFor="banType">Тип блокировки *</Label>
+              <Select value={banType} onValueChange={(value: 'temporary' | 'permanent') => setBanType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тип блокировки" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="temporary">Временная блокировка</SelectItem>
+                  <SelectItem value="permanent">Постоянная блокировка</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Длительность (только для временной) */}
+            {banType === 'temporary' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="banDuration">Длительность *</Label>
+                  <Input
+                    id="banDuration"
+                    type="number"
+                    min="1"
+                    value={banDuration}
+                    onChange={(e) => setBanDuration(parseInt(e.target.value) || 1)}
+                    placeholder="30"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="banDurationUnit">Единица времени *</Label>
+                  <Select value={banDurationUnit} onValueChange={(value: 'hours' | 'days' | 'months') => setBanDurationUnit(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hours">Часов</SelectItem>
+                      <SelectItem value="days">Дней</SelectItem>
+                      <SelectItem value="months">Месяцев</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Причина */}
+            <div className="space-y-2">
+              <Label htmlFor="banReason">Причина блокировки *</Label>
+              <Textarea
+                id="banReason"
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                placeholder="Нарушение правил сообщества - спам и нежелательный контент"
+                rows={4}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Укажите подробную причину блокировки. Пользователь увидит это сообщение.
+              </p>
+            </div>
+
+            {/* Email поддержки */}
+            <div className="space-y-2">
+              <Label htmlFor="banContactEmail">Email поддержки</Label>
+              <Input
+                id="banContactEmail"
+                type="email"
+                value={banContactEmail}
+                onChange={(e) => setBanContactEmail(e.target.value)}
+                placeholder="support@ebuster.ru"
+              />
+              <p className="text-xs text-muted-foreground">
+                Email для связи с поддержкой, который увидит пользователь
+              </p>
+            </div>
+
+            {/* Предпросмотр */}
+            <div className="p-4 rounded-lg bg-muted/30 border border-border">
+              <h4 className="text-sm font-medium mb-2">Предпросмотр блокировки:</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Тип:</span>
+                  <span className="font-medium">
+                    {banType === 'temporary' ? 'Временная блокировка' : 'Постоянная блокировка'}
+                  </span>
+                </div>
+                {banType === 'temporary' && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Длительность:</span>
+                    <span className="font-medium">
+                      {banDuration} {banDurationUnit === 'hours' ? 'часов' : banDurationUnit === 'days' ? 'дней' : 'месяцев'}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Причина:</span>
+                  <span className="font-medium text-right max-w-xs truncate">
+                    {banReason || 'Не указана'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowBanModal(false)}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={submitBanUser}>
+              <Ban className="h-4 w-4 mr-2" />
+              Заблокировать пользователя
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       

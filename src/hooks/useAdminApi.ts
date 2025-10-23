@@ -132,6 +132,21 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  // Бан пользователя с полными параметрами
+  const banUser = async (id: string, banData: {
+    reason: string;
+    banType: 'temporary' | 'permanent';
+    duration?: number;
+    durationUnit?: 'hours' | 'days' | 'months';
+    contactEmail?: string;
+  }): Promise<User> => {
+    const response = await fetchWithAuth(`/api/admin/users/${id}/ban`, {
+      method: 'POST',
+      body: JSON.stringify(banData)
+    });
+    return response.data;
+  };
+
   // Получение логов системы
   const getSystemLogs = async (params: {
     page?: number;
@@ -174,6 +189,7 @@ export const useAdminApi = () => {
     getUsers,
     getUserDetails,
     updateUserStatus,
+    banUser,
     getSystemLogs,
     getBrowserStats,
     getActivityStats,

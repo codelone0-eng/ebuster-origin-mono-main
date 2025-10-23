@@ -5,6 +5,8 @@ import {
   getUsers,
   getUserDetails,
   updateUserStatus,
+  banUser,
+  autoUnbanUsers,
   getSystemLogs,
   getBrowserStats,
   getActivityStats,
@@ -35,6 +37,10 @@ router.get('/users', getUsers);
 router.get('/users/search', searchUsers);
 router.get('/users/:id', getUserDetails);
 router.patch('/users/:id/status', updateUserStatus);
+router.post('/users/:id/ban', banUser);
+
+// Автоматическая разблокировка (для cron)
+router.post('/auto-unban', autoUnbanUsers);
 
 // Логи системы
 router.get('/logs', getSystemLogs);

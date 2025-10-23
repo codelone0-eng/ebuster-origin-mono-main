@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import nodemailer from 'nodemailer';
 
 // Ленивая инициализация Supabase клиента
 let supabaseClient: any = null;
@@ -315,13 +316,13 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 
     // Дополнительная статистика пользователя
-    const { count: userTickets } = await admin
+    const { count: userTickets } = await supabase
       .from('tickets')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', id)
       .catch(() => ({ count: 0 }));
 
-    const { count: userScripts } = await admin
+    const { count: userScripts } = await supabase
       .from('scripts')
       .select('*', { count: 'exact', head: true })
       .eq('author_id', id)
@@ -359,7 +360,16 @@ export const updateUserStatus = async (req: Request, res: Response) => {
       });
     }
 
-    const { data, error } = await admin
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      return res.status(500).json({
+        success: false,
+        error: 'Supabase недоступен'
+      });
+    }
+
+    const { data, error } = await supabase
       .from('users')
       .update({ 
         status,
@@ -556,6 +566,394 @@ export const searchUsers = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Ошибка поиска пользователей'
+    });
+  }
+};
+
+// Функция для отправки email о блокировке
+const sendBanEmail = async (userEmail: string, banInfo: any) => {
+  try {
+    // Настройка транспорта для отправки email
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+
+    const banTypeText = banInfo.banType === 'temporary' ? 'Временная блокировка' : 'Постоянная блокировка';
+    const durationText = banInfo.banType === 'temporary' 
+      ? `Длительность: ${banInfo.durationHours} часов (${Math.round(banInfo.durationHours / 24)} дней)`
+      : 'Блокировка постоянная';
+
+    const unbanDateText = banInfo.unbanDate 
+      ? new Date(banInfo.unbanDate).toLocaleDateString('ru-RU', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      : 'Не применимо';
+
+    const mailOptions = {
+      from: `"Ebuster Support" <${process.env.SMTP_USER}>`,
+      to: userEmail,
+      subject: '🚫 Ваш аккаунт заблокирован - Ebuster',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+            .info-box { background: white; padding: 20px; margin: 20px 0; border-left: 4px solid #667eea; border-radius: 5px; }
+            .info-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #eee; }
+            .info-label { font-weight: bold; color: #666; }
+            .info-value { color: #333; }
+            .reason-box { background: #fff3cd; padding: 15px; margin: 20px 0; border-left: 4px solid #ffc107; border-radius: 5px; }
+            .footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; font-size: 14px; }
+            .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🚫 Аккаунт заблокирован</h1>
+              <p>Ваш аккаунт был заблокирован администрацией</p>
+            </div>
+            <div class="content">
+              <p>Здравствуйте,</p>
+              <p>Ваш аккаунт на платформе <strong>Ebuster</strong> был заблокирован за нарушение правил сообщества.</p>
+              
+              <div class="info-box">
+                <h3>Информация о блокировке</h3>
+                <div class="info-row">
+                  <span class="info-label">ID блокировки:</span>
+                  <span class="info-value">${banInfo.banId}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Тип блокировки:</span>
+                  <span class="info-value">${banTypeText}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Дата блокировки:</span>
+                  <span class="info-value">${new Date(banInfo.banDate).toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</span>
+                </div>
+                ${banInfo.unbanDate ? `
+                <div class="info-row">
+                  <span class="info-label">Дата разблокировки:</span>
+                  <span class="info-value">${unbanDateText}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Длительность:</span>
+                  <span class="info-value">${durationText}</span>
+                </div>
+                ` : ''}
+              </div>
+
+              <div class="reason-box">
+                <h3>Причина блокировки:</h3>
+                <p>${banInfo.reason}</p>
+              </div>
+
+              <h3>Что делать дальше?</h3>
+              <ol>
+                <li><strong>Ожидайте окончания срока блокировки</strong> - ${banInfo.banType === 'temporary' ? `Ваш аккаунт будет автоматически разблокирован ${unbanDateText}` : 'Блокировка постоянная'}</li>
+                <li><strong>Обратитесь в поддержку</strong> - Если считаете блокировку несправедливой</li>
+                <li><strong>Изучите правила</strong> - Ознакомьтесь с правилами сообщества, чтобы избежать повторных нарушений</li>
+              </ol>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="mailto:${banInfo.contactEmail}" class="button">Написать в поддержку</a>
+              </div>
+
+              <div class="footer">
+                <p>Если у вас есть вопросы, свяжитесь с нами:</p>
+                <p><strong>Email:</strong> ${banInfo.contactEmail}</p>
+                <p><strong>Сайт:</strong> <a href="https://ebuster.ru">ebuster.ru</a></p>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                <p style="font-size: 12px; color: #999;">
+                  Это автоматическое уведомление. Пожалуйста, не отвечайте на это письмо.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Email о блокировке отправлен на:', userEmail);
+    return true;
+  } catch (error) {
+    console.error('❌ Ошибка отправки email о блокировке:', error);
+    return false;
+  }
+};
+
+// Функция для расчета даты разблокировки
+const calculateUnbanDate = (duration: number, durationUnit: 'hours' | 'days' | 'months'): Date => {
+  const now = new Date();
+  let hours = 0;
+
+  switch (durationUnit) {
+    case 'hours':
+      hours = duration;
+      break;
+    case 'days':
+      hours = duration * 24;
+      break;
+    case 'months':
+      hours = duration * 24 * 30; // Приблизительно 30 дней в месяце
+      break;
+  }
+
+  return new Date(now.getTime() + hours * 60 * 60 * 1000);
+};
+
+// Бан пользователя с полными параметрами
+export const banUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason, banType, duration, durationUnit, contactEmail } = req.body;
+
+    // Валидация
+    if (!reason || reason.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Причина блокировки обязательна'
+      });
+    }
+
+    if (!['temporary', 'permanent'].includes(banType)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Неверный тип блокировки'
+      });
+    }
+
+    if (banType === 'temporary' && (!duration || duration <= 0)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Для временной блокировки необходимо указать длительность'
+      });
+    }
+
+    if (banType === 'temporary' && !['hours', 'days', 'months'].includes(durationUnit)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Неверная единица времени'
+      });
+    }
+
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      return res.status(500).json({
+        success: false,
+        error: 'Supabase недоступен'
+      });
+    }
+
+    // Получаем информацию о пользователе
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('email, full_name')
+      .eq('id', id)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({
+        success: false,
+        error: 'Пользователь не найден'
+      });
+    }
+
+    // Генерируем ban_id
+    const { data: banIdData } = await supabase.rpc('generate_ban_id');
+    const banId = banIdData || `BAN-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+    // Рассчитываем дату разблокировки
+    const banDate = new Date();
+    let unbanDate = null;
+    let durationHours = null;
+
+    if (banType === 'temporary') {
+      unbanDate = calculateUnbanDate(duration, durationUnit);
+      
+      // Рассчитываем длительность в часах
+      switch (durationUnit) {
+        case 'hours':
+          durationHours = duration;
+          break;
+        case 'days':
+          durationHours = duration * 24;
+          break;
+        case 'months':
+          durationHours = duration * 24 * 30;
+          break;
+      }
+    }
+
+    // Получаем ID модератора (из токена или сессии)
+    // Пока используем заглушку
+    const moderatorId = null; // TODO: Получить из req.user
+    const moderatorEmail = 'admin@ebuster.ru'; // TODO: Получить из req.user
+
+    // Создаем запись о бане
+    const { data: banData, error: banError } = await supabase
+      .from('user_bans')
+      .insert({
+        user_id: id,
+        ban_id: banId,
+        reason: reason.trim(),
+        ban_type: banType,
+        ban_date: banDate.toISOString(),
+        unban_date: unbanDate ? unbanDate.toISOString() : null,
+        duration_hours: durationHours,
+        contact_email: contactEmail || 'support@ebuster.ru',
+        moderator_id: moderatorId,
+        moderator_email: moderatorEmail,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (banError) {
+      console.error('Ошибка создания бана:', banError);
+      throw banError;
+    }
+
+    // Обновляем статус пользователя
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        status: 'banned',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (updateError) {
+      console.error('Ошибка обновления статуса пользователя:', updateError);
+      throw updateError;
+    }
+
+    // Отправляем email пользователю
+    const emailInfo = {
+      banId,
+      banType,
+      reason: reason.trim(),
+      banDate: banDate.toISOString(),
+      unbanDate: unbanDate ? unbanDate.toISOString() : null,
+      durationHours,
+      contactEmail: contactEmail || 'support@ebuster.ru'
+    };
+
+    // Отправляем email асинхронно (не ждем результата)
+    sendBanEmail(user.email, emailInfo).catch(err => {
+      console.error('Ошибка отправки email:', err);
+    });
+
+    // Логируем действие
+    console.log(`✅ Пользователь ${user.email} (${id}) заблокирован. Ban ID: ${banId}`);
+
+    res.json({
+      success: true,
+      data: {
+        id,
+        status: 'banned',
+        banInfo: {
+          banId,
+          banType,
+          reason: reason.trim(),
+          banDate: banDate.toISOString(),
+          unbanDate: unbanDate ? unbanDate.toISOString() : null,
+          durationHours,
+          contactEmail: contactEmail || 'support@ebuster.ru',
+          moderator: moderatorEmail
+        }
+      },
+      message: 'Пользователь успешно заблокирован'
+    });
+  } catch (error) {
+    console.error('Ошибка блокировки пользователя:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка блокировки пользователя'
+    });
+  }
+};
+
+// Функция для автоматической разблокировки (вызывается по cron)
+export const autoUnbanUsers = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      return res.status(500).json({
+        success: false,
+        error: 'Supabase недоступен'
+      });
+    }
+
+    // Вызываем функцию автоматической разблокировки
+    const { data: unbannedCount, error } = await supabase.rpc('auto_unban_users');
+
+    if (error) {
+      throw error;
+    }
+
+    // Получаем список разблокированных пользователей
+    const { data: unbannedBans } = await supabase
+      .from('user_bans')
+      .select('user_id')
+      .eq('is_active', false)
+      .eq('ban_type', 'temporary')
+      .lte('unban_date', new Date().toISOString())
+      .order('updated_at', { ascending: false })
+      .limit(unbannedCount || 0);
+
+    // Обновляем статус пользователей на active
+    if (unbannedBans && unbannedBans.length > 0) {
+      const userIds = unbannedBans.map(ban => ban.user_id);
+      
+      await supabase
+        .from('users')
+        .update({ 
+          status: 'active',
+          updated_at: new Date().toISOString()
+        })
+        .in('id', userIds);
+
+      console.log(`✅ Автоматически разблокировано пользователей: ${unbannedCount}`);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        unbannedCount: unbannedCount || 0
+      },
+      message: `Разблокировано пользователей: ${unbannedCount || 0}`
+    });
+  } catch (error) {
+    console.error('Ошибка автоматической разблокировки:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка автоматической разблокировки'
     });
   }
 };

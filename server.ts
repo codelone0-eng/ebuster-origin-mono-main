@@ -11,6 +11,7 @@ import adminRoutes from './src/api/admin.routes';
 import scriptsRoutes from './src/api/scripts.routes';
 import extensionAuthRoutes from './src/api/extension-auth.routes';
 import referralRoutes from './src/api/referral.routes';
+import { startAllCronJobs } from './src/api/cron-jobs';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -88,6 +89,9 @@ app.listen(PORT, () => {
   console.log(`🚀 Email API Server running on port ${PORT}`);
   console.log(`📧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS enabled for: ${process.env.NODE_ENV === 'production' ? 'production domains' : 'localhost'}`);
+  
+  // Запускаем cron jobs для автоматической разблокировки
+  startAllCronJobs();
 });
 
 export default app;
