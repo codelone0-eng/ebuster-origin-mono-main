@@ -241,6 +241,16 @@ const AdminDashboard = () => {
   };
 
   const handleBanUser = (user: any) => {
+    if (!user) {
+      console.error('handleBanUser: user is undefined');
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить данные пользователя",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setUserToBan(user);
     setShowBanModal(true);
     // Сбрасываем форму
@@ -320,8 +330,13 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteUser = async (user: any) => {
+    if (!user) {
+      console.error('handleDeleteUser: user is undefined');
+      return;
+    }
+    
     // Используем customConfirm для подтверждения
-    const userName = user.full_name || user.name || user.email || 'этого пользователя';
+    const userName = user?.full_name || user?.name || user?.email || 'этого пользователя';
     const confirmMessage = `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`;
     const confirmTitle = 'Удаление пользователя';
     
@@ -815,7 +830,7 @@ const AdminDashboard = () => {
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                             <span className="text-sm font-medium text-primary">
-                              {(user.full_name || user.name || 'U').split(' ').map(n => n[0]).join('')}
+                              {(user?.full_name || user?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
                             </span>
                           </div>
                           <div>
@@ -1054,7 +1069,7 @@ const AdminDashboard = () => {
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                                 <span className="text-xs font-medium text-primary">
-                                  {(user.full_name || user.name || 'U').split(' ').map(n => n[0]).join('')}
+                                  {(user?.full_name || user?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
                                 </span>
                               </div>
                               <div>
@@ -1317,7 +1332,7 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/30">
                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
                   <span className="text-xl font-medium text-primary">
-                    {selectedUserDetails.name.split(' ').map(n => n[0]).join('')}
+                    {(selectedUserDetails?.full_name || selectedUserDetails?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
                   </span>
                 </div>
                 <div className="flex-1">
