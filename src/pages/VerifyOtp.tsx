@@ -65,7 +65,8 @@ export default function VerifyOtp() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
