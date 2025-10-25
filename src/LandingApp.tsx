@@ -18,6 +18,7 @@ import Pricing from "./landing/Pricing";
 import ForgotPassword from "./lk/ForgotPassword";
 import ResetPassword from "./lk/ResetPassword";
 import EmailConfirmation from "./lk/EmailConfirmation";
+import VerifyOtp from "./pages/VerifyOtp";
 import Error404 from "./landing/Error404";
 import Error500 from "./landing/Error500";
 import Error503 from "./landing/Error503";
@@ -56,6 +57,7 @@ const LandingApp = () => (
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/confirm-email" element={<EmailConfirmation />} />
+                  <Route path="/verify-otp" element={<VerifyOtp />} />
                   <Route path="/ban" element={<BanPage />} />
                   <Route path="/get-started" element={<Index />} />
                   <Route path="/signin" element={<Index />} />
