@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { OtpInput } from '@/components/OtpInput';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -21,6 +16,7 @@ export default function VerifyOtp() {
   const [email, setEmail] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [otpKey, setOtpKey] = useState(0); // Ключ для пересоздания компонента
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -95,6 +91,7 @@ export default function VerifyOtp() {
           variant: "destructive"
         });
         setOtp('');
+        setOtpKey(prev => prev + 1); // Пересоздаем InputOTP
       }
     } catch (error) {
       console.error('OTP verification error:', error);
@@ -104,6 +101,7 @@ export default function VerifyOtp() {
         variant: "destructive"
       });
       setOtp('');
+      setOtpKey(prev => prev + 1); // Пересоздаем InputOTP
     } finally {
       setLoading(false);
     }
@@ -156,28 +154,17 @@ export default function VerifyOtp() {
                 Введите код подтверждения
               </label>
               
-              <div className="otp-container">
-                <InputOTP
-                  id="otp-input"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(value) => setOtp(value)}
-                  disabled={loading}
-                  autoFocus
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                  </InputOTPGroup>
-                  <InputOTPSeparator />
-                  <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
+              <OtpInput
+                key={otpKey}
+                length={6}
+                value={otp}
+                onChange={(value) => {
+                  console.log('OTP onChange:', value);
+                  setOtp(value);
+                }}
+                disabled={loading}
+                autoFocus
+              />
 
               {loading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -427,34 +427,21 @@ export default function VerifyOtp() {
   };
   
   return (
-    <div className="otp-container">
-      <InputOTP
-        id="otp-input"
-        maxLength={6}
-        value={otp}
-        onChange={(value) => setOtp(value)}
-        autoFocus
-      >
-        <InputOTPGroup>
-          <InputOTPSlot index={0} />
-          <InputOTPSlot index={1} />
-          <InputOTPSlot index={2} />
-        </InputOTPGroup>
-        <InputOTPSeparator />
-        <InputOTPGroup>
-          <InputOTPSlot index={3} />
-          <InputOTPSlot index={4} />
-          <InputOTPSlot index={5} />
-        </InputOTPGroup>
-      </InputOTP>
-    </div>
+    <OtpInput
+      length={6}
+      value={otp}
+      onChange={(value) => setOtp(value)}
+      disabled={loading}
+      autoFocus
+    />
   );
 }
 ```
 
 **Изменения:**
-- Используется `InputOTP` для красивого ввода кода по ячейкам
-- Добавлен контейнер и уникальный ID для избежания конфликтов
+- Создан кастомный компонент `OtpInput` без внешних зависимостей
+- Полный контроль над вводом - нет дублирования символов
+- Поддержка вставки из буфера, навигация стрелками
 - Перенаправление на `lk.ebuster.ru/dashboard` вместо локального `/dashboard`
 
 ---
@@ -583,34 +570,26 @@ docker-compose up -d
 
 ### Проблема 2: InputOTP дублирует цифры в первую ячейку
 
-**Причина:** Конфликт с расширением браузера или React Strict Mode
+**Причина:** Конфликт библиотеки `input-otp` с расширением браузера или двойной рендеринг
 
-**Решение:** Добавлен контейнер и уникальный ID:
+**Решение:** Создан кастомный компонент `OtpInput` без зависимостей:
 ```typescript
-<div className="otp-container">
-  <InputOTP
-    id="otp-input"
-    maxLength={6}
-    value={otp}
-    onChange={(value) => setOtp(value)}
-    autoFocus
-  >
-    <InputOTPGroup>
-      <InputOTPSlot index={0} />
-      <InputOTPSlot index={1} />
-      <InputOTPSlot index={2} />
-    </InputOTPGroup>
-    <InputOTPSeparator />
-    <InputOTPGroup>
-      <InputOTPSlot index={3} />
-      <InputOTPSlot index={4} />
-      <InputOTPSlot index={5} />
-    </InputOTPGroup>
-  </InputOTP>
-</div>
+// src/components/OtpInput.tsx
+<OtpInput
+  length={6}
+  value={otp}
+  onChange={(value) => setOtp(value)}
+  disabled={loading}
+  autoFocus
+/>
 ```
 
-**Примечание:** Если проблема сохраняется, отключите расширения браузера на странице.
+**Преимущества:**
+- ✅ Нет дублирования символов
+- ✅ Полный контроль над вводом
+- ✅ Поддержка вставки из буфера обмена
+- ✅ Навигация стрелками и Backspace
+- ✅ Работает со всеми расширениями
 
 ### Проблема 3: "useAuth must be used within an AuthProvider"
 
