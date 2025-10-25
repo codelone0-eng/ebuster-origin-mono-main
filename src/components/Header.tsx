@@ -3,8 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 import { ThemeToggle } from "./ThemeToggle"
-import { LoginModal } from "./LoginModal"
-import { RegisterModal } from "./RegisterModal"
 import { CursorSelector } from "./CursorSelector"
 import { useCursor } from "@/contexts/CursorContext"
 import { useLanguage } from "@/hooks/useLanguage"
@@ -24,8 +22,6 @@ const generateAuthCode = () => {
 };
 
 export const Header = () => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { language, changeLanguage, t } = useLanguage();
@@ -36,28 +32,11 @@ export const Header = () => {
   const navigationLinks = t('header.navigation') as unknown as any[];
 
   const handleOpenLogin = () => {
-    setIsLoginModalOpen(true);
-    setIsRegisterModalOpen(false);
+    navigate('/login');
   };
 
   const handleOpenRegister = () => {
-    setIsRegisterModalOpen(true);
-    setIsLoginModalOpen(false);
-  };
-
-  const handleCloseModals = () => {
-    setIsLoginModalOpen(false);
-    setIsRegisterModalOpen(false);
-  };
-
-  const handleSwitchToLogin = () => {
-    setIsLoginModalOpen(true);
-    setIsRegisterModalOpen(false);
-  };
-
-  const handleSwitchToRegister = () => {
-    setIsRegisterModalOpen(true);
-    setIsLoginModalOpen(false);
+    navigate('/register');
   };
 
   const handleSignOut = async () => {
@@ -108,28 +87,26 @@ export const Header = () => {
             }
           }
           
-          // Пользователь не авторизован, показываем модалку логина
-          console.log('🔐 User not authenticated, showing login modal');
+          // Пользователь не авторизован, перенаправляем на страницу логина
+          console.log('🔐 User not authenticated, redirecting to login');
           sessionStorage.setItem('oauth_params', JSON.stringify({
             client_id: clientId,
             response_type: responseType,
             redirect_uri: redirectUri,
             scope: search.get('scope')
           }));
-          setIsLoginModalOpen(true);
-          setIsRegisterModalOpen(false);
+          navigate('/login');
           
         } catch (error) {
           console.error('🔐 Auth check error:', error);
-          // В случае ошибки показываем модалку логина
+          // В случае ошибки перенаправляем на страницу логина
           sessionStorage.setItem('oauth_params', JSON.stringify({
             client_id: clientId,
             response_type: responseType,
             redirect_uri: redirectUri,
             scope: search.get('scope')
           }));
-          setIsLoginModalOpen(true);
-          setIsRegisterModalOpen(false);
+          navigate('/login');
         }
       };
       
@@ -138,30 +115,22 @@ export const Header = () => {
     }
 
     if (location.pathname === '/signin' || openParam === 'login') {
-      setIsLoginModalOpen(true);
-      setIsRegisterModalOpen(false);
-      // Чистим URL после открытия, чтобы не мешало дальнейшей навигации
-      if (location.pathname === '/signin') {
-        navigate('/', { replace: true });
-      } else if (openParam === 'login') {
-        search.delete('open');
-        navigate({ pathname: location.pathname, search: search.toString() }, { replace: true });
-      }
+      navigate('/login');
+      return;
     }
 
-    // Открываем модалку регистрации при параметре ?register=true или ?ref=CODE
+    // Перенаправляем на страницу регистрации при параметре ?register=true или ?ref=CODE
     const refParam = search.get('ref');
     if (search.get('register') === 'true' || refParam) {
-      setIsRegisterModalOpen(true);
-      setIsLoginModalOpen(false);
-      // Чистим параметры из URL
-      search.delete('register');
+      // Перенаправляем на регистрацию с реферальным кодом
       if (refParam) {
-        // Сохраняем реферальный код в localStorage
-        localStorage.setItem('referral_code', refParam);
+        navigate(`/register?ref=${refParam}`);
+      } else {
+        navigate('/register');
       }
-      navigate({ pathname: location.pathname, search: search.toString() }, { replace: true });
+      return;
     }
+    
   }, [location, navigate]);
 
   return (
@@ -433,18 +402,6 @@ export const Header = () => {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      <LoginModal 
-        isOpen={isLoginModalOpen}
-        onClose={handleCloseModals}
-        onSwitchToRegister={handleSwitchToRegister}
-      />
-      <RegisterModal 
-        isOpen={isRegisterModalOpen}
-        onClose={handleCloseModals}
-        onSwitchToLogin={handleSwitchToLogin}
-      />
     </header>
   )
 }

@@ -110,8 +110,8 @@ ebuster-origin-mono-main/
 ├── src/
 │   ├── landing/              # Лендинг страницы
 │   │   ├── Index.tsx         # Главная страница
-│   │   ├── Register.tsx      # Страница регистрации
 │   │   ├── ApiDocs.tsx       # API документация
+│   │   ├── Error404.tsx      # Страница 404
 │   │   └── ...
 │   ├── lk/                   # Личный кабинет
 │   │   ├── Dashboard.tsx     # Дашборд пользователя
@@ -120,7 +120,9 @@ ebuster-origin-mono-main/
 │   ├── admin/                # Админ-панель
 │   │   ├── AdminDashboard.tsx
 │   │   └── ...
-│   ├── pages/                # Дополнительные страницы
+│   ├── pages/                # Страницы аутентификации
+│   │   ├── Login.tsx         # Страница входа
+│   │   ├── Register.tsx      # Страница регистрации
 │   │   └── VerifyOtp.tsx     # Страница ввода OTP кода
 │   ├── api/                  # Backend API
 │   │   ├── auth.controller.ts    # Аутентификация
@@ -425,27 +427,34 @@ export default function VerifyOtp() {
   };
   
   return (
-    <Input
-      type="text"
-      inputMode="numeric"
-      pattern="[0-9]*"
-      maxLength={6}
-      value={otp}
-      onChange={(e) => {
-        const value = e.target.value.replace(/\D/g, '');
-        setOtp(value);
-      }}
-      placeholder="000000"
-      className="text-center text-2xl font-mono tracking-widest w-48 h-14"
-      autoComplete="one-time-code"
-    />
+    <div className="otp-container">
+      <InputOTP
+        id="otp-input"
+        maxLength={6}
+        value={otp}
+        onChange={(value) => setOtp(value)}
+        autoFocus
+      >
+        <InputOTPGroup>
+          <InputOTPSlot index={0} />
+          <InputOTPSlot index={1} />
+          <InputOTPSlot index={2} />
+        </InputOTPGroup>
+        <InputOTPSeparator />
+        <InputOTPGroup>
+          <InputOTPSlot index={3} />
+          <InputOTPSlot index={4} />
+          <InputOTPSlot index={5} />
+        </InputOTPGroup>
+      </InputOTP>
+    </div>
   );
 }
 ```
 
 **Изменения:**
-- Заменен `InputOTP` на простой `Input` с маской для цифр
-- Добавлена фильтрация нецифровых символов
+- Используется `InputOTP` для красивого ввода кода по ячейкам
+- Добавлен контейнер и уникальный ID для избежания конфликтов
 - Перенаправление на `lk.ebuster.ru/dashboard` вместо локального `/dashboard`
 
 ---
@@ -515,27 +524,31 @@ CREATE TABLE auth_users (
 
 ### Роутинг:
 
-**Файл:** `src/App.tsx`
+**Файл:** `src/LandingApp.tsx` (для ebuster.ru)
 
 ```typescript
 <Routes>
-  {/* Лендинг */}
+  {/* Главная */}
   <Route path="/" element={<Index />} />
+  
+  {/* Аутентификация */}
+  <Route path="/login" element={<Login />} />
   <Route path="/register" element={<Register />} />
   <Route path="/verify-otp" element={<VerifyOtp />} />
+  <Route path="/signin" element={<Login />} />
   
   {/* Документация */}
   <Route path="/api-docs" element={<ApiDocs />} />
   <Route path="/documentation" element={<Documentation />} />
+  <Route path="/contacts" element={<Contacts />} />
   
-  {/* Защищенные роуты */}
-  <Route path="/dashboard" element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  } />
+  {/* Перенаправления на поддомены */}
+  <Route path="/dashboard/*" element={<RedirectTo url="https://lk.ebuster.ru/dashboard" />} />
+  <Route path="/admin/*" element={<RedirectTo url="https://admin.ebuster.ru" />} />
 </Routes>
 ```
+
+**Важно:** Login и Register теперь отдельные страницы, а не модальные окна!
 
 ### Компоненты UI:
 
@@ -570,23 +583,34 @@ docker-compose up -d
 
 ### Проблема 2: InputOTP дублирует цифры в первую ячейку
 
-**Причина:** Конфликт в библиотеке `input-otp` или CSS
+**Причина:** Конфликт с расширением браузера или React Strict Mode
 
-**Решение:** Заменен на простой `Input` с маской:
+**Решение:** Добавлен контейнер и уникальный ID:
 ```typescript
-<Input
-  type="text"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  maxLength={6}
-  value={otp}
-  onChange={(e) => {
-    const value = e.target.value.replace(/\D/g, '');
-    setOtp(value);
-  }}
-  className="text-center text-2xl font-mono tracking-widest"
-/>
+<div className="otp-container">
+  <InputOTP
+    id="otp-input"
+    maxLength={6}
+    value={otp}
+    onChange={(value) => setOtp(value)}
+    autoFocus
+  >
+    <InputOTPGroup>
+      <InputOTPSlot index={0} />
+      <InputOTPSlot index={1} />
+      <InputOTPSlot index={2} />
+    </InputOTPGroup>
+    <InputOTPSeparator />
+    <InputOTPGroup>
+      <InputOTPSlot index={3} />
+      <InputOTPSlot index={4} />
+      <InputOTPSlot index={5} />
+    </InputOTPGroup>
+  </InputOTP>
+</div>
 ```
+
+**Примечание:** Если проблема сохраняется, отключите расширения браузера на странице.
 
 ### Проблема 3: "useAuth must be used within an AuthProvider"
 
@@ -615,6 +639,32 @@ app.use(cors({
 docker-compose exec api npm install node-cron nodemailer
 docker-compose restart api
 ```
+
+---
+
+## 🆕 Последние изменения
+
+### Login и Register - теперь отдельные страницы
+
+**Изменено:** Login и Register больше не модальные окна, а полноценные страницы
+
+**Файлы:**
+- `src/pages/Login.tsx` - Страница входа
+- `src/pages/Register.tsx` - Страница регистрации
+- `src/components/Header.tsx` - Обновлен для перенаправления на страницы
+
+**Роуты:**
+- `/login` - Страница входа
+- `/register` - Страница регистрации
+- `/signin` - Алиас для `/login`
+- `/get-started` - Алиас для `/register`
+
+**Преимущества:**
+- ✅ Лучше SEO (отдельные URL)
+- ✅ Удобнее делиться ссылками
+- ✅ Работает кнопка "Назад" в браузере
+- ✅ Реферальные ссылки: `/register?ref=CODE`
+- ✅ Чище код (нет управления состоянием модалок)
 
 ---
 

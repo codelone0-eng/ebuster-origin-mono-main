@@ -1,8 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -147,25 +152,32 @@ export default function VerifyOtp() {
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="flex flex-col items-center space-y-4">
-              <label className="text-sm font-medium text-muted-foreground">
+              <label htmlFor="otp-input" className="text-sm font-medium text-muted-foreground">
                 Введите код подтверждения
               </label>
               
-              <Input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  setOtp(value);
-                }}
-                disabled={loading}
-                placeholder="000000"
-                className="text-center text-2xl font-mono tracking-widest w-48 h-14"
-                autoComplete="one-time-code"
-              />
+              <div className="otp-container">
+                <InputOTP
+                  id="otp-input"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                  disabled={loading}
+                  autoFocus
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
 
               {loading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
