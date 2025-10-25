@@ -10,13 +10,11 @@ import {
 } from "@/components/ui/input-otp";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function VerifyOtp() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
   
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -80,22 +78,16 @@ export default function VerifyOtp() {
         // Сохраняем токен и данные пользователя
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Обновляем контекст авторизации
-        if (login) {
-          login(data.user, data.token);
-        }
 
         toast({
           title: "✅ Успешно!",
           description: data.message || "Email подтвержден! Добро пожаловать!",
-          variant: "success"
         });
 
-        // Перенаправляем в личный кабинет
+        // Перенаправляем в личный кабинет (на поддомен lk.ebuster.ru)
         setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000);
+          window.location.href = 'https://lk.ebuster.ru/dashboard';
+        }, 1500);
       } else {
         toast({
           title: "Ошибка",

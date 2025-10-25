@@ -67,7 +67,7 @@ docker-compose logs -f frontend
 
 ## 📝 Изменения в коде:
 
-### Файл: `src/LandingApp.tsx`
+### 1. Файл: `src/LandingApp.tsx`
 
 ```typescript
 // Добавлен импорт
@@ -75,6 +75,14 @@ import VerifyOtp from "./pages/VerifyOtp";
 
 // Добавлен роут
 <Route path="/verify-otp" element={<VerifyOtp />} />
+```
+
+### 2. Файл: `src/pages/VerifyOtp.tsx`
+
+```typescript
+// Убран useAuth (не нужен, так как токен сохраняется напрямую)
+// Перенаправление на правильный поддомен
+window.location.href = 'https://lk.ebuster.ru/dashboard';
 ```
 
 ---
