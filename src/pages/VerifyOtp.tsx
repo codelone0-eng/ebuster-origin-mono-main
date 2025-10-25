@@ -1,13 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -156,24 +151,21 @@ export default function VerifyOtp() {
                 Введите код подтверждения
               </label>
               
-              <InputOTP 
-                maxLength={6} 
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
                 value={otp}
-                onChange={(value) => setOtp(value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setOtp(value);
+                }}
                 disabled={loading}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
+                placeholder="000000"
+                className="text-center text-2xl font-mono tracking-widest w-48 h-14"
+                autoComplete="one-time-code"
+              />
 
               {loading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

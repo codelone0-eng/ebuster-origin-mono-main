@@ -419,28 +419,34 @@ export default function VerifyOtp() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       
-      // Перенаправление
-      navigate('/dashboard');
+      // Перенаправление на поддомен личного кабинета
+      window.location.href = 'https://lk.ebuster.ru/dashboard';
     }
   };
   
   return (
-    <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-      <InputOTPGroup>
-        <InputOTPSlot index={0} />
-        <InputOTPSlot index={1} />
-        <InputOTPSlot index={2} />
-      </InputOTPGroup>
-      <InputOTPSeparator />
-      <InputOTPGroup>
-        <InputOTPSlot index={3} />
-        <InputOTPSlot index={4} />
-        <InputOTPSlot index={5} />
-      </InputOTPGroup>
-    </InputOTP>
+    <Input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      maxLength={6}
+      value={otp}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, '');
+        setOtp(value);
+      }}
+      placeholder="000000"
+      className="text-center text-2xl font-mono tracking-widest w-48 h-14"
+      autoComplete="one-time-code"
+    />
   );
 }
 ```
+
+**Изменения:**
+- Заменен `InputOTP` на простой `Input` с маской для цифр
+- Добавлена фильтрация нецифровых символов
+- Перенаправление на `lk.ebuster.ru/dashboard` вместо локального `/dashboard`
 
 ---
 
@@ -546,16 +552,49 @@ CREATE TABLE auth_users (
 
 ### Проблема 1: 404 на `/verify-otp`
 
-**Причина:** Frontend не пересобран с новым роутом
+**Причина:** Роут добавлен в `App.tsx`, но на production используется `LandingApp.tsx`
 
-**Решение:**
+**Решение:** Добавить роут в `LandingApp.tsx`:
+```typescript
+import VerifyOtp from "./pages/VerifyOtp";
+<Route path="/verify-otp" element={<VerifyOtp />} />
+```
+
+Затем пересобрать:
 ```bash
 cd /srv/ebuster
+git pull origin main
 docker-compose build --no-cache frontend
 docker-compose up -d
 ```
 
-### Проблема 2: CORS ошибки
+### Проблема 2: InputOTP дублирует цифры в первую ячейку
+
+**Причина:** Конфликт в библиотеке `input-otp` или CSS
+
+**Решение:** Заменен на простой `Input` с маской:
+```typescript
+<Input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  maxLength={6}
+  value={otp}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setOtp(value);
+  }}
+  className="text-center text-2xl font-mono tracking-widest"
+/>
+```
+
+### Проблема 3: "useAuth must be used within an AuthProvider"
+
+**Причина:** Компонент использует `useAuth`, но не обернут в `AuthProvider`
+
+**Решение:** Убрать `useAuth` из `VerifyOtp.tsx`, токен сохраняется напрямую в localStorage
+
+### Проблема 4: CORS ошибки
 
 **Причина:** API не возвращает CORS заголовки
 
@@ -567,7 +606,7 @@ app.use(cors({
 }));
 ```
 
-### Проблема 3: "Cannot find package 'node-cron'"
+### Проблема 5: "Cannot find package 'node-cron'"
 
 **Причина:** Зависимости не установлены в Docker контейнере
 
