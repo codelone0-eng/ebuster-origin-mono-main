@@ -6,8 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { RecentUsers } from '@/components/RecentUsers';
+
+// Генерация authorization code для OAuth
+const generateAuthCode = () => {
+  return 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,11 +22,19 @@ export default function Login() {
   const { t } = useLanguage();
   
   const [formData, setFormData] = useState({
-    email: '',
+    email: localStorage.getItem('lastEmail') || '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  const handleUserSelect = (email: string) => {
+    setFormData(prev => ({
+      ...prev,
+      email
+    }));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -54,6 +68,49 @@ export default function Login() {
           variant: "destructive"
         });
       } else {
+        // Сохраняем email для будущих входов
+        if (rememberMe) {
+          localStorage.setItem('lastEmail', formData.email);
+        } else {
+          localStorage.removeItem('lastEmail');
+        }
+        
+        // Добавляем в список недавних пользователей
+        const recentUsers = JSON.parse(localStorage.getItem('recentUsers') || '[]');
+        const userExists = recentUsers.find((u: any) => u.email === formData.email);
+        if (!userExists) {
+          recentUsers.unshift({
+            email: formData.email,
+            lastLogin: new Date().toISOString()
+          });
+          localStorage.setItem('recentUsers', JSON.stringify(recentUsers.slice(0, 3)));
+        }
+        
+        // Проверяем, есть ли OAuth параметры для расширения
+        const oauthParams = sessionStorage.getItem('oauth_params');
+        if (oauthParams) {
+          try {
+            const params = JSON.parse(oauthParams);
+            console.log('🔐 OAuth flow after login:', params);
+            
+            // Генерируем authorization code
+            const authCode = generateAuthCode();
+            
+            // Перенаправляем обратно в расширение с кодом
+            const redirectUrl = `${params.redirect_uri}?code=${authCode}&state=success`;
+            console.log('🔐 Redirecting to:', redirectUrl);
+            
+            // Сохраняем код для обмена на токен
+            sessionStorage.setItem('auth_code', authCode);
+            sessionStorage.setItem('oauth_client_id', params.client_id);
+            
+            window.location.href = redirectUrl;
+            return;
+          } catch (error) {
+            console.error('🔐 OAuth flow error:', error);
+          }
+        }
+        
         toast({
           title: "✅ Успешно!",
           description: "Добро пожаловать!",
@@ -100,6 +157,9 @@ export default function Login() {
           
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              {/* Recent Users */}
+              <RecentUsers onUserSelect={handleUserSelect} />
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -137,7 +197,7 @@ export default function Login() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                     disabled={loading}
                   />
@@ -145,13 +205,31 @@ export default function Login() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
                   >
-                    {showPassword ? "Скрыть" : "Показать"}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
                   </Button>
                 </div>
+              </div>
+
+              {/* Remember me checkbox */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                  Запомнить меня
+                </Label>
               </div>
 
               <Button 
