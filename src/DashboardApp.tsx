@@ -11,6 +11,7 @@ import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
 import Dashboard from "./lk/Dashboard";
 import TicketPage from "./lk/TicketPage";
+import BanPage from "./landing/BanPage";
 import Error404 from "./landing/Error404";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,9 @@ const DashboardApp = () => (
                       <TicketPage />
                     </ProtectedRoute>
                   } />
+                  
+                  {/* Ban page - не требует защиты, так как показывается забаненным */}
+                  <Route path="/ban" element={<BanPage />} />
                   
                   {/* Redirect root to dashboard */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />

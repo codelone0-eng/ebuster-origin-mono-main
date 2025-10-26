@@ -492,4 +492,48 @@ export const incrementDownloads = async (req: Request, res: Response) => {
   }
 };
 
+// Получение информации о бане пользователя
+export const getUserBanInfo = async (req: Request, res: Response) => {
+  try {
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase credentials not configured on server.' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Получаем ID пользователя из middleware
+    if (!req.user?.id) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Получаем активный бан пользователя
+    const { data: banData, error: banError } = await admin
+      .from('user_bans')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (banError || !banData) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Активная блокировка не найдена' 
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: banData
+    });
+  } catch (error) {
+    console.error('Error getting ban info:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 

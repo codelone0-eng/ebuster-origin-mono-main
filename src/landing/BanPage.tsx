@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -6,6 +6,7 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { API_CONFIG } from '@/config/api';
 import { 
   Shield, 
   Calendar, 
@@ -16,19 +17,103 @@ import {
   FileText
 } from 'lucide-react';
 
+interface BanInfo {
+  ban_id: string;
+  reason: string;
+  ban_type: 'temporary' | 'permanent';
+  created_at: string;
+  unban_date: string | null;
+  duration_hours: number | null;
+  contact_email: string;
+}
+
 const BanPage = () => {
-  // Mock данные для забаненного пользователя
-  const banInfo = {
-    reason: "Нарушение правил сообщества - спам и нежелательный контент",
-    banDate: "15 января 2024 г., 14:30",
-    unbanDate: "15 февраля 2024 г., 14:30",
-    banType: "Временная блокировка",
-    banDuration: "30 дней",
-    remainingDays: 12,
+  const [banInfo, setBanInfo] = useState<BanInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBanInfo = async () => {
+      try {
+        const token = localStorage.getItem('ebuster_token');
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/user/ban-info`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setBanInfo(data.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching ban info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBanInfo();
+  }, []);
+
+  // Mock данные как fallback
+  const defaultBanInfo = {
+    reason: "Нарушение правил сообщества",
+    banDate: new Date().toISOString(),
+    unbanDate: null,
+    banType: "Постоянная блокировка",
+    banDuration: "Бессрочно",
+    remainingDays: 0,
     contactEmail: "support@ebuster.ru",
-    banId: "BAN-2024-001",
-    moderator: "Администратор системы"
+    banId: "N/A",
+    moderator: "Администратор системы",
+    totalDays: 0
   };
+
+  const calculateRemainingDays = (unbanDate: string | null) => {
+    if (!unbanDate) return 0;
+    const now = new Date();
+    const unban = new Date(unbanDate);
+    const diff = unban.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  const calculateDuration = (hours: number | null) => {
+    if (!hours) return 'Бессрочно';
+    if (hours < 24) return `${hours} часов`;
+    const days = Math.floor(hours / 24);
+    return `${days} дней`;
+  };
+
+  const displayBanInfo = banInfo ? {
+    reason: banInfo.reason,
+    banDate: banInfo.created_at,
+    unbanDate: banInfo.unban_date,
+    banType: banInfo.ban_type === 'temporary' ? 'Временная блокировка' : 'Постоянная блокировка',
+    banDuration: calculateDuration(banInfo.duration_hours),
+    remainingDays: calculateRemainingDays(banInfo.unban_date),
+    contactEmail: banInfo.contact_email || 'support@ebuster.ru',
+    banId: banInfo.ban_id,
+    moderator: 'Администратор системы',
+    totalDays: banInfo.duration_hours ? Math.floor(banInfo.duration_hours / 24) : 0
+  } : defaultBanInfo;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
@@ -91,7 +176,7 @@ const BanPage = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Тип блокировки</p>
-                    <p className="text-lg font-semibold text-primary">{banInfo.banType}</p>
+                    <p className="text-lg font-semibold text-primary">{displayBanInfo.banType}</p>
                   </div>
                 </div>
                 
@@ -99,11 +184,11 @@ const BanPage = () => {
                 <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t content-border-30">
                   <div>
                     <p className="text-xs text-muted-foreground">ID блокировки</p>
-                    <p className="text-sm font-medium text-foreground">{banInfo.banId}</p>
+                    <p className="text-sm font-medium text-foreground">{displayBanInfo.banId}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Длительность</p>
-                    <p className="text-sm font-medium text-foreground">{banInfo.banDuration}</p>
+                    <p className="text-sm font-medium text-foreground">{displayBanInfo.banDuration}</p>
                   </div>
                 </div>
               </div>
@@ -112,7 +197,7 @@ const BanPage = () => {
               <div>
                 <span className="text-sm font-medium text-muted-foreground block mb-2">Причина блокировки:</span>
                 <div className="p-4 bg-muted/30 rounded-lg border content-border-50">
-                  <p className="text-foreground">{banInfo.reason}</p>
+                  <p className="text-foreground">{displayBanInfo.reason}</p>
                 </div>
               </div>
 
@@ -124,7 +209,7 @@ const BanPage = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Дата блокировки</p>
-                    <p className="text-foreground font-medium">{banInfo.banDate}</p>
+                    <p className="text-foreground font-medium">{displayBanInfo.banDate}</p>
                   </div>
                 </div>
 
@@ -134,7 +219,7 @@ const BanPage = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Дата разблокировки</p>
-                    <p className="text-foreground font-medium">{banInfo.unbanDate}</p>
+                    <p className="text-foreground font-medium">{displayBanInfo.unbanDate}</p>
                   </div>
                 </div>
               </div>
@@ -143,23 +228,23 @@ const BanPage = () => {
               <div className="p-6 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="text-center mb-4">
                   <p className="text-sm text-muted-foreground mb-2">Осталось дней до разблокировки:</p>
-                  <p className="text-3xl font-bold text-primary">{banInfo.remainingDays}</p>
+                  <p className="text-3xl font-bold text-primary">{displayBanInfo.remainingDays}</p>
                 </div>
                 
                 {/* Прогресс-бар */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>0 дней</span>
-                    <span>30 дней</span>
+                    <span>{displayBanInfo.totalDays || 30} дней</span>
                   </div>
                   <div className="w-full bg-muted/30 rounded-full h-2">
                     <div 
                       className="bg-primary h-2 rounded-full transition-all duration-500 ease-out"
-                      style={{ width: `${((30 - banInfo.remainingDays) / 30) * 100}%` }}
+                      style={{ width: `${displayBanInfo.totalDays > 0 ? (((displayBanInfo.totalDays - displayBanInfo.remainingDays) / displayBanInfo.totalDays) * 100) : 0}%` }}
                     ></div>
                   </div>
                   <div className="text-center text-xs text-muted-foreground">
-                    Прогресс блокировки: {Math.round(((30 - banInfo.remainingDays) / 30) * 100)}%
+                    Прогресс блокировки: {displayBanInfo.totalDays > 0 ? Math.round(((displayBanInfo.totalDays - displayBanInfo.remainingDays) / displayBanInfo.totalDays) * 100) : 0}%
                   </div>
                 </div>
               </div>
@@ -182,7 +267,7 @@ const BanPage = () => {
                   </div>
                   <div>
                     <p className="text-foreground font-medium">Ожидайте окончания срока блокировки</p>
-                    <p className="text-sm text-muted-foreground">Ваш аккаунт будет автоматически разблокирован {banInfo.unbanDate}</p>
+                    <p className="text-sm text-muted-foreground">Ваш аккаунт будет автоматически разблокирован {displayBanInfo.unbanDate}</p>
                   </div>
                 </div>
 
@@ -228,10 +313,10 @@ const BanPage = () => {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Email поддержки</p>
                     <a 
-                      href={`mailto:${banInfo.contactEmail}`}
+                      href={`mailto:${displayBanInfo.contactEmail}`}
                       className="text-primary hover:text-primary/80 transition-colors"
                     >
-                      {banInfo.contactEmail}
+                      {displayBanInfo.contactEmail}
                     </a>
                   </div>
                 </div>
@@ -249,7 +334,7 @@ const BanPage = () => {
             </Button>
             
             <Button asChild variant="default" className="flex items-center gap-2">
-              <a href={`mailto:${banInfo.contactEmail}?subject=Обжалование блокировки аккаунта`}>
+              <a href={`mailto:${displayBanInfo.contactEmail}?subject=Обжалование блокировки аккаунта`}>
                 <Mail className="h-4 w-4" />
                 Написать в поддержку
               </a>

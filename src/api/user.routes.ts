@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads } from './user.controller';
+import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads, getUserBanInfo } from './user.controller';
 import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
 import multer from 'multer';
 
@@ -22,6 +22,7 @@ const upload = multer({
 });
 
 router.get('/profile', optionalAuthenticateUser, getUserProfile);
+router.get('/ban-info', optionalAuthenticateUser, getUserBanInfo);
 router.post('/upsert', upsertUserProfile);
 router.post('/remove-avatar', removeAvatar);
 
