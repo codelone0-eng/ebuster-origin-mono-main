@@ -14,6 +14,7 @@ interface User {
   full_name?: string;
   avatar_url?: string;
   role?: 'user' | 'admin' | 'moderator';
+  status?: 'active' | 'banned' | 'inactive';
 }
 
 interface AuthContextType {
@@ -231,7 +232,8 @@ const authApi = {
               ...data.user,
               full_name: profileData.data.full_name || data.user.full_name,
               avatar_url: profileData.data.avatar_url,
-              role: profileData.data.role
+              role: profileData.data.role,
+              status: profileData.data.status
             };
           }
         }

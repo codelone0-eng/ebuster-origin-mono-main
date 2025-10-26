@@ -53,12 +53,13 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to="/403" replace />;
   }
 
-  console.log('✅ ProtectedRoute: Access granted');
+  // Check if user is banned
+  if (user?.status === 'banned') {
+    console.log('🚫 ProtectedRoute: User is banned, redirecting to /ban');
+    return <Navigate to="/ban" replace />;
+  }
 
-  // Check if user is banned (if we add this field later)
-  // if (user?.is_banned) {
-  //   return <Navigate to="/ban" replace />;
-  // }
+  console.log('✅ ProtectedRoute: Access granted');
 
   return <>{children}</>;
 };
