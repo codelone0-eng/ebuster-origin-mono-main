@@ -208,13 +208,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { data: { user } } = await typedSupabase.auth.getUser();
           if (user) {
             const { data: profile } = await typedSupabase
-              .from('users')
+              .from('auth_users')
               .select('id')
               .eq('id', user.id)
               .single();
             if (!profile) {
               await typedSupabase
-                .from('users')
+                .from('auth_users')
                 .insert({
                   id: user.id,
                   email: user.email,

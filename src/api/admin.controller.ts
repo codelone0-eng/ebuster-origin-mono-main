@@ -74,16 +74,16 @@ export const getSystemStats = async (req: Request, res: Response) => {
       
       // Статистика пользователей
       const { count: totalUsers } = await supabase
-        .from('users')
+        .from('auth_users')
         .select('*', { count: 'exact', head: true });
 
       const { count: activeUsers } = await supabase
-        .from('users')
+        .from('auth_users')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
       const { count: bannedUsers } = await supabase
-        .from('users')
+        .from('auth_users')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'banned');
 
@@ -91,7 +91,7 @@ export const getSystemStats = async (req: Request, res: Response) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const { count: newUsersToday } = await supabase
-        .from('users')
+        .from('auth_users')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
@@ -303,7 +303,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 
     const { data: user, error } = await supabase
-      .from('users')
+      .from('auth_users')
       .select('*')
       .eq('id', id)
       .single();
@@ -932,7 +932,7 @@ export const autoUnbanUsers = async (req: Request, res: Response) => {
       const userIds = unbannedBans.map(ban => ban.user_id);
       
       await supabase
-        .from('users')
+        .from('auth_users')
         .update({ 
           status: 'active',
           updated_at: new Date().toISOString()

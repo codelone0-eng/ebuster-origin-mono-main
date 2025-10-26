@@ -21,7 +21,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
       console.log('🔍 [getUserProfile] Getting profile for authenticated user:', req.user.id);
       
       const { data, error } = await admin
-        .from('users')
+        .from('auth_users')
         .select('*')
         .eq('id', req.user.id)
         .single();
@@ -65,7 +65,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
     }
 
     const { data, error } = await admin
-      .from('users')
+      .from('auth_users')
       .select('*')
       .eq('email', email)
       .single();
@@ -112,7 +112,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
     
     // Сначала проверяем, есть ли пользователь с таким email
     const { data: existingUser } = await admin
-      .from('users')
+      .from('auth_users')
       .select('id')
       .eq('email', email)
       .single();
@@ -136,7 +136,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
       console.log('🔄 [upsertUserProfile] Updating users table with data:', updateData);
       
       result = await admin
-        .from('users')
+        .from('auth_users')
         .update(updateData)
         .eq('id', existingUser.id)
         .select()
@@ -159,7 +159,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
       }
       
       result = await admin
-        .from('users')
+        .from('auth_users')
         .insert(insertData)
         .select()
         .single();
@@ -267,7 +267,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     // Обновляем URL аватара в базе данных
     console.log('🔄 [uploadAvatar] Updating users table for email:', email);
     const { data: userData, error: userError } = await admin
-      .from('users')
+      .from('auth_users')
       .update({ avatar_url: avatarUrl })
       .eq('email', email)
       .select()
@@ -335,7 +335,7 @@ export const removeAvatar = async (req: Request, res: Response) => {
 
     // Получаем текущий аватар пользователя
     const { data: userData, error: userError } = await admin
-      .from('users')
+      .from('auth_users')
       .select('avatar_url')
       .eq('email', email)
       .single();
@@ -373,7 +373,7 @@ export const removeAvatar = async (req: Request, res: Response) => {
     // Обновляем URL аватара в базе данных (устанавливаем null)
     console.log('🔄 [removeAvatar] Updating users table for email:', email);
     const { data: updatedUser, error: updateError } = await admin
-      .from('users')
+      .from('auth_users')
       .update({ avatar_url: null })
       .eq('email', email)
       .select()
