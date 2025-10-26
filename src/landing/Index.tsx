@@ -8,7 +8,7 @@ import Section from "@/components/Section";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CodeTypewriter } from "@/components/CodeTypewriter";
 import ShimmerTitle from "@/components/ShimmerTitle";
-import { ExtensionDemoNew } from "@/components/ExtensionDemoNew";
+import { ExtensionDemoExact } from "@/components/ExtensionDemoExact";
 // import SpotlightCard from "@/components/SpotlightCard";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -229,7 +229,7 @@ const Index = () => {
               <h3 className="text-3xl font-bold mb-3 text-foreground">Попробуйте прямо сейчас</h3>
               <p className="text-muted-foreground">Интерактивная демонстрация расширения</p>
             </div>
-            <ExtensionDemoNew />
+            <ExtensionDemoExact />
           </div>
 
           {/* CTA Buttons */}
