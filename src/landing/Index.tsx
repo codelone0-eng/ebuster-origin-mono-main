@@ -8,7 +8,7 @@ import Section from "@/components/Section";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CodeTypewriter } from "@/components/CodeTypewriter";
 import ShimmerTitle from "@/components/ShimmerTitle";
-import { ExtensionDemoExact } from "@/components/ExtensionDemoExact";
+import { ExtensionWorkflow } from "@/components/ExtensionWorkflow";
 // import SpotlightCard from "@/components/SpotlightCard";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -223,13 +223,13 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Interactive Demo */}
+          {/* Workflow */}
           <div className="mb-12">
-            <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold mb-3 text-foreground">Попробуйте прямо сейчас</h3>
-              <p className="text-muted-foreground">Интерактивная демонстрация расширения</p>
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold mb-3 text-foreground">Как начать работу</h3>
+              <p className="text-muted-foreground">Простой путь от установки до автоматизации</p>
             </div>
-            <ExtensionDemoExact />
+            <ExtensionWorkflow />
           </div>
 
           {/* CTA Buttons */}
