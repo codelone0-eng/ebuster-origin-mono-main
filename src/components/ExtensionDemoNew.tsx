@@ -63,12 +63,12 @@ export const ExtensionDemoNew = () => {
           {/* Logo */}
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">E</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-[#606060] via-[#a0a0a0] to-[#606060] bg-[length:200%_200%] animate-[gradient-shift_3s_ease_infinite] rounded-xl flex items-center justify-center">
+                <Zap className="h-6 w-6 text-[#1a1a1a]" />
               </div>
               <div>
                 <h3 className="font-bold text-foreground">Ebuster</h3>
-                <p className="text-xs text-muted-foreground">v1.0.3</p>
+                <p className="text-xs text-muted-foreground">v1.5.0</p>
               </div>
             </div>
           </div>
@@ -110,13 +110,19 @@ export const ExtensionDemoNew = () => {
             </div>
 
             {/* User Profile */}
-            <div className="flex items-center gap-3 p-3 bg-accent/30 rounded-xl">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
+              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm text-foreground truncate">Demo User</div>
-                <div className="text-xs text-muted-foreground">Premium</div>
+                <p className="text-sm font-medium text-foreground truncate">root</p>
+                <p className="text-xs text-[#22c55e] flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22c55e]"></span>
+                  </span>
+                  В сети
+                </p>
               </div>
             </div>
           </div>
