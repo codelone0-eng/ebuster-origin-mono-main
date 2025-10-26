@@ -317,30 +317,25 @@ export class EmailService {
         </p>
         
         <div style="text-align: center; margin: 40px 0;">
-            <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3px; border-radius: 12px;">
-                <div style="background-color: #1a1a1a; padding: 20px 40px; border-radius: 10px;">
-                    <div style="font-size: 48px; font-weight: 700; letter-spacing: 8px; color: #ffffff; font-family: 'Courier New', monospace;">
-                        ${otpCode}
-                    </div>
+            <div style="display: inline-block; background-color: #2a2a2a; border: 2px solid #606060; padding: 20px 40px; border-radius: 12px;">
+                <div style="font-size: 48px; font-weight: 700; letter-spacing: 8px; color: #ffffff; font-family: 'Courier New', monospace;">
+                    ${otpCode}
                 </div>
             </div>
         </div>
         
         <div style="background-color: #2a2a2a; border: 1px solid #404040; border-radius: 8px; padding: 20px; margin: 30px 0;">
-            <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                <div style="width: 24px; height: 24px; background-color: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                    <span style="color: #ffffff; font-size: 16px;">⏱</span>
-                </div>
-                <p style="color: #ffffff; margin: 0; font-weight: 600;">Код действителен 10 минут</p>
-            </div>
+            <p style="color: #ffffff; margin: 0 0 12px 0; font-weight: 600; font-size: 16px;">
+                Код действителен 10 минут
+            </p>
             <p style="color: #a0a0a0; margin: 0; font-size: 14px; line-height: 1.6;">
                 Введите этот код на странице регистрации, чтобы подтвердить ваш email и активировать аккаунт.
             </p>
         </div>
         
-        <div style="background-color: #2a2a2a; border-left: 4px solid #ffc107; border-radius: 4px; padding: 16px; margin: 20px 0;">
-            <p style="color: #ffc107; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">
-                ⚠️ Важно
+        <div style="background-color: #2a2a2a; border-left: 4px solid #a0a0a0; border-radius: 4px; padding: 16px; margin: 20px 0;">
+            <p style="color: #ffffff; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">
+                Важно
             </p>
             <p style="color: #a0a0a0; margin: 0; font-size: 13px; line-height: 1.5;">
                 Никому не сообщайте этот код. Сотрудники EBUSTER никогда не попросят вас предоставить код подтверждения.

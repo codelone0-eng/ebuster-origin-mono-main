@@ -21,6 +21,7 @@ import EmailConfirmation from "./lk/EmailConfirmation";
 import VerifyOtp from "./pages/VerifyOtp";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ExtensionAuth from "./pages/ExtensionAuth";
 import Error404 from "./landing/Error404";
 import Error500 from "./landing/Error500";
 import Error503 from "./landing/Error503";
@@ -63,6 +64,7 @@ const LandingApp = () => (
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/confirm-email" element={<EmailConfirmation />} />
                   <Route path="/verify-otp" element={<VerifyOtp />} />
+                  <Route path="/auth/extension" element={<ExtensionAuth />} />
                   <Route path="/ban" element={<BanPage />} />
                   <Route path="/get-started" element={<Register />} />
                   
