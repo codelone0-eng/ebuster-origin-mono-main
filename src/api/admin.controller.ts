@@ -771,7 +771,7 @@ export const banUser = async (req: Request, res: Response) => {
 
     // Получаем информацию о пользователе
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('auth_users')
       .select('email, full_name')
       .eq('id', id)
       .single();
@@ -840,7 +840,7 @@ export const banUser = async (req: Request, res: Response) => {
 
     // Обновляем статус пользователя
     const { error: updateError } = await supabase
-      .from('users')
+      .from('auth_users')
       .update({ 
         status: 'banned',
         updated_at: new Date().toISOString()
