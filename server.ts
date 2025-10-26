@@ -48,9 +48,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/scripts', scriptsRoutes);
 app.use('/api/referral', referralRoutes);
-
-// Extension auth routes (без префикса)
-app.use('/', extensionAuthRoutes);
+app.use('/api', extensionAuthRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
