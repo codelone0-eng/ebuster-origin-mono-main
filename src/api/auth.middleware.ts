@@ -59,7 +59,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('auth_users')
-        .select('id, email, full_name, email_confirmed')
+        .select('id, email, full_name, email_confirmed, status')
         .eq('id', decoded.userId)
         .single();
 
@@ -68,6 +68,15 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
           error: 'Пользователь не найден'
         });
       }
+      
+      // Проверка бана
+      if (data.status === 'banned') {
+        return res.status(403).json({
+          error: 'Ваш аккаунт заблокирован',
+          banned: true
+        });
+      }
+      
       user = data;
     } else {
       return res.status(500).json({
@@ -130,13 +139,13 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('auth_users')
-        .select('id, email, full_name, email_confirmed')
+        .select('id, email, full_name, email_confirmed, status')
         .eq('id', decoded.userId)
         .single();
 
       console.log('🔍 [optionalAuthenticateUser] Результат поиска:', { data, userError });
 
-      if (!userError && data && data.email_confirmed) {
+      if (!userError && data && data.email_confirmed && data.status !== 'banned') {
         console.log('🔍 [optionalAuthenticateUser] Пользователь найден и подтвержден:', data.email);
         req.user = {
           id: data.id,
@@ -144,7 +153,11 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
           full_name: data.full_name
         };
       } else {
-        console.log('🔍 [optionalAuthenticateUser] Пользователь не найден или не подтвержден');
+        if (data?.status === 'banned') {
+          console.log('🔍 [optionalAuthenticateUser] Пользователь заблокирован');
+        } else {
+          console.log('🔍 [optionalAuthenticateUser] Пользователь не найден или не подтвержден');
+        }
         req.user = undefined;
       }
     } else {

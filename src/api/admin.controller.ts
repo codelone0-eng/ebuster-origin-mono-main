@@ -370,7 +370,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
     }
 
     const { data, error } = await supabase
-      .from('users')
+      .from('auth_users')
       .update({ 
         status,
         ban_reason: reason || null,

@@ -80,6 +80,14 @@ export const useAdminApi = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Проверка на бан
+        if (response.status === 403 && errorData.banned) {
+          // Редирект на страницу бана
+          window.location.href = '/ban';
+          throw new Error('Ваш аккаунт заблокирован');
+        }
+        
         throw new Error(errorData.error || 'Ошибка запроса');
       }
 
