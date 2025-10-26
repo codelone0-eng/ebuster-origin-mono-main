@@ -61,35 +61,25 @@ export default function ExtensionAuth() {
       // Генерируем authorization code
       const authCode = 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       
-      // Сохраняем код и данные пользователя для обмена на токен
-      sessionStorage.setItem('auth_code', authCode);
-      sessionStorage.setItem('oauth_client_id', clientId!);
-      sessionStorage.setItem('oauth_user_data', JSON.stringify({
-        id: user!.id,
-        email: user!.email,
-        full_name: user!.full_name,
-        avatar_url: user!.avatar_url,
-        role: user!.role
-      }));
+      // Сохраняем код на бэкенде для последующего обмена
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
+      const saveResponse = await fetch(`${API_URL}/api/auth/extension/save-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: authCode,
+          userId: user!.id,
+          email: user!.email
+        })
+      });
 
-      // Сохраняем в chrome.storage для расширения (если доступно)
-      try {
-        if ((window as any).chrome && (window as any).chrome.storage) {
-          await (window as any).chrome.storage.local.set({
-            authToken: authCode,
-            userData: {
-              id: user!.id,
-              email: user!.email,
-              full_name: user!.full_name,
-              avatar_url: user!.avatar_url,
-              role: user!.role
-            }
-          });
-        }
-      } catch (storageError) {
-        // Игнорируем ошибки chrome.storage на обычном сайте
-        console.log('Chrome storage not available (normal for website)');
+      if (!saveResponse.ok) {
+        throw new Error('Failed to save authorization code');
       }
+
+      console.log('🔐 [ExtensionAuth] Authorization code saved:', authCode);
 
       // Формируем URL для редиректа
       const redirectUrl = new URL(redirectUri!);

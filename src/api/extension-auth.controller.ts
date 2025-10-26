@@ -356,65 +356,117 @@ export const extensionLoginPage = (req: Request, res: Response) => {
     `);
 };
 
-// Обработка OAuth callback для расширения
-export const extensionLogin = async (req: Request, res: Response) => {
+// Временное хранилище для authorization codes (в production использовать Redis)
+const authCodes = new Map<string, { userId: string; email: string; expiresAt: number }>();
+
+// Сохранение authorization code (вызывается из ExtensionAuth.tsx)
+export const saveAuthCode = async (req: Request, res: Response) => {
     try {
-        const { code, client_id, redirect_uri } = req.body;
+        const { code, userId, email } = req.body;
         
-        if (!code || !client_id || !redirect_uri) {
-            return res.status(400).json({ error: 'Missing required OAuth parameters' });
+        if (!code || !userId || !email) {
+            return res.status(400).json({ error: 'Missing required parameters' });
         }
         
-        // Проверяем authorization code
-        if (!code.startsWith('auth_')) {
-            return res.status(400).json({ error: 'Invalid authorization code' });
+        // Сохраняем код на 5 минут
+        authCodes.set(code, {
+            userId,
+            email,
+            expiresAt: Date.now() + 5 * 60 * 1000
+        });
+        
+        console.log(`🔐 [saveAuthCode] Saved code ${code} for user ${email}`);
+        
+        res.json({ success: true });
+        
+    } catch (error) {
+        console.error('Save auth code error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Обмен authorization code на токен и данные пользователя
+export const exchangeCode = async (req: Request, res: Response) => {
+    try {
+        const { code, client_id } = req.body;
+        
+        console.log(`🔐 [exchangeCode] Received request:`, { code, client_id });
+        
+        if (!code || !client_id) {
+            return res.status(400).json({ error: 'Missing required parameters' });
         }
+        
+        // Проверяем client_id
+        if (client_id !== 'ebuster-extension') {
+            return res.status(400).json({ error: 'Invalid client_id' });
+        }
+        
+        // Получаем данные по коду
+        const codeData = authCodes.get(code);
+        
+        if (!codeData) {
+            console.log(`🔐 [exchangeCode] Code not found: ${code}`);
+            return res.status(400).json({ error: 'Invalid or expired authorization code' });
+        }
+        
+        // Проверяем истечение
+        if (Date.now() > codeData.expiresAt) {
+            authCodes.delete(code);
+            console.log(`🔐 [exchangeCode] Code expired: ${code}`);
+            return res.status(400).json({ error: 'Authorization code expired' });
+        }
+        
+        // Удаляем использованный код
+        authCodes.delete(code);
         
         const supabase = getSupabaseAdmin();
         if (!supabase) {
             return res.status(500).json({ error: 'Database connection failed' });
         }
         
-        // Получаем информацию о текущем пользователе из сессии
-        // В реальном приложении здесь должна быть проверка authorization code
-        // и получение информации о пользователе
-        
-        // Для демонстрации получаем первого пользователя из базы
-        const { data: users, error: userError } = await supabase
+        // Получаем полные данные пользователя из БД
+        const { data: user, error: userError } = await supabase
             .from('auth_users')
-            .select('id, email, full_name, avatar_url')
-            .limit(1)
+            .select('id, email, full_name, avatar_url, role, created_at')
+            .eq('id', codeData.userId)
             .single();
             
-        if (userError || !users) {
+        if (userError || !user) {
+            console.error(`🔐 [exchangeCode] User not found:`, userError);
             return res.status(404).json({ error: 'User not found' });
         }
         
         // Создаем JWT токен для расширения
         const token = jwt.sign(
             { 
-                userId: users.id, 
-                email: users.email,
-                client_id: client_id
+                userId: user.id, 
+                email: user.email,
+                role: user.role || 'user'
             },
             JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '30d' } // 30 дней для расширения
         );
+        
+        console.log(`🔐 [exchangeCode] Success for user: ${user.email}`);
         
         res.json({
             success: true,
             token,
             user: {
-                id: users.id,
-                email: users.email,
-                full_name: users.full_name,
-                avatar_url: users.avatar_url,
-                role: 'user'
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                avatar_url: user.avatar_url,
+                role: user.role || 'user',
+                created_at: user.created_at
             }
         });
         
     } catch (error) {
-        console.error('Extension OAuth error:', error);
+        console.error('🔐 [exchangeCode] Error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Старый метод (deprecated, оставлен для совместимости)
+export const extensionLogin = exchangeCode;
