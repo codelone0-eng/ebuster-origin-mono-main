@@ -274,8 +274,37 @@ const DashboardContent = () => {
       loadUserProfile();
     }
   }, [authUser, loadUserProfile]);
+  
   const [scripts, setScripts] = useState(mockScripts);
+  const [installedScripts, setInstalledScripts] = useState([]);
   const [tickets, setTickets] = useState(mockTickets);
+  
+  // Загрузка установленных скриптов
+  useEffect(() => {
+    const loadInstalledScripts = async () => {
+      try {
+        const token = localStorage.getItem('ebuster_token');
+        if (!token) return;
+        
+        const response = await fetch('https://api.ebuster.ru/api/scripts/user/installed', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setInstalledScripts(data.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load installed scripts:', error);
+      }
+    };
+    
+    loadInstalledScripts();
+  }, []);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);
@@ -517,8 +546,25 @@ const DashboardContent = () => {
               </div>
 
               <div className="space-y-4">
-                {scripts.filter(script => script.isInstalled).map((script) => (
-                  <Card key={script.id} className="group hover:shadow-lg transition-all duration-200">
+                {installedScripts.length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Library className="h-12 w-12 text-muted-foreground" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
+                          {t('header.dashboard.installed.noScripts')}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('header.dashboard.installed.noScriptsDescription')}
+                        </p>
+                      </div>
+                      <GradientButton onClick={() => setActiveTab('scripts')}>
+                        {t('header.dashboard.installed.browseScripts')}
+                      </GradientButton>
+                    </div>
+                  </Card>
+                ) : installedScripts.map((item: any) => (
+                  <Card key={item.script_id} className="group hover:shadow-lg transition-all duration-200">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -526,39 +572,32 @@ const DashboardContent = () => {
                             <Library className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-foreground">{script.name}</h3>
-                            <p className="text-sm text-muted-foreground">{script.description}</p>
+                            <h3 className="font-semibold text-foreground">{item.script?.name || 'Скрипт'}</h3>
+                            <p className="text-sm text-muted-foreground">{item.script?.description || ''}</p>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                              <span>v{script.version}</span>
+                              <span>v{item.script?.version || '1.0.0'}</span>
                               <span>•</span>
-                              <span>{t('header.dashboard.scripts.updated')} {formatDate(script.lastUpdated)}</span>
+                              <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                              <GradientButton 
-                                variant="outline"
-                                size="sm"
-                              >
-                                <Settings className="h-3 w-3 mr-1" />
-                                {t('header.dashboard.installed.configure')}
-                              </GradientButton>
                           <GradientButton 
                             variant="outline"
                             size="sm"
                           >
-                            <RefreshCw className="h-3 w-3 mr-1" />
-                            {t('header.dashboard.installed.update')}
+                            <Settings className="h-3 w-3 mr-1" />
+                            {t('header.dashboard.installed.configure')}
                           </GradientButton>
                           <GradientButton 
                             variant="destructive"
                             size="sm"
                           >
                             <Trash2 className="h-3 w-3 mr-1" />
-                            {t('header.dashboard.installed.remove')}
+                            {t('header.dashboard.installed.uninstall')}
                           </GradientButton>
-                    </div>
-                  </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

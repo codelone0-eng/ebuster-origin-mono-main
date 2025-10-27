@@ -71,18 +71,39 @@ export default function VerifyOtp() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Сохраняем токен и данные пользователя
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Сохраняем токен (используем правильный ключ)
+        localStorage.setItem('ebuster_token', data.token);
 
         toast({
           title: "✅ Успешно!",
           description: data.message || "Email подтвержден! Добро пожаловать!",
         });
 
-        // Перенаправляем в личный кабинет (на поддомен lk.ebuster.ru)
+        // Применяем реферальный код если есть
+        const pendingRefCode = localStorage.getItem('pending_referral_code');
+        if (pendingRefCode) {
+          try {
+            await fetch(`${API_URL}/api/referrals/apply`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}`
+              },
+              body: JSON.stringify({ referral_code: pendingRefCode })
+            });
+            localStorage.removeItem('pending_referral_code');
+          } catch (error) {
+            console.error('Failed to apply referral code:', error);
+          }
+        }
+
+        // Перенаправляем в личный кабинет
         setTimeout(() => {
-          window.location.href = 'https://lk.ebuster.ru/dashboard';
+          if (window.location.hostname === 'lk.ebuster.ru') {
+            window.location.href = '/dashboard';
+          } else {
+            window.location.href = 'https://lk.ebuster.ru/dashboard';
+          }
         }, 1500);
       } else {
         toast({

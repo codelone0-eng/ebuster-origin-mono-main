@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticateUser } from './auth.middleware';
 import {
   getUserReferralCode,
   getUserReferralStats,
@@ -14,11 +15,11 @@ import {
 
 const router = Router();
 
-// Пользовательские роуты
-router.get('/user/:userId/code', getUserReferralCode);
-router.get('/user/:userId/stats', getUserReferralStats);
-router.get('/user/:userId/referrals', getUserReferrals);
-router.post('/apply', applyReferralCode);
+// Пользовательские роуты (требуют аутентификацию)
+router.get('/user/:userId/code', authenticateUser, getUserReferralCode);
+router.get('/user/:userId/stats', authenticateUser, getUserReferralStats);
+router.get('/user/:userId/referrals', authenticateUser, getUserReferrals);
+router.post('/apply', authenticateUser, applyReferralCode);
 
 // Админские роуты
 router.get('/admin/codes', getAllReferralCodes);

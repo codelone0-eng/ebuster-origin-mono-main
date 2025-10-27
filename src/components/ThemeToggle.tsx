@@ -10,12 +10,13 @@ function getInitialIsDark(): boolean {
   } catch {
     // ignore
   }
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // По умолчанию темная тема
+  return true;
 }
 
 export const ThemeToggle = () => {
   const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") return true;
     return getInitialIsDark();
   });
 
