@@ -284,7 +284,9 @@ const DashboardContent = () => {
     const loadInstalledScripts = async () => {
       try {
         const token = localStorage.getItem('ebuster_token');
-        if (!token) return;
+        if (!token || !authUser?.id) return;
+        
+        console.log('🔍 Загружаем установленные скрипты для пользователя:', authUser.id);
         
         const response = await fetch('https://api.ebuster.ru/api/scripts/user/installed', {
           headers: {
@@ -292,19 +294,26 @@ const DashboardContent = () => {
           }
         });
         
+        console.log('📦 Ответ от API:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('📊 Данные установленных скриптов:', data);
           if (data.success && data.data) {
             setInstalledScripts(data.data);
           }
+        } else {
+          console.error('❌ Ошибка загрузки скриптов:', response.status);
         }
       } catch (error) {
-        console.error('Failed to load installed scripts:', error);
+        console.error('❌ Failed to load installed scripts:', error);
       }
     };
     
-    loadInstalledScripts();
-  }, []);
+    if (authUser?.id) {
+      loadInstalledScripts();
+    }
+  }, [authUser?.id]);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);

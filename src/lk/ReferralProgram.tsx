@@ -71,11 +71,18 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   const loadReferralData = async () => {
     try {
       setLoading(true);
+      
+      const token = localStorage.getItem('ebuster_token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
       const [codeRes, statsRes, referralsRes] = await Promise.all([
-        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/code`),
-        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/stats`),
-        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/referrals`)
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/code`, { headers }),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/stats`, { headers }),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/referrals`, { headers })
       ]);
 
       const codeData = await codeRes.json();
