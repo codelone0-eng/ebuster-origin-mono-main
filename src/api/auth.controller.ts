@@ -269,6 +269,42 @@ export const verifyOtp = async (req: Request, res: Response) => {
     const sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
     sessions.set(sessionId, { userId: user.id, email: user.email });
 
+    // Генерируем реферальный код если его нет
+    if (supabase) {
+      try {
+        const { data: existingCode } = await supabase
+          .from('referral_codes')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingCode) {
+          const generateRandomCode = (): string => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+              code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+          };
+
+          const referralCode = generateRandomCode();
+          await supabase.from('referral_codes').insert({
+            user_id: user.id,
+            code: referralCode,
+            discount_type: 'percentage',
+            discount_value: 10,
+            is_active: true
+          });
+
+          await supabase.from('referral_stats').insert({ user_id: user.id });
+          console.log('✅ Реферальный код создан для пользователя:', user.id);
+        }
+      } catch (error) {
+        console.error('Ошибка создания реферального кода:', error);
+      }
+    }
+
     res.json({
       success: true,
       message: 'Email подтвержден! Добро пожаловать!',
@@ -388,6 +424,40 @@ export const loginUser = async (req: Request, res: Response) => {
         console.log(`✅ Updated user activity: ${browser}, ${location}`);
       } catch (updateError) {
         console.warn('Failed to update user activity:', updateError);
+      }
+      
+      // Генерируем реферальный код если его нет
+      try {
+        const { data: existingCode } = await supabase
+          .from('referral_codes')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingCode) {
+          const generateRandomCode = (): string => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+              code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+          };
+
+          const referralCode = generateRandomCode();
+          await supabase.from('referral_codes').insert({
+            user_id: user.id,
+            code: referralCode,
+            discount_type: 'percentage',
+            discount_value: 10,
+            is_active: true
+          });
+
+          await supabase.from('referral_stats').insert({ user_id: user.id });
+          console.log('✅ Реферальный код создан при логине для пользователя:', user.id);
+        }
+      } catch (error) {
+        console.error('Ошибка создания реферального кода при логине:', error);
       }
     }
 

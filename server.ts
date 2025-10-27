@@ -9,6 +9,7 @@ import authRoutes from './src/api/auth.routes';
 import userRoutes from './src/api/user.routes';
 import adminRoutes from './src/api/admin.routes';
 import scriptsRoutes from './src/api/scripts.routes';
+import scriptVersionsRoutes from './src/api/script-versions.routes';
 import extensionAuthRoutes from './src/api/extension-auth.routes';
 import referralRoutes from './src/api/referral.routes';
 import { startAllCronJobs } from './src/api/cron-jobs';
@@ -47,6 +48,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/scripts', scriptsRoutes);
+app.use('/api/script-versions', scriptVersionsRoutes);
 app.use('/api/referral', referralRoutes);
 app.use('/api', extensionAuthRoutes);
 

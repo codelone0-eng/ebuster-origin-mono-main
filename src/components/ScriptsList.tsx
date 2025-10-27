@@ -267,6 +267,26 @@ const ScriptsList: React.FC = () => {
           const installSuccess = await installScriptInExtension(data.data);
           
           if (installSuccess) {
+            // Сохраняем установку на сервере
+            try {
+              const installToken = localStorage.getItem('ebuster_token');
+              const installResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/user/install/${scriptId}`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${installToken}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (installResponse.ok) {
+                console.log('✅ Установка сохранена на сервере');
+              } else {
+                console.error('❌ Ошибка сохранения установки на сервере');
+              }
+            } catch (error) {
+              console.error('❌ Ошибка API сохранения установки:', error);
+            }
+            
             // Добавляем скрипт в список установленных
             setInstalledScriptIds(prev => new Set(prev).add(scriptId));
             
