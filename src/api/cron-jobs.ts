@@ -1,7 +1,67 @@
 import cron from 'node-cron';
-import fetch from 'node-fetch';
+import { createClient } from '@supabase/supabase-js';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+// Функция автоматической разблокировки (вызывается напрямую, без HTTP)
+const autoUnbanUsers = async () => {
+  try {
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      console.error('❌ [CRON] Supabase credentials not configured');
+      return { success: false, unbannedCount: 0 };
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      auth: { persistSession: false }
+    });
+
+    // Получаем все активные временные баны с истекшим сроком
+    const { data: expiredBans, error: fetchError } = await supabase
+      .from('user_bans')
+      .select('user_id, ban_id')
+      .eq('is_active', true)
+      .eq('ban_type', 'temporary')
+      .lte('unban_date', new Date().toISOString());
+
+    if (fetchError) {
+      console.error('❌ [CRON] Ошибка получения банов:', fetchError);
+      return { success: false, unbannedCount: 0 };
+    }
+
+    if (!expiredBans || expiredBans.length === 0) {
+      return { success: true, unbannedCount: 0 };
+    }
+
+    // Деактивируем баны
+    const { error: updateBansError } = await supabase
+      .from('user_bans')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .in('ban_id', expiredBans.map(b => b.ban_id));
+
+    if (updateBansError) {
+      console.error('❌ [CRON] Ошибка деактивации банов:', updateBansError);
+      return { success: false, unbannedCount: 0 };
+    }
+
+    // Обновляем статус пользователей
+    const userIds = expiredBans.map(b => b.user_id);
+    const { error: updateUsersError } = await supabase
+      .from('auth_users')
+      .update({ status: 'active', updated_at: new Date().toISOString() })
+      .in('id', userIds);
+
+    if (updateUsersError) {
+      console.error('❌ [CRON] Ошибка обновления пользователей:', updateUsersError);
+      return { success: false, unbannedCount: 0 };
+    }
+
+    return { success: true, unbannedCount: expiredBans.length };
+  } catch (error) {
+    console.error('❌ [CRON] Критическая ошибка:', error);
+    return { success: false, unbannedCount: 0 };
+  }
+};
 
 // Запускаем автоматическую разблокировку каждые 5 минут
 export const startAutoUnbanCron = () => {
@@ -10,19 +70,12 @@ export const startAutoUnbanCron = () => {
     try {
       console.log('🔄 [CRON] Запуск автоматической разблокировки пользователей...');
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/auto-unban`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
+      const result = await autoUnbanUsers();
       
-      if (data.success) {
-        console.log(`✅ [CRON] Автоматическая разблокировка завершена. Разблокировано: ${data.data.unbannedCount}`);
+      if (result.success) {
+        console.log(`✅ [CRON] Автоматическая разблокировка завершена. Разблокировано: ${result.unbannedCount}`);
       } else {
-        console.error('❌ [CRON] Ошибка автоматической разблокировки:', data.error);
+        console.error('❌ [CRON] Ошибка автоматической разблокировки');
       }
     } catch (error) {
       console.error('❌ [CRON] Ошибка выполнения cron job:', error);
@@ -39,19 +92,12 @@ export const startBanCleanupCron = () => {
     try {
       console.log('🧹 [CRON] Запуск очистки истекших банов...');
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/auto-unban`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
+      const result = await autoUnbanUsers();
       
-      if (data.success) {
-        console.log(`✅ [CRON] Очистка завершена. Обработано: ${data.data.unbannedCount}`);
+      if (result.success) {
+        console.log(`✅ [CRON] Очистка завершена. Обработано: ${result.unbannedCount}`);
       } else {
-        console.error('❌ [CRON] Ошибка очистки:', data.error);
+        console.error('❌ [CRON] Ошибка очистки');
       }
     } catch (error) {
       console.error('❌ [CRON] Ошибка выполнения cron job:', error);

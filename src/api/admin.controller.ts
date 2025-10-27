@@ -824,7 +824,7 @@ export const banUser = async (req: Request, res: Response) => {
         ban_type: banType,
         ban_date: banDate.toISOString(),
         unban_date: unbanDate ? unbanDate.toISOString() : null,
-        duration_hours: durationHours,
+        duration_hour: durationHours,
         contact_email: contactEmail || 'support@ebuster.ru',
         moderator_id: moderatorId,
         moderator_email: moderatorEmail,

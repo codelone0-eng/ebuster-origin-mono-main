@@ -23,7 +23,7 @@ interface BanInfo {
   ban_type: 'temporary' | 'permanent';
   created_at: string;
   unban_date: string | null;
-  duration_hours: number | null;
+  duration_hour: number | null;
   contact_email: string;
 }
 
@@ -96,12 +96,12 @@ const BanPage = () => {
     banDate: banInfo.created_at,
     unbanDate: banInfo.unban_date,
     banType: banInfo.ban_type === 'temporary' ? 'Временная блокировка' : 'Постоянная блокировка',
-    banDuration: calculateDuration(banInfo.duration_hours),
+    banDuration: calculateDuration(banInfo.duration_hour),
     remainingDays: calculateRemainingDays(banInfo.unban_date),
     contactEmail: banInfo.contact_email || 'support@ebuster.ru',
     banId: banInfo.ban_id,
     moderator: 'Администратор системы',
-    totalDays: banInfo.duration_hours ? Math.floor(banInfo.duration_hours / 24) : 0
+    totalDays: banInfo.duration_hour ? Math.floor(banInfo.duration_hour / 24) : 0
   } : defaultBanInfo;
 
   if (loading) {
