@@ -21,7 +21,46 @@ const getSupabaseClient = () => {
   return supabaseClient;
 };
 
-// Получить реферальный код пользователя
+// Генерация случайного реферального кода
+const generateRandomCode = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+// Создать реферальный код для пользователя
+const createReferralCodeForUser = async (userId: string, supabase: any) => {
+  const code = generateRandomCode();
+  
+  const { data, error } = await supabase
+    .from('referral_codes')
+    .insert({
+      user_id: userId,
+      code: code,
+      discount_type: 'percentage',
+      discount_value: 10,
+      is_active: true
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Ошибка создания реферального кода:', error);
+    return null;
+  }
+
+  // Создаем статистику
+  await supabase
+    .from('referral_stats')
+    .insert({ user_id: userId });
+
+  return data;
+};
+
+// Получить реферальный код пользователя (с автогенерацией если нет)
 export const getUserReferralCode = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -31,13 +70,22 @@ export const getUserReferralCode = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
-    const { data, error } = await supabase
+    // Пытаемся получить существующий код
+    let { data, error } = await supabase
       .from('referral_codes')
       .select('*')
       .eq('user_id', userId)
       .single();
 
-    if (error) {
+    // Если код не найден, создаем новый
+    if (error && error.code === 'PGRST116') {
+      console.log('Реферальный код не найден, создаем новый для пользователя:', userId);
+      data = await createReferralCodeForUser(userId, supabase);
+      
+      if (!data) {
+        return res.status(500).json({ success: false, error: 'Не удалось создать реферальный код' });
+      }
+    } else if (error) {
       console.error('Ошибка получения реферального кода:', error);
       return res.status(500).json({ success: false, error: 'Ошибка получения кода' });
     }

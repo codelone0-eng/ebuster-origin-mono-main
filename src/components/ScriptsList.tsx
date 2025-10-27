@@ -51,6 +51,7 @@ const ScriptsList: React.FC = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [scripts, setScripts] = useState<Script[]>([]);
+  const [installedScriptIds, setInstalledScriptIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -97,8 +98,33 @@ const ScriptsList: React.FC = () => {
     }
   };
 
+  // Загрузка установленных скриптов
+  const loadInstalledScripts = async () => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      if (!token) return;
+      
+      const response = await fetch('https://api.ebuster.ru/api/scripts/user/installed', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const ids = new Set<string>(data.data.map((item: any) => String(item.script_id)));
+          setInstalledScriptIds(ids);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load installed scripts:', error);
+    }
+  };
+
   useEffect(() => {
     loadScripts();
+    loadInstalledScripts();
   }, [searchTerm, categoryFilter, sortBy, sortOrder]);
 
   // Проверка наличия расширения Ebuster
@@ -241,6 +267,9 @@ const ScriptsList: React.FC = () => {
           const installSuccess = await installScriptInExtension(data.data);
           
           if (installSuccess) {
+            // Добавляем скрипт в список установленных
+            setInstalledScriptIds(prev => new Set(prev).add(scriptId));
+            
             // Показываем уведомление об успешной установке
             console.log('✅ Скрипт успешно установлен в расширение');
             toast({
@@ -248,6 +277,9 @@ const ScriptsList: React.FC = () => {
               description: t('header.dashboard.scripts.installSuccessDesc') || 'Скрипт успешно установлен в расширение Ebuster',
               variant: 'success'
             });
+            
+            // Перезагружаем список установленных скриптов
+            loadInstalledScripts();
           } else {
             console.error('❌ Ошибка установки в расширение');
             toast({
@@ -550,9 +582,20 @@ const ScriptsList: React.FC = () => {
                     size="sm"
                     onClick={() => handleDownloadScript(script.id)}
                     className="flex-1"
+                    disabled={installedScriptIds.has(script.id)}
+                    variant={installedScriptIds.has(script.id) ? "secondary" : "default"}
                   >
-                    <Download className="h-4 w-4 mr-2" />
-                    {t('header.dashboard.scripts.install')}
+                    {installedScriptIds.has(script.id) ? (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        {t('header.dashboard.scripts.installed')}
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        {t('header.dashboard.scripts.install')}
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>

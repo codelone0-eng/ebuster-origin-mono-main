@@ -208,7 +208,11 @@ export const ru = {
       addScript: "Добавить скрипт",
       configure: "Настройки",
       update: "Обновить",
-      remove: "Удалить"
+      remove: "Удалить",
+      uninstall: "Удалить",
+      noScripts: "У вас пока нет установленных скриптов",
+      noScriptsDescription: "Установите скрипты из библиотеки, чтобы они появились здесь",
+      browseScripts: "Перейти в библиотеку"
     }
   },
       cursor: {

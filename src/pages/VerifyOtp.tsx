@@ -75,8 +75,9 @@ export default function VerifyOtp() {
         localStorage.setItem('ebuster_token', data.token);
 
         toast({
-          title: "✅ Успешно!",
+          title: "Успешно!",
           description: data.message || "Email подтвержден! Добро пожаловать!",
+          variant: "success"
         });
 
         // Применяем реферальный код если есть

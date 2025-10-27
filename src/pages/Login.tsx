@@ -112,8 +112,9 @@ export default function Login() {
         }
         
         toast({
-          title: "✅ Успешно!",
+          title: "Успешно!",
           description: "Добро пожаловать!",
+          variant: "success"
         });
         
         // Перенаправление в личный кабинет

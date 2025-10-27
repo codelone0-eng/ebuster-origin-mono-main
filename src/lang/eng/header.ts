@@ -94,7 +94,6 @@ export const eng = {
       view: "View",
       download: "Download",
       downloadScript: "Download Script",
-      install: "Install",
       notFound: "No scripts found",
       notFoundDescription: "Try changing your search parameters or filters",
       loading: "Loading scripts...",
@@ -212,7 +211,11 @@ export const eng = {
       addScript: "Add Script",
       configure: "Configure",
       update: "Update",
-      remove: "Remove"
+      remove: "Remove",
+      uninstall: "Uninstall",
+      noScripts: "You don't have any installed scripts yet",
+      noScriptsDescription: "Install scripts from the library to see them here",
+      browseScripts: "Browse Library"
     }
   },
       cursor: {
