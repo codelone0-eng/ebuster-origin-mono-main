@@ -180,7 +180,7 @@ const ScriptsList: React.FC = () => {
   useEffect(() => {
     loadScripts();
     loadInstalledScripts();
-  }, [searchTerm, categoryFilter, sortBy, sortOrder]);
+  }, [categoryFilter, sortBy, sortOrder]); // Убрали searchTerm - фильтрация локальная
 
   // Слушатель событий от расширения для синхронизации
   useEffect(() => {
@@ -519,7 +519,7 @@ const ScriptsList: React.FC = () => {
     const matchesSearch = script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          script.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          script.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = !categoryFilter || categoryFilter === 'all' || script.category === categoryFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === '' || categoryFilter === 'all' || script.category === categoryFilter;
     
     return matchesSearch && matchesCategory;
   });

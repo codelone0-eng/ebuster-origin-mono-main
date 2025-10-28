@@ -608,12 +608,12 @@ const DashboardContent = () => {
                 <p className="text-muted-foreground">{t('header.dashboard.welcome')} {user.name}!</p>
               </div>
               <div className="flex items-center gap-4">
-                {user.plan === 'premium' ? (
+                {(user.plan === 'premium' || user.plan === 'pro') ? (
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-sm"></div>
                     <Badge className="relative bg-gradient-to-r from-primary to-accent text-primary-foreground border-0 px-4 py-2 text-sm font-bold shadow-lg">
                       <Crown className="h-4 w-4 mr-2" />
-                      PREMIUM
+                      {user.plan.toUpperCase()}
                     </Badge>
                   </div>
                 ) : (
@@ -642,7 +642,7 @@ const DashboardContent = () => {
                 {t('header.dashboard.tabs.scripts')}
               </TabsTrigger>
               <TabsTrigger value="installed" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
+                <Download className="h-5 w-5" />
                 {t('header.dashboard.tabs.installed')}
               </TabsTrigger>
               <TabsTrigger value="referral" className="flex items-center gap-2">

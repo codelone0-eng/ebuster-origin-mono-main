@@ -40,6 +40,16 @@ export const getUserProfile = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'User not found' });
           }
 
+          // Получаем подписку пользователя
+          const { data: subscription } = await admin
+            .from('subscriptions')
+            .select('plan')
+            .eq('user_id', req.user.id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
           return res.json({
             success: true,
             data: {
@@ -48,14 +58,31 @@ export const getUserProfile = async (req: Request, res: Response) => {
               full_name: authData.full_name,
               avatar_url: authData.avatar_url,
               role: 'user',
-              created_at: authData.created_at
+              created_at: authData.created_at,
+              subscription_plan: subscription?.plan || 'free'
             }
           });
         }
         return res.status(500).json({ error: error.message });
       }
 
-      return res.json({ success: true, data });
+      // Получаем подписку пользователя
+      const { data: subscription } = await admin
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', req.user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      return res.json({ 
+        success: true, 
+        data: {
+          ...data,
+          subscription_plan: subscription?.plan || 'free'
+        }
+      });
     }
 
     // Fallback: получение по email (для обратной совместимости)
@@ -77,7 +104,23 @@ export const getUserProfile = async (req: Request, res: Response) => {
       return res.status(500).json({ error: error.message });
     }
 
-    return res.json({ success: true, data });
+    // Получаем подписку пользователя
+    const { data: subscription } = await admin
+      .from('subscriptions')
+      .select('plan')
+      .eq('user_id', data.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    return res.json({ 
+      success: true, 
+      data: {
+        ...data,
+        subscription_plan: subscription?.plan || 'free'
+      }
+    });
   } catch (e: any) {
     console.error('🔍 [getUserProfile] Error:', e);
     return res.status(500).json({ error: e?.message || 'Server error' });

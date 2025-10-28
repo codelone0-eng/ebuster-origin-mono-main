@@ -1024,9 +1024,9 @@ const AdminDashboard = () => {
           {/* Кнопка назад */}
           <div className="text-center mt-12">
             <Button asChild variant="outline">
-              <Link to="/dashboard">
+              <a href="https://lk.ebuster.ru/dashboard">
                 Вернуться в личный кабинет
-              </Link>
+              </a>
             </Button>
           </div>
         </div>
