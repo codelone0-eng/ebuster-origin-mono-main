@@ -1,44 +1,3 @@
-            {/* Графики */}
-            <TabsContent value="charts">
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Графики и мониторинг
-                  </CardTitle>
-                  <CardDescription>
-                    Реальное время мониторинга и журналы производительности
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6 lg:grid-cols-2">
-                  <SystemMonitorChart data={systemMonitor} loading={monitorLoading} />
-
-                  <Card className="bg-muted/10 border-border/30">
-                    <CardHeader>
-                      <CardTitle className="text-base">История мониторинга</CardTitle>
-                      <CardDescription>Последние события системы и метрики</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {systemLogs.slice(0, 10).map((log) => (
-                          <div key={log.id} className="border border-border/20 rounded-lg p-4 bg-background/60">
-                            <div className="flex items-center justify-between">
-                              <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                                {log.level}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(log.timestamp).toLocaleString('ru-RU')}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-2">{log.message}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CardContent>
-              </Card>
-            </TabsContent>
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -129,33 +88,7 @@ import {
   Code
 } from 'lucide-react';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-
 const AdminDashboard = () => {
-  const [confirmState, setConfirmState] = useState({
-    open: false,
-    title: '',
-    description: '',
-    confirmLabel: '',
-    confirmVariant: 'default',
-    onConfirm: () => {}
-  });
-
-  const ConfirmDialog = () => (
-    <Dialog open={confirmState.open} onOpenChange={open => setConfirmState(s => ({ ...s, open }))}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{confirmState.title}</DialogTitle>
-          <DialogDescription>{confirmState.description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setConfirmState(s => ({ ...s, open: false }))}>Отмена</Button>
-          <Button variant={confirmState.confirmVariant as any} onClick={async () => { await confirmState.onConfirm(); setConfirmState(s => ({ ...s, open: false })); }}>{confirmState.confirmLabel || 'OK'}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-
   const { toast } = useToast();
   const adminApi = useAdminApi();
   
@@ -174,6 +107,45 @@ const AdminDashboard = () => {
   const [showBanModal, setShowBanModal] = useState(false);
   const [userToBan, setUserToBan] = useState(null);
   const [selectedUserDetails, setSelectedUserDetails] = useState(null);
+  
+  // Custom confirm modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    title: '',
+    message: '',
+    confirmText: 'Подтвердить',
+    cancelText: 'Отмена',
+    onConfirm: null,
+    onCancel: null
+  });
+  
+  // Custom confirm function
+  const customConfirm = (title, message, onConfirm, onCancel = null, confirmText = 'Подтвердить', cancelText = 'Отмена') => {
+    setConfirmConfig({
+      title,
+      message,
+      confirmText,
+      cancelText,
+      onConfirm,
+      onCancel
+    });
+    setShowConfirmModal(true);
+    
+    return new Promise<boolean>((resolve) => {
+      setConfirmConfig(prev => ({
+        ...prev,
+        onConfirm: () => {
+          onConfirm?.();
+          resolve(true);
+        },
+        onCancel: () => {
+          onCancel?.();
+          resolve(false);
+        }
+      }));
+    });
+  };
+  
   const [selectedScriptDetails, setSelectedScriptDetails] = useState(null);
   const [selectedTicketDetails, setSelectedTicketDetails] = useState(null);
   const [selectedLogDetails, setSelectedLogDetails] = useState(null);
@@ -402,33 +374,21 @@ const AdminDashboard = () => {
       return;
     }
     
+    // Используем customConfirm для подтверждения
     const userName = user?.full_name || user?.name || user?.email || 'этого пользователя';
-    setConfirmState({
-      open: true,
-      title: 'Удаление пользователя',
-      description: `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`,
-      confirmLabel: 'Удалить',
-      confirmVariant: 'destructive',
-      onConfirm: async () => {
-        try {
-          const userId = typeof user === 'string' ? user : user.id;
-          setRecentUsers(prev => prev.filter(u => u.id !== userId));
-          const translation = notificationTranslations.admin.userDeleted;
-          toast({
-            title: translation.title,
-            description: translation.description,
-            variant: 'success'
-          });
-        } catch (error) {
-          toast({
-            title: 'Ошибка',
-            description: 'Не удалось удалить пользователя',
-            variant: 'destructive'
-          });
-        }
-      }
-    });
-  };
+    const confirmMessage = `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`;
+    const confirmTitle = 'Удаление пользователя';
+    
+    const confirmed = await customConfirm(
+      confirmTitle,
+      confirmMessage,
+      null, // onConfirm will be handled after
+      null, // onCancel will be handled after  
+      'Удалить',
+      'Отмена'
+    );
+    
+    if (!confirmed) return;
     
     try {
       const userId = typeof user === 'string' ? user : user.id;
@@ -672,7 +632,6 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-8">
@@ -781,13 +740,41 @@ const AdminDashboard = () => {
                           <span className="text-sm font-medium">25%</span>
                         </div>
                       </div>
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Последние активности */}
+              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Последние активности
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {systemLogs.slice(0, 5).map((log) => (
+                      <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                        <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
+                          {log.level}
+                        </Badge>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground">{log.message}</p>
+                          <div className="flex items-center gap-4 mt-1">
+                            <span className="text-xs text-muted-foreground">{log.timestamp}</span>
+                            <span className="text-xs text-muted-foreground">IP: {log.ip}</span>
+                            {log.user !== 'System' && (
+                              <span className="text-xs text-muted-foreground">Пользователь: {log.user}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Пользователи */}
@@ -1014,284 +1001,25 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
 
-          {/* Быстрые действия */}
-          <Card className="bg-card/50 backdrop-blur-sm border border-border/30 mt-8">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2">
-                      <Users className="h-6 w-6" />
-                      <span className="text-sm">Пользователи</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Управление пользователями</DialogTitle>
-                      <DialogDescription>
-                        Просмотр и управление всеми пользователями системы
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="Поиск пользователей..." className="pl-10" />
-                        </div>
-                        <Select>
-                          <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Фильтр по статусу" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Все пользователи</SelectItem>
-                            <SelectItem value="active">Активные</SelectItem>
-                            <SelectItem value="banned">Забаненные</SelectItem>
-                            <SelectItem value="inactive">Неактивные</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {recentUsers.map((user) => (
-                          <div key={user.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                                <span className="text-xs font-medium text-primary">
-                                  {(user?.full_name || user?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">{user.full_name || user.name || 'Неизвестный пользователь'}</span>
-                                  <Badge className={`text-xs ${getStatusColor(user.status)}`}>
-                                    {user.status === 'active' ? 'Активен' : 
-                                     user.status === 'banned' ? 'Забанен' : 'Неактивен'}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground">{user.email || 'Не указан'}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button variant="outline" size="sm" onClick={() => handleViewUser(user)}>
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              {user.status === 'banned' ? (
-                                <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user)}>
-                                  <Unlock className="h-3 w-3" />
-                                </Button>
-                              ) : (
-                                <Button variant="outline" size="sm" onClick={() => handleBanUser(user)}>
-                                  <Ban className="h-3 w-3" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
-                <Dialog open={showScriptModal} onOpenChange={setShowScriptModal}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2">
-                      <FileText className="h-6 w-6" />
-                      <span className="text-sm">Скрипты</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Управление скриптами</DialogTitle>
-                      <DialogDescription>
-                        Просмотр и управление всеми скриптами в системе
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="Поиск скриптов..." className="pl-10" />
-                        </div>
-                        <Select>
-                          <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Фильтр по статусу" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Все скрипты</SelectItem>
-                            <SelectItem value="active">Активные</SelectItem>
-                            <SelectItem value="pending">На модерации</SelectItem>
-                            <SelectItem value="deprecated">Устаревшие</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {(scriptStats || []).map((script) => (
-                          <div key={script.name} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                                <FileText className="h-4 w-4 text-primary" />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">{script.name}</span>
-                                  <Badge className={`text-xs ${getStatusColor(script.status)}`}>
-                                    {script.status === 'active' ? 'Активен' : 
-                                     script.status === 'pending' ? 'На модерации' : 'Устарел'}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs">
-                                    {script.category}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                  Загрузок: {(script.downloads || 0).toLocaleString()} • Пользователей: {script.users || '0'} • Размер: {script.size || 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
-                <Dialog open={showAnalyticsModal} onOpenChange={setShowAnalyticsModal}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2">
-                      <BarChart3 className="h-6 w-6" />
-                      <span className="text-sm">Аналитика</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Аналитика системы</DialogTitle>
-                      <DialogDescription>
-                        Детальная статистика и аналитика работы системы
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Рост пользователей</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">+{systemStats?.newUsersToday || '0'}</div>
-                            <p className="text-xs text-muted-foreground">+12% с прошлого месяца</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Популярные скрипты</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">{scriptStats?.[0]?.downloads || '0'}</div>
-                            <p className="text-xs text-muted-foreground">{scriptStats?.[0]?.name || 'Нет данных'}</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      <div className="space-y-4">
-                        <h4 className="text-sm font-medium">Статистика по браузерам</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Chrome</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={65} className="w-20 h-2" />
-                              <span className="text-sm">65%</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Firefox</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={20} className="w-20 h-2" />
-                              <span className="text-sm">20%</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Safari</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={10} className="w-20 h-2" />
-                              <span className="text-sm">10%</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Edge</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={5} className="w-20 h-2" />
-                              <span className="text-sm">5%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
-                <Dialog open={showDatabaseModal} onOpenChange={setShowDatabaseModal}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2">
-                      <Database className="h-6 w-6" />
-                      <span className="text-sm">База данных</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Управление базой данных</DialogTitle>
-                      <DialogDescription>
-                        Мониторинг и управление базой данных системы
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Размер БД</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">2.4 GB</div>
-                            <p className="text-xs text-muted-foreground">+0.1 GB за неделю</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Запросов в секунду</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">156</div>
-                            <p className="text-xs text-muted-foreground">Средняя нагрузка</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      <div className="space-y-4">
-                        <h4 className="text-sm font-medium">Последние операции</h4>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {systemLogs.slice(0, 10).map((log) => (
-                            <div key={log.id} className="flex items-start gap-3 p-2 rounded bg-muted/30">
-                              <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                                {log.level}
-                              </Badge>
-                              <div className="flex-1">
-                                <p className="text-sm">{log.message}</p>
-                                <p className="text-xs text-muted-foreground">{log.timestamp}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Графики */}
+            <TabsContent value="charts" className="space-y-6">
+              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Графики и история мониторинга
+                  </CardTitle>
+                  <CardDescription>
+                    Детальная статистика и графики работы системы
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SystemMonitorChart />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
           {/* Кнопка назад */}
           <div className="text-center mt-12">
@@ -2051,6 +1779,46 @@ const AdminDashboard = () => {
             <Button variant="destructive" onClick={submitBanUser}>
               <Ban className="h-4 w-4 mr-2" />
               Заблокировать пользователя
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Кастомное модальное окно подтверждения */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="bg-card/95 backdrop-blur-sm border border-border/50 max-w-md">
+          <DialogHeader className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-destructive" />
+            </div>
+            <DialogTitle id="confirmTitle" className="text-xl font-semibold">
+              {confirmConfig.title}
+            </DialogTitle>
+            <DialogDescription id="confirmMessage" className="text-base mt-2">
+              {confirmConfig.message}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex gap-3 mt-6">
+            <Button 
+              variant="outline" 
+              className="flex-1" 
+              onClick={() => {
+                setShowConfirmModal(false);
+                confirmConfig.onCancel?.();
+              }}
+            >
+              {confirmConfig.cancelText || 'Отмена'}
+            </Button>
+            <Button 
+              variant="destructive" 
+              className="flex-1" 
+              onClick={() => {
+                setShowConfirmModal(false);
+                confirmConfig.onConfirm?.();
+              }}
+            >
+              {confirmConfig.confirmText || 'Подтвердить'}
             </Button>
           </div>
         </DialogContent>
