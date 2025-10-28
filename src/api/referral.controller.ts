@@ -237,8 +237,7 @@ export const getAllReferralCodes = async (req: Request, res: Response) => {
       .from('referral_codes')
       .select(`
         *,
-        user:auth_users(id, email, full_name),
-        stats:referral_stats(*)
+        user:auth_users(id, email, full_name)
       `, { count: 'exact' });
 
     if (search) {

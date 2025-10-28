@@ -76,7 +76,7 @@ const ScriptsList: React.FC = () => {
       if (searchTerm) params.append('search', searchTerm);
       if (categoryFilter) params.append('category', categoryFilter);
 
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       const headers: Record<string, string> = {};
       
       if (token) {
@@ -239,7 +239,7 @@ const ScriptsList: React.FC = () => {
   // Загрузка/установка скрипта
   const handleDownloadScript = async (scriptId: string) => {
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -376,7 +376,7 @@ const ScriptsList: React.FC = () => {
     if (!selectedScript) return;
 
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
