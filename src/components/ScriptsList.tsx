@@ -113,7 +113,58 @@ const ScriptsList: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data) {
-          const ids = new Set<string>(data.data.map((item: any) => String(item.script_id)));
+          let installedScripts = data.data.map((item: any) => String(item.script_id));
+          
+          // Проверяем наличие скриптов в расширении
+          if ((window as any).EbusterBridge) {
+            try {
+              const extensionScripts = await new Promise<any[]>((resolve) => {
+                (window as any).EbusterBridge.sendMessage(
+                  { action: 'GET_INSTALLED_SCRIPTS' },
+                  (response: any, error: any) => {
+                    if (error) {
+                      console.error('❌ [loadInstalledScripts] Ошибка получения скриптов:', error);
+                      resolve([]);
+                    } else {
+                      resolve(Array.isArray(response) ? response : []);
+                    }
+                  }
+                );
+              });
+              console.log('📦 [loadInstalledScripts] Скрипты в расширении:', extensionScripts);
+              
+              // Оставляем только те скрипты, которые есть в расширении с source="Установлено с сайта"
+              const validScripts = installedScripts.filter((id: string) => 
+                extensionScripts.some((s: any) => 
+                  s.id === id && s.source === 'Установлено с сайта'
+                )
+              );
+              
+              if (validScripts.length !== installedScripts.length) {
+                console.log('⚠️ [loadInstalledScripts] Расхождение! На сервере:', installedScripts.length, 'В расширении:', validScripts.length);
+                
+                // Синхронизируем с сервером
+                await fetch('https://api.ebuster.ru/api/scripts/user/sync', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    scriptIds: extensionScripts
+                      .filter((s: any) => s.source === 'Установлено с сайта')
+                      .map((s: any) => s.id)
+                  })
+                });
+                
+                installedScripts = validScripts;
+              }
+            } catch (error) {
+              console.error('❌ [loadInstalledScripts] Ошибка проверки расширения:', error);
+            }
+          }
+          
+          const ids = new Set<string>(installedScripts);
           setInstalledScriptIds(ids);
         }
       }

@@ -816,7 +816,10 @@ export const syncUserScripts = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const { scriptIds } = req.body; // Массив ID скриптов из расширения
     
+    console.log('🔄 [syncUserScripts] Синхронизация скриптов:', { userId, count: scriptIds?.length });
+    
     if (!userId) {
+      console.log('❌ [syncUserScripts] Пользователь не авторизован');
       return res.status(401).json({
         success: false,
         error: 'Unauthorized'
@@ -824,6 +827,7 @@ export const syncUserScripts = async (req: Request, res: Response) => {
     }
 
     if (!Array.isArray(scriptIds)) {
+      console.log('❌ [syncUserScripts] scriptIds не массив:', typeof scriptIds);
       return res.status(400).json({
         success: false,
         error: 'scriptIds должен быть массивом'
@@ -833,6 +837,7 @@ export const syncUserScripts = async (req: Request, res: Response) => {
     const supabase = getSupabaseClient();
 
     // Удаляем все старые записи
+    console.log('🗑️ [syncUserScripts] Удаляем старые записи...');
     await supabase
       .from('user_scripts')
       .delete()
@@ -840,6 +845,7 @@ export const syncUserScripts = async (req: Request, res: Response) => {
 
     // Добавляем новые
     if (scriptIds.length > 0) {
+      console.log('📝 [syncUserScripts] Добавляем новые записи:', scriptIds);
       const records = scriptIds.map(scriptId => ({
         user_id: userId,
         script_id: scriptId,
@@ -850,7 +856,13 @@ export const syncUserScripts = async (req: Request, res: Response) => {
         .from('user_scripts')
         .insert(records);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [syncUserScripts] Ошибка вставки:', error);
+        throw error;
+      }
+      console.log('✅ [syncUserScripts] Записи добавлены');
+    } else {
+      console.log('ℹ️ [syncUserScripts] Нет скриптов для добавления');
     }
 
     res.json({
