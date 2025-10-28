@@ -34,19 +34,27 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     
+    console.log('🔐 [authenticateUser] Проверка токена для:', req.method, req.path);
+    
     if (!token) {
+      console.log('❌ [authenticateUser] Токен не предоставлен');
       return res.status(401).json({
         error: 'Токен не предоставлен'
       });
     }
 
+    console.log('🔐 [authenticateUser] Токен найден:', token.substring(0, 20) + '...');
+
     // Проверка JWT токена
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
-    } catch (jwtError) {
+      console.log('✅ [authenticateUser] JWT декодирован:', { userId: decoded.userId, email: decoded.email });
+    } catch (jwtError: any) {
+      console.log('❌ [authenticateUser] JWT ошибка:', jwtError.message);
       return res.status(401).json({
-        error: 'Недействительный токен'
+        error: 'Недействительный токен',
+        details: jwtError.message
       });
     }
 
@@ -64,13 +72,17 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
         .single();
 
       if (userError || !data) {
+        console.log('❌ [authenticateUser] Пользователь не найден:', userError);
         return res.status(401).json({
           error: 'Пользователь не найден'
         });
       }
       
+      console.log('✅ [authenticateUser] Пользователь найден:', data.email);
+      
       // Проверка бана
       if (data.status === 'banned') {
+        console.log('❌ [authenticateUser] Пользователь заблокирован');
         return res.status(403).json({
           error: 'Ваш аккаунт заблокирован',
           banned: true

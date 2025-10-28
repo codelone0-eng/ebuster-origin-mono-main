@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
 import { ReferralProgram } from '@/lk/ReferralProgram';
+import { ScriptChangelog } from '@/lk/ScriptChangelog';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
@@ -27,6 +28,7 @@ import {
   Headphones, 
   Settings, 
   User,
+  FileText,
   Shield,
   Bell,
   Key,
@@ -278,6 +280,7 @@ const DashboardContent = () => {
   const [scripts, setScripts] = useState(mockScripts);
   const [installedScripts, setInstalledScripts] = useState([]);
   const [tickets, setTickets] = useState(mockTickets);
+  const [changelogScript, setChangelogScript] = useState<{ id: string; name: string } | null>(null);
   
   // Загрузка установленных скриптов
   useEffect(() => {
@@ -594,6 +597,14 @@ const DashboardContent = () => {
                           <GradientButton 
                             variant="outline"
                             size="sm"
+                            onClick={() => setChangelogScript({ id: item.script_id, name: item.script?.name || 'Скрипт' })}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            История версий
+                          </GradientButton>
+                          <GradientButton 
+                            variant="outline"
+                            size="sm"
                           >
                             <Settings className="h-3 w-3 mr-1" />
                             {t('header.dashboard.installed.configure')}
@@ -888,6 +899,16 @@ const DashboardContent = () => {
           onClose={() => setIsChangeEmailOpen(false)}
           currentEmail={user.email}
         />
+        
+        {/* Changelog Modal */}
+        {changelogScript && (
+          <ScriptChangelog
+            scriptId={changelogScript.id}
+            scriptName={changelogScript.name}
+            isOpen={!!changelogScript}
+            onClose={() => setChangelogScript(null)}
+          />
+        )}
       </div>
     </div>
   );
