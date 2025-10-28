@@ -827,21 +827,29 @@ export const syncUserScripts = async (req: Request, res: Response) => {
     }
 
     if (!Array.isArray(scriptIds)) {
-      console.log('❌ [syncUserScripts] scriptIds не массив:', typeof scriptIds);
+      console.log('❌ [syncUserScripts] scriptIds не массив:', typeof scriptIds, 'value:', scriptIds);
       return res.status(400).json({
         success: false,
         error: 'scriptIds должен быть массивом'
       });
     }
 
+    console.log('✅ [syncUserScripts] scriptIds валиден:', scriptIds);
+
     const supabase = getSupabaseClient();
 
     // Удаляем все старые записи
-    console.log('🗑️ [syncUserScripts] Удаляем старые записи...');
-    await supabase
+    console.log('🗑️ [syncUserScripts] Удаляем старые записи для пользователя:', userId);
+    const { error: deleteError } = await supabase
       .from('user_scripts')
       .delete()
       .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('❌ [syncUserScripts] Ошибка удаления старых записей:', deleteError);
+      throw deleteError;
+    }
+    console.log('✅ [syncUserScripts] Старые записи удалены');
 
     // Добавляем новые
     if (scriptIds.length > 0) {
@@ -852,15 +860,17 @@ export const syncUserScripts = async (req: Request, res: Response) => {
         installed_at: new Date().toISOString()
       }));
 
-      const { error } = await supabase
+      console.log('📝 [syncUserScripts] Записи для вставки:', JSON.stringify(records));
+
+      const { error: insertError, data } = await supabase
         .from('user_scripts')
         .insert(records);
 
-      if (error) {
-        console.error('❌ [syncUserScripts] Ошибка вставки:', error);
-        throw error;
+      if (insertError) {
+        console.error('❌ [syncUserScripts] Ошибка вставки:', insertError);
+        throw insertError;
       }
-      console.log('✅ [syncUserScripts] Записи добавлены');
+      console.log('✅ [syncUserScripts] Записи добавлены:', data);
     } else {
       console.log('ℹ️ [syncUserScripts] Нет скриптов для добавления');
     }

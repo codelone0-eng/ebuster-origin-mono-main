@@ -369,9 +369,34 @@ const DashboardContent = () => {
     }
   }, [authUser?.id]);
   
-  // Слушатель событий от расширения для синхронизации удаления
+  // Слушатель событий от расширения для синхронизации удаления и установки
   useEffect(() => {
     const handleExtensionSync = async (event: MessageEvent) => {
+      // Событие установки скрипта
+      if (event.data?.type === 'EBUSTER_SCRIPT_INSTALLED') {
+        console.log('✅ [Dashboard] Получено событие установки скрипта:', event.data.scriptId);
+        // Перезагружаем список установленных скриптов
+        setTimeout(() => {
+          const token = localStorage.getItem('ebuster_token');
+          if (token && authUser?.id) {
+            fetch('https://api.ebuster.ru/api/scripts/user/installed', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success && data.data) {
+                setInstalledScripts(data.data);
+                console.log('✅ [Dashboard] Список установленных скриптов обновлен');
+              }
+            })
+            .catch(err => console.error('❌ [Dashboard] Ошибка обновления списка:', err));
+          }
+        }, 300);
+      }
+      
+      // Событие удаления скрипта
       if (event.data?.type === 'EBUSTER_SCRIPT_UNINSTALLED') {
         const { scriptId } = event.data;
         console.log('🗑️ [Dashboard] Получено событие удаления скрипта:', scriptId);
