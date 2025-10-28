@@ -62,17 +62,17 @@ export class ApiClient {
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('auth_token');
+    this.token = localStorage.getItem('ebuster_token');
   }
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem('ebuster_token', token);
   }
 
   clearToken() {
     this.token = null;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('ebuster_token');
   }
 
   private async request<T>(

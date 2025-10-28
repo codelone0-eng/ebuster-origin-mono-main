@@ -70,22 +70,22 @@ const removeCookie = (name: string): void => {
 
 const getToken = (): string | null => {
   // Проверяем сначала cookie, потом localStorage
-  return getCookie('jwt_token') || localStorage.getItem('jwt_token');
+  return getCookie('ebuster_token') || localStorage.getItem('ebuster_token');
 };
 
 const setToken = (token: string): void => {
-  localStorage.setItem('jwt_token', token);
-  setCookie('jwt_token', token, 7); // 7 дней
+  localStorage.setItem('ebuster_token', token);
+  setCookie('ebuster_token', token, 7); // 7 дней
 };
 
 const saveToken = (token: string): void => {
-  localStorage.setItem('jwt_token', token);
-  setCookie('jwt_token', token, 7);
+  localStorage.setItem('ebuster_token', token);
+  setCookie('ebuster_token', token, 7);
 };
 
 const removeToken = (): void => {
-  localStorage.removeItem('jwt_token');
-  removeCookie('jwt_token');
+  localStorage.removeItem('ebuster_token');
+  removeCookie('ebuster_token');
 };
 
 // API функции
