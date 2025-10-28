@@ -17,13 +17,15 @@ import {
   Code,
   FileText,
   Crown,
-  Zap
+  Zap,
+  History
 } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
 import StarRating from './StarRating';
 import RatingModal from './RatingModal';
 import { useToast } from '../hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
+import { ScriptChangelog } from '@/lk/ScriptChangelog';
 
 interface Script {
   id: string;
@@ -56,6 +58,8 @@ const ScriptsList: React.FC = () => {
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
+  const [changelogScript, setChangelogScript] = useState<{ id: string; name: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
@@ -689,7 +693,18 @@ const ScriptsList: React.FC = () => {
 
                 {/* Кнопки действий */}
                 <div className="flex gap-2 pt-2">
-                  {/* Убираем кнопку просмотра кода для опубликованных скриптов */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setChangelogScript({ id: script.id, name: script.title });
+                      setIsChangelogDialogOpen(true);
+                    }}
+                    className="flex-1"
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    История
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -831,6 +846,19 @@ const ScriptsList: React.FC = () => {
         scriptTitle={selectedScript?.title || ''}
         onRatingSubmit={handleRatingSubmit}
       />
+
+      {/* Диалог истории версий */}
+      {changelogScript && (
+        <ScriptChangelog
+          isOpen={isChangelogDialogOpen}
+          onClose={() => {
+            setIsChangelogDialogOpen(false);
+            setChangelogScript(null);
+          }}
+          scriptId={changelogScript.id}
+          scriptName={changelogScript.name}
+        />
+      )}
     </div>
   );
 };

@@ -242,7 +242,8 @@ const DashboardContent = () => {
             ...prev,
             name: data.data.full_name || prev.name,
             email: data.data.email || prev.email,
-            avatar: data.data.avatar_url || prev.avatar
+            avatar: data.data.avatar_url || prev.avatar,
+            plan: data.data.subscription_plan || prev.plan
           }));
         }
       }

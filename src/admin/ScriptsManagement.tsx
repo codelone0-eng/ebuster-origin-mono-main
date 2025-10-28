@@ -20,10 +20,12 @@ import {
   Calendar,
   User,
   FileText,
-  Settings
+  Settings,
+  History
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { API_CONFIG } from '@/config/api';
+import { ScriptVersionManager } from './ScriptVersionManager';
 
 interface Script {
   id: string;
@@ -66,22 +68,34 @@ const ScriptsManagement: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   // Форма для создания/редактирования скрипта
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    code: string;
+    category: string;
+    tags: string[];
+    author_name: string;
+    is_featured: boolean;
+    is_premium: boolean;
+    file_type: string;
+    status: 'draft' | 'published' | 'archived' | 'banned';
+  }>({
     title: '',
     description: '',
     code: '',
     category: 'general',
-    tags: [] as string[],
+    tags: [],
     author_name: 'Admin',
     is_featured: false,
     is_premium: false,
     file_type: 'javascript',
-    status: 'draft' as const
+    status: 'draft'
   });
 
   // Загрузка данных
@@ -194,7 +208,7 @@ const ScriptsManagement: React.FC = () => {
 
   // Сброс формы
   const resetForm = () => {
-    const defaultFormData = {
+    const defaultFormData: typeof formData = {
       title: '',
       description: '',
       code: '',
@@ -204,7 +218,7 @@ const ScriptsManagement: React.FC = () => {
       is_featured: false,
       is_premium: false,
       file_type: 'javascript',
-      status: 'draft'
+      status: 'draft' as 'draft' | 'published' | 'archived' | 'banned'
     };
     console.log('Resetting form to:', defaultFormData);
     setFormData(defaultFormData);
@@ -421,6 +435,17 @@ const ScriptsManagement: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => {
+                      setSelectedScript(script);
+                      setIsVersionDialogOpen(true);
+                    }}
+                    title="История версий"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleDeleteScript(script.id)}
                     className="text-red-600 hover:text-red-700"
                   >
@@ -548,13 +573,39 @@ const ScriptsManagement: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Диалог управления версиями */}
+      <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Управление версиями: {selectedScript?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedScript && (
+            <ScriptVersionManager 
+              scriptId={selectedScript.id}
+              currentVersion={selectedScript.version}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 // Компонент формы для создания/редактирования скрипта
 interface ScriptFormProps {
-  formData: any;
+  formData: {
+    title: string;
+    description: string;
+    code: string;
+    category: string;
+    tags: string[];
+    author_name: string;
+    is_featured: boolean;
+    is_premium: boolean;
+    file_type: string;
+    status: 'draft' | 'published' | 'archived' | 'banned';
+  };
   setFormData: (data: any) => void;
   onSubmit: () => void;
   submitText: string;
