@@ -282,7 +282,8 @@ const ScriptsList: React.FC = () => {
         name: scriptData.title,
         code: scriptData.code,
         url: window.location.href,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        script_id: scriptData.id  // ВАЖНО! ID скрипта из БД для синхронизации
       };
       
       if (typeof (window as any).EbusterBridge !== 'undefined') {
