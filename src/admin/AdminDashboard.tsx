@@ -22,6 +22,8 @@ import ScriptsManagement from './ScriptsManagement';
 import SubscriptionsManagement from './SubscriptionsManagement';
 import SystemMonitorChart from './SystemMonitorChart';
 import { ReferralManagement } from './ReferralManagement';
+import { AdminSidebar } from './AdminSidebar';
+import CategoriesManagement from './CategoriesManagement';
 import { 
   Users, 
   Settings, 
@@ -488,7 +490,11 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <ParticleBackground />
-      <div className="relative z-content">
+      
+      {/* Sidebar */}
+      <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      <div className="relative z-content ml-64">
         <Header />
         
         <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -632,18 +638,8 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Табы */}
+          {/* Контент табов */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-8">
-              <TabsTrigger value="overview">Обзор</TabsTrigger>
-              <TabsTrigger value="users">Пользователи</TabsTrigger>
-              <TabsTrigger value="scripts">Скрипты</TabsTrigger>
-              <TabsTrigger value="subscriptions">Подписки</TabsTrigger>
-              <TabsTrigger value="referrals">Рефералы</TabsTrigger>
-              <TabsTrigger value="tickets">Тикеты</TabsTrigger>
-              <TabsTrigger value="logs">Логи</TabsTrigger>
-              <TabsTrigger value="charts">Графики</TabsTrigger>
-            </TabsList>
 
             {/* Обзор */}
             <TabsContent value="overview" className="space-y-6">
@@ -867,6 +863,11 @@ const AdminDashboard = () => {
             {/* Скрипты */}
             <TabsContent value="scripts" className="space-y-6">
               <ScriptsManagement />
+            </TabsContent>
+
+            {/* Категории */}
+            <TabsContent value="categories" className="space-y-6">
+              <CategoriesManagement />
             </TabsContent>
 
             {/* Подписки */}

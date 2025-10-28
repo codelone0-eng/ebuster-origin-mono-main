@@ -19,6 +19,7 @@ interface RegisterRequest {
   email: string;
   password: string;
   fullName?: string;
+  referralCode?: string;
 }
 
 interface LoginRequest {
@@ -61,7 +62,7 @@ const generateOtpCode = (): string => {
 // Регистрация пользователя
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { email, password, fullName }: RegisterRequest = req.body;
+    const { email, password, fullName, referralCode }: RegisterRequest = req.body;
 
     // Валидация
     if (!email || !password) {
@@ -136,6 +137,25 @@ export const registerUser = async (req: Request, res: Response) => {
         });
       }
       newUser = data;
+      
+      // Обработка реферального кода
+      if (referralCode && supabase) {
+        try {
+          const { data: referralResult, error: referralError } = await supabase
+            .rpc('process_referral', {
+              new_user_id: newUser.id,
+              referral_code_used: referralCode
+            });
+          
+          if (referralError) {
+            console.error('Referral processing error:', referralError);
+          } else if (referralResult) {
+            console.log('✅ Referral processed successfully for user:', newUser.id);
+          }
+        } catch (refError) {
+          console.error('Referral processing exception:', refError);
+        }
+      }
     } else {
       // Создание в in-memory
       newUser = {
@@ -145,11 +165,7 @@ export const registerUser = async (req: Request, res: Response) => {
         full_name: fullName,
         created_at: new Date().toISOString(),
         email_confirmed: false,
-        confirmation_token: otpCode,
-        otp_expiry: otpExpiry.toISOString(),
-        status: 'inactive',
-        downloads: 0,
-        scripts: 0
+        confirmation_token: otpCode
       };
       users.push(newUser);
     }

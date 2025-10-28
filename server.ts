@@ -12,6 +12,8 @@ import scriptsRoutes from './src/api/scripts.routes';
 import scriptVersionsRoutes from './src/api/script-versions.routes';
 import extensionAuthRoutes from './src/api/extension-auth.routes';
 import referralRoutes from './src/api/referral.routes';
+import categoriesRoutes from './src/api/categories.routes';
+import ticketsRoutes from './src/api/tickets.routes';
 import { startAllCronJobs } from './src/api/cron-jobs';
 
 const app = express();
@@ -50,6 +52,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/scripts', scriptsRoutes);
 app.use('/api/script-versions', scriptVersionsRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/tickets', ticketsRoutes);
 app.use('/api', extensionAuthRoutes);
 
 // Health check endpoint

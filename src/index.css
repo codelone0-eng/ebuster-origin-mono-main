@@ -185,6 +185,10 @@
     @apply border-border;
   }
 
+  html {
+    overflow-y: scroll; /* Всегда показываем scrollbar для предотвращения прыжков */
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
