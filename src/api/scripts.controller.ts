@@ -683,9 +683,10 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      scripts: installedScripts?.map((item: any) => ({
-        ...item.scripts,
-        installed_at: item.installed_at
+      data: installedScripts?.map((item: any) => ({
+        script_id: item.script_id,
+        installed_at: item.installed_at,
+        script: item.scripts
       })) || []
     });
   } catch (error) {
@@ -703,7 +704,10 @@ export const installScriptForUser = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const { id: scriptId } = req.params;
     
+    console.log('📥 [installScriptForUser] Установка скрипта:', { userId, scriptId });
+    
     if (!userId) {
+      console.log('❌ [installScriptForUser] Пользователь не авторизован');
       return res.status(401).json({
         success: false,
         error: 'Unauthorized'
@@ -727,6 +731,7 @@ export const installScriptForUser = async (req: Request, res: Response) => {
     }
 
     // Добавляем скрипт в установленные
+    console.log('💾 [installScriptForUser] Сохраняем в user_scripts...');
     const { error: installError } = await supabase
       .from('user_scripts')
       .upsert({
@@ -737,7 +742,12 @@ export const installScriptForUser = async (req: Request, res: Response) => {
         onConflict: 'user_id,script_id'
       });
 
-    if (installError) throw installError;
+    if (installError) {
+      console.error('❌ [installScriptForUser] Ошибка сохранения:', installError);
+      throw installError;
+    }
+    
+    console.log('✅ [installScriptForUser] Скрипт сохранен в БД');
 
     // Увеличиваем счетчик загрузок
     await supabase.rpc('increment_downloads', { script_id: scriptId });

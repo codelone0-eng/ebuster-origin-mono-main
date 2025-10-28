@@ -1,3 +1,19 @@
+-- Таблица установленных скриптов пользователей
+CREATE TABLE IF NOT EXISTS user_scripts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+  script_id UUID NOT NULL REFERENCES scripts(id) ON DELETE CASCADE,
+  installed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  UNIQUE(user_id, script_id)
+);
+
+-- Индексы для user_scripts
+CREATE INDEX IF NOT EXISTS idx_user_scripts_user ON user_scripts(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_scripts_script ON user_scripts(script_id);
+CREATE INDEX IF NOT EXISTS idx_user_scripts_installed ON user_scripts(installed_at);
+
 -- Таблица версий скриптов
 CREATE TABLE IF NOT EXISTS script_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
