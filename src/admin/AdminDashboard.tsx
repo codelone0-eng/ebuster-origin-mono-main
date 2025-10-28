@@ -24,6 +24,7 @@ import SystemMonitorChart from './SystemMonitorChart';
 import { ReferralManagement } from './ReferralManagement';
 import { AdminSidebar } from './AdminSidebar';
 import CategoriesManagement from './CategoriesManagement';
+import MonitoringDashboard from './MonitoringDashboard';
 import { 
   Users, 
   Settings, 
@@ -522,122 +523,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Основные метрики */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Всего пользователей</p>
-                    <p className="text-2xl font-bold text-foreground">{systemStats?.totalUsers?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-primary">+{systemStats?.newUsersToday || '0'} сегодня</p>
-                  </div>
-                  <Users className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Активные скрипты</p>
-                    <p className="text-2xl font-bold text-foreground">{systemStats?.activeScripts || '0'}</p>
-                    <p className="text-xs text-primary">из {systemStats?.totalScripts || '0'}</p>
-                  </div>
-                  <FileText className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Загрузки сегодня</p>
-                    <p className="text-2xl font-bold text-foreground">{systemStats?.downloadsToday?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-primary">+12% к вчера</p>
-                  </div>
-                  <Download className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Система</p>
-                    <p className="text-2xl font-bold text-foreground">{systemStats?.systemUptime || '0%'}</p>
-                    <p className="text-xs text-primary">Uptime</p>
-                  </div>
-                  <Server className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Мониторинг системы */}
-          <Card className="bg-card/50 backdrop-blur-sm border border-border/30 mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Monitor className="h-5 w-5" />
-                Мониторинг системы
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">CPU</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.cpu.usage}%</span>
-                  </div>
-                  <Progress value={systemStatus.cpu.usage} className="h-2" />
-                  <div className="flex items-center gap-2">
-                    <Cpu className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">{systemStatus.cpu.model}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Память</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.memory.usage}%</span>
-                  </div>
-                  <Progress value={systemStatus.memory.usage} className="h-2" />
-                  <div className="flex items-center gap-2">
-                    <HardDrive className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">{systemStatus.memory.total} ({systemStatus.memory.used} used)</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Диск</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.disk.usage}%</span>
-                  </div>
-                  <Progress value={systemStatus.disk.usage} className="h-2" />
-                  <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">{systemStatus.disk.total}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Сеть</span>
-                    <span className="text-sm text-muted-foreground">{systemStatus.network.usage}%</span>
-                  </div>
-                  <Progress value={systemStatus.network.usage} className="h-2" />
-                  <div className="flex items-center gap-2">
-                    <Wifi className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">{systemStatus.network.speed}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Контент табов */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
@@ -878,6 +763,11 @@ const AdminDashboard = () => {
             {/* Рефералы */}
             <TabsContent value="referrals" className="space-y-6">
               <ReferralManagement />
+            </TabsContent>
+
+            {/* Мониторинг */}
+            <TabsContent value="monitoring" className="space-y-6">
+              <MonitoringDashboard systemStats={systemStats} systemStatus={systemStatus} />
             </TabsContent>
 
             {/* Тикеты */}
