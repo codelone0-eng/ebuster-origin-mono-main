@@ -1,3 +1,44 @@
+            {/* Графики */}
+            <TabsContent value="charts">
+              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Графики и мониторинг
+                  </CardTitle>
+                  <CardDescription>
+                    Реальное время мониторинга и журналы производительности
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6 lg:grid-cols-2">
+                  <SystemMonitorChart data={systemMonitor} loading={monitorLoading} />
+
+                  <Card className="bg-muted/10 border-border/30">
+                    <CardHeader>
+                      <CardTitle className="text-base">История мониторинга</CardTitle>
+                      <CardDescription>Последние события системы и метрики</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {systemLogs.slice(0, 10).map((log) => (
+                          <div key={log.id} className="border border-border/20 rounded-lg p-4 bg-background/60">
+                            <div className="flex items-center justify-between">
+                              <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
+                                {log.level}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(log.timestamp).toLocaleString('ru-RU')}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-2">{log.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -88,7 +129,33 @@ import {
   Code
 } from 'lucide-react';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+
 const AdminDashboard = () => {
+  const [confirmState, setConfirmState] = useState({
+    open: false,
+    title: '',
+    description: '',
+    confirmLabel: '',
+    confirmVariant: 'default',
+    onConfirm: () => {}
+  });
+
+  const ConfirmDialog = () => (
+    <Dialog open={confirmState.open} onOpenChange={open => setConfirmState(s => ({ ...s, open }))}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{confirmState.title}</DialogTitle>
+          <DialogDescription>{confirmState.description}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmState(s => ({ ...s, open: false }))}>Отмена</Button>
+          <Button variant={confirmState.confirmVariant as any} onClick={async () => { await confirmState.onConfirm(); setConfirmState(s => ({ ...s, open: false })); }}>{confirmState.confirmLabel || 'OK'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   const { toast } = useToast();
   const adminApi = useAdminApi();
   
@@ -335,71 +402,33 @@ const AdminDashboard = () => {
       return;
     }
     
-    // Используем customConfirm для подтверждения
     const userName = user?.full_name || user?.name || user?.email || 'этого пользователя';
-    const confirmMessage = `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`;
-    const confirmTitle = 'Удаление пользователя';
-    
-    // Создаем Promise для модального окна
-    const confirmed = await new Promise<boolean>((resolve) => {
-      const modal = document.getElementById('customConfirmModal');
-      const titleElement = document.getElementById('confirmTitle');
-      const messageElement = document.getElementById('confirmMessage');
-      const cancelBtn = document.getElementById('confirmCancel');
-      const okBtn = document.getElementById('confirmOk');
-      
-      if (!modal || !titleElement || !messageElement || !cancelBtn || !okBtn) {
-        // Fallback на стандартный confirm
-        resolve(confirm(confirmMessage));
-        return;
+    setConfirmState({
+      open: true,
+      title: 'Удаление пользователя',
+      description: `Вы уверены, что хотите удалить пользователя «${userName}»? Это действие нельзя отменить.`,
+      confirmLabel: 'Удалить',
+      confirmVariant: 'destructive',
+      onConfirm: async () => {
+        try {
+          const userId = typeof user === 'string' ? user : user.id;
+          setRecentUsers(prev => prev.filter(u => u.id !== userId));
+          const translation = notificationTranslations.admin.userDeleted;
+          toast({
+            title: translation.title,
+            description: translation.description,
+            variant: 'success'
+          });
+        } catch (error) {
+          toast({
+            title: 'Ошибка',
+            description: 'Не удалось удалить пользователя',
+            variant: 'destructive'
+          });
+        }
       }
-      
-      // Устанавливаем контент
-      titleElement.textContent = confirmTitle;
-      messageElement.textContent = confirmMessage;
-      okBtn.textContent = 'Удалить';
-      
-      // Показываем модальное окно
-      modal.style.display = 'flex';
-      
-      const handleCancel = () => {
-        modal.style.display = 'none';
-        cleanup();
-        resolve(false);
-      };
-      
-      const handleOk = () => {
-        modal.style.display = 'none';
-        cleanup();
-        resolve(true);
-      };
-      
-      const handleBackdropClick = (e: MouseEvent) => {
-        if (e.target === modal) {
-          handleCancel();
-        }
-      };
-      
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          handleCancel();
-        }
-      };
-      
-      const cleanup = () => {
-        cancelBtn.removeEventListener('click', handleCancel);
-        okBtn.removeEventListener('click', handleOk);
-        modal.removeEventListener('click', handleBackdropClick);
-        document.removeEventListener('keydown', handleEscape);
-      };
-      
-      cancelBtn.addEventListener('click', handleCancel);
-      okBtn.addEventListener('click', handleOk);
-      modal.addEventListener('click', handleBackdropClick);
-      document.addEventListener('keydown', handleEscape);
     });
-    
-    if (!confirmed) return;
+  };
     
     try {
       const userId = typeof user === 'string' ? user : user.id;
@@ -643,14 +672,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Графики мониторинга */}
-          <div className="mb-8">
-            <SystemMonitorChart />
-          </div>
 
           {/* Табы */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="overview">Обзор</TabsTrigger>
               <TabsTrigger value="users">Пользователи</TabsTrigger>
               <TabsTrigger value="scripts">Скрипты</TabsTrigger>
@@ -658,6 +683,7 @@ const AdminDashboard = () => {
               <TabsTrigger value="referrals">Рефералы</TabsTrigger>
               <TabsTrigger value="tickets">Тикеты</TabsTrigger>
               <TabsTrigger value="logs">Логи</TabsTrigger>
+              <TabsTrigger value="charts">Графики</TabsTrigger>
             </TabsList>
 
             {/* Обзор */}
@@ -755,41 +781,13 @@ const AdminDashboard = () => {
                           <span className="text-sm font-medium">25%</span>
                         </div>
                       </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Последние активности */}
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Последние активности
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {systemLogs.slice(0, 5).map((log) => (
-                      <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                        <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                          {log.level}
-                        </Badge>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground">{log.message}</p>
-                          <div className="flex items-center gap-4 mt-1">
-                            <span className="text-xs text-muted-foreground">{log.timestamp}</span>
-                            <span className="text-xs text-muted-foreground">IP: {log.ip}</span>
-                            {log.user !== 'System' && (
-                              <span className="text-xs text-muted-foreground">Пользователь: {log.user}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             {/* Пользователи */}
@@ -1020,16 +1018,7 @@ const AdminDashboard = () => {
 
           {/* Быстрые действия */}
           <Card className="bg-card/50 backdrop-blur-sm border border-border/30 mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Быстрые действия
-              </CardTitle>
-              <CardDescription>
-                Часто используемые функции администрирования
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4">
                 <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
                   <DialogTrigger asChild>
