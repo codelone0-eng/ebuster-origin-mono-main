@@ -127,6 +127,45 @@ const ScriptsList: React.FC = () => {
     loadInstalledScripts();
   }, [searchTerm, categoryFilter, sortBy, sortOrder]);
 
+  // Слушатель событий от расширения для синхронизации
+  useEffect(() => {
+    const handleExtensionSync = async (event: MessageEvent) => {
+      if (event.data?.type === 'EBUSTER_SCRIPT_UNINSTALLED') {
+        const { scriptId } = event.data;
+        console.log('🗑️ Получено событие удаления скрипта:', scriptId);
+        
+        // Удаляем из локального состояния
+        setInstalledScriptIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(scriptId);
+          return newSet;
+        });
+        
+        // Удаляем на сервере
+        try {
+          const token = localStorage.getItem('ebuster_token');
+          if (token) {
+            await fetch(`${API_CONFIG.SCRIPTS_URL}/user/uninstall/${scriptId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            console.log('✅ Скрипт удален на сервере');
+          }
+        } catch (error) {
+          console.error('❌ Ошибка удаления скрипта на сервере:', error);
+        }
+        
+        // Перезагружаем список
+        loadInstalledScripts();
+      }
+    };
+
+    window.addEventListener('message', handleExtensionSync);
+    return () => window.removeEventListener('message', handleExtensionSync);
+  }, []);
+
   // Проверка наличия расширения Ebuster
   const checkExtensionInstalled = (): Promise<boolean> => {
     return new Promise((resolve) => {

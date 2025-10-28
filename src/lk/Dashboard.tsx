@@ -317,6 +317,50 @@ const DashboardContent = () => {
       loadInstalledScripts();
     }
   }, [authUser?.id]);
+  
+  // Слушатель событий от расширения для синхронизации удаления
+  useEffect(() => {
+    const handleExtensionSync = async (event: MessageEvent) => {
+      if (event.data?.type === 'EBUSTER_SCRIPT_UNINSTALLED') {
+        const { scriptId } = event.data;
+        console.log('🗑️ [Dashboard] Получено событие удаления скрипта:', scriptId);
+        
+        // Удаляем на сервере
+        try {
+          const token = localStorage.getItem('ebuster_token');
+          if (token && authUser?.id) {
+            await fetch(`https://api.ebuster.ru/api/scripts/user/uninstall/${scriptId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            console.log('✅ [Dashboard] Скрипт удален на сервере');
+            
+            // Перезагружаем список установленных скриптов
+            const response = await fetch('https://api.ebuster.ru/api/scripts/user/installed', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data) {
+                setInstalledScripts(data.data);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('❌ [Dashboard] Ошибка удаления скрипта:', error);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleExtensionSync);
+    return () => window.removeEventListener('message', handleExtensionSync);
+  }, [authUser?.id]);
+  
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);

@@ -772,7 +772,10 @@ export const uninstallScriptForUser = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const { id: scriptId } = req.params;
     
+    console.log('🗑️ [uninstallScriptForUser] Удаление скрипта:', { userId, scriptId });
+    
     if (!userId) {
+      console.log('❌ [uninstallScriptForUser] Пользователь не авторизован');
       return res.status(401).json({
         success: false,
         error: 'Unauthorized'
@@ -787,7 +790,12 @@ export const uninstallScriptForUser = async (req: Request, res: Response) => {
       .eq('user_id', userId)
       .eq('script_id', scriptId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ [uninstallScriptForUser] Ошибка удаления:', error);
+      throw error;
+    }
+    
+    console.log('✅ [uninstallScriptForUser] Скрипт удален из БД');
 
     res.json({
       success: true,
