@@ -281,8 +281,8 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
     );
   }
 
-  const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig];
-  const priorityInfo = priorityConfig[ticket.priority as keyof typeof priorityConfig];
+  const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig] || { label: ticket.status, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
+  const priorityInfo = priorityConfig[ticket.priority as keyof typeof priorityConfig] || { label: ticket.priority, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
 
   return (
     <div className="space-y-6">
