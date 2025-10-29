@@ -47,19 +47,21 @@ CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.support_tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_assigned ON public.support_tickets(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_tickets_created ON public.support_tickets(created_at DESC);
 
--- 3. Таблица комментариев к тикетам
-CREATE TABLE IF NOT EXISTS public.ticket_comments (
+-- 3. Таблица сообщений к тикетам
+CREATE TABLE IF NOT EXISTS public.ticket_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ticket_id UUID NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES public.auth_users(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES public.auth_users(id) ON DELETE CASCADE,
     message TEXT NOT NULL,
     is_internal BOOLEAN DEFAULT false,
+    is_system BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Индексы для комментариев
-CREATE INDEX IF NOT EXISTS idx_comments_ticket ON public.ticket_comments(ticket_id);
-CREATE INDEX IF NOT EXISTS idx_comments_created ON public.ticket_comments(created_at);
+-- Индексы для сообщений
+CREATE INDEX IF NOT EXISTS idx_messages_ticket ON public.ticket_messages(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created ON public.ticket_messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_author ON public.ticket_messages(author_id);
 
 -- 4. Добавляем поля для реферальной системы в auth_users (если не существуют)
 DO $$ 
@@ -184,7 +186,7 @@ WHERE referral_code IS NULL;
 -- 10. Row Level Security (RLS) политики
 ALTER TABLE public.script_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ticket_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ticket_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_history ENABLE ROW LEVEL SECURITY;
 
 -- Политики для категорий (все могут читать, только админы могут изменять)
@@ -220,8 +222,8 @@ CREATE POLICY "Admins can update tickets" ON public.support_tickets
         )
     );
 
--- Политики для комментариев
-CREATE POLICY "Users can view comments on their tickets" ON public.ticket_comments
+-- Политики для сообщений
+CREATE POLICY "Users can view messages on their tickets" ON public.ticket_messages
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.support_tickets
@@ -235,8 +237,8 @@ CREATE POLICY "Users can view comments on their tickets" ON public.ticket_commen
         )
     );
 
-CREATE POLICY "Users can create comments" ON public.ticket_comments
-    FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can create messages" ON public.ticket_messages
+    FOR INSERT WITH CHECK (author_id = auth.uid());
 
 -- Политики для истории рефералов
 CREATE POLICY "Users can view own referral history" ON public.referral_history
@@ -250,5 +252,5 @@ CREATE POLICY "Users can view own referral history" ON public.referral_history
 
 COMMENT ON TABLE public.script_categories IS 'Категории скриптов для организации и фильтрации';
 COMMENT ON TABLE public.support_tickets IS 'Тикеты технической поддержки';
-COMMENT ON TABLE public.ticket_comments IS 'Комментарии к тикетам поддержки';
+COMMENT ON TABLE public.ticket_messages IS 'Сообщения к тикетам поддержки';
 COMMENT ON TABLE public.referral_history IS 'История реферальных вознаграждений';

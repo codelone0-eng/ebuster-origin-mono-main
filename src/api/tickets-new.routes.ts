@@ -8,7 +8,6 @@ import {
   updateTicket,
   addMessage,
   getTicketMessages,
-  getTicketHistory,
   getTicketStats,
   getSupportTeams
 } from './tickets-new.controller';
@@ -25,6 +24,5 @@ router.post('/', authenticateUser, createTicket); // Создать тикет
 router.patch('/:id', authenticateUser, updateTicket); // Обновить тикет (админ/агент)
 router.post('/:id/messages', authenticateUser, addMessage); // Добавить сообщение
 router.get('/:id/messages', authenticateUser, getTicketMessages); // Получить сообщения
-router.get('/:id/history', authenticateUser, getTicketHistory); // История изменений (админ/агент)
 
 export default router;

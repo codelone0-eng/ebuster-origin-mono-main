@@ -14,26 +14,6 @@ const getSupabase = () => {
   });
 };
 
-// Вспомогательная функция для логирования истории
-const logHistory = async (supabase: any, ticketId: number, userId: number, fieldName: string, oldValue: any, newValue: any) => {
-  await supabase.from('ticket_history').insert({
-    ticket_id: ticketId,
-    user_id: userId,
-    field_name: fieldName,
-    old_value: oldValue?.toString() || null,
-    new_value: newValue?.toString() || null
-  });
-};
-
-// Создать системное сообщение
-const createSystemMessage = async (supabase: any, ticketId: number, message: string) => {
-  await supabase.from('ticket_messages').insert({
-    ticket_id: ticketId,
-    message,
-    is_system: true,
-    is_internal: false
-  });
-};
 
 // Получить тикеты пользователя (клиент видит только свои)
 export const getUserTickets = async (req: Request, res: Response) => {
@@ -234,50 +214,29 @@ export const updateTicket = async (req: Request, res: Response) => {
     
     const updateData: any = {};
     
-    // Обновляем поля и логируем изменения
-    if (status && status !== oldTicket.status) {
+    // Обновляем поля
+    if (status !== undefined && status !== oldTicket.status) {
       updateData.status = status;
-      await logHistory(supabase, Number(id), userId, 'status', oldTicket.status, status);
-      await createSystemMessage(supabase, Number(id), `Статус изменен: ${oldTicket.status} → ${status}`);
+      updateData.updated_at = new Date().toISOString();
       
-      if (status === 'resolved' && !oldTicket.resolved_at) {
-        updateData.resolved_at = new Date().toISOString();
-      }
       if (status === 'closed' && !oldTicket.closed_at) {
         updateData.closed_at = new Date().toISOString();
       }
-      if (status === 'open' && !oldTicket.first_response_at) {
-        updateData.first_response_at = new Date().toISOString();
-      }
     }
     
-    if (assigned_agent_id !== undefined && assigned_agent_id !== oldTicket.assigned_agent_id) {
-      updateData.assigned_agent_id = assigned_agent_id;
-      await logHistory(supabase, Number(id), userId, 'assigned_agent_id', oldTicket.assigned_agent_id, assigned_agent_id);
-      
-      if (assigned_agent_id) {
-        const { data: agent } = await supabase
-          .from('auth_users')
-          .select('full_name')
-          .eq('id', assigned_agent_id)
-          .single();
-        await createSystemMessage(supabase, Number(id), `Тикет назначен на ${agent?.full_name || 'агента'}`);
-      }
+    if (assigned_agent_id !== undefined && assigned_agent_id !== oldTicket.assigned_to) {
+      updateData.assigned_to = assigned_agent_id;
+      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
     }
     
     if (priority && priority !== oldTicket.priority) {
       updateData.priority = priority;
-      await logHistory(supabase, Number(id), userId, 'priority', oldTicket.priority, priority);
-      await createSystemMessage(supabase, Number(id), `Приоритет изменен: ${oldTicket.priority} → ${priority}`);
-    }
-    
-    if (team_id && team_id !== oldTicket.team_id) {
-      updateData.team_id = team_id;
-      await logHistory(supabase, Number(id), userId, 'team_id', oldTicket.team_id, team_id);
+      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
     }
     
     if (tags) {
       updateData.tags = tags;
+      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
     }
     
     if (Object.keys(updateData).length === 0) {
@@ -322,7 +281,7 @@ export const addMessage = async (req: Request, res: Response) => {
     
     const { data: ticket } = await supabase
       .from('support_tickets')
-      .select('user_id, status, first_response_at')
+      .select('user_id, status, assigned_to')
       .eq('id', id)
       .single();
 
@@ -334,13 +293,13 @@ export const addMessage = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const { data, error } = await supabase
+    const { data: newMessage, error } = await supabase
       .from('ticket_messages')
       .insert({
         ticket_id: id,
         author_id: userId,
         message,
-        is_internal: isInternalNote,
+        is_internal: isInternalNote || false,
         is_system: false
       })
       .select(`
@@ -351,15 +310,16 @@ export const addMessage = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    const updateData: any = {};
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
     
-    if ((userRole === 'admin' || userRole === 'agent') && !ticket.first_response_at) {
-      updateData.first_response_at = new Date().toISOString();
+    if (ticket.status === 'new' && ticket.assigned_to) {
+      updateData.status = 'open';
     }
     
     if (ticket.status === 'pending_customer' && ticket.user_id === userId) {
       updateData.status = 'open';
-      await createSystemMessage(supabase, Number(id), 'Клиент ответил, статус изменен на "Открыт"');
     }
 
     if (Object.keys(updateData).length > 0) {
@@ -369,7 +329,7 @@ export const addMessage = async (req: Request, res: Response) => {
         .eq('id', id);
     }
 
-    res.json({ success: true, data });
+    res.json({ success: true, data: newMessage });
   } catch (error: any) {
     console.error('Add message error:', error);
     res.status(500).json({ error: error.message });
@@ -413,49 +373,20 @@ export const getTicketMessages = async (req: Request, res: Response) => {
 
     // Клиенты не видят внутренние заметки
     if (userRole !== 'admin' && userRole !== 'agent') {
-      query = query.eq('is_internal', false);
+      query = query.or('is_internal.eq.false,is_internal.is.null');
     }
 
     const { data, error } = await query.order('created_at', { ascending: true });
 
     if (error) throw error;
 
-    res.json({ success: true, data });
+    res.json({ success: true, data: data || [] });
   } catch (error: any) {
     console.error('Get ticket messages error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Получить историю изменений тикета
-export const getTicketHistory = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
-    const { id } = req.params;
-    
-    if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('ticket_history')
-      .select(`
-        *,
-        user:auth_users(id, full_name, email)
-      `)
-      .eq('ticket_id', id)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    res.json({ success: true, data });
-  } catch (error: any) {
-    console.error('Get ticket history error:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
 
 // Получить статистику (dashboard)
 export const getTicketStats = async (req: Request, res: Response) => {

@@ -125,7 +125,7 @@ const TicketsManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('ebuster_token');
       
-      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/comments`, {
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -134,7 +134,7 @@ const TicketsManagement: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        setComments(data.data);
+        setComments(data.data || []);
       }
     } catch (error) {
       console.error('Load comments error:', error);
@@ -185,14 +185,13 @@ const TicketsManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('jwt_token');
       
-      const response = await fetch('https://api.ebuster.ru/api/tickets/comments', {
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${selectedTicket.id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          ticket_id: selectedTicket.id,
           message: newComment,
           is_internal: false
         })
