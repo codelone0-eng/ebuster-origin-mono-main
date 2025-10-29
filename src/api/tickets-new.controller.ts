@@ -49,12 +49,7 @@ export const getUserTickets = async (req: Request, res: Response) => {
     
     let query = supabase
       .from('tickets')
-      .select(`
-        *,
-        customer:auth_users!customer_id(id, full_name, email, avatar_url),
-        assigned_agent:auth_users!assigned_agent_id(id, full_name, email),
-        team:support_teams(id, name)
-      `)
+      .select('*')
       .eq('is_deleted', false);
 
     // Клиенты видят только свои тикеты
@@ -96,12 +91,7 @@ export const getAllTickets = async (req: Request, res: Response) => {
     
     let query = supabase
       .from('tickets')
-      .select(`
-        *,
-        customer:auth_users!customer_id(id, full_name, email, avatar_url),
-        assigned_agent:auth_users!assigned_agent_id(id, full_name, email),
-        team:support_teams(id, name)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('is_deleted', false);
     
     // Агенты видят только тикеты своих команд
@@ -157,12 +147,7 @@ export const getTicket = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     const { data: ticket, error } = await supabase
       .from('tickets')
-      .select(`
-        *,
-        customer:auth_users!customer_id(id, full_name, email, avatar_url),
-        assigned_agent:auth_users!assigned_agent_id(id, full_name, email),
-        team:support_teams(id, name)
-      `)
+      .select('*')
       .eq('id', id)
       .eq('is_deleted', false)
       .single();
@@ -213,11 +198,7 @@ export const createTicket = async (req: Request, res: Response) => {
         status: 'new',
         tags: tags || []
       })
-      .select(`
-        *,
-        customer:auth_users!customer_id(id, full_name, email),
-        team:support_teams(id, name)
-      `)
+      .select('*')
       .single();
 
     if (ticketError) throw ticketError;
@@ -321,12 +302,7 @@ export const updateTicket = async (req: Request, res: Response) => {
       .from('tickets')
       .update(updateData)
       .eq('id', id)
-      .select(`
-        *,
-        customer:auth_users!customer_id(id, full_name, email),
-        assigned_agent:auth_users!assigned_agent_id(id, full_name, email),
-        team:support_teams(id, name)
-      `)
+      .select('*')
       .single();
 
     if (error) throw error;

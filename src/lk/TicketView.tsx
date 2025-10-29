@@ -38,7 +38,10 @@ interface Ticket {
   created_at: string;
   updated_at: string;
   tags: string[];
-  customer: {
+  customer_id: number;
+  assigned_agent_id?: number;
+  team_id?: number;
+  customer?: {
     id: number;
     full_name: string;
     email: string;
@@ -474,12 +477,12 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
                 </label>
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={ticket.customer.avatar_url} />
-                    <AvatarFallback>{ticket.customer.full_name[0]}</AvatarFallback>
+                    <AvatarImage src={ticket.customer?.avatar_url} />
+                    <AvatarFallback>{ticket.customer?.full_name?.[0] || '?'}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="text-sm font-medium">{ticket.customer.full_name}</div>
-                    <div className="text-xs text-muted-foreground">{ticket.customer.email}</div>
+                    <div className="text-sm font-medium">{ticket.customer?.full_name || `ID: ${ticket.customer_id}`}</div>
+                    <div className="text-xs text-muted-foreground">{ticket.customer?.email || ''}</div>
                   </div>
                 </div>
               </div>

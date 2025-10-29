@@ -33,7 +33,10 @@ interface Ticket {
   priority: string;
   created_at: string;
   updated_at: string;
-  customer: {
+  customer_id: number;
+  assigned_agent_id?: number;
+  team_id?: number;
+  customer?: {
     id: number;
     full_name: string;
     email: string;
@@ -385,7 +388,7 @@ export const TicketsSystem: React.FC = () => {
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Users className="h-3 w-3" />
-                              {ticket.customer.full_name}
+                              {ticket.customer?.full_name || `ID: ${ticket.customer_id}`}
                             </span>
                             {ticket.team && (
                               <span className="flex items-center gap-1">
