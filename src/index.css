@@ -186,20 +186,30 @@
   }
 
   html {
-    overflow-y: scroll; /* Всегда показываем scrollbar для предотвращения прыжков */
-    overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+    overflow-y: scroll !important; /* Всегда показываем scrollbar для предотвращения прыжков */
+    overflow-x: hidden !important; /* Предотвращаем горизонтальный скролл */
     min-height: 100vh; /* Гарантируем высоту для scrollbar */
+    width: 100vw; /* Фиксируем ширину */
   }
   
   body {
     /* Фиксируем body чтобы предотвратить прыжки */
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+    width: 100%;
+    position: relative;
   }
   
   /* Дополнительный фикс для dropdown контейнеров */
-  .dropdown-content {
-    position: fixed;
+  .dropdown-content,
+  [data-radix-popper-content-wrapper],
+  [data-radix-select-viewport] {
+    position: fixed !important;
     z-index: 50;
+  }
+  
+  /* Предотвращаем прыжки при открытии модальных окон */
+  [data-radix-portal] {
+    position: fixed;
   }
 
   body {

@@ -12,14 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AvatarUpload } from '@/components/AvatarUpload';
 import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
-import { AvatarUpload } from './AvatarUpload';
+import { AvatarUpload } from '@/components/AvatarUpload';
 import { ReferralProgram } from './ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
 import TicketsUser from './TicketsUser';
+import { ScriptChangelog } from './ScriptChangelog';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
@@ -537,27 +537,27 @@ const DashboardContent = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-8">
               <TabsTrigger value="scripts" className="flex items-center gap-2">
-                <Library className="h-5 w-5" />
+                <Library className="h-5 w-5 flex-shrink-0" />
                 {t('header.dashboard.tabs.scripts')}
               </TabsTrigger>
               <TabsTrigger value="installed" className="flex items-center gap-2">
-                <Download className="h-5 w-5" />
+                <Download className="h-5 w-5 flex-shrink-0" />
                 {t('header.dashboard.tabs.installed')}
               </TabsTrigger>
               <TabsTrigger value="referral" className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
+                <Star className="h-5 w-5 flex-shrink-0" />
                 Рефералы
               </TabsTrigger>
               <TabsTrigger value="support" className="flex items-center gap-2">
-                <Headphones className="h-5 w-5" />
+                <Headphones className="h-5 w-5 flex-shrink-0" />
                 {t('header.dashboard.tabs.support')}
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 flex-shrink-0" />
                 {t('header.dashboard.tabs.profile')}
               </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+                <Settings className="h-5 w-5 flex-shrink-0" />
                 {t('header.dashboard.tabs.settings')}
               </TabsTrigger>
             </TabsList>
@@ -658,7 +658,7 @@ const DashboardContent = () => {
             <TabsContent value="profile" className="space-y-6">
               <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.profile.personalInfo')}</h2>
               
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="max-w-2xl mx-auto">
                 <Card>
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -700,7 +700,15 @@ const DashboardContent = () => {
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+            </TabsContent>
 
+            {/* Настройки */}
+            <TabsContent value="settings" className="space-y-6">
+              <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Безопасность */}
                 <Card>
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -739,8 +747,8 @@ const DashboardContent = () => {
                           <span className="text-sm text-muted-foreground">
                             {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
                           </span>
-              </div>
-            </div>
+                        </div>
+                      </div>
                     </div>
                     <Button variant="outline" className="w-full">
                       <LogOut className="h-4 w-4 mr-2" />
@@ -748,14 +756,8 @@ const DashboardContent = () => {
                     </Button>
                   </CardContent>
                 </Card>
-              </div>
-            </TabsContent>
 
-            {/* Настройки */}
-            <TabsContent value="settings" className="space-y-6">
-              <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
-              
-              <div className="grid md:grid-cols-2 gap-6">
+                {/* Общие настройки */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
