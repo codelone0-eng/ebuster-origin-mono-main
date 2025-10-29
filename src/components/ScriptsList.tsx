@@ -78,7 +78,7 @@ const ScriptsList: React.FC = () => {
       });
 
       if (searchTerm) params.append('search', searchTerm);
-      if (categoryFilter) params.append('category', categoryFilter);
+      if (categoryFilter && categoryFilter !== 'all') params.append('category', categoryFilter);
 
       const token = localStorage.getItem('ebuster_token');
       const headers: Record<string, string> = {};

@@ -16,9 +16,10 @@ import { AvatarUpload } from '@/components/AvatarUpload';
 import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
-import { ReferralProgram } from '@/lk/ReferralProgram';
-import { ScriptChangelog } from '@/lk/ScriptChangelog';
+import { AvatarUpload } from './AvatarUpload';
+import { ReferralProgram } from './ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
+import TicketsUser from './TicketsUser';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
@@ -121,89 +122,6 @@ const mockScripts = [
   }
 ];
 
-const mockTickets = [
-  {
-    id: 1,
-    subject: "Проблема с установкой скрипта",
-    description: "Не могу установить скрипт Auto Form Filler, выдает ошибку при загрузке",
-    status: "open",
-    priority: "high",
-    category: "technical",
-    createdAt: "2024-01-20T09:15:00Z",
-    updatedAt: "2024-01-20T14:30:00Z",
-    attachments: ["error_log.txt", "screenshot.png"],
-    messages: [
-      {
-        id: 1,
-        author: "Александр Петров",
-        message: "Не могу установить скрипт Auto Form Filler, выдает ошибку при загрузке",
-        timestamp: "2024-01-20T09:15:00Z",
-        isUser: true
-      },
-      {
-        id: 2,
-        author: "Support Team",
-        message: "Здравствуйте! Мы получили ваш запрос. Пожалуйста, приложите скриншот ошибки и логи для более детального анализа.",
-        timestamp: "2024-01-20T10:30:00Z",
-        isUser: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    subject: "Запрос на новую функцию",
-    description: "Хотелось бы добавить возможность экспорта настроек скриптов",
-    status: "in_progress",
-    priority: "medium",
-    category: "feature_request",
-    createdAt: "2024-01-18T16:45:00Z",
-    updatedAt: "2024-01-19T11:20:00Z",
-    attachments: [],
-    messages: [
-      {
-        id: 3,
-        author: "Александр Петров",
-        message: "Хотелось бы добавить возможность экспорта настроек скриптов",
-        timestamp: "2024-01-18T16:45:00Z",
-        isUser: true
-      },
-      {
-        id: 4,
-        author: "Product Team",
-        message: "Спасибо за предложение! Мы добавили эту функцию в наш roadmap. Ожидайте обновления в следующем релизе.",
-        timestamp: "2024-01-19T11:20:00Z",
-        isUser: false
-      }
-    ]
-  },
-  {
-    id: 3,
-    subject: "Проблема с производительностью",
-    description: "Скрипт Dark Mode Enforcer замедляет работу браузера",
-    status: "resolved",
-    priority: "high",
-    category: "bug_report",
-    createdAt: "2024-01-15T12:00:00Z",
-    updatedAt: "2024-01-16T15:45:00Z",
-    attachments: ["performance_report.pdf"],
-    messages: [
-      {
-        id: 5,
-        author: "Александр Петров",
-        message: "Скрипт Dark Mode Enforcer замедляет работу браузера",
-        timestamp: "2024-01-15T12:00:00Z",
-        isUser: true
-      },
-      {
-        id: 6,
-        author: "Dev Team",
-        message: "Проблема была исправлена в версии 2.0.1. Пожалуйста, обновите скрипт до последней версии.",
-        timestamp: "2024-01-16T15:45:00Z",
-        isUser: false
-      }
-    ]
-  }
-];
 
 const Dashboard = () => {
   return (
@@ -280,8 +198,7 @@ const DashboardContent = () => {
   
   const [scripts, setScripts] = useState(mockScripts);
   const [installedScripts, setInstalledScripts] = useState([]);
-  const [tickets, setTickets] = useState(mockTickets);
-  const [changelogScript, setChangelogScript] = useState<{ id: string; name: string } | null>(null);
+    const [changelogScript, setChangelogScript] = useState<{ id: string; name: string } | null>(null);
   
   // Загрузка установленных скриптов
   useEffect(() => {
@@ -561,25 +478,7 @@ const DashboardContent = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-red-500/20 text-red-600 border-red-500/30';
-      case 'in_progress': return 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30';
-      case 'resolved': return 'bg-green-500/20 text-green-600 border-green-500/30';
-      case 'closed': return 'bg-gray-500/20 text-gray-600 border-gray-500/30';
-      default: return 'bg-gray-500/20 text-gray-600 border-gray-500/30';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-500/20 text-red-600 border-red-500/30';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30';
-      case 'low': return 'bg-green-500/20 text-green-600 border-green-500/30';
-      default: return 'bg-gray-500/20 text-gray-600 border-gray-500/30';
-    }
-  };
-
+  
   const formatDate = (dateString: string) => {
     const locale = language === 'ru' ? 'ru-RU' : 'en-US';
     return new Date(dateString).toLocaleDateString(locale, {
@@ -752,68 +651,7 @@ const DashboardContent = () => {
 
             {/* Поддержка */}
             <TabsContent value="support" className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.support')}</h2>
-                <GradientButton className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  {t('header.dashboard.support.createTicket')}
-                </GradientButton>
-            </div>
-
-              <div className="space-y-4">
-                {tickets.map((ticket) => (
-                  <Card key={ticket.id} className="group hover:shadow-lg transition-all duration-200">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-foreground">{ticket.subject}</h3>
-                            <Badge className={getStatusColor(ticket.status)}>
-                              {ticket.status === 'open' ? t('header.dashboard.tickets.openStatus') : 
-                               ticket.status === 'in_progress' ? t('header.dashboard.tickets.inProgress') :
-                               ticket.status === 'resolved' ? t('header.dashboard.tickets.resolved') : t('header.dashboard.tickets.closed')}
-                            </Badge>
-                            <Badge className={getPriorityColor(ticket.priority)}>
-                              {ticket.priority === 'high' ? t('header.dashboard.tickets.high') : 
-                               ticket.priority === 'medium' ? t('header.dashboard.tickets.medium') : t('header.dashboard.tickets.low')}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{ticket.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>{t('header.dashboard.tickets.created')} {formatDate(ticket.createdAt)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>{t('header.dashboard.tickets.updated')} {formatDate(ticket.updatedAt)}</span>
-                            </div>
-                            {ticket.attachments.length > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Paperclip className="h-3 w-3" />
-                                <span>{ticket.attachments.length} {t('header.dashboard.tickets.attachments')}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50"
-                            asChild
-                          >
-                            <Link to={`/ticket/${ticket.id}`}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              {t('header.dashboard.tickets.open')}
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                    </div>
+              <TicketsUser />
             </TabsContent>
 
             {/* Профиль */}
