@@ -201,19 +201,27 @@
   
   /* Дополнительный фикс для dropdown контейнеров */
   .dropdown-content,
-  [data-radix-popper-content-wrapper],
-  [data-radix-select-viewport] {
+  [data-radix-popper-content-wrapper] {
     position: fixed !important;
-    z-index: 50;
-    min-width: var(--radix-select-trigger-width, 12rem);
-    width: max(var(--radix-select-trigger-width, 12rem), max-content);
-    max-width: min(calc(100vw - 32px), 26rem);
+    z-index: 9999 !important;
   }
 
-  [data-radix-select-content],
-  [role="listbox"] {
+  [data-radix-select-viewport] {
     min-width: var(--radix-select-trigger-width, 12rem) !important;
     width: max(var(--radix-select-trigger-width, 12rem), max-content) !important;
+    max-width: min(calc(100vw - 32px), 26rem) !important;
+  }
+
+  [data-radix-select-content] {
+    min-width: var(--radix-select-trigger-width, 12rem) !important;
+    width: max(var(--radix-select-trigger-width, 12rem), max-content) !important;
+    background: hsl(var(--popover)) !important;
+    z-index: 9999 !important;
+  }
+  
+  [role="listbox"] {
+    min-width: var(--radix-select-trigger-width, 12rem) !important;
+    width: 100% !important;
   }
   
   /* Предотвращаем прыжки при открытии модальных окон */

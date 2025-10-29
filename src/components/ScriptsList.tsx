@@ -609,7 +609,7 @@ const ScriptsList: React.FC = () => {
       {/* Список скриптов */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredScripts.map((script) => (
-          <Card key={script.id} className="bg-card/50 backdrop-blur-sm border border-border/30 hover:border-border/50 transition-all duration-200">
+          <Card key={script.id} className="relative bg-card/50 backdrop-blur-sm border border-border/30 hover:border-border/50 transition-all duration-200 hover:z-10">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">

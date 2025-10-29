@@ -59,7 +59,8 @@ import {
   RefreshCw,
   LogOut,
   Crown,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 
 // Имя/почта берутся из авторизации; мок оставлен как дефолт
@@ -365,37 +366,78 @@ const DashboardContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['scripts', 'support', 'settings']);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
+  };
 
   const navigationItems = [
     {
-      value: 'scripts',
-      label: t('header.dashboard.tabs.scripts'),
-      icon: Library
+      id: 'scripts',
+      label: language === 'ru' ? 'Скрипты' : 'Scripts',
+      icon: Library,
+      children: [
+        {
+          value: 'scripts',
+          label: language === 'ru' ? 'Библиотека скриптов' : 'Scripts Library',
+          icon: Library
+        },
+        {
+          value: 'installed',
+          label: language === 'ru' ? 'Установленные скрипты' : 'Installed Scripts',
+          icon: Download
+        }
+      ]
     },
     {
-      value: 'installed',
-      label: t('header.dashboard.tabs.installed'),
-      icon: Download
-    },
-    {
+      id: 'referral',
       value: 'referral',
       label: language === 'ru' ? 'Рефералы' : 'Referrals',
       icon: Star
     },
     {
-      value: 'support',
-      label: t('header.dashboard.tabs.support'),
-      icon: Headphones
+      id: 'support',
+      label: language === 'ru' ? 'Поддержка' : 'Support',
+      icon: Headphones,
+      children: [
+        {
+          value: 'support',
+          label: language === 'ru' ? 'Все тикеты' : 'All Tickets',
+          icon: Headphones
+        },
+        {
+          value: 'support-open',
+          label: language === 'ru' ? 'Открытые тикеты' : 'Open Tickets',
+          icon: Headphones
+        },
+        {
+          value: 'support-resolved',
+          label: language === 'ru' ? 'Решенные тикеты' : 'Resolved Tickets',
+          icon: Headphones
+        }
+      ]
     },
     {
-      value: 'profile',
-      label: t('header.dashboard.tabs.profile'),
-      icon: User
-    },
-    {
-      value: 'settings',
-      label: t('header.dashboard.tabs.settings'),
-      icon: Settings
+      id: 'settings',
+      label: language === 'ru' ? 'Настройки' : 'Settings',
+      icon: Settings,
+      children: [
+        {
+          value: 'profile',
+          label: language === 'ru' ? 'Настройки профиля' : 'Profile Settings',
+          icon: User
+        },
+        {
+          value: 'settings',
+          label: language === 'ru' ? 'Настройки аккаунта' : 'Account Settings',
+          icon: Settings
+        }
+      ]
     }
   ];
 
@@ -541,7 +583,7 @@ const DashboardContent = () => {
                 <p className="text-muted-foreground">{t('header.dashboard.welcome')} {user.name}!</p>
               </div>
               <div className="flex items-center gap-4">
-                {(user.plan === 'premium' || user.plan === 'pro') ? (
+                {(user.plan === 'premium' || user.plan === 'pro' || user.plan === 'enterprise') ? (
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-sm"></div>
                     <Badge className="relative bg-gradient-to-r from-primary to-accent text-primary-foreground border-0 px-4 py-2 text-sm font-bold shadow-lg">
@@ -578,31 +620,72 @@ const DashboardContent = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-2 pb-2">
-                  <nav className="space-y-2">
-                    {navigationItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeTab === item.value;
-                      return (
-                        <button
-                          key={item.value}
-                          onClick={() => handleTabChange(item.value)}
-                          className={cn(
-                            'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
-                            isActive
-                              ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                          )}
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
-                            <span className="truncate">{item.label}</span>
-                          </span>
-                          <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
-                        </button>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
+                    <nav className="space-y-1">
+                      {navigationItems.map((item) => {
+                        const Icon = item.icon;
+                        const hasChildren = item.children && item.children.length > 0;
+                        const isExpanded = expandedSections.includes(item.id);
+                        const itemValue = item.value || item.id;
+                        const isActive = !hasChildren && activeTab === itemValue;
+
+                        return (
+                          <div key={item.id}>
+                            <button
+                              onClick={() => {
+                                if (hasChildren) {
+                                  toggleSection(item.id);
+                                } else {
+                                  handleTabChange(itemValue);
+                                }
+                              }}
+                              className={cn(
+                                'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
+                                isActive
+                                  ? 'bg-primary text-primary-foreground shadow-sm'
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                              )}
+                            >
+                              <span className="flex items-center gap-2.5">
+                                <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
+                                <span className="truncate">{item.label}</span>
+                              </span>
+                              {hasChildren ? (
+                                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isExpanded ? 'rotate-180' : 'rotate-0')} />
+                              ) : (
+                                <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                              )}
+                            </button>
+
+                            {hasChildren && isExpanded && (
+                              <div className="ml-3 mt-1 space-y-1 border-l-2 border-border/50 pl-2">
+                                {item.children.map((child: any) => {
+                                  const ChildIcon = child.icon;
+                                  const isChildActive = activeTab === child.value;
+                                  return (
+                                    <button
+                                      key={child.value}
+                                      onClick={() => handleTabChange(child.value)}
+                                      className={cn(
+                                        'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all',
+                                        isChildActive
+                                          ? 'bg-primary text-primary-foreground shadow-sm'
+                                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                                      )}
+                                    >
+                                      <span className="flex items-center gap-2 flex-1 min-w-0">
+                                        <span className="truncate">{child.label}</span>
+                                      </span>
+                                      <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isChildActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </nav>
+                  </CardContent>
               </Card>
               </div>
             </aside>
@@ -706,7 +789,7 @@ const DashboardContent = () => {
               </div>
             )}
 
-            {activeTab === 'support' && (
+            {(activeTab === 'support' || activeTab === 'support-open' || activeTab === 'support-resolved') && (
               <div className="space-y-6">
                 <TicketsUser />
               </div>
