@@ -17,7 +17,7 @@ import { ChangeEmailModal } from '@/components/ChangeEmailModal';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ReferralProgram } from './ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
-import TicketsUser from './TicketsUser';
+import { TicketsSystem } from './TicketsSystem';
 import { ScriptChangelog } from './ScriptChangelog';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
@@ -791,7 +791,7 @@ const DashboardContent = () => {
 
             {(activeTab === 'support' || activeTab === 'support-open' || activeTab === 'support-resolved') && (
               <div className="space-y-6">
-                <TicketsUser />
+                <TicketsSystem />
               </div>
             )}
 
