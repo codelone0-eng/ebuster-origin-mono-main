@@ -63,6 +63,23 @@ CREATE INDEX IF NOT EXISTS idx_messages_ticket ON public.ticket_messages(ticket_
 CREATE INDEX IF NOT EXISTS idx_messages_created ON public.ticket_messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_author ON public.ticket_messages(author_id);
 
+-- 3.1. Таблица вложений для тикетов
+CREATE TABLE IF NOT EXISTS public.ticket_attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id UUID NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
+    message_id UUID REFERENCES public.ticket_messages(id) ON DELETE CASCADE,
+    filename VARCHAR(255) NOT NULL,
+    original_filename VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size BIGINT NOT NULL,
+    mime_type VARCHAR(100),
+    uploaded_by UUID REFERENCES public.auth_users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_attachments_ticket ON public.ticket_attachments(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_message ON public.ticket_attachments(message_id);
+
 -- 4. Добавляем поля для реферальной системы в auth_users (если не существуют)
 DO $$ 
 BEGIN
@@ -187,6 +204,7 @@ WHERE referral_code IS NULL;
 ALTER TABLE public.script_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ticket_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_history ENABLE ROW LEVEL SECURITY;
 
 -- Политики для категорий (все могут читать, только админы могут изменять)
@@ -239,6 +257,24 @@ CREATE POLICY "Users can view messages on their tickets" ON public.ticket_messag
 
 CREATE POLICY "Users can create messages" ON public.ticket_messages
     FOR INSERT WITH CHECK (author_id = auth.uid());
+
+-- Политики для вложений
+CREATE POLICY "Users can view attachments on their tickets" ON public.ticket_attachments
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.support_tickets
+            WHERE id = ticket_id AND (
+                user_id = auth.uid() OR
+                EXISTS (
+                    SELECT 1 FROM public.auth_users
+                    WHERE id = auth.uid() AND role = 'admin'
+                )
+            )
+        )
+    );
+
+CREATE POLICY "Users can upload attachments" ON public.ticket_attachments
+    FOR INSERT WITH CHECK (uploaded_by = auth.uid());
 
 -- Политики для истории рефералов
 CREATE POLICY "Users can view own referral history" ON public.referral_history

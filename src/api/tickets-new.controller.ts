@@ -24,12 +24,15 @@ export const getUserTickets = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { status, priority, team_id, search } = req.query;
+    const { status, priority, category, search } = req.query;
     const supabase = getSupabase();
     
     let query = supabase
       .from('support_tickets')
-      .select('*')
+      .select(`
+        *,
+        user:auth_users(full_name, email, avatar_url)
+      `)
       ;
 
     // Клиенты видят только свои тикеты
@@ -40,9 +43,9 @@ export const getUserTickets = async (req: Request, res: Response) => {
     // Фильтры
     if (status && status !== 'all') query = query.eq('status', status);
     if (priority) query = query.eq('priority', priority);
-    if (team_id) query = query.eq('team_id', team_id);
+    if (category) query = query.eq('category', category);
     if (search) {
-      query = query.or(`subject.ilike.%${search}%,description.ilike.%${search}%,ticket_number.ilike.%${search}%`);
+      query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%`);
     }
 
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -367,7 +370,8 @@ export const getTicketMessages = async (req: Request, res: Response) => {
       .from('ticket_messages')
       .select(`
         *,
-        author:auth_users(id, full_name, email, avatar_url, role)
+        author:auth_users(id, full_name, email, avatar_url, role),
+        attachments:ticket_attachments(*)
       `)
       .eq('ticket_id', id);
 
@@ -383,6 +387,32 @@ export const getTicketMessages = async (req: Request, res: Response) => {
     res.json({ success: true, data: data || [] });
   } catch (error: any) {
     console.error('Get ticket messages error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Загрузить вложение
+export const uploadAttachment = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { ticketId, messageId } = req.params;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // TODO: Реализовать загрузку файла в Supabase Storage
+    // Пока возвращаем заглушку
+    res.json({ 
+      success: true, 
+      data: { 
+        message: 'File upload not yet implemented',
+        ticketId,
+        messageId 
+      } 
+    });
+  } catch (error: any) {
+    console.error('Upload attachment error:', error);
     res.status(500).json({ error: error.message });
   }
 };

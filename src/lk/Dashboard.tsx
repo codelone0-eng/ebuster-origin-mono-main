@@ -366,7 +366,7 @@ const DashboardContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['scripts', 'support', 'settings']);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -611,15 +611,15 @@ const DashboardContent = () => {
 
           {/* Layout with sidebar navigation */}
           <div className="flex flex-col lg:flex-row gap-8">
-            <aside className="w-full lg:w-56 flex-shrink-0">
+            <aside className="w-full lg:w-64 flex-shrink-0">
               <div className="sticky top-24 space-y-4">
                 <Card className="bg-card/80 backdrop-blur border border-border/60">
-                  <CardHeader className="pb-2 px-3">
+                  <CardHeader className="pb-2 px-4">
                     <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       {language === 'ru' ? 'Навигация' : 'Navigation'}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 px-2 pb-2">
+                  <CardContent className="pt-0 px-3 pb-3">
                     <nav className="space-y-1">
                       {navigationItems.map((item) => {
                         const Icon = item.icon;
@@ -645,9 +645,9 @@ const DashboardContent = () => {
                                   : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                               )}
                             >
-                              <span className="flex items-center gap-2.5">
+                              <span className="flex items-center gap-2.5 flex-1 min-w-0">
                                 <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
-                                <span className="truncate">{item.label}</span>
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
                               </span>
                               {hasChildren ? (
                                 <ChevronDown className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isExpanded ? 'rotate-180' : 'rotate-0')} />
@@ -673,7 +673,7 @@ const DashboardContent = () => {
                                       )}
                                     >
                                       <span className="flex items-center gap-2 flex-1 min-w-0">
-                                        <span className="truncate">{child.label}</span>
+                                        <span className="whitespace-nowrap overflow-hidden text-ellipsis">{child.label}</span>
                                       </span>
                                       <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isChildActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
                                     </button>

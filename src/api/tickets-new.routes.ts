@@ -9,7 +9,8 @@ import {
   addMessage,
   getTicketMessages,
   getTicketStats,
-  getSupportTeams
+  getSupportTeams,
+  uploadAttachment
 } from './tickets-new.controller';
 
 const router = Router();
@@ -24,5 +25,7 @@ router.post('/', authenticateUser, createTicket); // Создать тикет
 router.patch('/:id', authenticateUser, updateTicket); // Обновить тикет (админ/агент)
 router.post('/:id/messages', authenticateUser, addMessage); // Добавить сообщение
 router.get('/:id/messages', authenticateUser, getTicketMessages); // Получить сообщения
+router.post('/:ticketId/attachments', authenticateUser, uploadAttachment); // Загрузить вложение
+router.post('/:ticketId/messages/:messageId/attachments', authenticateUser, uploadAttachment); // Загрузить вложение к сообщению
 
 export default router;
