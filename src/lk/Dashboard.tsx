@@ -530,8 +530,8 @@ const DashboardContent = () => {
       <div className="relative z-content">
         <Header />
 
-        <div className="container mx-auto max-w-7xl px-4 py-8">
-          {/* Header */}
+        <div className="container mx-auto max-w-[1400px] px-6 lg:px-8 py-8">
+          {/* Dashboard Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
@@ -566,22 +566,18 @@ const DashboardContent = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Layout with sidebar navigation */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <div className="sticky top-28 space-y-4">
-              <Card className="bg-card/80 backdrop-blur border border-border/60">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-muted-foreground">
-                    {language === 'ru' ? 'Разделы личного кабинета' : 'Dashboard Sections'}
-                  </CardTitle>
-                  <CardDescription>
-                    {language === 'ru' ? 'Выберите нужную вкладку' : 'Choose a section'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
+          {/* Layout with sidebar navigation */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            <aside className="w-full lg:w-56 flex-shrink-0">
+              <div className="sticky top-24 space-y-4">
+                <Card className="bg-card/80 backdrop-blur border border-border/60">
+                  <CardHeader className="pb-2 px-3">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      {language === 'ru' ? 'Навигация' : 'Navigation'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 px-2 pb-2">
                   <nav className="space-y-2">
                     {navigationItems.map((item) => {
                       const Icon = item.icon;
@@ -591,17 +587,17 @@ const DashboardContent = () => {
                           key={item.value}
                           onClick={() => handleTabChange(item.value)}
                           className={cn(
-                            'w-full flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
+                            'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
                             isActive
                               ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'bg-card/80 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                           )}
                         >
-                          <span className="flex items-center gap-3">
-                            <Icon className={cn('h-5 w-5 transition-colors', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
-                            {item.label}
+                          <span className="flex items-center gap-2.5">
+                            <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
+                            <span className="truncate">{item.label}</span>
                           </span>
-                          <ChevronRight className={cn('h-4 w-4 transition-transform', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                          <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
                         </button>
                       );
                     })}
