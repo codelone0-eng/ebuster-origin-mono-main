@@ -143,7 +143,7 @@ const DashboardContent = () => {
   // Функция для загрузки профиля из public.users
   const loadUserProfile = useCallback(async () => {
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       if (!token || !authUser?.email) {
         return;
       }
@@ -468,7 +468,7 @@ const DashboardContent = () => {
       setIsSaving(true);
       
       // Получаем токен из localStorage
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       if (!token) {
         toast({
           title: "Ошибка авторизации",

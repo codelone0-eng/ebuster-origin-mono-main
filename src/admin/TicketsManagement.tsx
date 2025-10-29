@@ -96,7 +96,7 @@ const TicketsManagement: React.FC = () => {
   const loadTickets = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`https://api.ebuster.ru/api/tickets/all${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`, {
         headers: {
@@ -123,7 +123,7 @@ const TicketsManagement: React.FC = () => {
 
   const loadComments = async (ticketId: string) => {
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/comments`, {
         headers: {
@@ -149,7 +149,7 @@ const TicketsManagement: React.FC = () => {
 
   const updateTicketStatus = async (ticketId: string, status: string) => {
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}`, {
         method: 'PUT',

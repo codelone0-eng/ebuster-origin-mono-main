@@ -37,7 +37,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
   const loadTeams = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/teams`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -71,7 +71,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets`, {
         method: 'POST',

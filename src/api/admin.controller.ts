@@ -174,6 +174,71 @@ export const getSystemStats = async (req: Request, res: Response) => {
   }
 };
 
+// Получение статистики по тикетам для админки
+export const getAdminTicketStats = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      // Возвращаем mock-данные, если Supabase недоступен
+      return res.json({
+        success: true,
+        data: {
+          stats: {
+            new: 5, open: 12, pending_customer: 3, pending_internal: 2, resolved: 50, closed: 150, total: 222
+          },
+          recentTickets: [
+            { id: 1, subject: 'Не работает кнопка', user_email: 'test1@example.com', status: 'new', created_at: new Date().toISOString() },
+            { id: 2, subject: 'Проблема с оплатой', user_email: 'test2@example.com', status: 'open', created_at: new Date().toISOString() },
+          ]
+        }
+      });
+    }
+
+    // Получаем количество тикетов по каждому статусу
+    const { data: statusCounts, error: statsError } = await supabase
+      .from('tickets')
+      .select('status')
+      .eq('is_deleted', false);
+
+    if (statsError) throw statsError;
+
+    const stats = {
+      new: statusCounts?.filter(t => t.status === 'new').length || 0,
+      open: statusCounts?.filter(t => t.status === 'open').length || 0,
+      pending_customer: statusCounts?.filter(t => t.status === 'pending_customer').length || 0,
+      pending_internal: statusCounts?.filter(t => t.status === 'pending_internal').length || 0,
+      resolved: statusCounts?.filter(t => t.status === 'resolved').length || 0,
+      closed: statusCounts?.filter(t => t.status === 'closed').length || 0,
+      total: statusCounts?.length || 0
+    };
+
+    // Получаем 5 последних тикетов с информацией о пользователе
+    const { data: recentTickets, error: recentError } = await supabase
+      .from('tickets')
+      .select('id, subject, status, created_at, customer:auth_users(email, full_name)')
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (recentError) throw recentError;
+
+    res.json({
+      success: true,
+      data: {
+        stats,
+        recentTickets: recentTickets.map(t => ({ ...t, user_email: t.customer?.email, user_name: t.customer?.full_name }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Ошибка получения статистики тикетов:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения статистики тикетов'
+    });
+  }
+};
+
 // Получение списка пользователей
 export const getUsers = async (req: Request, res: Response) => {
   try {

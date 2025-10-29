@@ -58,7 +58,7 @@ export const useAdminApi = () => {
   const [error, setError] = useState<string | null>(null);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem('ebuster_token');
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -185,6 +185,11 @@ export const useAdminApi = () => {
   };
 
   // Получение мониторинга системы
+  const getTicketStats = async () => {
+    const response = await fetchWithAuth('/api/admin/ticket-stats');
+    return response.data;
+  };
+
   const getSystemMonitor = async () => {
     const response = await fetchWithAuth('/api/admin/system-monitor');
     return response.data;
@@ -201,6 +206,7 @@ export const useAdminApi = () => {
     getSystemLogs,
     getBrowserStats,
     getActivityStats,
-    getSystemMonitor
+    getSystemMonitor,
+    getTicketStats
   };
 };

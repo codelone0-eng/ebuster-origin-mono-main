@@ -102,7 +102,7 @@ export const TicketsSystem: React.FC = () => {
   const loadTickets = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       
       const params = new URLSearchParams();
       if (filters.status !== 'all') params.append('status', filters.status);
@@ -136,7 +136,7 @@ export const TicketsSystem: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`

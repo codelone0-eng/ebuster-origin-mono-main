@@ -10,7 +10,8 @@ import {
   getSystemLogs,
   getBrowserStats,
   getActivityStats,
-  searchUsers
+  searchUsers,
+  getAdminTicketStats
 } from './admin.controller';
 import { getSystemMonitor } from './system-monitor.controller';
 import {
@@ -47,6 +48,9 @@ router.get('/logs', getSystemLogs);
 
 // Статистика браузеров
 router.get('/browser-stats', getBrowserStats);
+
+// Статистика по тикетам
+router.get('/ticket-stats', getAdminTicketStats);
 
 // Статистика активности
 router.get('/activity-stats', getActivityStats);

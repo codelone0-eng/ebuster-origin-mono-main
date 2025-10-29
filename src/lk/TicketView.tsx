@@ -120,7 +120,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
 
   const loadTicket = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/${ticketId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -148,7 +148,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
 
   const loadMessages = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/${ticketId}/messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -170,7 +170,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
 
     try {
       setSending(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/${ticketId}/messages`, {
         method: 'POST',
@@ -211,7 +211,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
 
   const handleStatusChange = async (newStatus: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ebuster_token');
       
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/${ticketId}`, {
         method: 'PATCH',

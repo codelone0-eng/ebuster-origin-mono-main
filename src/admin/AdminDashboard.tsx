@@ -169,6 +169,8 @@ const AdminDashboard = () => {
   const [browserStats, setBrowserStats] = useState([]);
   const [activityStats, setActivityStats] = useState([]);
   const [scriptStats, setScriptStats] = useState([]);
+  const [ticketStats, setTicketStats] = useState(null);
+  const [recentTickets, setRecentTickets] = useState([]);
     const [systemStatus, setSystemStatus] = useState({
     cpu: { usage: 0, model: 'Loading...' },
     memory: { usage: 0, total: '0GB', used: '0GB' },
@@ -211,20 +213,18 @@ const AdminDashboard = () => {
         const activityData = await adminApi.getActivityStats();
         setActivityStats(activityData);
 
+        // Загружаем статистику по тикетам
+        const ticketData = await adminApi.getTicketStats();
+        setTicketStats(ticketData.stats);
+        setRecentTickets(ticketData.recentTickets);
+
         // Загружаем мониторинг системы
         await updateMonitoring();
 
-        // Пока используем заглушки для скриптов и тикетов
         setScriptStats([
           { name: 'Dark Mode Enforcer', downloads: 1247, rating: 4.8, users: 892, size: '1.2MB', category: 'UI/UX', status: 'active' },
           { name: 'Auto Form Filler', downloads: 934, rating: 4.6, users: 567, size: '2.1MB', category: 'Productivity', status: 'active' },
           { name: 'Password Generator', downloads: 756, rating: 4.9, users: 423, size: '0.8MB', category: 'Security', status: 'active' }
-        ]);
-
-        setTicketStats([
-          { id: 1, user: 'Александр Петров', subject: 'Проблема с установкой скрипта', priority: 'high', status: 'open', created: '2024-01-25 14:30', assigned: 'Админ 1' },
-          { id: 2, user: 'Мария Иванова', subject: 'Запрос на новую функцию', priority: 'medium', status: 'in_progress', created: '2024-01-25 13:45', assigned: 'Админ 2' },
-          { id: 3, user: 'Дмитрий Сидоров', subject: 'Ошибка в работе скрипта', priority: 'low', status: 'resolved', created: '2024-01-25 12:20', assigned: 'Админ 1' }
         ]);
       } catch (error) {
         console.error('Ошибка загрузки данных админки:', error);
@@ -575,7 +575,62 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Активность по времени */}
+                              {/* Статистика по тикетам */}
+              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Статистика тикетов
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {ticketStats ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold">{ticketStats.new}</p>
+                        <p className="text-xs text-muted-foreground">Новые</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{ticketStats.open}</p>
+                        <p className="text-xs text-muted-foreground">Открытые</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{ticketStats.resolved}</p>
+                        <p className="text-xs text-muted-foreground">Решенные</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{ticketStats.total}</p>
+                        <p className="text-xs text-muted-foreground">Всего</p>
+                      </div>
+                    </div>
+                  ) : <p>Загрузка...</p>}
+                </CardContent>
+              </Card>
+
+              {/* Последние тикеты */}
+              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Последние тикеты
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentTickets.map((ticket) => (
+                      <div key={ticket.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                        <div>
+                          <p className="font-medium">{ticket.subject}</p>
+                          <p className="text-sm text-muted-foreground">{ticket.user_email}</p>
+                        </div>
+                        <Badge className={`${getStatusColor(ticket.status)}`}>{ticket.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Активность по времени */}
                 <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
