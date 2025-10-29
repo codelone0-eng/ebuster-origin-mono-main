@@ -10,6 +10,7 @@ declare global {
         id: string;
         email: string;
         full_name?: string;
+        role?: string;
       };
     }
   }
@@ -67,7 +68,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('auth_users')
-        .select('id, email, full_name, email_confirmed, status')
+        .select('id, email, full_name, email_confirmed, status, role')
         .eq('id', decoded.userId)
         .single();
 
@@ -107,7 +108,8 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
     req.user = {
       id: user.id,
       email: user.email,
-      full_name: user.full_name
+      full_name: user.full_name,
+      role: user.role || 'user'
     };
 
     next();
@@ -151,7 +153,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('auth_users')
-        .select('id, email, full_name, email_confirmed, status')
+        .select('id, email, full_name, email_confirmed, status, role')
         .eq('id', decoded.userId)
         .single();
 
@@ -162,7 +164,8 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
         req.user = {
           id: data.id,
           email: data.email,
-          full_name: data.full_name
+          full_name: data.full_name,
+          role: data.role || 'user'
         };
       } else {
         if (data?.status === 'banned') {

@@ -307,14 +307,14 @@ export const TicketsSystem: React.FC = () => {
               </SelectContent>
             </Select>
             <Select
-              value={filters.priority}
-              onValueChange={(value) => setFilters({ ...filters, priority: value })}
+              value={filters.priority || 'all'}
+              onValueChange={(value) => setFilters({ ...filters, priority: value === 'all' ? '' : value })}
             >
               <SelectTrigger className="w-full md:w-[200px]">
                 <SelectValue placeholder="Все приоритеты" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все приоритеты</SelectItem>
+                <SelectItem value="all">Все приоритеты</SelectItem>
                 <SelectItem value="low">Низкий</SelectItem>
                 <SelectItem value="medium">Средний</SelectItem>
                 <SelectItem value="high">Высокий</SelectItem>
