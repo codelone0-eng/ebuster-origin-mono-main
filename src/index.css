@@ -187,6 +187,19 @@
 
   html {
     overflow-y: scroll; /* Всегда показываем scrollbar для предотвращения прыжков */
+    overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+    min-height: 100vh; /* Гарантируем высоту для scrollbar */
+  }
+  
+  body {
+    /* Фиксируем body чтобы предотвратить прыжки */
+    overflow-x: hidden;
+  }
+  
+  /* Дополнительный фикс для dropdown контейнеров */
+  .dropdown-content {
+    position: fixed;
+    z-index: 50;
   }
 
   body {

@@ -25,6 +25,7 @@ import { ReferralManagement } from './ReferralManagement';
 import { AdminSidebar } from './AdminSidebar';
 import CategoriesManagement from './CategoriesManagement';
 import MonitoringDashboard from './MonitoringDashboard';
+import TicketsManagement from './TicketsManagement';
 import { 
   Users, 
   Settings, 
@@ -168,8 +169,7 @@ const AdminDashboard = () => {
   const [browserStats, setBrowserStats] = useState([]);
   const [activityStats, setActivityStats] = useState([]);
   const [scriptStats, setScriptStats] = useState([]);
-  const [ticketStats, setTicketStats] = useState([]);
-  const [systemStatus, setSystemStatus] = useState({
+    const [systemStatus, setSystemStatus] = useState({
     cpu: { usage: 0, model: 'Loading...' },
     memory: { usage: 0, total: '0GB', used: '0GB' },
     disk: { usage: 0, total: '0GB' },
@@ -424,11 +424,7 @@ const AdminDashboard = () => {
     setShowScriptDetailsModal(true);
   };
 
-  const handleViewTicket = (ticket: any) => {
-    setSelectedTicketDetails(ticket);
-    setShowTicketDetailsModal(true);
-  };
-
+  
   const handleViewLog = (log: any) => {
     setSelectedLogDetails(log);
     setShowLogDetailsModal(true);
@@ -444,11 +440,7 @@ const AdminDashboard = () => {
     setShowScriptDetailsModal(true);
   };
 
-  const handleEditTicket = (ticket: any) => {
-    setSelectedTicketDetails(ticket);
-    setShowTicketDetailsModal(true);
-  };
-
+  
   const testToast = () => {
     console.log('testToast called');
     toast({
@@ -772,72 +764,7 @@ const AdminDashboard = () => {
 
             {/* Тикеты */}
             <TabsContent value="tickets" className="space-y-6">
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5" />
-                        Система поддержки
-                      </CardTitle>
-                      <CardDescription>
-                        Всего тикетов: {systemStats?.totalTickets || '0'} | Открытых: {systemStats?.openTickets || '0'} | Решенных: {systemStats?.resolvedTickets || '0'}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Экспорт тикетов
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Обновить
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {(ticketStats || []).map((ticket) => (
-                      <div key={ticket.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                            <MessageSquare className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-foreground">{ticket.subject}</span>
-                              <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                                {ticket.priority === 'high' ? 'Высокий' : 
-                                 ticket.priority === 'medium' ? 'Средний' : 'Низкий'}
-                              </Badge>
-                              <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
-                                {ticket.status === 'open' ? 'Открыт' : 
-                                 ticket.status === 'in_progress' ? 'В работе' : 'Решен'}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>Пользователь: {ticket.user}</span>
-                              <span>•</span>
-                              <span>Создан: {ticket.created}</span>
-                              <span>•</span>
-                              <span>Назначен: {ticket.assigned}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleViewTicket(ticket)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleEditTicket(ticket)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <TicketsManagement />
             </TabsContent>
 
             {/* Логи */}

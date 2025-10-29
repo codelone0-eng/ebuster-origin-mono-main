@@ -638,7 +638,7 @@ const DashboardContent = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-8">
               <TabsTrigger value="scripts" className="flex items-center gap-2">
-                <Library className="h-4 w-4" />
+                <Library className="h-5 w-5" />
                 {t('header.dashboard.tabs.scripts')}
               </TabsTrigger>
               <TabsTrigger value="installed" className="flex items-center gap-2">
@@ -646,19 +646,19 @@ const DashboardContent = () => {
                 {t('header.dashboard.tabs.installed')}
               </TabsTrigger>
               <TabsTrigger value="referral" className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
+                <Star className="h-5 w-5" />
                 Рефералы
               </TabsTrigger>
               <TabsTrigger value="support" className="flex items-center gap-2">
-                <Headphones className="h-4 w-4" />
+                <Headphones className="h-5 w-5" />
                 {t('header.dashboard.tabs.support')}
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
+                <User className="h-5 w-5" />
                 {t('header.dashboard.tabs.profile')}
               </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
+                <Settings className="h-5 w-5" />
                 {t('header.dashboard.tabs.settings')}
               </TabsTrigger>
             </TabsList>

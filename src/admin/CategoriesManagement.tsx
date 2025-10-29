@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, FolderTree } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,7 +33,7 @@ const CategoriesManagement: React.FC = () => {
     name: '',
     slug: '',
     description: '',
-    icon: '📦',
+    icon: 'General',
     color: '#6b7280',
     display_order: 0,
     is_active: true
@@ -151,7 +152,7 @@ const CategoriesManagement: React.FC = () => {
       name: '',
       slug: '',
       description: '',
-      icon: '📦',
+      icon: 'General',
       color: '#6b7280',
       display_order: 0,
       is_active: true
@@ -212,12 +213,25 @@ const CategoriesManagement: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Иконка (emoji)</label>
-                  <Input
-                    value={formData.icon}
-                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    placeholder="🎨"
-                  />
+                  <label className="text-sm font-medium">Иконка (текст)</label>
+                  <Select 
+                    value={formData.icon} 
+                    onValueChange={(value) => setFormData({ ...formData, icon: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UI">UI</SelectItem>
+                      <SelectItem value="Privacy">Privacy</SelectItem>
+                      <SelectItem value="Productivity">Productivity</SelectItem>
+                      <SelectItem value="General">General</SelectItem>
+                      <SelectItem value="Security">Security</SelectItem>
+                      <SelectItem value="Gaming">Gaming</SelectItem>
+                      <SelectItem value="Social">Social</SelectItem>
+                      <SelectItem value="Tools">Tools</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Цвет</label>
@@ -263,8 +277,12 @@ const CategoriesManagement: React.FC = () => {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: `${category.color}20` }}
+                    className="w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold"
+                    style={{ 
+                      backgroundColor: `${category.color}20`,
+                      color: category.color,
+                      border: `2px solid ${category.color}`
+                    }}
                   >
                     {category.icon}
                   </div>
