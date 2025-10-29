@@ -121,18 +121,18 @@ export const getSystemStats = async (req: Request, res: Response) => {
       let resolvedTickets = 0;
       try {
         const { count: ticketsCount } = await supabase
-          .from('tickets')
+          .from('support_tickets')
           .select('*', { count: 'exact', head: true });
         totalTickets = ticketsCount || 0;
 
         const { count: openTicketsCount } = await supabase
-          .from('tickets')
+          .from('support_tickets')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'open');
         openTickets = openTicketsCount || 0;
 
         const { count: resolvedTicketsCount } = await supabase
-          .from('tickets')
+          .from('support_tickets')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'resolved');
         resolvedTickets = resolvedTicketsCount || 0;
@@ -196,7 +196,7 @@ export const getAdminTicketStats = async (req: Request, res: Response) => {
 
     // Получаем количество тикетов по каждому статусу
     const { data: statusCounts, error: statsError } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('status')
       .eq('is_deleted', false);
 
@@ -214,7 +214,7 @@ export const getAdminTicketStats = async (req: Request, res: Response) => {
 
     // Получаем 5 последних тикетов с информацией о пользователе
     const { data: recentTickets, error: recentError } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('id, subject, status, created_at, customer:auth_users(email, full_name)')
       .eq('is_deleted', false)
       .order('created_at', { ascending: false })
@@ -382,7 +382,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
 
     // Дополнительная статистика пользователя
     const { count: userTickets } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', id)
       .catch(() => ({ count: 0 }));

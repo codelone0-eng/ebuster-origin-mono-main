@@ -48,13 +48,13 @@ export const getUserTickets = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     
     let query = supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('*')
-      .eq('is_deleted', false);
+      ;
 
     // Клиенты видят только свои тикеты
     if (userRole !== 'admin' && userRole !== 'agent') {
-      query = query.eq('customer_id', userId);
+      query = query.eq('user_id', userId);
     }
     
     // Фильтры
@@ -90,9 +90,9 @@ export const getAllTickets = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     
     let query = supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('*', { count: 'exact' })
-      .eq('is_deleted', false);
+      ;
     
     // Агенты видят только тикеты своих команд
     if (userRole === 'agent') {
@@ -146,11 +146,10 @@ export const getTicket = async (req: Request, res: Response) => {
 
     const supabase = getSupabase();
     const { data: ticket, error } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('*')
       .eq('id', id)
-      .eq('is_deleted', false)
-      .single();
+            .single();
 
     if (error) throw error;
     if (!ticket) {
@@ -158,7 +157,7 @@ export const getTicket = async (req: Request, res: Response) => {
     }
 
     // Проверка прав доступа
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.customer_id !== userId) {
+    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -187,9 +186,9 @@ export const createTicket = async (req: Request, res: Response) => {
     
     // Создаем тикет
     const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .insert({
-        customer_id: userId,
+        user_id: userId,
         subject,
         description,
         category: category || 'general',
@@ -237,7 +236,7 @@ export const updateTicket = async (req: Request, res: Response) => {
     
     // Получаем текущий тикет
     const { data: oldTicket } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('*')
       .eq('id', id)
       .single();
@@ -299,7 +298,7 @@ export const updateTicket = async (req: Request, res: Response) => {
     }
     
     const { data, error } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .update(updateData)
       .eq('id', id)
       .select('*')
@@ -335,8 +334,8 @@ export const addMessage = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     
     const { data: ticket } = await supabase
-      .from('tickets')
-      .select('customer_id, status, first_response_at')
+      .from('support_tickets')
+      .select('user_id, status, first_response_at')
       .eq('id', id)
       .single();
 
@@ -344,7 +343,7 @@ export const addMessage = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.customer_id !== userId) {
+    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -371,14 +370,14 @@ export const addMessage = async (req: Request, res: Response) => {
       updateData.first_response_at = new Date().toISOString();
     }
     
-    if (ticket.status === 'pending_customer' && ticket.customer_id === userId) {
+    if (ticket.status === 'pending_customer' && ticket.user_id === userId) {
       updateData.status = 'open';
       await createSystemMessage(supabase, Number(id), 'Клиент ответил, статус изменен на "Открыт"');
     }
 
     if (Object.keys(updateData).length > 0) {
       await supabase
-        .from('tickets')
+        .from('support_tickets')
         .update(updateData)
         .eq('id', id);
     }
@@ -404,8 +403,8 @@ export const getTicketMessages = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     
     const { data: ticket } = await supabase
-      .from('tickets')
-      .select('customer_id')
+      .from('support_tickets')
+      .select('user_id')
       .eq('id', id)
       .single();
 
@@ -413,7 +412,7 @@ export const getTicketMessages = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.customer_id !== userId) {
+    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -484,9 +483,9 @@ export const getTicketStats = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     
     const { data: statusCounts } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('status')
-      .eq('is_deleted', false);
+      ;
 
     const stats = {
       new: statusCounts?.filter(t => t.status === 'new').length || 0,
@@ -499,7 +498,7 @@ export const getTicketStats = async (req: Request, res: Response) => {
     };
 
     const { data: responseTime } = await supabase
-      .from('tickets')
+      .from('support_tickets')
       .select('created_at, first_response_at')
       .not('first_response_at', 'is', null)
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
