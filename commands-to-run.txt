@@ -1,0 +1,22 @@
+
+
+# 1. Делаем скрипт исполняемым
+chmod +x /srv/ebuster/fix-disk.sh
+
+# 2. Запускаем очистку
+/srv/ebuster/fix-disk.sh
+
+# Если места все еще мало, дополнительно:
+# rm -rf /root/.npm/_cacache
+# rm -rf /tmp/* 
+# rm -rf /var/tmp/*
+
+# 3. Проверяем результат
+df -h
+docker-compose ps
+
+# 4. Если нужно, пересобираем еще раз:
+cd /srv/ebuster
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
