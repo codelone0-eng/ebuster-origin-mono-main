@@ -604,8 +604,8 @@ const DashboardContent = () => {
                   </nav>
                 </CardContent>
               </Card>
-            </div>
-          </aside>
+              </div>
+            </aside>
 
           <div className="flex-1 space-y-8">
             {activeTab === 'scripts' && (
@@ -902,8 +902,9 @@ const DashboardContent = () => {
               </div>
             )}
           </div>
+          </div>
         </div>
-        
+
         <Footer />
         
         {/* Modals */}
