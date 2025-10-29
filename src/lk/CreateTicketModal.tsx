@@ -81,9 +81,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
         },
         body: JSON.stringify({
           subject,
-          description,
+          message: description,
           priority,
-          team_id: teamId,
           category: 'general'
         })
       });

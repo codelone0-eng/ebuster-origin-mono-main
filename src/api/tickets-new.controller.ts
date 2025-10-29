@@ -176,10 +176,10 @@ export const createTicket = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { subject, description, category, priority, team_id, tags } = req.body;
+    const { subject, message, category, priority } = req.body;
     
-    if (!subject || !description) {
-      return res.status(400).json({ error: 'Subject and description are required' });
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Subject and message are required' });
     }
 
     const supabase = getSupabase();
@@ -190,28 +190,15 @@ export const createTicket = async (req: Request, res: Response) => {
       .insert({
         user_id: userId,
         subject,
-        description,
+        message,
         category: category || 'general',
         priority: priority || 'medium',
-        team_id: team_id || 1,
-        status: 'new',
-        tags: tags || []
+        status: 'new'
       })
       .select('*')
       .single();
 
     if (ticketError) throw ticketError;
-
-    // Создаем первое сообщение
-    await supabase
-      .from('ticket_messages')
-      .insert({
-        ticket_id: ticket.id,
-        author_id: userId,
-        message: description,
-        is_internal: false,
-        is_system: false
-      });
 
     res.json({ success: true, data: ticket });
   } catch (error: any) {
@@ -529,16 +516,8 @@ export const getTicketStats = async (req: Request, res: Response) => {
 // Получить команды поддержки
 export const getSupportTeams = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('support_teams')
-      .select('*')
-      .eq('is_active', true)
-      .order('name');
-
-    if (error) throw error;
-
-    res.json({ success: true, data });
+    // TODO: Таблица support_teams еще не создана, возвращаем пустой массив
+    res.json({ success: true, data: [] });
   } catch (error: any) {
     console.error('Get support teams error:', error);
     res.status(500).json({ error: error.message });

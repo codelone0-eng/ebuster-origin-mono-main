@@ -27,6 +27,23 @@ import {
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
+const statusConfig = {
+  new: { label: 'Новый', color: 'bg-yellow-500', textColor: 'text-yellow-700', bgLight: 'bg-yellow-50' },
+  open: { label: 'Открыт', color: 'bg-blue-500', textColor: 'text-blue-700', bgLight: 'bg-blue-50' },
+  pending_customer: { label: 'Ожидание клиента', color: 'bg-orange-500', textColor: 'text-orange-700', bgLight: 'bg-orange-50' },
+  pending_internal: { label: 'Ожидание внутреннее', color: 'bg-purple-500', textColor: 'text-purple-700', bgLight: 'bg-purple-50' },
+  resolved: { label: 'Решен', color: 'bg-green-500', textColor: 'text-green-700', bgLight: 'bg-green-50' },
+  closed: { label: 'Закрыт', color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' },
+  cancelled: { label: 'Отменен', color: 'bg-red-500', textColor: 'text-red-700', bgLight: 'bg-red-50' }
+};
+
+const priorityConfig = {
+  low: { label: 'Низкий', color: 'bg-gray-500' },
+  medium: { label: 'Средний', color: 'bg-blue-500' },
+  high: { label: 'Высокий', color: 'bg-orange-500' },
+  critical: { label: 'Критический', color: 'bg-red-500' }
+};
+
 // Mock данные для тикета
 const mockTicket = {
   id: 1,
@@ -338,9 +355,7 @@ const TicketPage = () => {
                       <div>
                         <div className="font-medium text-foreground">{t('header.dashboard.tickets.status')}</div>
                         <div className="text-muted-foreground">
-                          {ticket.status === 'open' ? 'Open' : 
-                           ticket.status === 'in_progress' ? 'In Progress' :
-                           ticket.status === 'resolved' ? 'Resolved' : 'Closed'}
+                          {(statusConfig[ticket.status as keyof typeof statusConfig] || { label: ticket.status }).label}
                         </div>
                       </div>
                     </div>
@@ -351,8 +366,7 @@ const TicketPage = () => {
                       <div>
                         <div className="font-medium text-foreground">{t('header.dashboard.tickets.priority')}</div>
                         <div className="text-muted-foreground">
-                          {ticket.priority === 'high' ? 'High Priority' : 
-                           ticket.priority === 'medium' ? 'Medium Priority' : 'Low Priority'}
+                          {(priorityConfig[ticket.priority as keyof typeof priorityConfig] || { label: ticket.priority }).label}
                         </div>
                       </div>
                     </div>
