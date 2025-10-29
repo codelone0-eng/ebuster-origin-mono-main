@@ -96,9 +96,9 @@ export const createScriptVersion = async (req: Request, res: Response) => {
       .update({
         version,
         code,
-        description,
         file_size: fileSize,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        changelog_summary: changelog || description || null
       })
       .eq('id', scriptId);
 

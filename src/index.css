@@ -205,6 +205,15 @@
   [data-radix-select-viewport] {
     position: fixed !important;
     z-index: 50;
+    min-width: var(--radix-select-trigger-width, 12rem);
+    width: max(var(--radix-select-trigger-width, 12rem), max-content);
+    max-width: min(calc(100vw - 32px), 26rem);
+  }
+
+  [data-radix-select-content],
+  [role="listbox"] {
+    min-width: var(--radix-select-trigger-width, 12rem) !important;
+    width: max(var(--radix-select-trigger-width, 12rem), max-content) !important;
   }
   
   /* Предотвращаем прыжки при открытии модальных окон */

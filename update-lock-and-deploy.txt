@@ -1,0 +1,51 @@
+# ИНСТРУКЦИЯ: Обновление package-lock.json и деплой
+
+## 1. Обновить package-lock.json локально:
+
+```bash
+# В локальной терминале в папке проекта:
+cd /path/to/ebuster-origin-mono-main
+rm package-lock.json
+npm install
+```
+
+## 2. Закоммитить изменения:
+
+```bash
+git add package.json package-lock.json
+git commit -m "fix: add node-cron dependency and update lock file"
+git push origin main
+```
+
+## 3. Деплой на VPS:
+
+```bash
+# На VPS:
+cd /srv/ebuster
+git pull origin main
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+sleep 10
+docker-compose ps
+curl -s https://api.ebuster.ru/api/health
+```
+
+## Альтернативный способ (без локального обновления):
+
+На VPS можно временно заменить npm ci на npm install:
+
+```bash
+# На VPS:
+cd /srv/ebuster
+# Временно изменить Dockerfile.api
+sed -i 's/npm ci --only=production/npm install --omit=dev/g' Dockerfile.api
+
+# Собрать и запустить
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+
+# После успешного запуска вернуть обратно:
+git checkout -- Dockerfile.api
+```

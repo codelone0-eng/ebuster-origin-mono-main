@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { GradientButton } from '@/components/ui/gradient-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
@@ -23,6 +22,7 @@ import { ScriptChangelog } from './ScriptChangelog';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
+import { cn } from '@/lib/utils';
 import { 
   Library, 
   Download, 
@@ -58,7 +58,8 @@ import {
   Unlock,
   RefreshCw,
   LogOut,
-  Crown
+  Crown,
+  ChevronRight
 } from 'lucide-react';
 
 // Имя/почта берутся из авторизации; мок оставлен как дефолт
@@ -365,6 +366,39 @@ const DashboardContent = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  const navigationItems = [
+    {
+      value: 'scripts',
+      label: t('header.dashboard.tabs.scripts'),
+      icon: Library
+    },
+    {
+      value: 'installed',
+      label: t('header.dashboard.tabs.installed'),
+      icon: Download
+    },
+    {
+      value: 'referral',
+      label: language === 'ru' ? 'Рефералы' : 'Referrals',
+      icon: Star
+    },
+    {
+      value: 'support',
+      label: t('header.dashboard.tabs.support'),
+      icon: Headphones
+    },
+    {
+      value: 'profile',
+      label: t('header.dashboard.tabs.profile'),
+      icon: User
+    },
+    {
+      value: 'settings',
+      label: t('header.dashboard.tabs.settings'),
+      icon: Settings
+    }
+  ];
+
   // Функция для изменения активной вкладки с сохранением в URL и localStorage
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -494,7 +528,7 @@ const DashboardContent = () => {
     <div className="min-h-screen bg-background relative">
       <ParticleBackground />
       <div className="relative z-content">
-      <Header />
+        <Header />
 
         <div className="container mx-auto max-w-7xl px-4 py-8">
           {/* Header */}
@@ -532,320 +566,346 @@ const DashboardContent = () => {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 mb-8">
-              <TabsTrigger value="scripts" className="flex items-center gap-2">
-                <Library className="h-5 w-5 flex-shrink-0" />
-                {t('header.dashboard.tabs.scripts')}
-              </TabsTrigger>
-              <TabsTrigger value="installed" className="flex items-center gap-2">
-                <Download className="h-5 w-5 flex-shrink-0" />
-                {t('header.dashboard.tabs.installed')}
-              </TabsTrigger>
-              <TabsTrigger value="referral" className="flex items-center gap-2">
-                <Star className="h-5 w-5 flex-shrink-0" />
-                Рефералы
-              </TabsTrigger>
-              <TabsTrigger value="support" className="flex items-center gap-2">
-                <Headphones className="h-5 w-5 flex-shrink-0" />
-                {t('header.dashboard.tabs.support')}
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-5 w-5 flex-shrink-0" />
-                {t('header.dashboard.tabs.profile')}
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-5 w-5 flex-shrink-0" />
-                {t('header.dashboard.tabs.settings')}
-              </TabsTrigger>
-            </TabsList>
+        {/* Layout with sidebar navigation */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <div className="sticky top-28 space-y-4">
+              <Card className="bg-card/80 backdrop-blur border border-border/60">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-muted-foreground">
+                    {language === 'ru' ? 'Разделы личного кабинета' : 'Dashboard Sections'}
+                  </CardTitle>
+                  <CardDescription>
+                    {language === 'ru' ? 'Выберите нужную вкладку' : 'Choose a section'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <nav className="space-y-2">
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          onClick={() => handleTabChange(item.value)}
+                          className={cn(
+                            'w-full flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
+                            isActive
+                              ? 'bg-primary text-primary-foreground shadow-sm'
+                              : 'bg-card/80 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                          )}
+                        >
+                          <span className="flex items-center gap-3">
+                            <Icon className={cn('h-5 w-5 transition-colors', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
+                            {item.label}
+                          </span>
+                          <ChevronRight className={cn('h-4 w-4 transition-transform', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </CardContent>
+              </Card>
+            </div>
+          </aside>
 
-            {/* Библиотека скриптов */}
-            <TabsContent value="scripts" className="space-y-6">
-              <ScriptsList />
-            </TabsContent>
-
-            {/* Установленные скрипты */}
-            <TabsContent value="installed" className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.installed')}</h2>
-                <GradientButton className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  {t('header.dashboard.installed.addScript')}
-                </GradientButton>
+          <div className="flex-1 space-y-8">
+            {activeTab === 'scripts' && (
+              <div className="space-y-6">
+                <ScriptsList />
               </div>
+            )}
 
-              <div className="space-y-4">
-                {installedScripts.length === 0 ? (
-                  <Card className="p-12 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <Library className="h-12 w-12 text-muted-foreground" />
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground mb-2">
-                          {t('header.dashboard.installed.noScripts')}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {t('header.dashboard.installed.noScriptsDescription')}
-                        </p>
+            {activeTab === 'installed' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.installed')}</h2>
+                  <GradientButton className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    {t('header.dashboard.installed.addScript')}
+                  </GradientButton>
+                </div>
+
+                <div className="space-y-4">
+                  {installedScripts.length === 0 ? (
+                    <Card className="p-12 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <Library className="h-12 w-12 text-muted-foreground" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground mb-2">
+                            {t('header.dashboard.installed.noScripts')}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {t('header.dashboard.installed.noScriptsDescription')}
+                          </p>
+                        </div>
+                        <GradientButton onClick={() => handleTabChange('scripts')}>
+                          {t('header.dashboard.installed.browseScripts')}
+                        </GradientButton>
                       </div>
-                      <GradientButton onClick={() => setActiveTab('scripts')}>
-                        {t('header.dashboard.installed.browseScripts')}
-                      </GradientButton>
-                    </div>
-                  </Card>
-                ) : installedScripts.map((item: any) => (
-                  <Card key={item.script_id} className="group hover:shadow-lg transition-all duration-200">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Library className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">{item.script?.name || 'Скрипт'}</h3>
-                            <p className="text-sm text-muted-foreground">{item.script?.description || ''}</p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                              <span>v{item.script?.version || '1.0.0'}</span>
-                              <span>•</span>
-                              <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
+                    </Card>
+                  ) : installedScripts.map((item: any) => {
+                    const scriptTitle = item.script?.title || item.script?.name || 'Скрипт';
+                    const scriptDescription = item.script?.short_description || item.script?.description || '';
+                    const scriptVersion = item.script?.version || item.version || '1.0.0';
+
+                    return (
+                      <Card key={item.script_id} className="group hover:shadow-lg transition-all duration-200">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Library className="h-6 w-6 text-primary" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-foreground">{scriptTitle}</h3>
+                                {scriptDescription && (
+                                  <p className="text-sm text-muted-foreground line-clamp-2">{scriptDescription}</p>
+                                )}
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                  <span>v{scriptVersion}</span>
+                                  <span>•</span>
+                                  <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <GradientButton 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setChangelogScript({ id: item.script_id, name: scriptTitle })}
+                              >
+                                <FileText className="h-3 w-3 mr-1" />
+                                История версий
+                              </GradientButton>
+                              <GradientButton 
+                                variant="outline"
+                                size="sm"
+                              >
+                                <Settings className="h-3 w-3 mr-1" />
+                                {t('header.dashboard.installed.configure')}
+                              </GradientButton>
+                              <GradientButton 
+                                variant="destructive"
+                                size="sm"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                {t('header.dashboard.installed.uninstall')}
+                              </GradientButton>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <GradientButton 
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setChangelogScript({ id: item.script_id, name: item.script?.name || 'Скрипт' })}
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
-                            История версий
-                          </GradientButton>
-                          <GradientButton 
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Settings className="h-3 w-3 mr-1" />
-                            {t('header.dashboard.installed.configure')}
-                          </GradientButton>
-                          <GradientButton 
-                            variant="destructive"
-                            size="sm"
-                          >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            {t('header.dashboard.installed.uninstall')}
-                          </GradientButton>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
-            </TabsContent>
+            )}
 
-            {/* Реферальная программа */}
-            <TabsContent value="referral" className="space-y-6">
-              <ReferralProgram userId={String(authUser?.id || '')} />
-            </TabsContent>
+            {activeTab === 'referral' && (
+              <div className="space-y-6">
+                <ReferralProgram userId={String(authUser?.id || '')} />
+              </div>
+            )}
 
-            {/* Поддержка */}
-            <TabsContent value="support" className="space-y-6">
-              <TicketsUser />
-            </TabsContent>
+            {activeTab === 'support' && (
+              <div className="space-y-6">
+                <TicketsUser />
+              </div>
+            )}
 
-            {/* Профиль */}
-            <TabsContent value="profile" className="space-y-6">
-              <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.profile.personalInfo')}</h2>
-              
-              <div className="max-w-2xl mx-auto">
-                <Card>
-                  <CardHeader>
+            {activeTab === 'profile' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.profile.personalInfo')}</h2>
+                <div className="max-w-2xl mx-auto">
+                  <Card>
+                    <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <User className="h-5 w-5" />
                         {t('header.dashboard.profile.personalInfo')}
                       </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <AvatarUpload 
-                      currentAvatar={authUser?.avatar_url || user.avatar}
-                      onAvatarUpdate={(avatarUrl) => {
-                        setUser(prev => ({ ...prev, avatar: avatarUrl }));
-                      }}
-                    />
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.name')}</label>
-                        <Input
-                          type="text"
-                          value={user.name}
-                          onChange={(e) => setUser((prev) => ({ ...prev, name: e.target.value }))}
-                          className="w-full mt-1"
-                        />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <AvatarUpload 
+                        currentAvatar={authUser?.avatar_url || user.avatar}
+                        onAvatarUpdate={(avatarUrl) => {
+                          setUser(prev => ({ ...prev, avatar: avatarUrl }));
+                        }}
+                      />
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.name')}</label>
+                          <Input
+                            type="text"
+                            value={user.name}
+                            onChange={(e) => setUser((prev) => ({ ...prev, name: e.target.value }))}
+                            className="w-full mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.email')}</label>
+                          <Input
+                            type="email"
+                            value={user.email}
+                            onChange={(e) => setUser((prev) => ({ ...prev, email: e.target.value }))}
+                            className="w-full mt-1"
+                            disabled
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.email')}</label>
-                        <Input
-                          type="email"
-                          value={user.email}
-                          onChange={(e) => setUser((prev) => ({ ...prev, email: e.target.value }))}
-                          className="w-full mt-1"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                    <Button variant="outline" className="w-full" onClick={handleSaveProfile} disabled={isSaving}>
-                      <UserCheck className="h-4 w-4 mr-2" />
-                      {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <Button variant="outline" className="w-full" onClick={handleSaveProfile} disabled={isSaving}>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </TabsContent>
+            )}
 
-            {/* Настройки */}
-            <TabsContent value="settings" className="space-y-6">
-              <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Безопасность */}
-                <Card>
-                  <CardHeader>
+            {activeTab === 'settings' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Shield className="h-5 w-5" />
                         {t('header.dashboard.settings.security')}
                       </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                          <GradientButton 
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => setIsChangePasswordOpen(true)}
-                          >
-                            <Key className="h-4 w-4 mr-2" />
-                            {t('header.dashboard.settings.changePassword')}
-                          </GradientButton>
-                      <GradientButton 
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setIsChangeEmailOpen(true)}
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        {t('header.dashboard.settings.changeEmail')}
-                      </GradientButton>
-                      <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium">{t('header.dashboard.settings.twoFactorAuth')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={is2FAEnabled}
-                            onCheckedChange={setIs2FAEnabled}
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <Button variant="outline" className="w-full">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {t('header.dashboard.settings.logoutAll')}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Общие настройки */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      {t('header.dashboard.settings.general')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-foreground">{t('header.dashboard.settings.autoUpdate')}</h4>
-                        <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.autoUpdateDesc')}</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-foreground">{t('header.dashboard.settings.newScripts')}</h4>
-                        <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.newScriptsDesc')}</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-foreground">{t('header.dashboard.settings.updateNotifications')}</h4>
-                        <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.updateNotificationsDesc')}</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      {t('header.dashboard.settings.twoFactorAuth')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-foreground">{t('header.dashboard.settings.request2FA')}</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">{t('header.dashboard.settings.accountLogin')}</span>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">{t('header.dashboard.settings.passwordChange')}</span>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">{t('header.dashboard.settings.emailChange')}</span>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">{t('header.dashboard.settings.accountDeletion')}</span>
-                          <Switch defaultChecked />
-          </div>
-        </div>
-      </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-foreground">{t('header.dashboard.settings.methods2FA')}</h4>
-                      <div className="space-y-2">
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <GradientButton 
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => setIsChangePasswordOpen(true)}
+                        >
+                          <Key className="h-4 w-4 mr-2" />
+                          {t('header.dashboard.settings.changePassword')}
+                        </GradientButton>
+                        <GradientButton 
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => setIsChangeEmailOpen(true)}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          {t('header.dashboard.settings.changeEmail')}
+                        </GradientButton>
                         <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
                           <div className="flex items-center gap-2">
-                            <Smartphone className="h-4 w-4 text-primary" />
-                            <span className="text-sm">{t('header.dashboard.settings.telegramBot')}</span>
+                            <Shield className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">{t('header.dashboard.settings.twoFactorAuth')}</span>
                           </div>
-                          <Badge variant="default">{t('header.dashboard.settings.active')}</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
                           <div className="flex items-center gap-2">
-                            <QrCode className="h-4 w-4 text-primary" />
-                            <span className="text-sm">{t('header.dashboard.settings.googleAuth')}</span>
+                            <Switch 
+                              checked={is2FAEnabled}
+                              onCheckedChange={setIs2FAEnabled}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
+                            </span>
                           </div>
-                          <Button variant="ghost" size="sm">
-                            {t('header.dashboard.settings.configure')}
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <Button variant="outline" className="w-full">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        {t('header.dashboard.settings.logoutAll')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        {t('header.dashboard.settings.general')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-foreground">{t('header.dashboard.settings.autoUpdate')}</h4>
+                          <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.autoUpdateDesc')}</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-foreground">{t('header.dashboard.settings.newScripts')}</h4>
+                          <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.newScriptsDesc')}</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-foreground">{t('header.dashboard.settings.updateNotifications')}</h4>
+                          <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.updateNotificationsDesc')}</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="h-5 w-5" />
+                        {t('header.dashboard.settings.twoFactorAuth')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-foreground">{t('header.dashboard.settings.request2FA')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">{t('header.dashboard.settings.accountLogin')}</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">{t('header.dashboard.settings.passwordChange')}</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">{t('header.dashboard.settings.emailChange')}</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">{t('header.dashboard.settings.accountDeletion')}</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-foreground">{t('header.dashboard.settings.methods2FA')}</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Smartphone className="h-4 w-4 text-primary" />
+                              <span className="text-sm">{t('header.dashboard.settings.telegramBot')}</span>
+                            </div>
+                            <Badge variant="default">{t('header.dashboard.settings.active')}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <QrCode className="h-4 w-4 text-primary" />
+                              <span className="text-sm">{t('header.dashboard.settings.googleAuth')}</span>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              {t('header.dashboard.settings.configure')}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </div>
         
         <Footer />

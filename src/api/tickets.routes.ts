@@ -11,6 +11,7 @@ import { authenticateUser } from './auth.middleware';
 
 const router = Router();
 
+router.get('/', authenticateUser, getUserTickets);
 router.get('/user', authenticateUser, getUserTickets);
 router.get('/all', authenticateUser, getAllTickets);
 router.post('/', authenticateUser, createTicket);
