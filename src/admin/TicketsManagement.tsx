@@ -30,6 +30,17 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FileUpload } from '@/components/ui/file-upload';
+import { AttachmentList } from '@/components/ui/attachment-list';
+
+interface Attachment {
+  id: string;
+  filename: string;
+  original_filename: string;
+  file_path: string;
+  file_size: number;
+  mime_type?: string;
+  created_at: string;
+}
 
 interface Ticket {
   id: string;
@@ -39,13 +50,14 @@ interface Ticket {
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'new' | 'open' | 'pending_customer' | 'pending_internal' | 'resolved' | 'closed';
   user_id: string;
-  user?: {
+  client?: {
+    id: string;
     full_name: string;
     email: string;
     avatar_url?: string;
   };
   assigned_to?: string;
-  assigned?: {
+  agent?: {
     full_name: string;
   };
   created_at: string;
@@ -68,6 +80,7 @@ interface TicketMessage {
     avatar_url?: string;
     role: string;
   };
+  attachments?: Attachment[];
 }
 
 const TicketsManagement: React.FC = () => {
@@ -86,19 +99,19 @@ const TicketsManagement: React.FC = () => {
   const [realtimeMessages, setRealtimeMessages] = useState<TicketMessage[]>([]);
 
   const statusColors = {
-    new: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    open: 'bg-blue-100 text-blue-800 border-blue-300',
-    pending_customer: 'bg-orange-100 text-orange-800 border-orange-300',
-    pending_internal: 'bg-purple-100 text-purple-800 border-purple-300',
-    resolved: 'bg-green-100 text-green-800 border-green-300',
-    closed: 'bg-gray-100 text-gray-800 border-gray-300'
+    new: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+    open: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    pending_customer: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    pending_internal: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    resolved: 'bg-green-500/10 text-green-500 border-green-500/20',
+    closed: 'bg-gray-500/10 text-gray-500 border-gray-500/20'
   };
 
   const priorityColors = {
-    low: 'bg-gray-100 text-gray-800 border-gray-300',
-    medium: 'bg-blue-100 text-blue-800 border-blue-300',
-    high: 'bg-orange-100 text-orange-800 border-orange-300',
-    critical: 'bg-red-100 text-red-800 border-red-300'
+    low: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    medium: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    high: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    critical: 'bg-red-500/10 text-red-500 border-red-500/20'
   };
 
   const statusLabels = {
@@ -248,7 +261,7 @@ const TicketsManagement: React.FC = () => {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedTicket || isSending) return;
+    if ((!newMessage.trim() && selectedFiles.length === 0) || !selectedTicket || isSending) return;
 
     try {
       setIsSending(true);
@@ -385,11 +398,11 @@ const TicketsManagement: React.FC = () => {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                     <div className="flex items-center gap-1.5">
                       <Avatar className="h-5 w-5">
-                        <AvatarImage src={ticket.user?.avatar_url} />
-                        <AvatarFallback className="text-xs">{ticket.user?.full_name?.[0] || '?'}</AvatarFallback>
+                        <AvatarImage src={ticket.client?.avatar_url} />
+                        <AvatarFallback className="text-xs">{ticket.client?.full_name?.[0] || '?'}</AvatarFallback>
                       </Avatar>
-                      <span className="font-medium">{ticket.user?.full_name || 'Unknown'}</span>
-                      <span className="text-muted-foreground/70">({ticket.user?.email})</span>
+                      <span className="font-medium">{ticket.client?.full_name || 'Unknown'}</span>
+                      <span className="text-muted-foreground/70">({ticket.client?.email})</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />
@@ -401,10 +414,10 @@ const TicketsManagement: React.FC = () => {
                         <span>Обновлен {formatDate(ticket.updated_at)}</span>
                       </div>
                     )}
-                    {ticket.assigned && (
+                    {ticket.agent && (
                       <div className="flex items-center gap-1.5">
                         <User className="h-3.5 w-3.5" />
-                        <span>Назначен: {ticket.assigned.full_name}</span>
+                        <span>Назначен: {ticket.agent.full_name}</span>
                       </div>
                     )}
                   </div>
@@ -466,8 +479,8 @@ const TicketsManagement: React.FC = () => {
                         <User className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm text-muted-foreground">Клиент</p>
-                          <p className="font-medium">{selectedTicket.user?.full_name || 'Unknown'}</p>
-                          <p className="text-xs text-muted-foreground">{selectedTicket.user?.email}</p>
+                          <p className="font-medium">{selectedTicket.client?.full_name || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground">{selectedTicket.client?.email}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -512,7 +525,7 @@ const TicketsManagement: React.FC = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {messages.map((message) => {
-                        const isSupport = message.author?.role === 'admin';
+                        const isSupport = message.author_id !== selectedTicket.user_id;
                         const isSystem = message.is_system;
 
                         if (isSystem) {
@@ -534,18 +547,10 @@ const TicketsManagement: React.FC = () => {
                             )}
                           >
                             <Avatar className="h-10 w-10 flex-shrink-0">
-                              {isSupport ? (
-                                <div className="bg-yellow-100 flex items-center justify-center w-full h-full">
-                                  <LightningIcon size={24} />
-                                </div>
-                              ) : (
-                                <>
-                                  <AvatarImage src={message.author?.avatar_url} />
-                                  <AvatarFallback>
-                                    {message.author?.full_name?.[0] || '?'}
-                                  </AvatarFallback>
-                                </>
-                              )}
+                              <AvatarImage src={isSupport ? undefined : message.author?.avatar_url} />
+                              <AvatarFallback className={cn(isSupport && 'bg-primary text-primary-foreground')}>
+                                {isSupport ? <Wrench className="h-5 w-5" /> : message.author?.full_name?.[0] || '?'}
+                              </AvatarFallback>
                             </Avatar>
                             <div className={cn(
                               "flex-1 max-w-[75%]",
@@ -568,12 +573,20 @@ const TicketsManagement: React.FC = () => {
                                 className={cn(
                                   "rounded-lg p-3 whitespace-pre-wrap",
                                   isSupport
-                                    ? "bg-yellow-50 border border-yellow-200"
+                                    ? "bg-primary/5 border border-primary/10"
                                     : "bg-muted"
                                 )}
                               >
                                 {message.message}
                               </div>
+                              {message.attachments && message.attachments.length > 0 && (
+                                <div className="mt-2">
+                                  <AttachmentList 
+                                    attachments={message.attachments} 
+                                    canDelete={false}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -590,6 +603,37 @@ const TicketsManagement: React.FC = () => {
 
               {/* Форма отправки сообщения */}
               <div className="border-t pt-4 space-y-3 bg-background">
+                {selectedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Paperclip className="h-4 w-4 text-muted-foreground" />
+                      Прикрепленные файлы ({selectedFiles.length})
+                    </div>
+                    <AttachmentList 
+                      attachments={selectedFiles.map((file, index) => ({
+                        id: `temp-${index}`,
+                        filename: file.name,
+                        original_filename: file.name,
+                        file_path: URL.createObjectURL(file),
+                        file_size: file.size,
+                        mime_type: file.type,
+                        created_at: new Date().toISOString()
+                      }))}
+                      canDelete={true}
+                      onDelete={(id) => {
+                        const index = parseInt(id.split('-')[1]);
+                        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+                      }}
+                    />
+                  </div>
+                )}
+                <FileUpload
+                  onFileSelect={setSelectedFiles}
+                  maxFiles={5}
+                  maxSize={10 * 1024 * 1024}
+                  acceptedTypes={['image/*', 'application/pdf', 'text/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                  disabled={isSending}
+                />
                 <Textarea
                   placeholder="Введите ваш ответ..."
                   value={newMessage}
@@ -608,7 +652,7 @@ const TicketsManagement: React.FC = () => {
                   </span>
                   <Button 
                     onClick={sendMessage} 
-                    disabled={!newMessage.trim() || isSending}
+                    disabled={(!newMessage.trim() && selectedFiles.length === 0) || isSending}
                     className="min-w-[140px]"
                   >
                     {isSending ? (

@@ -45,12 +45,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       validFiles.push(file);
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles].slice(0, maxFiles));
-    onFileSelect(validFiles);
+    const newFiles = [...selectedFiles, ...validFiles].slice(0, maxFiles);
+    setSelectedFiles(newFiles);
+    onFileSelect(newFiles);
   };
 
   const handleRemoveFile = (index: number) => {
+    const removed = selectedFiles[index];
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    onFileSelect(selectedFiles.filter((_, i) => i !== index));
   };
 
   const handleDrag = (e: React.DragEvent) => {

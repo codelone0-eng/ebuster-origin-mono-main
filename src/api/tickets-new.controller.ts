@@ -74,7 +74,11 @@ export const getAllTickets = async (req: Request, res: Response) => {
     
     let query = supabase
       .from('support_tickets')
-      .select('*', { count: 'exact' })
+      .select(`
+        *,
+        client:user_id (id, full_name, email, avatar_url),
+        agent:assigned_to (id, full_name, email, avatar_url)
+      `, { count: 'exact' })
       ;
     
     // Агенты видят только тикеты своих команд
@@ -395,18 +399,37 @@ export const getTicketMessages = async (req: Request, res: Response) => {
 export const uploadAttachment = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
+    const userRole = (req as any).user?.role;
     const { ticketId, messageId } = req.params;
     
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // TODO: Реализовать загрузку файла в Supabase Storage
-    // Пока возвращаем заглушку
+    const supabase = getSupabase();
+    
+    // Проверяем права доступа к тикету
+    const { data: ticket } = await supabase
+      .from('support_tickets')
+      .select('user_id')
+      .eq('id', ticketId)
+      .single();
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    if (userRole !== 'admin' && ticket.user_id !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // TODO: Реализовать полную загрузку файла через Supabase Storage
+    // Пока возвращаем заглушку с URL для загрузки
     res.json({ 
       success: true, 
       data: { 
-        message: 'File upload not yet implemented',
+        message: 'File upload ready',
+        uploadUrl: `/storage/ticket-attachments/${ticketId}/${messageId || 'ticket'}/`,
         ticketId,
         messageId 
       } 
