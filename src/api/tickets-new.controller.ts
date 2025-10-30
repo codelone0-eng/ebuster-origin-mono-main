@@ -31,7 +31,8 @@ export const getUserTickets = async (req: Request, res: Response) => {
       .from('support_tickets')
       .select(`
         *,
-        user:auth_users(full_name, email, avatar_url)
+        client:user_id (id, full_name, email, avatar_url),
+        agent:assigned_to (id, full_name, email, avatar_url)
       `)
       ;
 

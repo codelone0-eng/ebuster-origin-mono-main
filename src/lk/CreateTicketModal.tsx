@@ -209,7 +209,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
                 onValueChange={(value) => setTeamId(Number(value))}
               >
                 <SelectTrigger id="team">
-                  <SelectValue />
+                  <SelectValue placeholder="Выберите категорию..." />
                 </SelectTrigger>
                 <SelectContent>
                   {teams.map((team) => (

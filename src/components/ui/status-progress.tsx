@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Check, Clock, MailQuestion, MessageSquare, X } from 'lucide-react';
 
 interface StatusProgressProps {
   currentStatus: string;
@@ -8,11 +10,11 @@ interface StatusProgressProps {
 }
 
 const statusSteps = [
-  { id: 'new', label: 'Новое', color: 'bg-yellow-500', hoverColor: 'hover:bg-yellow-400' },
-  { id: 'open', label: 'В работе', color: 'bg-blue-500', hoverColor: 'hover:bg-blue-400' },
-  { id: 'pending_customer', label: 'Ожидает ответа', color: 'bg-orange-500', hoverColor: 'hover:bg-orange-400' },
-  { id: 'resolved', label: 'Решено', color: 'bg-green-500', hoverColor: 'hover:bg-green-400' },
-  { id: 'closed', label: 'Закрыто', color: 'bg-gray-500', hoverColor: 'hover:bg-gray-400' }
+  { id: 'new', label: 'Новый', icon: MessageSquare, color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
+  { id: 'open', label: 'В работе', icon: Clock, color: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20' },
+  { id: 'pending_customer', label: 'Ожидает ответа', icon: MailQuestion, color: 'text-orange-500 bg-orange-500/10 border-orange-500/20' },
+  { id: 'resolved', label: 'Решен', icon: Check, color: 'text-green-500 bg-green-500/10 border-green-500/20' },
+  { id: 'closed', label: 'Закрыт', icon: X, color: 'text-gray-500 bg-gray-500/10 border-gray-500/20' }
 ];
 
 export const StatusProgress: React.FC<StatusProgressProps> = ({ 
@@ -20,46 +22,27 @@ export const StatusProgress: React.FC<StatusProgressProps> = ({
   onStatusChange,
   isAdmin = false 
 }) => {
-  const currentIndex = statusSteps.findIndex(step => step.id === currentStatus);
-  const activeIndex = currentIndex >= 0 ? currentIndex : 0;
-
   return (
-    <div className="flex items-center gap-2 w-full max-w-3xl">
-      {statusSteps.map((step, index) => {
-        const isActive = index <= activeIndex;
-        const isClickable = isAdmin && onStatusChange && index >= 0;
+    <div className="flex items-center gap-2 flex-wrap">
+      {statusSteps.map((step) => {
+        const isActive = step.id === currentStatus;
+        const isClickable = isAdmin && onStatusChange;
 
         return (
-          <React.Fragment key={step.id}>
-            <button
-              type="button"
-              onClick={() => isClickable && onStatusChange?.(step.id)}
-              disabled={!isClickable}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium text-white transition-all",
-                "relative overflow-hidden",
-                isActive ? step.color : "bg-gray-300",
-                isClickable && "cursor-pointer",
-                isClickable && step.hoverColor,
-                !isClickable && "cursor-default"
-              )}
-              style={{
-                flex: '1 1 0%',
-                minWidth: 0
-              }}
-            >
-              <span className="relative z-10">{step.label}</span>
-              {isActive && index === activeIndex && (
-                <div className="absolute inset-0 bg-black/10" />
-              )}
-            </button>
-            {index < statusSteps.length - 1 && (
-              <div className={cn(
-                "flex-shrink-0 w-2 h-2 rounded-full transition-colors",
-                index < activeIndex ? step.color : "bg-gray-300"
-              )} />
+          <Badge
+            key={step.id}
+            variant={isActive ? 'default' : 'outline'}
+            onClick={() => isClickable && onStatusChange?.(step.id)}
+            className={cn(
+              'py-2 px-4 text-sm font-medium transition-all',
+              isClickable && 'cursor-pointer hover:bg-accent',
+              isActive && `${step.color.replace('text-', 'bg-').replace('/10', '/20')} text-white`,
+              !isActive && 'border-dashed'
             )}
-          </React.Fragment>
+          >
+            <step.icon className="h-4 w-4 mr-2" />
+            {step.label}
+          </Badge>
         );
       })}
     </div>
