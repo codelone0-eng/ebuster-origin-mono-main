@@ -254,11 +254,16 @@ const Pricing = () => {
                       key={role.id}
                       className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0 pt-6"
                     >
-                      <Card className={cn(
-                        "relative overflow-hidden border transition-all duration-300 flex flex-col",
-                        isPremium ? "border-primary/40 bg-card/90 shadow-lg shadow-primary/10" : "border-border/40 bg-card/70",
-                        "min-h-[520px]"
-                      )}>
+                      <Card
+                        className={cn(
+                          "relative overflow-hidden rounded-2xl border transition-all duration-300 flex flex-col backdrop-blur",
+                          "shadow-[0_28px_60px_-40px_rgba(0,0,0,0.9)] ring-1 ring-border/20 hover:ring-primary/30 hover:-translate-y-1",
+                          isPremium
+                            ? "border-primary/30 bg-gradient-to-br from-primary/8 via-card/85 to-card/70"
+                            : "border-border/50 bg-gradient-to-br from-card/85 via-card/70 to-card/60",
+                          "min-h-[520px]"
+                        )}
+                      >
                         {/* Premium Badge */}
                         {isPremium && (
                           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
@@ -270,7 +275,7 @@ const Pricing = () => {
                         )}
 
                         {/* Content */}
-                        <CardContent className="p-6 pt-8">
+                        <CardContent className="p-6 pt-8 flex flex-col h-full">
                           <div className="text-center mb-6">
                             <div className={cn(
                               "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
@@ -306,7 +311,7 @@ const Pricing = () => {
                             </p>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="flex-1 flex flex-col space-y-4">
                             <ul className="space-y-2">
                               {features.slice(0, 6).map((feature, index) => (
                                 <li key={index} className="flex items-start gap-2">
@@ -323,7 +328,7 @@ const Pricing = () => {
 
                             <Button 
                               className={cn(
-                                "w-full h-10 rounded-lg font-semibold text-sm",
+                                "w-full h-10 rounded-lg font-semibold text-sm mt-auto",
                                 isPremium ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border-border/30 bg-card/50 text-foreground hover:bg-card"
                               )}
                               variant={isPremium ? "default" : "outline"}
