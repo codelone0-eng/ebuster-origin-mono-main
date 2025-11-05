@@ -1054,9 +1054,10 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
         </div>
 
         <Footer />
+      </div>
         
-        {/* Modals */}
-        <ChangePasswordModal 
+      {/* Modals */}
+      <ChangePasswordModal 
           isOpen={isChangePasswordOpen}
           onClose={() => setIsChangePasswordOpen(false)}
         />
