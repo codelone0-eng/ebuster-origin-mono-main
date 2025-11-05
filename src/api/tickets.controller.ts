@@ -18,7 +18,7 @@ const normalizeId = (value: any) => (value === null || value === undefined ? nul
 
 const isTicketClosedStatus = (status?: string | null) => {
   if (!status) return false;
-  return ['closed', 'cancelled'].includes(status);
+  return ['closed', 'cancelled', 'resolved'].includes(status);
 };
 
 // Получить тикеты пользователя
@@ -127,6 +127,8 @@ export const updateTicket = async (req: Request, res: Response) => {
     
     if (status === 'closed') {
       updateData.closed_at = new Date().toISOString();
+    } else if (status === 'resolved') {
+      updateData.resolved_at = new Date().toISOString();
     }
     
     const supabase = getSupabase();

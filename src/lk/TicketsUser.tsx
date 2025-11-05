@@ -32,8 +32,10 @@ interface Ticket {
   user_id: string;
   created_at: string;
   updated_at: string;
+  closed_at?: string | null;
+  resolved_at?: string | null;
   client?: { id: string; full_name: string; email: string; avatar_url?: string; };
-  agent?: { full_name: string; };
+  agent?: { full_name: string };
 }
 
 interface TicketComment {
@@ -78,7 +80,8 @@ const TicketsUser: React.FC = () => {
     pending_customer: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
     pending_internal: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
     resolved: 'bg-green-500/10 text-green-500 border-green-500/20',
-    closed: 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+    closed: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    cancelled: 'bg-red-500/10 text-red-500 border-red-500/20'
   };
 
   const priorityColors = {
@@ -93,7 +96,8 @@ const TicketsUser: React.FC = () => {
     pending_customer: 'Ожидает ответа',
     pending_internal: 'Внутреннее ожидание',
     resolved: 'Решен',
-    closed: 'Закрыт'
+    closed: 'Закрыт',
+    cancelled: 'Отменен'
   };
 
   const priorityLabels = {
@@ -221,7 +225,7 @@ const TicketsUser: React.FC = () => {
   };
 
   const addComment = async () => {
-    if (!newComment.trim() || !selectedTicket) return;
+    if (!newComment.trim() || !selectedTicket || isTicketClosed(selectedTicket)) return;
 
     try {
       const token = localStorage.getItem('ebuster_token');
@@ -317,7 +321,14 @@ const TicketsUser: React.FC = () => {
 
   const isTicketClosed = (ticket?: Ticket | null) => {
     if (!ticket) return false;
-    return ticket.status === 'closed' || ticket.status === 'cancelled';
+    return ['closed', 'cancelled', 'resolved'].includes(ticket.status);
+  };
+
+  const getClosedTicketMessage = (ticket: Ticket) => {
+    const dateValue = ticket.closed_at || ticket.resolved_at;
+    const formattedDate = dateValue ? new Date(dateValue).toLocaleString() : 'дата не указана';
+    const agentName = ticket.agent?.full_name || 'администратор поддержки';
+    return `Тикет закрыт, ${formattedDate}, ${agentName}`;
   };
 
   if (loading) {
@@ -451,7 +462,8 @@ const TicketsUser: React.FC = () => {
                     <div className="rounded-xl border content-border-40 bg-muted/40 p-4">
                       <h5 className="font-semibold mb-1">Тикет закрыт</h5>
                       <p className="text-sm text-muted-foreground">
-                        Чтобы продолжить обсуждение, переоткройте тикет или создайте новый запрос в поддержку.
+                        Тикет закрыт {selectedTicket.closed_at ? new Date(selectedTicket.closed_at).toLocaleString() : ''}
+                        {selectedTicket.agent?.full_name ? `, ${selectedTicket.agent.full_name}` : ''}
                       </p>
                     </div>
                     <Button
