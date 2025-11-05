@@ -41,6 +41,8 @@ interface Ticket {
   customer_id: number;
   assigned_agent_id?: number;
   team_id?: number;
+  closed_at?: string | null;
+  resolved_at?: string | null;
   customer?: {
     id: number;
     full_name: string;
@@ -166,7 +168,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !ticket || isTicketClosed(ticket)) return;
 
     try {
       setSending(true);
@@ -261,6 +263,17 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const isTicketClosed = (currentTicket: Ticket) => {
+    return ['closed', 'cancelled', 'resolved'].includes(currentTicket.status);
+  };
+
+  const closedTicketMessage = (currentTicket: Ticket) => {
+    const dateValue = currentTicket.closed_at || currentTicket.resolved_at;
+    const formattedDate = dateValue ? new Date(dateValue).toLocaleString('ru-RU') : 'дата не указана';
+    const agentName = currentTicket.assigned_agent?.full_name || 'администратор';
+    return `Тикет закрыт, ${formattedDate}, ${agentName}`;
   };
 
   if (loading) {
@@ -395,32 +408,34 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
               </div>
 
               {/* Форма ответа */}
-              <div className="mt-4 pt-4 border-t">
-                <Textarea
-                  placeholder="Введите ваше сообщение..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  rows={3}
-                  className="mb-2"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.ctrlKey) {
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">
-                    Ctrl + Enter для отправки
-                  </span>
-                  <Button 
-                    onClick={handleSendMessage} 
-                    disabled={sending || !newMessage.trim()}
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    Отправить
-                  </Button>
+              {!isTicketClosed(ticket) ? (
+                <div className="mt-4 pt-4 border-t">
+                  <Textarea
+                    placeholder="Введите ваше сообщение..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    rows={3}
+                    disabled={sending}
+                  />
+                  <div className="mt-2 flex justify-between items-center text-xs text-muted-foreground">
+                    <span>Ctrl + Enter для отправки</span>
+                    <Button
+                      size="sm"
+                      onClick={handleSendMessage}
+                      disabled={sending || !newMessage.trim()}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Отправить
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/30 p-4 text-sm text-muted-foreground">
+                    {closedTicketMessage(ticket)}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
