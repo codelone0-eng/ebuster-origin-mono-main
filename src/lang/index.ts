@@ -10,12 +10,8 @@ import { ru as ruLogin } from './ru/login';
 import { eng as engLogin } from './eng/login';
 import { ru as ruAdvantages } from './ru/advantages';
 import { eng as engAdvantages } from './eng/advantages';
-import { ru as ruDocumentation } from './ru/documentation';
-import { eng as engDocumentation } from './eng/documentation';
 import { ru as ruContacts } from './ru/contacts';
 import { eng as engContacts } from './eng/contacts';
-import { ru as ruApiDocs } from './ru/api-docs';
-import { eng as engApiDocs } from './eng/api-docs';
 import { ru as ruPricing } from './ru/pricing';
 import { eng as engPricing } from './eng/pricing';
 import { ru as ruNotifications } from './ru/notifications';
@@ -33,9 +29,7 @@ export const translations = {
     register: ruRegister,
     login: ruLogin,
     advantages: ruAdvantages,
-    documentation: ruDocumentation,
     contacts: ruContacts,
-    'api-docs': ruApiDocs,
     pricing: ruPricing,
     notifications: ruNotifications,
     workflow: ruWorkflow
@@ -47,9 +41,7 @@ export const translations = {
     register: engRegister,
     login: engLogin,
     advantages: engAdvantages,
-    documentation: engDocumentation,
     contacts: engContacts,
-    'api-docs': engApiDocs,
     pricing: engPricing,
     notifications: engNotifications,
     workflow: engWorkflow

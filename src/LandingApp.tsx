@@ -10,7 +10,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
 import Index from "./landing/Index";
-import ComingSoon from "./landing/ComingSoon";
 import Contacts from "./landing/Contacts";
 import Advantages from "./landing/Advantages";
 import Pricing from "./landing/Pricing";
@@ -51,7 +50,6 @@ const LandingApp = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/api-docs" element={<ComingSoon />} />
                   <Route path="/contacts" element={<Contacts />} />
                   <Route path="/advantages" element={<Advantages />} />
                   <Route path="/price" element={<Pricing />} />

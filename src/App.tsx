@@ -12,7 +12,6 @@ import { AuthProvider } from "@/contexts/CustomAuthContext";
 import Index from "./landing/Index";
 import Register from "./landing/Register";
 import VerifyOtp from "./pages/VerifyOtp";
-import ComingSoon from "./landing/ComingSoon";
 import Contacts from "./landing/Contacts";
 import Advantages from "./landing/Advantages";
 import Pricing from "./landing/Pricing";
@@ -49,7 +48,6 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/verify-otp" element={<VerifyOtp />} />
-                    <Route path="/api-docs" element={<ComingSoon />} />
                     <Route path="/contacts" element={<Contacts />} />
                     <Route path="/advantages" element={<Advantages />} />
                     <Route path="/price" element={<Pricing />} />
