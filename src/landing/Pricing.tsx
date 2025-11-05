@@ -1,26 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ParticleBackground } from '@/components/ParticleBackground';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PricingPlans } from '@/components/PricingPlans';
 import { useLanguage } from '@/hooks/useLanguage';
-import { 
-  Check, 
-  Star, 
-  Zap, 
-  Shield, 
-  Crown,
-  ArrowRight,
-  Download,
-  Code2,
-  Terminal,
-  Headphones
-} from 'lucide-react';
 
 const Pricing = () => {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const plans = [
     {
