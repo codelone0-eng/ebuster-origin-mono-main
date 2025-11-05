@@ -907,3 +907,109 @@ export const clearUsersDebug = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Failed to clear users' });
   }
 };
+
+// Повторная отправка OTP кода
+export const resendOtp = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email обязателен'
+      });
+    }
+
+    const supabase = getSupabaseAdmin();
+    let user;
+
+    if (supabase) {
+      // Поиск пользователя в Supabase
+      const { data, error: userError } = await supabase
+        .from('auth_users')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (userError || !data) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь не найден'
+        });
+      }
+      user = data;
+    } else {
+      // Поиск в in-memory
+      user = users.find(u => u.email === email);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь не найден'
+        });
+      }
+    }
+
+    // Проверяем, что email еще не подтвержден
+    if (user.email_confirmed) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email уже подтвержден'
+      });
+    }
+
+    // Генерируем новый OTP код
+    const newOtpCode = generateOtpCode();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
+
+    // Обновляем OTP код в базе
+    if (supabase) {
+      const { error: updateError } = await supabase
+        .from('auth_users')
+        .update({
+          confirmation_token: newOtpCode,
+          otp_expiry: otpExpiry.toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Error updating OTP:', updateError);
+        return res.status(500).json({
+          success: false,
+          error: 'Ошибка обновления OTP кода'
+        });
+      }
+    } else {
+      // Обновление in-memory
+      const userIndex = users.findIndex(u => u.id === user.id);
+      if (userIndex !== -1) {
+        users[userIndex].confirmation_token = newOtpCode;
+      }
+    }
+
+    // Отправляем новый OTP код на email
+    const emailSent = await emailService.sendOtpEmail(
+      email,
+      newOtpCode,
+      user.full_name || email
+    );
+
+    if (!emailSent) {
+      return res.status(500).json({
+        success: false,
+        error: 'Не удалось отправить письмо. Попробуйте позже.'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Новый код отправлен на ваш email'
+    });
+
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Внутренняя ошибка сервера'
+    });
+  }
+};

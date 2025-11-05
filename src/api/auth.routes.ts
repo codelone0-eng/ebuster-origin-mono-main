@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   verifyOtp,
+  resendOtp,
   confirmEmail,
   verifyToken,
   logoutUser,
@@ -22,6 +23,9 @@ router.post('/login', loginUser);
 
 // Проверка OTP кода
 router.post('/verify-otp', verifyOtp);
+
+// Повторная отправка OTP кода
+router.post('/resend-otp', resendOtp);
 
 // Подтверждение email (старый метод, оставляем для совместимости)
 router.get('/confirm-email', confirmEmail);

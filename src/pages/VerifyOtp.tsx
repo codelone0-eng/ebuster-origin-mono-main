@@ -74,6 +74,12 @@ export default function VerifyOtp() {
         // Сохраняем токен (используем правильный ключ)
         localStorage.setItem('ebuster_token', data.token);
 
+        // Устанавливаем cookie для кросс-доменной авторизации
+        // Cookie будет доступна на всех поддоменах .ebuster.ru
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 7); // 7 дней
+        document.cookie = `ebuster_token=${data.token}; domain=.ebuster.ru; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
+
         toast({
           title: "Успешно!",
           description: data.message || "Email подтвержден! Добро пожаловать!",
@@ -135,16 +141,34 @@ export default function VerifyOtp() {
     setResendLoading(true);
 
     try {
-      // Здесь должен быть endpoint для повторной отправки OTP
-      // Пока используем тот же endpoint регистрации
-      toast({
-        title: "Код отправлен",
-        description: "Новый код отправлен на ваш email",
-        variant: "success"
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
+      const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
-      
-      setResendCooldown(60); // 60 секунд до следующей отправки
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast({
+          title: "Код отправлен",
+          description: data.message || "Новый код отправлен на ваш email",
+          variant: "success"
+        });
+        
+        setResendCooldown(60); // 60 секунд до следующей отправки
+      } else {
+        toast({
+          title: "Ошибка",
+          description: data.error || "Не удалось отправить код. Попробуйте позже.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
+      console.error('Resend OTP error:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось отправить код. Попробуйте позже.",
