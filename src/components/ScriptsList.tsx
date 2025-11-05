@@ -26,6 +26,7 @@ import RatingModal from './RatingModal';
 import { useToast } from '../hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import { ScriptChangelog } from '@/lk/ScriptChangelog';
+import { ScriptCard } from './ScriptCard';
 
 interface Script {
   id: string;
@@ -650,7 +651,22 @@ const ScriptsList: React.FC = () => {
       </Card>
 
       {/* Список скриптов */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredScripts.map((script) => (
+          <ScriptCard
+            key={script.id}
+            script={script}
+            onView={() => {
+              setSelectedScript(script);
+              setIsViewDialogOpen(true);
+            }}
+            onDownload={() => handleDownloadScript(script.id)}
+          />
+        ))}
+      </div>
+
+      {/* Старые карточки - удалить после проверки */}
+      <div className="hidden grid-cols-1 gap-6">
         {filteredScripts.map((script) => (
           <Card key={script.id} className="relative bg-card/50 backdrop-blur-sm border border-border/30 hover:border-border/50 transition-all duration-200 hover:z-10">
             <CardHeader className="pb-3">

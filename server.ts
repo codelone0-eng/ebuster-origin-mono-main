@@ -16,6 +16,8 @@ import categoriesRoutes from './src/api/categories.routes';
 import ticketsRoutes from './src/api/tickets-new.routes';
 import rolesRoutes from './src/api/roles.routes';
 import subscriptionsRoutes from './src/api/subscriptions.routes';
+import * as apiKeysController from './src/api/apikeys.controller';
+import { authenticateUser } from './src/api/auth.middleware';
 import { startAllCronJobs } from './src/api/cron-jobs';
 
 const app = express();
@@ -58,6 +60,13 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/tickets', ticketsRoutes); // Новая система тикетов
 app.use('/api/roles', rolesRoutes); // Система ролей
 app.use('/api/subscriptions', subscriptionsRoutes); // Подписки
+
+// API Keys routes
+app.get('/api/user/api-keys', authenticateUser, apiKeysController.getUserApiKeys);
+app.post('/api/user/api-keys', authenticateUser, apiKeysController.createApiKey);
+app.put('/api/user/api-keys/:id', authenticateUser, apiKeysController.updateApiKey);
+app.delete('/api/user/api-keys/:id', authenticateUser, apiKeysController.deleteApiKey);
+
 app.use('/api', extensionAuthRoutes);
 
 // Health check endpoint

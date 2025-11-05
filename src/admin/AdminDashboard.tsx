@@ -1032,8 +1032,9 @@ const AdminDashboard = () => {
                     <Label htmlFor="userName">Имя пользователя</Label>
                     <Input 
                       id="userName" 
-                      defaultValue={selectedUserDetails.name}
+                      defaultValue={selectedUserDetails.full_name || selectedUserDetails.name || ''}
                       className="mt-1"
+                      placeholder="Введите имя пользователя"
                     />
                   </div>
                   <div>
