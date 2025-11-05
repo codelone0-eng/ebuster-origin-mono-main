@@ -250,7 +250,10 @@ const Pricing = () => {
                   const price = getPrice(role);
 
                   return (
-                    <div key={role.id} className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0">
+                    <div
+                      key={role.id}
+                      className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0 pt-6"
+                    >
                       <Card className={cn(
                         "relative overflow-hidden border transition-all duration-300 flex flex-col",
                         isPremium ? "border-primary/40 bg-card/90 shadow-lg shadow-primary/10" : "border-border/40 bg-card/70",
