@@ -486,27 +486,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Очищаем все данные
     setUser(null);
     
-    // Удаляем токены из localStorage
+    // Удаляем токены используя функцию removeToken (она удаляет и cookie и localStorage)
+    removeToken();
+    
+    // Удаляем остальные данные из localStorage
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('lastEmail');
     localStorage.removeItem('referral_code');
     localStorage.removeItem('pending_referral_code');
     localStorage.removeItem('dashboardActiveTab');
-    
-    // Удаляем cookie - пробуем разные варианты
-    const expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
-    
-    // Удаляем jwt_token cookie
-    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=none`;
-    document.cookie = `jwt_token=;expires=${expires};path=/`;
-    
-    // Удаляем ebuster_token cookie (для кросс-доменной авторизации)
-    document.cookie = `ebuster_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=none`;
-    document.cookie = `ebuster_token=;expires=${expires};path=/`;
-    
-    // Удаляем токены из localStorage
-    localStorage.removeItem('ebuster_token');
-    localStorage.removeItem('jwt_token');
     
     // Восстанавливаем настройки
     if (theme) localStorage.setItem('theme', theme);

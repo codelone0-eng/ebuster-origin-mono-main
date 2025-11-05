@@ -1,53 +1,22 @@
 import { Download, LogIn, Code2, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export const ExtensionWorkflow = () => {
-  const steps = [
-    {
-      id: 1,
-      icon: Download,
-      title: 'Установите расширение',
-      description: 'Скачайте Ebuster из Chrome Web Store',
-      color: 'from-muted/50 to-muted',
-      iconColor: 'text-foreground',
-      borderColor: 'border',
-    },
-    {
-      id: 2,
-      icon: LogIn,
-      title: 'Авторизуйтесь',
-      description: 'Войдите через OAuth для синхронизации',
-      color: 'from-muted/50 to-muted',
-      iconColor: 'text-foreground',
-      borderColor: 'border',
-    },
-    {
-      id: 3,
-      icon: Code2,
-      title: 'Создайте скрипт',
-      description: 'Напишите свой первый userscript',
-      color: 'from-muted/50 to-muted',
-      iconColor: 'text-foreground',
-      borderColor: 'border',
-    },
-    {
-      id: 4,
-      icon: Zap,
-      title: 'Запустите на сайте',
-      description: 'Скрипт автоматически выполнится',
-      color: 'from-muted/50 to-muted',
-      iconColor: 'text-foreground',
-      borderColor: 'border',
-    },
-    {
-      id: 5,
-      icon: CheckCircle2,
-      title: 'Готово!',
-      description: 'Наслаждайтесь автоматизацией',
-      color: 'from-muted/50 to-muted',
-      iconColor: 'text-foreground',
-      borderColor: 'border',
-    },
-  ];
+  const { t } = useLanguage();
+  
+  const icons = [Download, LogIn, Code2, Zap, CheckCircle2];
+  
+  const workflowSteps = t('workflow.steps') as unknown as Array<{ title: string; description: string }>;
+  
+  const steps = workflowSteps.map((step, index) => ({
+    id: index + 1,
+    icon: icons[index],
+    title: step.title,
+    description: step.description,
+    color: 'from-muted/50 to-muted',
+    iconColor: 'text-foreground',
+    borderColor: 'border',
+  }));
 
   return (
     <div className="w-full max-w-6xl mx-auto py-12">

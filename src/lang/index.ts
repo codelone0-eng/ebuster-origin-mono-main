@@ -20,6 +20,8 @@ import { ru as ruPricing } from './ru/pricing';
 import { eng as engPricing } from './eng/pricing';
 import { ru as ruNotifications } from './ru/notifications';
 import { eng as engNotifications } from './eng/notifications';
+import { workflow as ruWorkflow } from './ru/workflow';
+import { workflow as engWorkflow } from './eng/workflow';
 
 export type Language = 'ru' | 'eng';
 
@@ -35,7 +37,8 @@ export const translations = {
     contacts: ruContacts,
     'api-docs': ruApiDocs,
     pricing: ruPricing,
-    notifications: ruNotifications
+    notifications: ruNotifications,
+    workflow: ruWorkflow
   },
   eng: {
     header: engHeader,
@@ -48,7 +51,8 @@ export const translations = {
     contacts: engContacts,
     'api-docs': engApiDocs,
     pricing: engPricing,
-    notifications: engNotifications
+    notifications: engNotifications,
+    workflow: engWorkflow
   }
 };
 

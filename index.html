@@ -4,9 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EBUSTER - Расширение нового поколения</title>
-    <meta name="description" content="EBUSTER - мощное расширение для Chrome с минималистичным дизайном и продвинутыми функциями" />
+    <meta name="description" content="EBUSTER - мощное расширение для Chrome с минималистичным дизайном и продвинутыми функциями. Userscript менеджер для автоматизации браузера." />
     <meta name="author" content="EBUSTER" />
-    <meta name="keywords" content="chrome extension, расширение chrome, ebuster, productivity, инструменты браузера" />
+    <meta name="keywords" content="chrome extension, расширение chrome, ebuster, userscript, tampermonkey, greasemonkey, автоматизация браузера, скрипты для chrome, productivity, инструменты браузера, userscript manager" />
+    
+    <!-- SEO -->
+    <link rel="canonical" href="https://ebuster.ru/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="Russian" />
+    <meta name="revisit-after" content="7 days" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -63,6 +70,34 @@
   </head>
 
   <body>
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "EBUSTER",
+      "applicationCategory": "BrowserApplication",
+      "operatingSystem": "Chrome",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "ratingCount": "1"
+      },
+      "description": "Мощное расширение для Chrome с минималистичным дизайном и продвинутыми функциями. Userscript менеджер для автоматизации браузера.",
+      "url": "https://ebuster.ru",
+      "image": "https://ebuster.ru/og-image.png",
+      "author": {
+        "@type": "Organization",
+        "name": "EBUSTER"
+      }
+    }
+    </script>
+    
     <script>
       // Prevent theme flash on load
       (function () {
