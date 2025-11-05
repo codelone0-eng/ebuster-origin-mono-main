@@ -1,8 +1,16 @@
+# EBUSTER - Chrome Extension
+User-agent: Yandex
+Allow: /
+Crawl-delay: 0
+Host: ebuster.ru
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +20,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard/settings
+
+Sitemap: https://ebuster.ru/sitemap.xml

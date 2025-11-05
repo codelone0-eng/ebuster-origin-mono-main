@@ -93,6 +93,8 @@ const Pricing = () => {
   const getFeaturesList = (features: any) => {
     const list: string[] = [];
 
+    if (!features) return ['Базовые возможности'];
+
     if (features.scripts) {
       const count = features.scripts.max_count;
       list.push(count === -1 ? 'Неограниченные скрипты' : `До ${count} скриптов`);
@@ -105,7 +107,7 @@ const Pricing = () => {
     if (features.downloads) {
       if (features.downloads.unlimited) {
         list.push('Неограниченные загрузки');
-      } else {
+      } else if (features.downloads.max_per_day) {
         list.push(`До ${features.downloads.max_per_day} загрузок в день`);
       }
     }
@@ -124,7 +126,7 @@ const Pricing = () => {
       list.push(size === -1 ? 'Неограниченное хранилище' : `${size} МБ хранилища`);
     }
 
-    return list;
+    return list.length > 0 ? list : ['Базовые возможности'];
   };
 
   // Function to get appropriate icon for each feature
@@ -227,10 +229,10 @@ const Pricing = () => {
             )}
 
             {/* Slider Container */}
-            <div className="overflow-hidden px-12">
+            <div className="overflow-hidden px-4 md:px-12">
               <div 
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                className="flex transition-transform duration-500 ease-in-out gap-6"
+                style={{ transform: `translateX(-${currentSlide * (100 / Math.min(roles.length, 3))}%)` }}
               >
                 {roles.map((role) => {
                   const isPremium = role.name === 'premium';
@@ -238,79 +240,67 @@ const Pricing = () => {
                   const price = getPrice(role);
 
                   return (
-                    <div key={role.id} className="w-full flex-shrink-0 px-4">
-                      <div className={cn(
-                        "relative overflow-hidden rounded-3xl shadow-2xl transition-all duration-500",
-                        isPremium ? "bg-gradient-to-br from-card/95 via-card/80 to-card/60 border border-border/40" : "bg-gradient-to-br from-card/80 via-card/60 to-card/40 border border-border/20"
+                    <div key={role.id} className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0">
+                      <Card className={cn(
+                        "relative overflow-hidden border transition-all duration-300 h-full",
+                        isPremium ? "border-primary/40 bg-card/90 shadow-lg shadow-primary/10" : "border-border/40 bg-card/70"
                       )}>
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 opacity-8">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20"></div>
-                          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(96,96,96,0.1),transparent_50%)]"></div>
-                          <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,rgba(96,96,96,0.08),transparent_50%)]"></div>
-                        </div>
-
                         {/* Premium Badge */}
                         {isPremium && (
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10">
-                            <Badge className="bg-primary text-primary-foreground px-8 py-3 shadow-2xl border border-primary/30 backdrop-blur-sm text-sm font-bold rounded-full">
-                              <Star className="h-4 w-4 mr-2" />
-                              Популярный выбор
+                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                            <Badge className="bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold">
+                              <Star className="h-3 w-3 mr-1" />
+                              Популярный
                             </Badge>
                           </div>
                         )}
 
                         {/* Content */}
-                        <div className="relative z-10 p-8 pt-20">
-                          <div className="text-center pb-8">
+                        <CardContent className="p-6 pt-8">
+                          <div className="text-center mb-6">
                             <div className={cn(
-                              "inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 border",
-                              isPremium ? "bg-primary/20 border-primary/30" : "bg-muted/20 border-border/30"
+                              "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
+                              isPremium ? "bg-primary/10 border-primary/20" : "bg-muted/20 border-border/30"
                             )}>
                               {isPremium ? (
-                                <Crown className="h-8 w-8 text-primary" />
+                                <Crown className="h-6 w-6 text-primary" />
                               ) : (
-                                <Code2 className="h-6 w-6 text-muted-foreground" />
+                                <Code2 className="h-5 w-5 text-muted-foreground" />
                               )}
                             </div>
                             <h3 className={cn(
-                              "text-3xl mb-4 font-bold",
-                              isPremium && "gradient-text"
+                              "text-2xl mb-2 font-bold",
+                              isPremium && "text-primary"
                             )}>
                               {role.display_name}
                             </h3>
-                            <div className="mb-6">
+                            <div className="mb-3">
                               <span className={cn(
-                                "text-5xl font-bold",
-                                isPremium && "gradient-text"
+                                "text-4xl font-bold",
+                                isPremium && "text-primary"
                               )}>
                                 {price}₽
                               </span>
                               {price > 0 && (
-                                <span className="text-muted-foreground ml-2 text-lg">
+                                <span className="text-muted-foreground ml-1 text-sm">
                                   /{billingPeriod === 'monthly' ? 'мес' : 'год'}
                                 </span>
                               )}
                             </div>
-                            <p className="text-base text-muted-foreground/90 font-medium">
+                            <p className="text-sm text-muted-foreground">
                               {role.description}
                             </p>
                           </div>
 
-                          <div className="space-y-6">
-                            <ul className="space-y-4">
-                              {features.map((feature, index) => (
-                                <li key={index} className="flex items-start gap-4">
-                                  <div className={cn(
-                                    "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center mt-0.5 border",
-                                    isPremium ? "bg-primary/15 border-primary/20" : "bg-muted/20 border-border/20"
-                                  )}>
-                                    <Check className={cn(
-                                      "h-4 w-4",
-                                      isPremium ? "text-primary" : "text-muted-foreground"
-                                    )} />
-                                  </div>
-                                  <span className="text-sm text-muted-foreground font-medium leading-relaxed">
+                          <div className="space-y-4">
+                            <ul className="space-y-2">
+                              {features.slice(0, 6).map((feature, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <Check className={cn(
+                                    "h-4 w-4 mt-0.5 flex-shrink-0",
+                                    isPremium ? "text-primary" : "text-muted-foreground"
+                                  )} />
+                                  <span className="text-sm text-muted-foreground">
                                     {feature}
                                   </span>
                                 </li>
@@ -319,8 +309,8 @@ const Pricing = () => {
 
                             <Button 
                               className={cn(
-                                "w-full h-12 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg hover:shadow-xl",
-                                isPremium ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border/30"
+                                "w-full h-10 rounded-lg font-semibold text-sm",
+                                isPremium ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border-border/30 bg-card/50 text-foreground hover:bg-card"
                               )}
                               variant={isPremium ? "default" : "outline"}
                             >
@@ -328,8 +318,8 @@ const Pricing = () => {
                               <ArrowRight className="h-4 w-4 ml-2" />
                             </Button>
                           </div>
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   );
                 })}
