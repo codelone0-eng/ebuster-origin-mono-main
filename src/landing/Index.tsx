@@ -23,22 +23,6 @@ const Index = () => {
   // Телепорт в верх страницы при загрузке/рефреше лендинга
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    // Проверяем параметр logout в URL и очищаем cookie
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('logout') === 'true') {
-      // Агрессивно удаляем jwt_token cookie
-      const expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=lax`;
-      document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru`;
-      document.cookie = `jwt_token=;expires=${expires};path=/`;
-      
-      // Очищаем localStorage
-      localStorage.removeItem('jwt_token');
-      
-      // Убираем параметр из URL
-      window.history.replaceState({}, '', '/');
-    }
   }, []);
   
   return (

@@ -495,14 +495,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Удаляем cookie - пробуем разные варианты
     const expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
-    // Вариант 1: с secure и samesite
-    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=lax`;
-    // Вариант 2: без secure
-    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;samesite=lax`;
-    // Вариант 3: только домен и путь
-    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru`;
-    // Вариант 4: без домена
+    
+    // Удаляем jwt_token cookie
+    document.cookie = `jwt_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=none`;
     document.cookie = `jwt_token=;expires=${expires};path=/`;
+    
+    // Удаляем ebuster_token cookie (для кросс-доменной авторизации)
+    document.cookie = `ebuster_token=;expires=${expires};path=/;domain=.ebuster.ru;secure;samesite=none`;
+    document.cookie = `ebuster_token=;expires=${expires};path=/`;
+    
+    // Удаляем токены из localStorage
+    localStorage.removeItem('ebuster_token');
+    localStorage.removeItem('jwt_token');
     
     // Восстанавливаем настройки
     if (theme) localStorage.setItem('theme', theme);
@@ -516,8 +520,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout API error:', err);
     }
     
-    // Редирект с параметром logout для дополнительной очистки на главной
-    window.location.replace('https://ebuster.ru?logout=true');
+    // Редирект на главную страницу ebuster.ru
+    window.location.href = 'https://ebuster.ru';
   };
 
   const resetPassword = async (email: string) => {
