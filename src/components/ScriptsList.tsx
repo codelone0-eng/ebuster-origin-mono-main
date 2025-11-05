@@ -655,44 +655,44 @@ const ScriptsList: React.FC = () => {
         {filteredScripts.map((script) => (
           <Card
             key={script.id}
-            className="relative overflow-hidden rounded-xl border border-border/40 bg-[#14151a] shadow-[0_12px_20px_-18px_rgba(0,0,0,0.8)]"
+            className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm transition-colors duration-200 hover:border-border/40 hover:bg-card"
           >
-            <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4 flex-1 min-w-0">
-                <div className="flex-shrink-0 w-14 h-14 rounded-lg border border-border/50 bg-gradient-to-br from-[#1d1f26] to-[#111218] flex items-center justify-center text-muted-foreground">
-                  <Code className="h-6 w-6 text-muted-foreground" />
+            <div className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-1 min-w-0 items-start gap-4">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-border/40 bg-card text-muted-foreground">
+                  <Code className="h-5 w-5" />
                 </div>
 
-                <div className="flex-1 space-y-3 min-w-0">
+                <div className="flex-1 min-w-0 space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-lg font-semibold text-foreground line-clamp-1">
+                    <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
                       {script.title}
                     </h3>
                     {script.is_featured && (
-                      <Badge className="border border-amber-500/40 bg-amber-500/10 text-amber-200">
+                      <Badge className="border border-amber-400/40 bg-amber-500/15 text-amber-200">
                         <Crown className="h-3 w-3 mr-1" />
                         Featured
                       </Badge>
                     )}
                     {script.is_premium && (
-                      <Badge className="border border-purple-500/40 bg-purple-500/10 text-purple-200">
+                      <Badge className="border border-purple-400/40 bg-purple-500/15 text-purple-100">
                         <Zap className="h-3 w-3 mr-1" />
                         Premium
                       </Badge>
                     )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-muted-foreground/90 line-clamp-2">
                     {script.description || t('header.dashboard.scripts.descriptionPlaceholder')}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground/90">
-                    <Badge variant="outline" className="border border-border/50 bg-[#1b1d24] text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground/80">
+                    <Badge variant="outline" className="border border-border/40 bg-card/70 text-muted-foreground">
                       {script.category}
                     </Badge>
                     <span className="flex items-center gap-1">
                       <Star className="h-3 w-3 text-amber-300" />
-                      <span className="font-medium text-foreground">{script.rating.toFixed(1)}</span>
+                      <span className="font-medium text-card-foreground">{script.rating.toFixed(1)}</span>
                       <span className="text-muted-foreground">({script.rating_count})</span>
                     </span>
                     <span className="flex items-center gap-1">
@@ -711,11 +711,11 @@ const ScriptsList: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 lg:flex-shrink-0">
+              <div className="flex flex-wrap items-center gap-2 lg:flex-shrink-0">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="border border-border/50 bg-[#1a1b22] text-foreground hover:bg-[#1f2129]"
+                  className="border border-border/50 bg-transparent text-foreground hover:bg-card/70"
                   onClick={() => {
                     setChangelogScript({ id: script.id, name: script.title });
                     setIsChangelogDialogOpen(true);
@@ -725,22 +725,31 @@ const ScriptsList: React.FC = () => {
                   История
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="border border-border/50 bg-[#1a1b22] text-foreground hover:bg-[#1f2129]"
+                  className="border border-border/50 bg-transparent text-foreground hover:bg-card/70"
                   onClick={() => handleRateScript(script)}
                 >
                   <Star className="h-4 w-4 mr-2" />
                   {ratedScriptIds.has(script.id) ? 'Изменить' : 'Оценить'}
                 </Button>
                 <Button
+                  variant="ghost"
+                  size="sm"
+                  className="border border-border/50 bg-transparent text-foreground hover:bg-card/70"
+                  onClick={() => handleViewScript(script)}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Просмотр
+                </Button>
+                <Button
                   size="sm"
                   disabled={installedScriptIds.has(script.id)}
-                  className="border border-primary/30 bg-primary/80 text-primary-foreground hover:bg-primary"
+                  className="border border-primary/40 bg-primary/80 text-primary-foreground hover:bg-primary"
                   onClick={() => handleDownloadScript(script.id)}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Установить
+                  {installedScriptIds.has(script.id) ? 'Установлен' : 'Установить'}
                 </Button>
               </div>
             </div>

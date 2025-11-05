@@ -172,28 +172,28 @@ export function ApiKeysManagement() {
           </div>
           
           {showNewKey && (
-            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-              <div className="flex items-start gap-2 mb-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-                    ⚠️ Сохраните ключ! Вы не сможете увидеть его снова.
+            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 shadow-lg">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Сохраните ключ — после закрытия блока он больше не будет доступен.
                   </p>
-                  <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                    Скопируйте ключ и сохраните в безопасном месте
+                  <p className="text-xs text-muted-foreground">
+                    Скопируйте ключ и добавьте его в надёжный менеджер секретов.
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <code className="flex-1 p-3 bg-white dark:bg-gray-950 rounded text-sm font-mono break-all border">
+                <code className="flex-1 rounded-lg border border-border/40 bg-background/80 p-3 text-sm font-mono text-foreground break-all">
                   {newKeyValue}
                 </code>
-                <Button size="sm" onClick={() => copyKey(newKeyValue)}>
+                <Button variant="outline" size="sm" onClick={() => copyKey(newKeyValue)}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="mt-3"
                 onClick={() => setShowNewKey(false)}
