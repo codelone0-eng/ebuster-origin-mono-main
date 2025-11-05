@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface Ticket {
   id: string;
@@ -73,6 +75,7 @@ const TicketsUser: React.FC = () => {
     priority: 'medium'
   });
   const [newComment, setNewComment] = useState('');
+  const commentsChannelRef = useRef<RealtimeChannel | null>(null);
 
   const statusColors = {
     new: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -330,6 +333,39 @@ const TicketsUser: React.FC = () => {
     const agentName = ticket.agent?.full_name || 'администратор поддержки';
     return `Тикет закрыт, ${formattedDate}, ${agentName}`;
   };
+
+  useEffect(() => {
+    if (!selectedTicket) {
+      if (commentsChannelRef.current) {
+        supabase.removeChannel(commentsChannelRef.current);
+        commentsChannelRef.current = null;
+      }
+      return;
+    }
+
+    const ticketId = selectedTicket.id;
+    const channel = supabase.channel(`ticket-comments-${ticketId}`);
+    commentsChannelRef.current = channel;
+
+    channel.on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'ticket_comments',
+      filter: `ticket_id=eq.${ticketId}`
+    }, async () => {
+      await loadComments(ticketId);
+      await loadTickets({ keepSelected: true });
+    });
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      if (commentsChannelRef.current === channel) {
+        commentsChannelRef.current = null;
+      }
+    };
+  }, [selectedTicket?.id]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-64">Загрузка...</div>;

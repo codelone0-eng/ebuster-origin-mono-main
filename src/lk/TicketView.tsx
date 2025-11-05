@@ -22,6 +22,8 @@ import {
 import { API_CONFIG } from '@/config/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface TicketViewProps {
   ticketId: number;
@@ -101,6 +103,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
   const [sending, setSending] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -275,6 +278,38 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
     const agentName = currentTicket.assigned_agent?.full_name || 'администратор';
     return `Тикет закрыт, ${formattedDate}, ${agentName}`;
   };
+
+  useEffect(() => {
+    if (!ticket) {
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
+      }
+      return;
+    }
+
+    const channel = supabase.channel(`ticket-messages-${ticket.id}`);
+    realtimeChannelRef.current = channel;
+
+    channel.on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'ticket_messages',
+      filter: `ticket_id=eq.${ticket.id}`
+    }, async () => {
+      await loadMessages();
+      await loadTicket();
+    });
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      if (realtimeChannelRef.current === channel) {
+        realtimeChannelRef.current = null;
+      }
+    };
+  }, [ticket?.id]);
 
   if (loading) {
     return (
