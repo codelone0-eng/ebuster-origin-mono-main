@@ -14,6 +14,15 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const shouldRedirectToLanding =
+    hostname.endsWith('.ebuster.ru') &&
+    hostname !== 'www.ebuster.ru' &&
+    hostname !== 'ebuster.ru';
+
+  const redirectToLanding = () => {
+    window.location.href = 'https://ebuster.ru';
+  };
 
   console.log('🔐 ProtectedRoute:', { user, loading, requireAdmin, location: location.pathname });
 
@@ -33,9 +42,8 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   // Redirect to login if not authenticated
   if (!user) {
     console.log('❌ ProtectedRoute: No user, redirecting to login');
-    // Если на поддомене админки, редиректим на главный сайт
-    if (window.location.hostname.includes('admin.')) {
-      window.location.href = 'https://ebuster.ru';
+    if (shouldRedirectToLanding) {
+      redirectToLanding();
       return null;
     }
     return <Navigate to="/" state={{ from: location }} replace />;
@@ -45,9 +53,8 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   if (requireAdmin && user?.role !== 'admin') {
     console.log('❌ ProtectedRoute: User is not admin, redirecting');
     console.log('User role:', user?.role);
-    // Если на поддомене админки, редиректим на главный сайт
-    if (window.location.hostname.includes('admin.')) {
-      window.location.href = 'https://ebuster.ru';
+    if (shouldRedirectToLanding) {
+      redirectToLanding();
       return null;
     }
     return <Navigate to="/403" replace />;
