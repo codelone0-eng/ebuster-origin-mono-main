@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { API_CONFIG } from '@/config/api';
 import { useToast } from '@/hooks/use-toast';
+
+import { API_CONFIG } from '@/config/api';
 
 interface CreateTicketModalProps {
   isOpen: boolean;
@@ -14,53 +14,17 @@ interface CreateTicketModalProps {
   onSuccess: () => void;
 }
 
-interface SupportTeam {
-  id: number;
-  name: string;
-  description: string;
-}
-
 export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
-  const [teamId, setTeamId] = useState<number | null>(null);
-  const [teams, setTeams] = useState<SupportTeam[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
-      loadTeams();
     }
   }, [isOpen]);
-
-  const loadTeams = async () => {
-    try {
-      const token = localStorage.getItem('ebuster_token');
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/teams`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const result = await response.json();
-      
-      if (result.success && Array.isArray(result.data)) {
-        setTeams(result.data);
-        if (result.data.length > 0) {
-          setTeamId(result.data[0].id);
-        } else {
-          setTeamId(null);
-        }
-      } else {
-        setTeams([]);
-        setTeamId(null);
-      }
-    } catch (error) {
-      console.error('Load teams error:', error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,8 +52,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           subject,
           message: description,
           priority,
-          category: teams.find((team) => team.id === teamId)?.name || 'general',
-          team_id: teamId
+          category: 'general'
         })
       });
 
@@ -106,12 +69,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
         setSubject('');
         setDescription('');
         setPriority('medium');
-        if (teams.length > 0) {
-          setTeamId(teams[0].id);
-        } else {
-          setTeamId(null);
-        }
-        
+
         onSuccess();
       } else {
         throw new Error(result.error || 'Failed to create ticket');
@@ -179,75 +137,24 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             {/* Приоритет */}
             <div className="space-y-2">
               <Label htmlFor="priority">Приоритет</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger id="priority" className="bg-card/60 border content-border-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  sideOffset={8}
-                  className="z-[10000] max-h-64 overflow-y-auto border content-border-40 bg-card/95 backdrop-blur-xl"
-                >
-                  <SelectItem value="low">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-500" />
-                      Низкий
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="medium">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      Средний
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="high">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-orange-500" />
-                      Высокий
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="critical">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-red-500" />
-                      Критический
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                id="priority"
+                className="w-full rounded-md border content-border-40 bg-card/60 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="low">Низкий</option>
+                <option value="medium">Средний</option>
+                <option value="high">Высокий</option>
+                <option value="critical">Критический</option>
+              </select>
             </div>
 
-            {/* Категория/Команда */}
             <div className="space-y-2">
-              <Label htmlFor="team">Категория</Label>
-              <Select 
-                value={teamId !== null ? teamId.toString() : undefined} 
-                onValueChange={(value) => {
-                  if (value === '__empty') return;
-                  setTeamId(Number(value));
-                }}
-                disabled={teams.length === 0}
-              >
-                <SelectTrigger id="team" className="bg-card/60 border content-border-40" disabled={teams.length === 0}>
-                  <SelectValue placeholder={teams.length === 0 ? 'Категории отсутствуют' : 'Выберите категорию...'} />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  sideOffset={8}
-                  className="z-[10000] max-h-64 overflow-y-auto border content-border-40 bg-card/95 backdrop-blur-xl"
-                >
-                  {teams.length > 0 ? (
-                    teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id.toString()}>
-                        {team.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="__empty" disabled>
-                      Нет доступных категорий
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="category">Категория</Label>
+              <div className="text-sm text-muted-foreground bg-card/60 border content-border-40 rounded-md px-3 py-2">
+                Категории временно недоступны
+              </div>
               <p className="text-xs text-muted-foreground">
                 Выберите подходящую категорию для вашего запроса
               </p>
