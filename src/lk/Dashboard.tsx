@@ -22,6 +22,7 @@ import { ScriptChangelog } from './ScriptChangelog';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
+import { ApiKeysManagement } from '@/components/ApiKeysManagement';
 import { cn } from '@/lib/utils';
 import { 
   Library, 
@@ -895,8 +896,74 @@ const DashboardContent = () => {
                       </Button>
                     </CardContent>
                   </Card>
+                </div>
+                
+                {/* API Keys Section */}
+                <div className="mt-8">
+                  <ApiKeysManagement />
+                </div>
+              </div>
+            )}
 
-                  <Card>
+            {activeTab === 'api-docs' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-foreground">API Документация</h2>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Использование API</CardTitle>
+                    <CardDescription>
+                      Создайте API ключ в настройках и используйте его для доступа к нашему API
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">Аутентификация</h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Используйте API ключ в заголовке запроса:
+                      </p>
+                      <pre className="p-3 bg-muted rounded-lg text-sm">
+                        <code>X-API-Key: ebk_your_api_key_here</code>
+                      </pre>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-semibold mb-2">Примеры</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-1">JavaScript/Node.js</p>
+                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+{`const response = await fetch('https://api.ebuster.ru/api/v1/scripts', {
+  headers: { 'X-API-Key': 'ebk_your_api_key_here' }
+});
+const data = await response.json();`}
+                          </pre>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium mb-1">Python</p>
+                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+{`import requests
+headers = {'X-API-Key': 'ebk_your_api_key_here'}
+response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers)`}
+                          </pre>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium mb-1">cURL</p>
+                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+{`curl -H "X-API-Key: ebk_your_api_key_here" https://api.ebuster.ru/api/v1/scripts`}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {activeTab === 'general-settings' && (
+              <div className="space-y-6">
+                <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Settings className="h-5 w-5" />
@@ -984,7 +1051,6 @@ const DashboardContent = () => {
                 </div>
               </div>
             )}
-          </div>
           </div>
         </div>
 

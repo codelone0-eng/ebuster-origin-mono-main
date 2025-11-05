@@ -651,150 +651,116 @@ const ScriptsList: React.FC = () => {
       </Card>
 
       {/* Список скриптов */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {filteredScripts.map((script) => (
-          <ScriptCard
-            key={script.id}
-            script={script}
-            onView={() => {
-              setSelectedScript(script);
-              setIsViewDialogOpen(true);
-            }}
-            onDownload={() => handleDownloadScript(script.id)}
-          />
-        ))}
-      </div>
-
-      {/* Старые карточки - удалить после проверки */}
-      <div className="hidden grid-cols-1 gap-6">
-        {filteredScripts.map((script) => (
-          <Card key={script.id} className="relative bg-card/50 backdrop-blur-sm border border-border/30 hover:border-border/50 transition-all duration-200 hover:z-10">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg line-clamp-1">{script.title}</CardTitle>
-                    {script.is_featured && (
-                      <Badge variant="secondary">
-                        <Zap className="h-3 w-3 mr-1" />
-                        Featured
-                      </Badge>
-                    )}
-                    {script.is_premium && (
-                      <Badge variant="outline">
-                        <Crown className="h-3 w-3 mr-1" />
-                        Premium
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {script.description}
-                  </p>
-                </div>
+          <Card key={script.id} className="group relative overflow-hidden bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm border-2 border-border/40 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
+            {/* Градиентный фон при ховере */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <div className="relative flex items-center gap-6 p-6">
+              {/* Иконка слева */}
+              <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Code className="h-8 w-8 text-white" />
               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3">
-                {/* Категория и теги */}
-                <div className="flex gap-2">
-                  <Badge className={getCategoryColor(script.category)}>
+
+              {/* Основной контент */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
+                        {script.title}
+                      </h3>
+                      {script.is_featured && (
+                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-md">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Featured
+                        </Badge>
+                      )}
+                      {script.is_premium && (
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Premium
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {script.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Метаданные и статистика */}
+                <div className="flex items-center gap-6 mt-3 text-sm">
+                  <Badge className={getCategoryColor(script.category)} variant="secondary">
                     {script.category}
                   </Badge>
-                  {script.tags.slice(0, 2).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {tag}
-                    </Badge>
-                  ))}
-                  {script.tags.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{script.tags.length - 2}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Статистика */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <Download className="h-3 w-3" />
-                      {script.downloads_count.toLocaleString()}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <StarRating 
-                        rating={script.rating} 
-                        size="sm" 
-                        showValue={true}
-                        interactive={false}
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        ({script.rating_count})
-                      </span>
-                    </div>
-                    <span className="flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      {formatFileSize(script.file_size)}
-                    </span>
+                  
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-semibold">{script.rating.toFixed(1)}</span>
+                    <span className="text-xs">({script.rating_count})</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Download className="h-4 w-4" />
+                    <span>{script.downloads_count.toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span>{script.author_name}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    <span>{formatFileSize(script.file_size)}</span>
                   </div>
                 </div>
-
-                {/* Автор и дата */}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    {script.author_name}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(script.published_at || script.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {/* Кнопки действий */}
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setChangelogScript({ id: script.id, name: script.title });
-                      setIsChangelogDialogOpen(true);
-                    }}
-                    className="flex-1"
-                  >
-                    <History className="h-4 w-4 mr-2" />
-                    История
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRateScript(script)}
-                    className="flex-1"
-                  >
-                    <Star className="h-4 w-4 mr-2" />
-                    {ratedScriptIds.has(script.id) ? 'Изменить оценку' : 'Оценить'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleDownloadScript(script.id)}
-                    className="flex-1"
-                    disabled={installedScriptIds.has(script.id)}
-                    variant={installedScriptIds.has(script.id) ? "secondary" : "default"}
-                  >
-                    {installedScriptIds.has(script.id) ? (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        {t('header.dashboard.scripts.installed')}
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-2" />
-                        {t('header.dashboard.scripts.install')}
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
-            </CardContent>
+
+              {/* Кнопки справа */}
+              <div className="flex-shrink-0 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setChangelogScript({ id: script.id, name: script.title });
+                    setIsChangelogDialogOpen(true);
+                  }}
+                >
+                  <History className="h-4 w-4 mr-2" />
+                  История
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRateScript(script)}
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  {ratedScriptIds.has(script.id) ? 'Изменить' : 'Оценить'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleDownloadScript(script.id)}
+                  disabled={installedScriptIds.has(script.id)}
+                  variant={installedScriptIds.has(script.id) ? "secondary" : "default"}
+                  className="bg-gradient-to-r from-primary to-primary/80"
+                >
+                  {installedScriptIds.has(script.id) ? (
+                    <>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Установлен
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </Card>
         ))}
       </div>
