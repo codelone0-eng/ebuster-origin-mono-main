@@ -62,7 +62,7 @@ const Index = () => {
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-accent/50" asChild>
-                    <Link to="/documentation">
+                    <Link to="/api-docs">
                       <Terminal className="mr-2 h-5 w-5" />
                       {t('index.hero.documentation')}
                     </Link>
@@ -252,14 +252,14 @@ const Index = () => {
               <ul className="space-y-3">
                 <li><a href="https://ebuster.ru/advantages" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.features')}</a></li>
                 <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.pricing')}</a></li>
-                <li><a href="https://ebuster.ru/documentation" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.components')}</a></li>
+                <li><a href="https://ebuster.ru/api-docs" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.components')}</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.resources')}</h4>
               <ul className="space-y-3">
-                <li><a href="https://ebuster.ru/documentation" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
+                <li><a href="https://ebuster.ru/api-docs" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
                 <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.support')}</a></li>
                 <li><a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.faq')}</a></li>
               </ul>

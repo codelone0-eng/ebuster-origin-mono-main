@@ -6,7 +6,6 @@ export const eng = {
       label: "Help",
       submenu: {
         items: [
-          { href: "https://ebuster.ru/documentation", label: "Documentation", description: "Detailed guides and examples" },
           { href: "https://ebuster.ru/api-docs", label: "API Docs", description: "Interactive API documentation" },
           { href: "https://ebuster.ru/contacts", label: "Contacts", description: "Contact our support team" }
         ]
