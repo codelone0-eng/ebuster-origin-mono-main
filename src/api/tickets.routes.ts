@@ -5,6 +5,7 @@ import {
   createTicket, 
   updateTicket, 
   addComment,
+  reopenTicket,
   getTicketComments 
 } from './tickets.controller';
 import { authenticateUser } from './auth.middleware';
@@ -16,6 +17,7 @@ router.get('/user', authenticateUser, getUserTickets);
 router.get('/all', authenticateUser, getAllTickets);
 router.post('/', authenticateUser, createTicket);
 router.put('/:id', authenticateUser, updateTicket);
+router.post('/:id/reopen', authenticateUser, reopenTicket);
 router.post('/comments', authenticateUser, addComment);
 router.get('/:ticketId/comments', authenticateUser, getTicketComments);
 

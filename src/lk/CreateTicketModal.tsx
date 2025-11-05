@@ -169,10 +169,14 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             <div className="space-y-2">
               <Label htmlFor="priority">Приоритет</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" className="bg-card/60 border content-border-40">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  position="popper"
+                  sideOffset={8}
+                  className="z-[10000] max-h-64 overflow-y-auto border content-border-40 bg-card/95 backdrop-blur-xl"
+                >
                   <SelectItem value="low">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-gray-500" />
@@ -208,10 +212,14 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
                 value={teamId.toString()} 
                 onValueChange={(value) => setTeamId(Number(value))}
               >
-                <SelectTrigger id="team">
+                <SelectTrigger id="team" className="bg-card/60 border content-border-40">
                   <SelectValue placeholder="Выберите категорию..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  position="popper"
+                  sideOffset={8}
+                  className="z-[10000] max-h-64 overflow-y-auto border content-border-40 bg-card/95 backdrop-blur-xl"
+                >
                   {teams.map((team) => (
                     <SelectItem key={team.id} value={team.id.toString()}>
                       {team.name}

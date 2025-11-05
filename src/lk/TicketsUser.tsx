@@ -16,7 +16,8 @@ import {
   CheckCircle, 
   Plus,
   Eye,
-  Send
+  Send,
+  RefreshCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -27,7 +28,7 @@ interface Ticket {
   message: string;
   category: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'new' | 'open' | 'pending_customer' | 'pending_internal' | 'resolved' | 'closed';
+  status: 'new' | 'open' | 'pending_customer' | 'pending_internal' | 'resolved' | 'closed' | 'cancelled';
   user_id: string;
   created_at: string;
   updated_at: string;
@@ -61,6 +62,7 @@ const TicketsUser: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [reopenLoading, setReopenLoading] = useState(false);
   
   const [newTicket, setNewTicket] = useState({
     subject: '',
@@ -104,7 +106,7 @@ const TicketsUser: React.FC = () => {
     loadTickets();
   }, [statusFilter]);
 
-  const loadTickets = async () => {
+  const loadTickets = async (options?: { keepSelected?: boolean }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('ebuster_token');
@@ -119,6 +121,12 @@ const TicketsUser: React.FC = () => {
       
       if (data.success) {
         setTickets(data.data);
+        if (options?.keepSelected && selectedTicket) {
+          const updated = data.data.find((item: Ticket) => item.id === selectedTicket.id);
+          if (updated) {
+            setSelectedTicket(updated);
+          }
+        }
       }
     } catch (error) {
       console.error('Load tickets error:', error);
@@ -188,7 +196,7 @@ const TicketsUser: React.FC = () => {
           category: 'technical',
           priority: 'medium'
         });
-        loadTickets();
+        loadTickets({ keepSelected: true });
       } else {
         toast({
           title: 'Ошибка',
@@ -233,14 +241,26 @@ const TicketsUser: React.FC = () => {
 
       const data = await response.json();
       
-      if (data.success) {
-        setNewComment('');
-        loadComments(selectedTicket.id);
+      if (!response.ok || !data.success) {
         toast({
-          title: 'Успешно',
-          description: 'Комментарий добавлен'
+          title: 'Ошибка',
+          description: data.error || 'Не удалось добавить комментарий',
+          variant: 'destructive'
         });
+
+        if (response.status === 403) {
+          await loadTickets({ keepSelected: true });
+        }
+        return;
       }
+
+      setNewComment('');
+      await loadComments(selectedTicket.id);
+      await loadTickets({ keepSelected: true });
+      toast({
+        title: 'Успешно',
+        description: 'Комментарий добавлен'
+      });
     } catch (error) {
       console.error('Add comment error:', error);
       toast({
@@ -249,6 +269,55 @@ const TicketsUser: React.FC = () => {
         variant: 'destructive'
       });
     }
+  };
+
+  const reopenTicket = async () => {
+    if (!selectedTicket) return;
+
+    try {
+      setReopenLoading(true);
+      const token = localStorage.getItem('ebuster_token');
+
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${selectedTicket.id}/reopen`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось переоткрыть тикет',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      toast({
+        title: 'Готово',
+        description: 'Тикет переоткрыт'
+      });
+
+      await loadTickets({ keepSelected: true });
+      await loadComments(selectedTicket.id);
+    } catch (error) {
+      console.error('Reopen ticket error:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось переоткрыть тикет',
+        variant: 'destructive'
+      });
+    } finally {
+      setReopenLoading(false);
+    }
+  };
+
+  const isTicketClosed = (ticket?: Ticket | null) => {
+    if (!ticket) return false;
+    return ticket.status === 'closed' || ticket.status === 'cancelled';
   };
 
   if (loading) {
@@ -377,7 +446,25 @@ const TicketsUser: React.FC = () => {
                   )}
                 </div>
 
-                {selectedTicket.status !== 'closed' && (
+                {isTicketClosed(selectedTicket) ? (
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="rounded-xl border content-border-40 bg-muted/40 p-4">
+                      <h5 className="font-semibold mb-1">Тикет закрыт</h5>
+                      <p className="text-sm text-muted-foreground">
+                        Чтобы продолжить обсуждение, переоткройте тикет или создайте новый запрос в поддержку.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={reopenTicket}
+                      disabled={reopenLoading}
+                    >
+                      <RefreshCcw className="h-4 w-4 mr-2" />
+                      {reopenLoading ? 'Переоткрываем...' : 'Переоткрыть тикет'}
+                    </Button>
+                  </div>
+                ) : (
                   <div className="space-y-3 pt-4 border-t">
                     <Textarea
                       placeholder="Напишите ваш ответ..."
