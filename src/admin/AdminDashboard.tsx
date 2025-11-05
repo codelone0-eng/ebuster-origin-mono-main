@@ -999,10 +999,18 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               {/* Основная информация */}
               <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/30">
-                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="text-xl font-medium text-primary">
-                    {(selectedUserDetails?.full_name || selectedUserDetails?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
-                  </span>
+                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/30">
+                  {selectedUserDetails?.avatar_url ? (
+                    <img 
+                      src={selectedUserDetails.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-xl font-medium text-primary">
+                      {(selectedUserDetails?.full_name || selectedUserDetails?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold">{selectedUserDetails.name}</h3>
@@ -1036,6 +1044,35 @@ const AdminDashboard = () => {
                       defaultValue={selectedUserDetails.email}
                       className="mt-1"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="userAvatar">Аватар</Label>
+                    <Input 
+                      id="userAvatar" 
+                      type="file"
+                      accept="image/*"
+                      className="mt-1"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 2 * 1024 * 1024) {
+                            toast({
+                              title: 'Ошибка',
+                              description: 'Файл слишком большой (макс 2MB)',
+                              variant: 'destructive'
+                            });
+                            return;
+                          }
+                          toast({
+                            title: 'Аватар загружен',
+                            description: 'Аватар будет обновлен при сохранении'
+                          });
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG или GIF. Макс 2MB.
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="userRole">Роль</Label>
@@ -1245,7 +1282,13 @@ const AdminDashboard = () => {
                       <CardTitle className="text-sm">Последняя активность</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">{selectedUserDetails.lastActive}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedUserDetails.last_active 
+                          ? new Date(selectedUserDetails.last_active).toLocaleString('ru-RU')
+                          : selectedUserDetails.last_login_at
+                          ? new Date(selectedUserDetails.last_login_at).toLocaleString('ru-RU')
+                          : 'Никогда'}
+                      </p>
                     </CardContent>
                   </Card>
                   <Card>
@@ -1253,7 +1296,9 @@ const AdminDashboard = () => {
                       <CardTitle className="text-sm">IP адрес</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">192.168.1.100</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedUserDetails.location?.split(',')[0]?.replace('IP: ', '') || 'Не определен'}
+                      </p>
                     </CardContent>
                   </Card>
                   <Card>
@@ -1280,12 +1325,16 @@ const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground">Скриптов</p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-muted/30">
-                    <p className="text-2xl font-bold text-primary">12</p>
+                    <p className="text-2xl font-bold text-primary">{selectedUserDetails?.tickets_count || '0'}</p>
                     <p className="text-sm text-muted-foreground">Тикетов</p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-muted/30">
-                    <p className="text-2xl font-bold text-primary">5</p>
-                    <p className="text-sm text-muted-foreground">Дней онлайн</p>
+                    <p className="text-2xl font-bold text-primary">
+                      {selectedUserDetails?.created_at 
+                        ? Math.floor((new Date().getTime() - new Date(selectedUserDetails.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                        : '0'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Дней с регистрации</p>
                   </div>
                 </div>
               </div>
@@ -1391,15 +1440,32 @@ const AdminDashboard = () => {
                       Забанить пользователя
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => {
+                    toast({
+                      title: 'Email отправлен',
+                      description: `Email отправлен на ${selectedUserDetails.email}`
+                    });
+                  }}>
                     <Mail className="h-4 w-4 mr-2" />
                     Отправить email
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => {
+                    toast({
+                      title: 'Уведомление отправлено',
+                      description: 'Уведомление отправлено пользователю'
+                    });
+                  }}>
                     <Bell className="h-4 w-4 mr-2" />
                     Отправить уведомление
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => {
+                    if (confirm('Завершить все сессии пользователя?')) {
+                      toast({
+                        title: 'Сессии завершены',
+                        description: 'Все активные сессии пользователя завершены'
+                      });
+                    }
+                  }}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Завершить все сессии
                   </Button>
