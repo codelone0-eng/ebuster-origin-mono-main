@@ -40,15 +40,16 @@ interface Ticket {
   agent?: { full_name: string };
 }
 
-interface TicketComment {
-  id: string;
-  ticket_id: string;
-  user_id: string;
+interface TicketMessage {
+  id: number;
+  ticket_id: number;
+  author_id?: number;
   message: string;
   is_internal: boolean;
+  is_system: boolean;
   created_at: string;
   author?: {
-    id: string;
+    id: number;
     full_name: string;
     email: string;
     avatar_url?: string;
@@ -62,7 +63,7 @@ const TicketsUser: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [comments, setComments] = useState<TicketComment[]>([]);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -72,7 +73,8 @@ const TicketsUser: React.FC = () => {
     subject: '',
     message: '',
     category: 'technical',
-    priority: 'medium'
+    priority: 'medium',
+    team_id: null as number | null
   });
   const [newComment, setNewComment] = useState('');
   const commentsChannelRef = useRef<RealtimeChannel | null>(null);
@@ -147,11 +149,11 @@ const TicketsUser: React.FC = () => {
     }
   };
 
-  const loadComments = async (ticketId: string) => {
+  const loadMessages = async (ticketId: string) => {
     try {
       const token = localStorage.getItem('ebuster_token');
       
-      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/comments`, {
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -160,7 +162,7 @@ const TicketsUser: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        setComments(data.data);
+        setMessages(data.data);
       }
     } catch (error) {
       console.error('Load comments error:', error);
@@ -201,7 +203,8 @@ const TicketsUser: React.FC = () => {
           subject: '',
           message: '',
           category: 'technical',
-          priority: 'medium'
+          priority: 'medium',
+          team_id: null
         });
         loadTickets({ keepSelected: true });
       } else {
@@ -223,7 +226,7 @@ const TicketsUser: React.FC = () => {
 
   const openTicket = async (ticket: Ticket) => {
     setSelectedTicket(ticket);
-    await loadComments(ticket.id);
+    await loadMessages(ticket.id);
     setIsViewSheetOpen(true);
   };
 
@@ -233,14 +236,13 @@ const TicketsUser: React.FC = () => {
     try {
       const token = localStorage.getItem('ebuster_token');
       
-      const response = await fetch('https://api.ebuster.ru/api/tickets/comments', {
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${selectedTicket.id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          ticket_id: selectedTicket.id,
           message: newComment,
           is_internal: false
         })
@@ -262,7 +264,7 @@ const TicketsUser: React.FC = () => {
       }
 
       setNewComment('');
-      await loadComments(selectedTicket.id);
+      await loadMessages(selectedTicket.id);
       await loadTickets({ keepSelected: true });
       toast({
         title: 'Успешно',
@@ -344,16 +346,16 @@ const TicketsUser: React.FC = () => {
     }
 
     const ticketId = selectedTicket.id;
-    const channel = supabase.channel(`ticket-comments-${ticketId}`);
+    const channel = supabase.channel(`ticket-messages-${ticketId}`);
     commentsChannelRef.current = channel;
 
     channel.on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
-      table: 'ticket_comments',
+      table: 'ticket_messages',
       filter: `ticket_id=eq.${ticketId}`
     }, async () => {
-      await loadComments(ticketId);
+      await loadMessages(ticketId);
       await loadTickets({ keepSelected: true });
     });
 
@@ -472,23 +474,23 @@ const TicketsUser: React.FC = () => {
 
                 <div className="space-y-4">
                   <h4 className="font-medium text-lg">История сообщений</h4>
-                  {comments.map((comment) => {
-                    const isSupport = comment.author?.role !== 'user';
+                  {messages.map((message) => {
+                    const isSupport = message.author?.role !== 'user';
                     return (
-                      <div key={comment.id} className={cn('flex items-start gap-3', isSupport && 'flex-row-reverse')}>
+                      <div key={message.id} className={cn('flex items-start gap-3', isSupport && 'flex-row-reverse')}>
                         <Avatar>
-                          <AvatarImage src={comment.author?.avatar_url} />
-                          <AvatarFallback>{comment.author?.full_name?.[0] || '?'}</AvatarFallback>
+                          <AvatarImage src={message.author?.avatar_url} />
+                          <AvatarFallback>{message.author?.full_name?.[0] || '?'}</AvatarFallback>
                         </Avatar>
                         <div className={cn('p-3 rounded-lg max-w-[80%]', isSupport ? 'bg-primary/10' : 'bg-muted')}>
-                          <div className="font-semibold text-sm mb-1">{comment.author?.full_name}</div>
-                          <p className="text-sm whitespace-pre-wrap">{comment.message}</p>
-                          <div className="text-xs text-muted-foreground mt-2 text-right">{new Date(comment.created_at).toLocaleString()}</div>
+                          <div className="font-semibold text-sm mb-1">{message.author?.full_name}</div>
+                          <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                          <div className="text-xs text-muted-foreground mt-2 text-right">{new Date(message.created_at).toLocaleString()}</div>
                         </div>
                       </div>
                     );
                   })}
-                  {comments.length === 0 && (
+                  {messages.length === 0 && (
                     <div className="text-center text-sm text-muted-foreground py-8">Нет сообщений</div>
                   )}
                 </div>

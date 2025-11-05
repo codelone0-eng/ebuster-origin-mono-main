@@ -164,7 +164,7 @@ export const createTicket = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { subject, message, category, priority } = req.body;
+    const { subject, message, category, priority, team_id } = req.body;
     
     if (!subject || !message) {
       return res.status(400).json({ error: 'Subject and message are required' });
@@ -181,7 +181,8 @@ export const createTicket = async (req: Request, res: Response) => {
         message,
         category: category || 'general',
         priority: priority || 'medium',
-        status: 'new'
+        status: 'new',
+        team_id: team_id || null
       })
       .select('*')
       .single();

@@ -14,6 +14,23 @@ const getSupabase = () => {
   });
 };
 
+export const getSupportTeams = async (_req: Request, res: Response) => {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('support_teams')
+      .select('id, name, description')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({ success: true, data });
+  } catch (error: any) {
+    console.error('Get support teams error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const normalizeId = (value: any) => (value === null || value === undefined ? null : String(value));
 
 const isTicketClosedStatus = (status?: string | null) => {

@@ -24,7 +24,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
-  const [teamId, setTeamId] = useState<number>(1);
+  const [teamId, setTeamId] = useState<number | null>(null);
   const [teams, setTeams] = useState<SupportTeam[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -46,11 +46,16 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
       const result = await response.json();
       
-      if (result.success && result.data) {
+      if (result.success && Array.isArray(result.data)) {
         setTeams(result.data);
         if (result.data.length > 0) {
           setTeamId(result.data[0].id);
+        } else {
+          setTeamId(null);
         }
+      } else {
+        setTeams([]);
+        setTeamId(null);
       }
     } catch (error) {
       console.error('Load teams error:', error);
@@ -83,7 +88,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           subject,
           message: description,
           priority,
-          category: 'general'
+          category: teams.find((team) => team.id === teamId)?.name || 'general',
+          team_id: teamId
         })
       });
 
@@ -100,6 +106,11 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
         setSubject('');
         setDescription('');
         setPriority('medium');
+        if (teams.length > 0) {
+          setTeamId(teams[0].id);
+        } else {
+          setTeamId(null);
+        }
         
         onSuccess();
       } else {
@@ -209,22 +220,32 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             <div className="space-y-2">
               <Label htmlFor="team">Категория</Label>
               <Select 
-                value={teamId.toString()} 
-                onValueChange={(value) => setTeamId(Number(value))}
+                value={teamId !== null ? teamId.toString() : undefined} 
+                onValueChange={(value) => {
+                  if (value === '__empty') return;
+                  setTeamId(Number(value));
+                }}
+                disabled={teams.length === 0}
               >
-                <SelectTrigger id="team" className="bg-card/60 border content-border-40">
-                  <SelectValue placeholder="Выберите категорию..." />
+                <SelectTrigger id="team" className="bg-card/60 border content-border-40" disabled={teams.length === 0}>
+                  <SelectValue placeholder={teams.length === 0 ? 'Категории отсутствуют' : 'Выберите категорию...'} />
                 </SelectTrigger>
                 <SelectContent
                   position="popper"
                   sideOffset={8}
                   className="z-[10000] max-h-64 overflow-y-auto border content-border-40 bg-card/95 backdrop-blur-xl"
                 >
-                  {teams.map((team) => (
-                    <SelectItem key={team.id} value={team.id.toString()}>
-                      {team.name}
+                  {teams.length > 0 ? (
+                    teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id.toString()}>
+                        {team.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__empty" disabled>
+                      Нет доступных категорий
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
