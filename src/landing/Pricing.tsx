@@ -256,8 +256,8 @@ const Pricing = () => {
                     >
                       <Card
                         className={cn(
-                          "relative overflow-hidden rounded-2xl border transition-all duration-300 flex flex-col backdrop-blur",
-                          "shadow-[0_28px_60px_-40px_rgba(0,0,0,0.9)] ring-1 ring-border/20 hover:ring-primary/30 hover:-translate-y-1",
+                          "relative overflow-visible rounded-2xl border transition-all duration-300 flex flex-col backdrop-blur",
+                          "shadow-[0_28px_60px_-40px_rgba(0,0,0,0.9)] hover:-translate-y-1",
                           isPremium
                             ? "border-primary/30 bg-gradient-to-br from-primary/8 via-card/85 to-card/70"
                             : "border-border/50 bg-gradient-to-br from-card/85 via-card/70 to-card/60",
