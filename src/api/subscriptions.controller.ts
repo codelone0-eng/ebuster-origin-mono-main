@@ -134,7 +134,21 @@ export const createSubscription = async (req: Request, res: Response) => {
       });
     }
 
-    // Определяем цену и функции плана
+    // Находим роль по имени плана
+    const { data: role, error: roleError } = await supabaseAdmin
+      .from('roles')
+      .select('id, price_monthly, features')
+      .eq('name', plan)
+      .single();
+
+    if (roleError || !role) {
+      return res.status(404).json({
+        success: false,
+        error: `Role '${plan}' not found`
+      });
+    }
+
+    // Определяем цену и функции плана (fallback на старые значения)
     const planPrices: Record<string, number> = {
       free: 0,
       premium: 9.99,
@@ -159,13 +173,14 @@ export const createSubscription = async (req: Request, res: Response) => {
       .from('subscriptions')
       .insert({
         user_id: user.id,
+        role_id: role.id, // ← ДОБАВЛЕНО!
         plan,
         status: status || 'active',
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         auto_renew: auto_renew !== undefined ? auto_renew : true,
-        amount: planPrices[plan] || 0,
-        features: planFeatures[plan] || [],
+        amount: role.price_monthly || planPrices[plan] || 0,
+        features: role.features || planFeatures[plan] || [],
         payment_method: 'manual'
       })
       .select()
