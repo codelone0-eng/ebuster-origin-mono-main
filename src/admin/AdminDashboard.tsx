@@ -1067,7 +1067,10 @@ const AdminDashboard = () => {
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">План:</span>
                             <Badge variant="outline">
-                              {userSubscription.roles?.display_name || 'Unknown'}
+                              {userSubscription.roles?.display_name || 
+                               userSubscription.plan || 
+                               availableRoles.find((r: any) => r.id === selectedUserDetails.role_id)?.display_name || 
+                               'Free'}
                             </Badge>
                           </div>
                           <div className="flex justify-between text-sm">
@@ -1108,34 +1111,16 @@ const AdminDashboard = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="userSubscription">Тип подписки</Label>
-                    <Select defaultValue={selectedUserDetails.subscriptionType}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="free">Бесплатная</SelectItem>
-                        <SelectItem value="premium">Премиум</SelectItem>
-                        <SelectItem value="enterprise">Корпоративная</SelectItem>
-                        <SelectItem value="developer">Разработчик</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="userSubscriptionExpiry">Окончание подписки</Label>
-                    <Input 
-                      id="userSubscriptionExpiry" 
-                      type="date"
-                      defaultValue={selectedUserDetails.subscriptionExpiry || ''}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="userEmailVerified" 
-                      defaultChecked={selectedUserDetails.emailVerified}
-                    />
-                    <Label htmlFor="userEmailVerified">Email подтвержден</Label>
+                    <Label>Email подтвержден</Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Switch 
+                        id="userEmailVerified" 
+                        defaultChecked={selectedUserDetails.email_confirmed}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {selectedUserDetails.email_confirmed ? 'Да' : 'Нет'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
