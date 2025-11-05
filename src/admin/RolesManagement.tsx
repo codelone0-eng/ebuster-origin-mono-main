@@ -21,6 +21,7 @@ interface Role {
   features: any;
   limits: any;
   is_active: boolean;
+  is_subscription: boolean;
   display_order: number;
 }
 
@@ -38,6 +39,7 @@ export const RolesManagement: React.FC = () => {
     features: '{}',
     limits: '{}',
     is_active: true,
+    is_subscription: false,
     display_order: 0
   });
   const { toast } = useToast();
@@ -78,6 +80,7 @@ export const RolesManagement: React.FC = () => {
       features: JSON.stringify(role.features, null, 2),
       limits: JSON.stringify(role.limits, null, 2),
       is_active: role.is_active,
+      is_subscription: role.is_subscription || false,
       display_order: role.display_order
     });
     setIsDialogOpen(true);
@@ -100,6 +103,7 @@ export const RolesManagement: React.FC = () => {
         downloads_per_day: 20
       }, null, 2),
       is_active: true,
+      is_subscription: false,
       display_order: roles.length
     });
     setIsDialogOpen(true);
@@ -311,7 +315,7 @@ export const RolesManagement: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_active"
@@ -320,8 +324,16 @@ export const RolesManagement: React.FC = () => {
                   />
                   <Label htmlFor="is_active">Активна</Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_subscription"
+                    checked={formData.is_subscription}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_subscription: checked })}
+                  />
+                  <Label htmlFor="is_subscription">Подписка</Label>
+                </div>
                 <div>
-                  <Label htmlFor="display_order">Порядок отображения</Label>
+                  <Label htmlFor="display_order">Порядок</Label>
                   <Input
                     id="display_order"
                     type="number"
@@ -354,7 +366,10 @@ export const RolesManagement: React.FC = () => {
                   {getRoleIcon(role.name)}
                   <CardTitle>{role.display_name}</CardTitle>
                 </div>
-                {!role.is_active && <Badge variant="secondary">Неактивна</Badge>}
+                <div className="flex gap-2">
+                  {role.is_subscription && <Badge variant="default">Подписка</Badge>}
+                  {!role.is_active && <Badge variant="secondary">Неактивна</Badge>}
+                </div>
               </div>
               <CardDescription>{role.description}</CardDescription>
             </CardHeader>

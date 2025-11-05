@@ -102,6 +102,7 @@ export const createRole = async (req: Request, res: Response) => {
       features,
       limits,
       is_active,
+      is_subscription,
       display_order
     } = req.body;
 
@@ -126,6 +127,7 @@ export const createRole = async (req: Request, res: Response) => {
         features,
         limits,
         is_active: is_active !== undefined ? is_active : true,
+        is_subscription: is_subscription !== undefined ? is_subscription : false,
         display_order: display_order || 0
       })
       .select()
@@ -176,6 +178,7 @@ export const updateRole = async (req: Request, res: Response) => {
       features,
       limits,
       is_active,
+      is_subscription,
       display_order
     } = req.body;
 
@@ -190,6 +193,7 @@ export const updateRole = async (req: Request, res: Response) => {
     if (features !== undefined) updateData.features = features;
     if (limits !== undefined) updateData.limits = limits;
     if (is_active !== undefined) updateData.is_active = is_active;
+    if (is_subscription !== undefined) updateData.is_subscription = is_subscription;
     if (display_order !== undefined) updateData.display_order = display_order;
 
     const { data: role, error } = await supabase
