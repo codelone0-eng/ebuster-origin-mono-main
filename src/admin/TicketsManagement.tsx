@@ -549,7 +549,7 @@ const TicketsManagement: React.FC = () => {
                             <Avatar className="h-10 w-10 flex-shrink-0">
                               <AvatarImage src={isSupport ? undefined : message.author?.avatar_url} />
                               <AvatarFallback className={cn(isSupport && 'bg-primary text-primary-foreground')}>
-                                {isSupport ? <Wrench className="h-5 w-5" /> : message.author?.full_name?.[0] || '?'}
+                                {isSupport ? <LightningIcon size={24} /> : message.author?.full_name?.[0] || '?'}
                               </AvatarFallback>
                             </Avatar>
                             <div className={cn(

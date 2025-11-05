@@ -65,12 +65,7 @@ export const ExtensionWorkflow = () => {
                 <div className={`absolute inset-0 bg-gradient-to-br ${step.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 
                 {/* Card */}
-                <div className={`relative bg-card/50 backdrop-blur-sm border-2 ${step.borderColor} rounded-2xl p-6 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl`}>
-                  {/* Step Number */}
-                  <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
-                    {step.id}
-                  </div>
-
+                <div className={`relative bg-card/50 backdrop-blur-sm border ${step.borderColor} rounded-2xl p-6 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl h-full flex flex-col`}>
                   {/* Icon */}
                   <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:rotate-6`}>
                     <step.icon className={`w-8 h-8 ${step.iconColor}`} />
@@ -79,9 +74,6 @@ export const ExtensionWorkflow = () => {
                   {/* Content */}
                   <h3 className="text-lg font-bold text-foreground mb-2 text-center">{step.title}</h3>
                   <p className="text-sm text-muted-foreground text-center">{step.description}</p>
-
-                  {/* Pulse Animation */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-primary/0 group-hover:border-primary/50 transition-all duration-300 animate-pulse" />
                 </div>
               </div>
 
@@ -106,17 +98,12 @@ export const ExtensionWorkflow = () => {
               <div className={`absolute inset-0 bg-gradient-to-br ${step.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
               
               {/* Card */}
-              <div className={`relative bg-card/50 backdrop-blur-sm border-2 ${step.borderColor} rounded-2xl p-6 transition-all duration-300`}>
+              <div className={`relative bg-card/50 backdrop-blur-sm border ${step.borderColor} rounded-2xl p-6 transition-all duration-300`}>
                 <div className="flex items-start gap-4">
-                  {/* Step Number & Icon */}
+                  {/* Icon */}
                   <div className="flex-shrink-0">
-                    <div className="relative">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center`}>
-                        <step.icon className={`w-8 h-8 ${step.iconColor}`} />
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
-                        {step.id}
-                      </div>
+                    <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center`}>
+                      <step.icon className={`w-8 h-8 ${step.iconColor}`} />
                     </div>
                   </div>
 

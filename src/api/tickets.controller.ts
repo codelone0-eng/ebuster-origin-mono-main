@@ -186,7 +186,7 @@ export const getTicketComments = async (req: Request, res: Response) => {
       .from('ticket_comments')
       .select(`
         *,
-        user:auth_users(full_name, email, role)
+        author:user_id(full_name, email, role, avatar_url)
       `)
       .eq('ticket_id', ticketId)
       .order('created_at', { ascending: true });
