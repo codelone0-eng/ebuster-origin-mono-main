@@ -1048,7 +1048,6 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                       </div>
                     </CardContent>
                   </Card>
-                </div>
               </div>
             )}
           </div>
