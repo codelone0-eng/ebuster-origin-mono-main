@@ -14,6 +14,8 @@ import extensionAuthRoutes from './src/api/extension-auth.routes';
 import referralRoutes from './src/api/referral.routes';
 import categoriesRoutes from './src/api/categories.routes';
 import ticketsRoutes from './src/api/tickets-new.routes';
+import rolesRoutes from './src/api/roles.routes';
+import subscriptionsRoutes from './src/api/subscriptions.routes';
 import { startAllCronJobs } from './src/api/cron-jobs';
 
 const app = express();
@@ -54,6 +56,8 @@ app.use('/api/script-versions', scriptVersionsRoutes);
 app.use('/api/referral', referralRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/tickets', ticketsRoutes); // Новая система тикетов
+app.use('/api/roles', rolesRoutes); // Система ролей
+app.use('/api/subscriptions', subscriptionsRoutes); // Подписки
 app.use('/api', extensionAuthRoutes);
 
 // Health check endpoint

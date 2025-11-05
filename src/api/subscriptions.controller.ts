@@ -419,3 +419,210 @@ export const checkPremiumAccess = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Получить мою подписку (для текущего пользователя)
+ */
+export const getMySubscription = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const { data: subscription, error } = await supabaseAdmin
+      .from('subscriptions')
+      .select(`
+        *,
+        roles:role_id (
+          id,
+          name,
+          display_name,
+          features,
+          limits
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching subscription:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch subscription'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: subscription || null
+    });
+  } catch (error) {
+    console.error('Error in getMySubscription:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * Оформить подписку
+ */
+export const subscribe = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { roleId, billingPeriod, paymentMethod } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    if (!roleId || !billingPeriod) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields'
+      });
+    }
+
+    const startDate = new Date();
+    const endDate = new Date();
+    
+    if (billingPeriod === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (billingPeriod === 'yearly') {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    const { data: subscription, error } = await supabaseAdmin
+      .from('subscriptions')
+      .insert({
+        user_id: userId,
+        role_id: roleId,
+        status: 'active',
+        billing_period: billingPeriod,
+        start_date: startDate.toISOString(),
+        end_date: billingPeriod === 'lifetime' ? null : endDate.toISOString(),
+        auto_renew: billingPeriod !== 'lifetime',
+        payment_method: paymentMethod || 'manual'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating subscription:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create subscription'
+      });
+    }
+
+    await supabaseAdmin
+      .from('auth_users')
+      .update({ role_id: roleId, subscription_id: subscription.id })
+      .eq('id', userId);
+
+    res.json({
+      success: true,
+      data: subscription
+    });
+  } catch (error) {
+    console.error('Error in subscribe:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * Отменить мою подписку
+ */
+export const cancelMySubscription = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const { data: subscription, error } = await supabaseAdmin
+      .from('subscriptions')
+      .update({ status: 'cancelled', auto_renew: false })
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error cancelling subscription:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to cancel subscription'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: subscription
+    });
+  } catch (error) {
+    console.error('Error in cancelMySubscription:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * История подписок пользователя
+ */
+export const getMySubscriptionHistory = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+    }
+
+    const { data: subscriptions, error } = await supabaseAdmin
+      .from('subscriptions')
+      .select('*, roles:role_id (name, display_name)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching subscription history:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch subscription history'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: subscriptions || []
+    });
+  } catch (error) {
+    console.error('Error in getMySubscriptionHistory:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};

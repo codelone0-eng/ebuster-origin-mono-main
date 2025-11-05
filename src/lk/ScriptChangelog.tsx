@@ -67,7 +67,8 @@ export const ScriptChangelog: React.FC<ScriptChangelogProps> = ({
           ) : versions.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">История версий недоступна</p>
+              <p className="text-lg font-medium mb-2">Пока нет обновлений</p>
+              <p className="text-sm text-muted-foreground">Это первая версия скрипта. История изменений появится после первого обновления.</p>
             </div>
           ) : (
             <div className="space-y-4">

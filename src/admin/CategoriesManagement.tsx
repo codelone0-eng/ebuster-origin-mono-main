@@ -66,7 +66,7 @@ const CategoriesManagement: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       const url = editingCategory
         ? `https://api.ebuster.ru/api/categories/${editingCategory.id}`
         : 'https://api.ebuster.ru/api/categories';
@@ -105,7 +105,7 @@ const CategoriesManagement: React.FC = () => {
     if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
 
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`https://api.ebuster.ru/api/categories/${id}`, {
         method: 'DELETE',
         headers: {

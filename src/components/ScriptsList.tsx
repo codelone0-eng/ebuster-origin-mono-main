@@ -54,6 +54,7 @@ const ScriptsList: React.FC = () => {
   const { toast } = useToast();
   const [scripts, setScripts] = useState<Script[]>([]);
   const [installedScriptIds, setInstalledScriptIds] = useState<Set<string>>(new Set());
+  const [ratedScriptIds, setRatedScriptIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -177,10 +178,52 @@ const ScriptsList: React.FC = () => {
     }
   };
 
+  // Загрузка оцененных скриптов
+  const loadRatedScripts = async () => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      if (!token) return;
+      
+      // Загружаем все скрипты и проверяем, какие из них оценены пользователем
+      const ratedIds = new Set<string>();
+      
+      for (const script of scripts) {
+        try {
+          const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/public/${script.id}/ratings`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            // Проверяем, есть ли оценка от текущего пользователя
+            if (data.success && data.data && data.data.length > 0) {
+              ratedIds.add(script.id);
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to check rating for script ${script.id}:`, error);
+        }
+      }
+      
+      setRatedScriptIds(ratedIds);
+    } catch (error) {
+      console.error('Failed to load rated scripts:', error);
+    }
+  };
+
   useEffect(() => {
     loadScripts();
     loadInstalledScripts();
   }, [categoryFilter, sortBy, sortOrder]); // Убрали searchTerm - фильтрация локальная
+  
+  // Загружаем оцененные скрипты после загрузки списка скриптов
+  useEffect(() => {
+    if (scripts.length > 0) {
+      loadRatedScripts();
+    }
+  }, [scripts]);
 
   // Слушатель событий от расширения для синхронизации
   useEffect(() => {
@@ -712,7 +755,7 @@ const ScriptsList: React.FC = () => {
                     className="flex-1"
                   >
                     <Star className="h-4 w-4 mr-2" />
-                    Оценить
+                    {ratedScriptIds.has(script.id) ? 'Изменить оценку' : 'Оценить'}
                   </Button>
                   <Button
                     size="sm"
