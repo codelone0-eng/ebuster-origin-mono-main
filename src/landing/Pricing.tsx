@@ -76,13 +76,23 @@ const Pricing = () => {
   };
 
   const faqItems = t('pricing.faq.items');
+  const faqArray = Array.isArray(faqItems) ? faqItems : [];
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % roles.length);
+    if (roles.length <= 3) return; // Не скроллим если карточек 3 или меньше
+    setCurrentSlide((prev) => {
+      const next = prev + 1;
+      // Зацикливаем: если дошли до конца, возвращаемся в начало
+      return next >= roles.length - 2 ? 0 : next;
+    });
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + roles.length) % roles.length);
+    if (roles.length <= 3) return;
+    setCurrentSlide((prev) => {
+      const next = prev - 1;
+      return next < 0 ? Math.max(0, roles.length - 3) : next;
+    });
   };
 
   const getPrice = (role: Role) => {
@@ -205,9 +215,9 @@ const Pricing = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="relative mb-16">
+          <div className="relative mb-16 pt-6">
             {/* Slider Navigation */}
-            {roles.length > 1 && (
+            {roles.length > 3 && (
               <>
                 <Button
                   variant="outline"
@@ -242,8 +252,9 @@ const Pricing = () => {
                   return (
                     <div key={role.id} className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0">
                       <Card className={cn(
-                        "relative overflow-hidden border transition-all duration-300 h-full",
-                        isPremium ? "border-primary/40 bg-card/90 shadow-lg shadow-primary/10" : "border-border/40 bg-card/70"
+                        "relative overflow-hidden border transition-all duration-300 flex flex-col",
+                        isPremium ? "border-primary/40 bg-card/90 shadow-lg shadow-primary/10" : "border-border/40 bg-card/70",
+                        "min-h-[520px]"
                       )}>
                         {/* Premium Badge */}
                         {isPremium && (
@@ -514,7 +525,7 @@ const Pricing = () => {
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
-            {faqItems.map((item, index) => (
+            {Array.isArray(faqArray) && faqArray.map((item: any, index: number) => (
               <Card key={index} className="bg-card/30 backdrop-blur-sm border content-border-30">
                 <CardHeader>
                   <CardTitle className="text-lg">{item.question}</CardTitle>
