@@ -26,6 +26,7 @@ import { AdminSidebar } from './AdminSidebar';
 import CategoriesManagement from './CategoriesManagement';
 import MonitoringDashboard from './MonitoringDashboard';
 import TicketsManagement from './TicketsManagement';
+import { RolesManagement } from './RolesManagement';
 import { 
   Users, 
   Settings, 
@@ -111,6 +112,8 @@ const AdminDashboard = () => {
   const [showBanModal, setShowBanModal] = useState(false);
   const [userToBan, setUserToBan] = useState(null);
   const [selectedUserDetails, setSelectedUserDetails] = useState(null);
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [userSubscription, setUserSubscription] = useState(null);
   
   // Custom confirm modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -414,9 +417,38 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleViewUser = (user: any) => {
+  const loadRolesAndSubscription = async (userId: string) => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      
+      // Загружаем роли
+      const rolesResponse = await fetch(`${process.env.VITE_API_URL || 'https://api.ebuster.ru'}/api/roles`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const rolesData = await rolesResponse.json();
+      if (rolesData.success) {
+        setAvailableRoles(rolesData.data);
+      }
+
+      // Загружаем подписку пользователя
+      const subResponse = await fetch(`${process.env.VITE_API_URL || 'https://api.ebuster.ru'}/api/subscriptions?user_id=${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const subData = await subResponse.json();
+      if (subData.success && subData.data.subscriptions.length > 0) {
+        setUserSubscription(subData.data.subscriptions[0]);
+      } else {
+        setUserSubscription(null);
+      }
+    } catch (error) {
+      console.error('Error loading roles and subscription:', error);
+    }
+  };
+
+  const handleViewUser = async (user: any) => {
     setSelectedUserDetails(user);
     setShowUserDetailsModal(true);
+    await loadRolesAndSubscription(user.id);
   };
 
   const handleViewScript = (script: any) => {
@@ -430,9 +462,51 @@ const AdminDashboard = () => {
     setShowLogDetailsModal(true);
   };
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = async (user: any) => {
     setSelectedUserDetails(user);
     setShowUserDetailsModal(true);
+    await loadRolesAndSubscription(user.id);
+  };
+
+  const handleRoleChange = async (roleId: string) => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${process.env.VITE_API_URL || 'https://api.ebuster.ru'}/api/roles/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: selectedUserDetails.id,
+          roleId
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: 'Успешно',
+          description: 'Роль пользователя обновлена',
+          variant: 'default'
+        });
+        
+        // Обновляем данные пользователя
+        setSelectedUserDetails({
+          ...selectedUserDetails,
+          role_id: roleId
+        });
+      } else {
+        throw new Error(data.error || 'Failed to assign role');
+      }
+    } catch (error) {
+      console.error('Error assigning role:', error);
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось обновить роль',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleEditScript = (script: any) => {
@@ -807,6 +881,11 @@ const AdminDashboard = () => {
               <SubscriptionsManagement />
             </TabsContent>
 
+            {/* Роли */}
+            <TabsContent value="roles" className="space-y-6">
+              <RolesManagement />
+            </TabsContent>
+
             {/* Рефералы */}
             <TabsContent value="referrals" className="space-y-6">
               <ReferralManagement />
@@ -960,33 +1039,57 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="userRole">Роль</Label>
-                    <Select defaultValue={selectedUserDetails.role}>
+                    <Select 
+                      defaultValue={selectedUserDetails.role_id} 
+                      onValueChange={handleRoleChange}
+                    >
                       <SelectTrigger className="mt-1">
-                        <SelectValue />
+                        <SelectValue placeholder="Выберите роль" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="user">Пользователь</SelectItem>
-                        <SelectItem value="moderator">Модератор</SelectItem>
-                        <SelectItem value="developer">Разработчик</SelectItem>
-                        <SelectItem value="admin">Администратор</SelectItem>
+                        {availableRoles.length > 0 ? (
+                          availableRoles.map((role: any) => (
+                            <SelectItem key={role.id} value={role.id}>
+                              {role.display_name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="loading" disabled>Загрузка...</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="userAccessLevel">Уровень доступа</Label>
-                    <Select defaultValue={selectedUserDetails.accessLevel}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basic">Базовый</SelectItem>
-                        <SelectItem value="standard">Стандартный</SelectItem>
-                        <SelectItem value="premium">Премиум</SelectItem>
-                        <SelectItem value="enterprise">Корпоративный</SelectItem>
-                        <SelectItem value="developer">Разработчик</SelectItem>
-                        <SelectItem value="moderator">Модератор</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Подписка</Label>
+                    <div className="mt-1 p-3 bg-muted/30 rounded-lg border">
+                      {userSubscription ? (
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">План:</span>
+                            <Badge variant="outline">
+                              {userSubscription.roles?.display_name || 'Unknown'}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Статус:</span>
+                            <Badge variant={userSubscription.status === 'active' ? 'default' : 'secondary'}>
+                              {userSubscription.status === 'active' ? 'Активна' : 
+                               userSubscription.status === 'expired' ? 'Истекла' : 'Отменена'}
+                            </Badge>
+                          </div>
+                          {userSubscription.end_date && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Действует до:</span>
+                              <span className="font-medium">
+                                {new Date(userSubscription.end_date).toLocaleDateString('ru-RU')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Нет активной подписки</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -1040,62 +1143,112 @@ const AdminDashboard = () => {
               {/* Права и доступы */}
               <div className="space-y-4">
                 <h4 className="text-lg font-semibold">Права и доступы</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <h5 className="font-medium">Права пользователя</h5>
-                    <div className="space-y-2">
-                      {['script_download', 'ticket_create', 'script_upload', 'script_moderate', 'user_view', 'api_access'].map((permission) => (
-                        <div key={permission} className="flex items-center space-x-2">
-                          <Switch 
-                            id={permission}
-                            defaultChecked={selectedUserDetails.permissions?.includes(permission)}
-                          />
-                          <Label htmlFor={permission} className="text-sm">
-                            {permission === 'script_download' && 'Скачивание скриптов'}
-                            {permission === 'ticket_create' && 'Создание тикетов'}
-                            {permission === 'script_upload' && 'Загрузка скриптов'}
-                            {permission === 'script_moderate' && 'Модерация скриптов'}
-                            {permission === 'user_view' && 'Просмотр пользователей'}
-                            {permission === 'api_access' && 'Доступ к API'}
-                          </Label>
-                        </div>
-                      ))}
+                {availableRoles.length > 0 && selectedUserDetails.role_id && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h5 className="font-medium">Возможности роли</h5>
+                      <div className="space-y-2">
+                        {(() => {
+                          const userRole = availableRoles.find((r: any) => r.id === selectedUserDetails.role_id);
+                          if (!userRole?.features) return <p className="text-sm text-muted-foreground">Нет данных о правах</p>;
+                          
+                          return (
+                            <>
+                              {userRole.features.scripts?.can_create && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Создание скриптов</span>
+                                </div>
+                              )}
+                              {userRole.features.scripts?.can_publish && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Публикация скриптов</span>
+                                </div>
+                              )}
+                              {userRole.features.scripts?.can_feature && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Featured скрипты</span>
+                                </div>
+                              )}
+                              {userRole.features.downloads?.unlimited && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Неограниченные загрузки</span>
+                                </div>
+                              )}
+                              {userRole.features.api?.enabled && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>API доступ</span>
+                                </div>
+                              )}
+                              {userRole.features.support?.priority && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Приоритетная поддержка</span>
+                                </div>
+                              )}
+                              {userRole.features.support?.chat && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Чат поддержки</span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h5 className="font-medium">Лимиты</h5>
+                      <div className="space-y-2">
+                        {(() => {
+                          const userRole = availableRoles.find((r: any) => r.id === selectedUserDetails.role_id);
+                          if (!userRole?.limits) return <p className="text-sm text-muted-foreground">Нет данных о лимитах</p>;
+                          
+                          return (
+                            <>
+                              {userRole.limits.scripts !== undefined && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Скрипты:</span>
+                                  <span className="font-medium">
+                                    {userRole.limits.scripts === -1 ? 'Неограниченно' : userRole.limits.scripts}
+                                  </span>
+                                </div>
+                              )}
+                              {userRole.limits.downloads_per_day !== undefined && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Загрузки в день:</span>
+                                  <span className="font-medium">
+                                    {userRole.limits.downloads_per_day === -1 ? 'Неограниченно' : userRole.limits.downloads_per_day}
+                                  </span>
+                                </div>
+                              )}
+                              {userRole.limits.api_rate_limit !== undefined && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">API запросов:</span>
+                                  <span className="font-medium">
+                                    {userRole.limits.api_rate_limit === -1 ? 'Неограниченно' : userRole.limits.api_rate_limit}
+                                  </span>
+                                </div>
+                              )}
+                              {userRole.limits.storage_mb !== undefined && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Хранилище:</span>
+                                  <span className="font-medium">
+                                    {userRole.limits.storage_mb === -1 ? 'Неограниченно' : `${userRole.limits.storage_mb} МБ`}
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <h5 className="font-medium">Дополнительные возможности</h5>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Switch 
-                          id="twoFactorEnabled"
-                          defaultChecked={selectedUserDetails.twoFactorEnabled}
-                        />
-                        <Label htmlFor="twoFactorEnabled" className="text-sm">2FA включена</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch 
-                          id="apiAccess"
-                          defaultChecked={selectedUserDetails.apiAccess}
-                        />
-                        <Label htmlFor="apiAccess" className="text-sm">API доступ</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch 
-                          id="customScripts"
-                          defaultChecked={selectedUserDetails.customScripts}
-                        />
-                        <Label htmlFor="customScripts" className="text-sm">Кастомные скрипты</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch 
-                          id="prioritySupport"
-                          defaultChecked={selectedUserDetails.prioritySupport}
-                        />
-                        <Label htmlFor="prioritySupport" className="text-sm">Приоритетная поддержка</Label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Дополнительная информация */}

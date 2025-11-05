@@ -10,7 +10,8 @@ import {
   BarChart3,
   Settings,
   FolderTree,
-  Ticket
+  Ticket,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ const menuItems = [
   { id: 'scripts', label: 'Скрипты', icon: FileText },
   { id: 'categories', label: 'Категории', icon: FolderTree },
   { id: 'subscriptions', label: 'Подписки', icon: CreditCard },
+  { id: 'roles', label: 'Роли', icon: Shield },
   { id: 'referrals', label: 'Рефералы', icon: Star },
   { id: 'tickets', label: 'Тикеты', icon: Ticket },
   { id: 'monitoring', label: 'Мониторинг', icon: Activity },
