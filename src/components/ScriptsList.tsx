@@ -653,77 +653,69 @@ const ScriptsList: React.FC = () => {
       {/* Список скриптов */}
       <div className="grid grid-cols-1 gap-4">
         {filteredScripts.map((script) => (
-          <Card key={script.id} className="group relative overflow-hidden bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm border-2 border-border/40 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
-            {/* Градиентный фон при ховере */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            <div className="relative flex items-center gap-6 p-6">
-              {/* Иконка слева */}
-              <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Code className="h-8 w-8 text-white" />
-              </div>
-
-              {/* Основной контент */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
-                        {script.title}
-                      </h3>
-                      {script.is_featured && (
-                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-md">
-                          <Crown className="h-3 w-3 mr-1" />
-                          Featured
-                        </Badge>
-                      )}
-                      {script.is_premium && (
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md">
-                          <Zap className="h-3 w-3 mr-1" />
-                          Premium
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                      {script.description}
-                    </p>
-                  </div>
+          <Card
+            key={script.id}
+            className="relative overflow-hidden rounded-xl border border-border/50 bg-card/90 shadow-lg shadow-black/20"
+          >
+            <div className="flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="flex-shrink-0 w-14 h-14 rounded-lg border border-border/60 bg-muted/30 flex items-center justify-center text-muted-foreground">
+                  <Code className="h-6 w-6" />
                 </div>
 
-                {/* Метаданные и статистика */}
-                <div className="flex items-center gap-6 mt-3 text-sm">
-                  <Badge className={getCategoryColor(script.category)} variant="secondary">
-                    {script.category}
-                  </Badge>
-                  
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{script.rating.toFixed(1)}</span>
-                    <span className="text-xs">({script.rating_count})</span>
+                <div className="flex-1 space-y-3 min-w-0">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="text-lg font-semibold text-foreground line-clamp-1">
+                      {script.title}
+                    </h3>
+                    {script.is_featured && (
+                      <Badge className="border border-amber-400/40 bg-amber-500/15 text-amber-200">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Featured
+                      </Badge>
+                    )}
+                    {script.is_premium && (
+                      <Badge className="border border-purple-400/40 bg-purple-500/15 text-purple-200">
+                        <Zap className="h-3 w-3 mr-1" />
+                        Premium
+                      </Badge>
+                    )}
                   </div>
-                  
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Download className="h-4 w-4" />
-                    <span>{script.downloads_count.toLocaleString()}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <User className="h-4 w-4" />
-                    <span>{script.author_name}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    <span>{formatFileSize(script.file_size)}</span>
+
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {script.description || t('header.dashboard.scripts.descriptionPlaceholder')}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground/90">
+                    <Badge variant="outline" className="border-border/60 bg-muted/20 text-muted-foreground">
+                      {script.category}
+                    </Badge>
+                    <span className="flex items-center gap-1">
+                      <Star className="h-3 w-3 text-amber-300" />
+                      <span className="font-medium text-foreground">{script.rating.toFixed(1)}</span>
+                      <span className="text-muted-foreground">({script.rating_count})</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Download className="h-3 w-3" />
+                      {script.downloads_count.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {script.author_name}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      {formatFileSize(script.file_size)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Кнопки справа */}
-              <div className="flex-shrink-0 flex gap-2">
+              <div className="flex items-center gap-3 lg:flex-shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
+                  className="border-border/60 bg-muted/20 text-foreground hover:bg-muted"
                   onClick={() => {
                     setChangelogScript({ id: script.id, name: script.title });
                     setIsChangelogDialogOpen(true);
@@ -735,6 +727,7 @@ const ScriptsList: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="border-border/60 bg-muted/20 text-foreground hover:bg-muted"
                   onClick={() => handleRateScript(script)}
                 >
                   <Star className="h-4 w-4 mr-2" />
@@ -742,10 +735,9 @@ const ScriptsList: React.FC = () => {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => handleDownloadScript(script.id)}
                   disabled={installedScriptIds.has(script.id)}
-                  variant={installedScriptIds.has(script.id) ? "secondary" : "default"}
-                  className="bg-gradient-to-r from-primary to-primary/80"
+                  className="bg-primary/80 text-primary-foreground hover:bg-primary/70"
+                  onClick={() => handleDownloadScript(script.id)}
                 >
                   {installedScriptIds.has(script.id) ? (
                     <>

@@ -29,7 +29,8 @@ const getSupabaseClient = () => {
  * Генерация API ключа
  */
 function generateApiKey(): string {
-  return 'ebk_' + crypto.randomBytes(32).toString('hex');
+  // 24 bytes -> 48 hex chars + prefix keeps key length < 64 characters
+  return 'ebk_' + crypto.randomBytes(24).toString('hex');
 }
 
 /**
