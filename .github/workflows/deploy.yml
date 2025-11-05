@@ -1,0 +1,66 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Позволяет запускать вручную
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: 📝 Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      
+      - name: 🚀 Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh $SERVER_USER@$SERVER_IP << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            
+            echo "🔄 Pulling latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            echo "🔨 Building containers..."
+            docker compose down
+            docker compose build --no-cache
+            
+            echo "▶️  Starting containers..."
+            docker compose up -d
+            
+            echo "⏳ Waiting for services to start..."
+            sleep 15
+            
+            echo "✅ Checking container status..."
+            docker compose ps
+            
+            echo "🔍 Checking API health..."
+            curl -f https://api.ebuster.ru/api/health || echo "⚠️  API health check failed"
+            
+            echo "🎉 Deployment completed!"
+          ENDSSH
+      
+      - name: 📊 Deployment status
+        if: success()
+        run: echo "✅ Deployment successful!"
+      
+      - name: ❌ Deployment failed
+        if: failure()
+        run: echo "❌ Deployment failed! Check logs above."
