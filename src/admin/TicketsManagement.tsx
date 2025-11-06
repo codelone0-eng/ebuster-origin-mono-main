@@ -218,9 +218,17 @@ const TicketsManagement: React.FC = () => {
       
       if (data.success) {
         setTickets(data.data || []);
+      } else {
+        setTickets([]);
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось загрузить тикеты',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
       console.error('Load tickets error:', error);
+      setTickets([]);
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить тикеты',
@@ -245,9 +253,12 @@ const TicketsManagement: React.FC = () => {
       
       if (data.success) {
         setMessages(data.data || []);
+      } else {
+        setMessages([]);
       }
     } catch (error) {
       console.error('Load messages error:', error);
+      setMessages([]);
     }
   };
 
@@ -402,7 +413,7 @@ const TicketsManagement: React.FC = () => {
       </div>
 
       <div className="space-y-3">
-        {tickets.map((ticket) => (
+        {tickets && tickets.map((ticket) => (
           <Card key={ticket.id} className="hover:shadow-lg transition-all cursor-pointer" onClick={() => openTicket(ticket)}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between gap-4">
@@ -461,7 +472,7 @@ const TicketsManagement: React.FC = () => {
         ))}
       </div>
 
-      {tickets.length === 0 && (
+      {tickets && tickets.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
             <Ticket className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -534,12 +545,12 @@ const TicketsManagement: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <MessageSquare className="h-5 w-5" />
-                      История сообщений ({messages.length})
+                      История сообщений ({messages?.length || 0})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {messages.map((message) => {
+                      {messages && messages.map((message) => {
                         const isSupport = message.author_id !== selectedTicket.user_id;
                         const isSystem = message.is_system;
 
@@ -625,7 +636,7 @@ const TicketsManagement: React.FC = () => {
                       Прикрепленные файлы ({selectedFiles.length})
                     </div>
                     <AttachmentList 
-                      attachments={selectedFiles.map((file, index) => ({
+                      attachments={selectedFiles?.map((file, index) => ({
                         id: `temp-${index}`,
                         filename: file.name,
                         original_filename: file.name,
@@ -633,7 +644,7 @@ const TicketsManagement: React.FC = () => {
                         file_size: file.size,
                         mime_type: file.type,
                         created_at: new Date().toISOString()
-                      }))}
+                      })) || []}
                       canDelete={true}
                       onDelete={(id) => {
                         const index = parseInt(id.split('-')[1]);
