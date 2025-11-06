@@ -14,6 +14,50 @@ const getSupabase = () => {
   });
 };
 
+const enrichTicketsWithUsers = async (supabaseClient: ReturnType<typeof getSupabase>, tickets: any[] = []) => {
+  if (!tickets.length) return [];
+
+  const userIds = new Set<string>();
+  tickets.forEach((ticket) => {
+    if (ticket.user_id) userIds.add(String(ticket.user_id));
+    if (ticket.assigned_to) userIds.add(String(ticket.assigned_to));
+  });
+
+  const ids = Array.from(userIds);
+  if (!ids.length) {
+    return tickets.map((ticket) => ({ ...ticket, client: null, agent: null }));
+  }
+
+  const { data: users, error } = await supabaseClient
+    .from('auth_users')
+    .select('id, full_name, email, avatar_url, role')
+    .in('id', ids);
+
+  if (error) {
+    console.error('Load auth users error:', error);
+    return tickets.map((ticket) => ({ ...ticket, client: null, agent: null }));
+  }
+
+  const usersMap = new Map((users || []).map((user: any) => [String(user.id), user]));
+
+  return tickets.map((ticket) => {
+    const client = ticket.user_id ? usersMap.get(String(ticket.user_id)) || null : null;
+    const agent = ticket.assigned_to ? usersMap.get(String(ticket.assigned_to)) || null : null;
+
+    return {
+      ...ticket,
+      client,
+      agent
+    };
+  });
+};
+
+const enrichTicketWithUsers = async (supabaseClient: ReturnType<typeof getSupabase>, ticket: any) => {
+  if (!ticket) return ticket;
+  const [enriched] = await enrichTicketsWithUsers(supabaseClient, [ticket]);
+  return enriched || ticket;
+};
+
 
 // Получить тикеты пользователя (клиент видит только свои)
 export const getUserTickets = async (req: Request, res: Response) => {
@@ -29,12 +73,7 @@ export const getUserTickets = async (req: Request, res: Response) => {
     
     let query = supabase
       .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `)
-      ;
+      .select('*');
 
     // Клиенты видят только свои тикеты
     if (userRole !== 'admin' && userRole !== 'agent') {
@@ -52,7 +91,9 @@ export const getUserTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.json({ success: true, data });
+    const tickets = await enrichTicketsWithUsers(supabase, data || []);
+
+    res.json({ success: true, data: tickets });
   } catch (error: any) {
     console.error('Get user tickets error:', error);
     res.status(500).json({ error: error.message });
@@ -74,12 +115,7 @@ export const getAllTickets = async (req: Request, res: Response) => {
     
     let query = supabase
       .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `, { count: 'exact' })
-      ;
+      .select('*', { count: 'exact' });
     
     // Агенты видят только тикеты своих команд
     if (userRole === 'agent') {
@@ -100,7 +136,7 @@ export const getAllTickets = async (req: Request, res: Response) => {
     if (status && status !== 'all') query = query.eq('status', status);
     if (priority) query = query.eq('priority', priority);
     if (team_id) query = query.eq('team_id', team_id);
-    if (assigned_to) query = query.eq('assigned_agent_id', assigned_to);
+    if (assigned_to) query = query.eq('assigned_to', assigned_to);
     if (search) {
       query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%,ticket_number.ilike.%${search}%`);
     }
@@ -113,7 +149,9 @@ export const getAllTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.json({ success: true, data, count, page: Number(page), limit: Number(limit) });
+    const tickets = await enrichTicketsWithUsers(supabase, data || []);
+
+    res.json({ success: true, data: tickets, count, page: Number(page), limit: Number(limit) });
   } catch (error: any) {
     console.error('Get all tickets error:', error);
     res.status(500).json({ error: error.message });
@@ -134,11 +172,7 @@ export const getTicket = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     const { data: ticket, error } = await supabase
       .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -147,12 +181,14 @@ export const getTicket = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
+    const enrichedTicket = await enrichTicketWithUsers(supabase, ticket);
+
     // Проверка прав доступа
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+    if (userRole !== 'admin' && userRole !== 'agent' && enrichedTicket.user_id !== userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    res.json({ success: true, data: ticket });
+    res.json({ success: true, data: enrichedTicket });
   } catch (error: any) {
     console.error('Get ticket error:', error);
     res.status(500).json({ error: error.message });
