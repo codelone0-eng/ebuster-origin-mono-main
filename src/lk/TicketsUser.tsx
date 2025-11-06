@@ -291,14 +291,25 @@ const TicketsUser: React.FC = () => {
       schema: 'public',
       table: 'ticket_messages'
     }, async (payload) => {
+      console.log('[Realtime] New message received:', payload);
       const payloadTicketId = payload.new?.ticket_id;
-      if (String(payloadTicketId) !== String(ticketId)) return;
+      console.log('[Realtime] Comparing ticket IDs:', { payloadTicketId, ticketId });
+      if (String(payloadTicketId) !== String(ticketId)) {
+        console.log('[Realtime] Ticket ID mismatch, ignoring');
+        return;
+      }
 
+      console.log('[Realtime] Loading messages for ticket:', ticketId);
       await loadMessages(ticketId);
       await loadTickets({ keepSelected: true });
     });
 
-    channel.subscribe();
+    channel.subscribe((status) => {
+      console.log('[Realtime] Subscription status:', status);
+      if (status === 'SUBSCRIBED') {
+        console.log('[Realtime] Successfully subscribed to ticket-messages-' + ticketId);
+      }
+    });
 
     return () => {
       supabase.removeChannel(channel);
