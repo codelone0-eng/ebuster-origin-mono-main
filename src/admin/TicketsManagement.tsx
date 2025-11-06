@@ -46,7 +46,6 @@ interface Ticket {
   id: string;
   subject: string;
   message: string;
-  category: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'new' | 'open' | 'pending_customer' | 'pending_internal' | 'resolved' | 'closed';
   user_id: string;
@@ -91,7 +90,6 @@ const TicketsManagement: React.FC = () => {
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [newMessage, setNewMessage] = useState('');
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -147,7 +145,7 @@ const TicketsManagement: React.FC = () => {
 
   useEffect(() => {
     loadTickets();
-  }, [statusFilter, priorityFilter, categoryFilter]);
+  }, [statusFilter, priorityFilter]);
 
   // Realtime обновления сообщений
   useEffect(() => {
@@ -170,7 +168,6 @@ const TicketsManagement: React.FC = () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (priorityFilter !== 'all') params.append('priority', priorityFilter);
-      if (categoryFilter !== 'all') params.append('category', categoryFilter);
       
       url += params.toString();
       
@@ -360,18 +357,6 @@ const TicketsManagement: React.FC = () => {
               <SelectItem value="critical">Критический</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Категория" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все категории</SelectItem>
-              <SelectItem value="technical">Техническая</SelectItem>
-              <SelectItem value="billing">Оплата</SelectItem>
-              <SelectItem value="general">Общая</SelectItem>
-              <SelectItem value="bug">Ошибка</SelectItem>
-            </SelectContent>
-          </Select>
           <Button onClick={loadTickets} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Обновить
@@ -488,13 +473,6 @@ const TicketsManagement: React.FC = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">Создан</p>
                           <p className="font-medium">{formatDate(selectedTicket.created_at)}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Категория</p>
-                          <Badge variant="secondary">{selectedTicket.category}</Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

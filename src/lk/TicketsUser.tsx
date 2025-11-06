@@ -28,7 +28,7 @@ interface Ticket {
   id: string;
   subject: string;
   message: string;
-  category: string;
+  category?: string | null;
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'new' | 'open' | 'pending_customer' | 'pending_internal' | 'resolved' | 'closed' | 'cancelled';
   user_id: string;
@@ -42,7 +42,7 @@ interface Ticket {
 
 interface TicketMessage {
   id: number;
-  ticket_id: number;
+  ticket_id: string | number;
   author_id?: number;
   message: string;
   is_internal: boolean;
@@ -64,18 +64,10 @@ const TicketsUser: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<TicketMessage[]>([]);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [reopenLoading, setReopenLoading] = useState(false);
   
-  const [newTicket, setNewTicket] = useState({
-    subject: '',
-    message: '',
-    category: 'technical',
-    priority: 'medium',
-    team_id: null as number | null
-  });
   const [newComment, setNewComment] = useState('');
   const commentsChannelRef = useRef<RealtimeChannel | null>(null);
 
@@ -169,61 +161,6 @@ const TicketsUser: React.FC = () => {
     }
   };
 
-  const createTicket = async () => {
-    if (!newTicket.subject.trim() || !newTicket.message.trim()) {
-      toast({
-        title: 'Ошибка',
-        description: 'Заполните тему и сообщение',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('ebuster_token');
-      
-      const response = await fetch('https://api.ebuster.ru/api/tickets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newTicket)
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast({
-          title: 'Успешно',
-          description: 'Тикет создан'
-        });
-        setIsCreateDialogOpen(false);
-        setNewTicket({
-          subject: '',
-          message: '',
-          category: 'technical',
-          priority: 'medium',
-          team_id: null
-        });
-        loadTickets({ keepSelected: true });
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось создать тикет',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Create ticket error:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать тикет',
-        variant: 'destructive'
-      });
-    }
-  };
-
   const openTicket = async (ticket: Ticket) => {
     setSelectedTicket(ticket);
     await loadMessages(ticket.id);
@@ -311,7 +248,7 @@ const TicketsUser: React.FC = () => {
       });
 
       await loadTickets({ keepSelected: true });
-      await loadComments(selectedTicket.id);
+      await loadMessages(selectedTicket.id);
     } catch (error) {
       console.error('Reopen ticket error:', error);
       toast({
@@ -352,9 +289,11 @@ const TicketsUser: React.FC = () => {
     channel.on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
-      table: 'ticket_messages',
-      filter: `ticket_id=eq.${ticketId}`
-    }, async () => {
+      table: 'ticket_messages'
+    }, async (payload) => {
+      const payloadTicketId = payload.new?.ticket_id;
+      if (String(payloadTicketId) !== String(ticketId)) return;
+
       await loadMessages(ticketId);
       await loadTickets({ keepSelected: true });
     });

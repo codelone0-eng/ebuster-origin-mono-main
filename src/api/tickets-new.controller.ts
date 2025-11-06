@@ -24,15 +24,15 @@ export const getUserTickets = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { status, priority, category, search } = req.query;
+    const { status, priority, search } = req.query;
     const supabase = getSupabase();
     
     let query = supabase
       .from('support_tickets')
       .select(`
         *,
-        client:user_id (id, full_name, email, avatar_url),
-        agent:assigned_to (id, full_name, email, avatar_url)
+        client:auth_users!user_id(id, full_name, email, avatar_url),
+        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
       `)
       ;
 
@@ -44,7 +44,6 @@ export const getUserTickets = async (req: Request, res: Response) => {
     // Фильтры
     if (status && status !== 'all') query = query.eq('status', status);
     if (priority) query = query.eq('priority', priority);
-    if (category) query = query.eq('category', category);
     if (search) {
       query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%`);
     }
@@ -77,8 +76,8 @@ export const getAllTickets = async (req: Request, res: Response) => {
       .from('support_tickets')
       .select(`
         *,
-        client:user_id (id, full_name, email, avatar_url),
-        agent:assigned_to (id, full_name, email, avatar_url)
+        client:auth_users!user_id(id, full_name, email, avatar_url),
+        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
       `, { count: 'exact' })
       ;
     
@@ -103,7 +102,7 @@ export const getAllTickets = async (req: Request, res: Response) => {
     if (team_id) query = query.eq('team_id', team_id);
     if (assigned_to) query = query.eq('assigned_agent_id', assigned_to);
     if (search) {
-      query = query.or(`subject.ilike.%${search}%,description.ilike.%${search}%,ticket_number.ilike.%${search}%`);
+      query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%,ticket_number.ilike.%${search}%`);
     }
 
     // Пагинация
@@ -135,9 +134,13 @@ export const getTicket = async (req: Request, res: Response) => {
     const supabase = getSupabase();
     const { data: ticket, error } = await supabase
       .from('support_tickets')
-      .select('*')
+      .select(`
+        *,
+        client:auth_users!user_id(id, full_name, email, avatar_url),
+        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
+      `)
       .eq('id', id)
-            .single();
+      .single();
 
     if (error) throw error;
     if (!ticket) {
@@ -164,7 +167,7 @@ export const createTicket = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { subject, message, category, priority } = req.body;
+    const { subject, message, priority } = req.body;
     
     if (!subject || !message) {
       return res.status(400).json({ error: 'Subject and message are required' });
@@ -179,7 +182,6 @@ export const createTicket = async (req: Request, res: Response) => {
         user_id: userId,
         subject,
         message,
-        category: category || 'general',
         priority: priority || 'medium',
         status: 'new'
       })

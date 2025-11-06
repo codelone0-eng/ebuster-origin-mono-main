@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,11 +20,6 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
   const [priority, setPriority] = useState('medium');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (isOpen) {
-    }
-  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +46,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
         body: JSON.stringify({
           subject,
           message: description,
-          priority,
-          category: 'general'
+          priority
         })
       });
 
@@ -61,7 +55,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
       if (result.success) {
         toast({
           title: 'Тикет создан',
-          description: `Номер тикета: ${result.data.ticket_number}`,
+          description: result.data?.ticket_number ? `Номер тикета: ${result.data.ticket_number}` : undefined,
           variant: 'success'
         });
         
@@ -133,32 +127,19 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Приоритет */}
-            <div className="space-y-2">
-              <Label htmlFor="priority">Приоритет</Label>
-              <select
-                id="priority"
-                className="w-full rounded-md border content-border-40 bg-card/60 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="low">Низкий</option>
-                <option value="medium">Средний</option>
-                <option value="high">Высокий</option>
-                <option value="critical">Критический</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Категория</Label>
-              <div className="text-sm text-muted-foreground bg-card/60 border content-border-40 rounded-md px-3 py-2">
-                Категории временно недоступны
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Выберите подходящую категорию для вашего запроса
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="priority">Приоритет</Label>
+            <select
+              id="priority"
+              className="w-full rounded-md border content-border-40 bg-card/60 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+            >
+              <option value="low">Низкий</option>
+              <option value="medium">Средний</option>
+              <option value="high">Высокий</option>
+              <option value="critical">Критический</option>
+            </select>
           </div>
 
           {/* Кнопки */}
