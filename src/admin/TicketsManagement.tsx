@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,8 @@ import {
   XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { cn } from '@/lib/utils';
 import { FileUpload } from '@/components/ui/file-upload';
 import { AttachmentList } from '@/components/ui/attachment-list';
@@ -95,6 +97,7 @@ const TicketsManagement: React.FC = () => {
   const [isSending, setIsSending] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [realtimeMessages, setRealtimeMessages] = useState<TicketMessage[]>([]);
+  const messagesChannelRef = useRef<RealtimeChannel | null>(null);
 
   const statusColors = {
     new: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -149,15 +152,49 @@ const TicketsManagement: React.FC = () => {
 
   // Realtime обновления сообщений
   useEffect(() => {
-    if (!selectedTicket || !isTicketDialogOpen) return;
+    if (!selectedTicket || !isTicketDialogOpen) {
+      if (messagesChannelRef.current) {
+        supabase.removeChannel(messagesChannelRef.current);
+        messagesChannelRef.current = null;
+      }
+      return;
+    }
 
-    // Polling для обновления сообщений каждые 3 секунды
-    const interval = setInterval(() => {
-      loadMessages(selectedTicket.id);
-    }, 3000);
+    const ticketId = selectedTicket.id;
+    const channel = supabase.channel(`admin-ticket-messages-${ticketId}`);
+    messagesChannelRef.current = channel;
 
-    return () => clearInterval(interval);
-  }, [selectedTicket, isTicketDialogOpen]);
+    channel.on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'ticket_messages'
+    }, async (payload) => {
+      console.log('[Admin Realtime] New message received:', payload);
+      const payloadTicketId = payload.new?.ticket_id;
+      console.log('[Admin Realtime] Comparing ticket IDs:', { payloadTicketId, ticketId });
+      if (String(payloadTicketId) !== String(ticketId)) {
+        console.log('[Admin Realtime] Ticket ID mismatch, ignoring');
+        return;
+      }
+
+      console.log('[Admin Realtime] Loading messages for ticket:', ticketId);
+      await loadMessages(ticketId);
+    });
+
+    channel.subscribe((status) => {
+      console.log('[Admin Realtime] Subscription status:', status);
+      if (status === 'SUBSCRIBED') {
+        console.log('[Admin Realtime] Successfully subscribed to admin-ticket-messages-' + ticketId);
+      }
+    });
+
+    return () => {
+      supabase.removeChannel(channel);
+      if (messagesChannelRef.current === channel) {
+        messagesChannelRef.current = null;
+      }
+    };
+  }, [selectedTicket?.id, isTicketDialogOpen]);
 
   const loadTickets = async () => {
     try {

@@ -52,6 +52,7 @@ export const getUserTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
+    console.log('[getUserTickets] Sample ticket data:', data?.[0]);
     res.json({ success: true, data });
   } catch (error: any) {
     console.error('Get user tickets error:', error);
@@ -113,6 +114,7 @@ export const getAllTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
+    console.log('[getAllTickets] Sample ticket data:', data?.[0]);
     res.json({ success: true, data, count, page: Number(page), limit: Number(limit) });
   } catch (error: any) {
     console.error('Get all tickets error:', error);
@@ -152,6 +154,7 @@ export const getTicket = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
+    console.log('[getTicket] Ticket data:', ticket);
     res.json({ success: true, data: ticket });
   } catch (error: any) {
     console.error('Get ticket error:', error);
