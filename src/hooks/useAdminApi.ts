@@ -186,7 +186,7 @@ export const useAdminApi = () => {
 
   // Получение мониторинга системы
   const getTicketStats = async () => {
-    const response = await fetchWithAuth('/api/admin/ticket-stats');
+    const response = await fetchWithAuth('/api/tickets/stats');
     return response.data;
   };
 

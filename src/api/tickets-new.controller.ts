@@ -31,8 +31,8 @@ export const getUserTickets = async (req: Request, res: Response) => {
       .from('support_tickets')
       .select(`
         *,
-        client:auth_users!user_id(id, full_name, email, avatar_url),
-        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
+        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
+        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
       `)
       ;
 
@@ -77,8 +77,8 @@ export const getAllTickets = async (req: Request, res: Response) => {
       .from('support_tickets')
       .select(`
         *,
-        client:auth_users!user_id(id, full_name, email, avatar_url),
-        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
+        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
+        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
       `, { count: 'exact' })
       ;
     
@@ -138,8 +138,8 @@ export const getTicket = async (req: Request, res: Response) => {
       .from('support_tickets')
       .select(`
         *,
-        client:auth_users!user_id(id, full_name, email, avatar_url),
-        agent:auth_users!assigned_to(id, full_name, email, avatar_url)
+        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
+        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
       `)
       .eq('id', id)
       .single();
