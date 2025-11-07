@@ -38,6 +38,7 @@ interface Ticket {
   resolved_at?: string | null;
   client?: { id: string; full_name: string; email: string; avatar_url?: string; };
   agent?: { full_name: string };
+  ticket_number: string;
 }
 
 interface TicketMessage {
@@ -56,6 +57,20 @@ interface TicketMessage {
     role: string;
   };
 }
+
+const normalizeTicket = (ticket: any): Ticket => {
+  return {
+    ...ticket,
+    id: ticket.id,
+    ticket_number: ticket.ticket_number || ticket.id,
+    status: ticket.status,
+    priority: ticket.priority,
+    updated_at: ticket.updated_at,
+    created_at: ticket.created_at,
+    closed_at: ticket.closed_at || null,
+    agent: ticket.agent ?? ticket.assigned_agent ?? ticket.assigned_to_user ?? null
+  };
+};
 
 const TicketsUser: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -121,9 +136,10 @@ const TicketsUser: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        setTickets(data.data);
+        const normalized = (data.data || []).map((ticket: any) => normalizeTicket(ticket));
+        setTickets(normalized);
         if (options?.keepSelected && selectedTicket) {
-          const updated = data.data.find((item: Ticket) => item.id === selectedTicket.id);
+          const updated = normalized.find((item: Ticket) => item.id === selectedTicket.id);
           if (updated) {
             setSelectedTicket(updated);
           }
@@ -162,7 +178,7 @@ const TicketsUser: React.FC = () => {
   };
 
   const openTicket = async (ticket: Ticket) => {
-    setSelectedTicket(ticket);
+    setSelectedTicket(normalizeTicket(ticket));
     await loadMessages(ticket.id);
     setIsViewSheetOpen(true);
   };
@@ -370,6 +386,7 @@ const TicketsUser: React.FC = () => {
           <Card key={ticket.id} className="flex flex-col">
             <CardHeader>
               <CardTitle className="line-clamp-2">{ticket.subject}</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">Тикет № {ticket.ticket_number}</p>
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="flex items-center gap-2 mb-4">
@@ -411,7 +428,7 @@ const TicketsUser: React.FC = () => {
               <SheetHeader>
                 <SheetTitle>{selectedTicket.subject}</SheetTitle>
                 <SheetDescription>
-                  ID: {selectedTicket.id}
+                  Тикет № {selectedTicket.ticket_number || selectedTicket.id}
                 </SheetDescription>
               </SheetHeader>
               <div className="py-6 space-y-6">
