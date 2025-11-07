@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const getSupabase = () => {
   const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -12,6 +12,39 @@ const getSupabase = () => {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     auth: { persistSession: false }
   });
+};
+
+const enrichTicketsWithUsers = async (supabase: SupabaseClient, tickets: any[]) => {
+  if (!tickets?.length) return tickets;
+
+  const missingClientIds = tickets
+    .filter((ticket) => ticket.user_id && !ticket.client)
+    .map((ticket) => ticket.user_id);
+
+  const missingAgentIds = tickets
+    .filter((ticket) => ticket.assigned_to && !ticket.agent)
+    .map((ticket) => ticket.assigned_to);
+
+  const uniqueUserIds = Array.from(new Set([...missingClientIds, ...missingAgentIds]));
+  if (!uniqueUserIds.length) return tickets;
+
+  const { data: users, error } = await supabase
+    .from('auth_users')
+    .select('id, full_name, email, avatar_url')
+    .in('id', uniqueUserIds);
+
+  if (error) {
+    console.error('[tickets] Failed to enrich users data:', error);
+    return tickets;
+  }
+
+  const userMap = new Map(users?.map((user) => [user.id, user]));
+
+  return tickets.map((ticket) => ({
+    ...ticket,
+    client: ticket.client || (ticket.user_id ? userMap.get(ticket.user_id) || null : null),
+    agent: ticket.agent || (ticket.assigned_to ? userMap.get(ticket.assigned_to) || null : null)
+  }));
 };
 
 
@@ -52,8 +85,9 @@ export const getUserTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
+    const enrichedTickets = await enrichTicketsWithUsers(supabase, data || []);
     console.log('[getUserTickets] Sample ticket data:', data?.[0]);
-    res.json({ success: true, data });
+    res.json({ success: true, data: enrichedTickets });
   } catch (error: any) {
     console.error('Get user tickets error:', error);
     res.status(500).json({ error: error.message });
@@ -114,8 +148,9 @@ export const getAllTickets = async (req: Request, res: Response) => {
 
     if (error) throw error;
 
+    const enrichedTickets = await enrichTicketsWithUsers(supabase, data || []);
     console.log('[getAllTickets] Sample ticket data:', data?.[0]);
-    res.json({ success: true, data, count, page: Number(page), limit: Number(limit) });
+    res.json({ success: true, data: enrichedTickets, count, page: Number(page), limit: Number(limit) });
   } catch (error: any) {
     console.error('Get all tickets error:', error);
     res.status(500).json({ error: error.message });
@@ -154,8 +189,10 @@ export const getTicket = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    console.log('[getTicket] Ticket data:', ticket);
-    res.json({ success: true, data: ticket });
+    const [enrichedTicket] = await enrichTicketsWithUsers(supabase, [ticket]);
+
+    console.log('[getTicket] Ticket data:', enrichedTicket);
+    res.json({ success: true, data: enrichedTicket });
   } catch (error: any) {
     console.error('Get ticket error:', error);
     res.status(500).json({ error: error.message });

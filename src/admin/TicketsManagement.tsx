@@ -161,18 +161,20 @@ const TicketsManagement: React.FC = () => {
     }
 
     const ticketId = selectedTicket.id;
-    const channel = supabase.channel(`admin-ticket-messages-${ticketId}`);
+    const normalizedTicketId = String(ticketId);
+    const channel = supabase.channel(`admin-ticket-messages-${normalizedTicketId}`);
     messagesChannelRef.current = channel;
 
     channel.on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
-      table: 'ticket_messages'
+      table: 'ticket_messages',
+      filter: `ticket_id=eq.${normalizedTicketId}`
     }, async (payload) => {
       console.log('[Admin Realtime] New message received:', payload);
       const payloadTicketId = payload.new?.ticket_id;
       console.log('[Admin Realtime] Comparing ticket IDs:', { payloadTicketId, ticketId });
-      if (String(payloadTicketId) !== String(ticketId)) {
+      if (String(payloadTicketId) !== normalizedTicketId) {
         console.log('[Admin Realtime] Ticket ID mismatch, ignoring');
         return;
       }
@@ -181,15 +183,20 @@ const TicketsManagement: React.FC = () => {
       await loadMessages(ticketId);
     });
 
-    channel.subscribe((status) => {
+    const subscription = channel.subscribe((status) => {
       console.log('[Admin Realtime] Subscription status:', status);
       if (status === 'SUBSCRIBED') {
-        console.log('[Admin Realtime] Successfully subscribed to admin-ticket-messages-' + ticketId);
+        console.log('[Admin Realtime] Successfully subscribed to admin-ticket-messages-' + normalizedTicketId);
       }
     });
 
     return () => {
       supabase.removeChannel(channel);
+      if (subscription) {
+        subscription.unsubscribe?.().catch((err: unknown) => {
+          console.warn('[Admin Realtime] Failed to unsubscribe cleanly', err);
+        });
+      }
       if (messagesChannelRef.current === channel) {
         messagesChannelRef.current = null;
       }

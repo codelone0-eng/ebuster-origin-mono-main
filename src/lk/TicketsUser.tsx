@@ -283,18 +283,20 @@ const TicketsUser: React.FC = () => {
     }
 
     const ticketId = selectedTicket.id;
-    const channel = supabase.channel(`ticket-messages-${ticketId}`);
+    const normalizedTicketId = String(ticketId);
+    const channel = supabase.channel(`ticket-messages-${normalizedTicketId}`);
     commentsChannelRef.current = channel;
 
     channel.on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
-      table: 'ticket_messages'
+      table: 'ticket_messages',
+      filter: `ticket_id=eq.${normalizedTicketId}`
     }, async (payload) => {
       console.log('[Realtime] New message received:', payload);
       const payloadTicketId = payload.new?.ticket_id;
       console.log('[Realtime] Comparing ticket IDs:', { payloadTicketId, ticketId });
-      if (String(payloadTicketId) !== String(ticketId)) {
+      if (String(payloadTicketId) !== normalizedTicketId) {
         console.log('[Realtime] Ticket ID mismatch, ignoring');
         return;
       }
@@ -304,15 +306,20 @@ const TicketsUser: React.FC = () => {
       await loadTickets({ keepSelected: true });
     });
 
-    channel.subscribe((status) => {
+    const subscription = channel.subscribe((status) => {
       console.log('[Realtime] Subscription status:', status);
       if (status === 'SUBSCRIBED') {
-        console.log('[Realtime] Successfully subscribed to ticket-messages-' + ticketId);
+        console.log('[Realtime] Successfully subscribed to ticket-messages-' + normalizedTicketId);
       }
     });
 
     return () => {
       supabase.removeChannel(channel);
+      if (subscription) {
+        subscription.unsubscribe?.().catch((err: unknown) => {
+          console.warn('[Realtime] Failed to unsubscribe cleanly', err);
+        });
+      }
       if (commentsChannelRef.current === channel) {
         commentsChannelRef.current = null;
       }
