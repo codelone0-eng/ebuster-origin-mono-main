@@ -59,12 +59,42 @@ interface Ticket {
   };
   assigned_to?: string;
   agent?: {
+    id?: string;
     full_name: string;
+    email?: string;
+    avatar_url?: string;
   };
   created_at: string;
   updated_at: string;
   closed_at?: string;
 }
+
+const normalizeTicket = (ticket: any): Ticket => {
+  const client = ticket.client ?? ticket.customer ?? (ticket.user
+    ? {
+        id: ticket.user.id,
+        full_name: ticket.user.full_name,
+        email: ticket.user.email,
+        avatar_url: ticket.user.avatar_url
+      }
+    : undefined);
+
+  const agent = ticket.agent ?? ticket.assigned_agent ?? (ticket.assigned_to_user
+    ? {
+        id: ticket.assigned_to_user.id,
+        full_name: ticket.assigned_to_user.full_name,
+        email: ticket.assigned_to_user.email,
+        avatar_url: ticket.assigned_to_user.avatar_url
+      }
+    : undefined);
+
+  return {
+    ...ticket,
+    client,
+    agent,
+    assigned_to: ticket.assigned_to ?? ticket.assigned_agent_id ?? ticket.assigned_to_id,
+  };
+};
 
 interface TicketMessage {
   id: string;
@@ -229,7 +259,8 @@ const TicketsManagement: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        setTickets(data.data || []);
+        const normalized = (data.data || []).map((ticket: any) => normalizeTicket(ticket));
+        setTickets(normalized);
       } else {
         setTickets([]);
         toast({
@@ -297,14 +328,14 @@ const TicketsManagement: React.FC = () => {
   };
 
   const openTicket = async (ticket: Ticket) => {
-    setSelectedTicket(ticket);
+    setSelectedTicket(normalizeTicket(ticket));
     setMessages([]);
     setIsTicketDialogOpen(true);
     await loadMessages(ticket.id);
 
     const detailedTicket = await fetchTicketDetails(ticket.id);
     if (detailedTicket) {
-      setSelectedTicket(detailedTicket);
+      setSelectedTicket(normalizeTicket(detailedTicket));
     }
   };
 

@@ -31,7 +31,7 @@ interface TicketViewProps {
 }
 
 interface Ticket {
-  id: number;
+  id: string | number;
   ticket_number: string;
   subject: string;
   description: string;
@@ -40,9 +40,9 @@ interface Ticket {
   created_at: string;
   updated_at: string;
   tags: string[];
-  customer_id: number;
-  assigned_agent_id?: number;
-  team_id?: number;
+  customer_id: string | number;
+  assigned_agent_id?: string | number;
+  team_id?: string | number;
   closed_at?: string | null;
   resolved_at?: string | null;
   customer?: {
@@ -63,7 +63,7 @@ interface Ticket {
 }
 
 interface Message {
-  id: number;
+  id: string | number;
   ticket_id: number;
   message: string;
   is_internal: boolean;
@@ -93,6 +93,35 @@ const priorityConfig = {
   medium: { label: 'Средний', color: 'bg-blue-500' },
   high: { label: 'Высокий', color: 'bg-orange-500' },
   critical: { label: 'Критический', color: 'bg-red-500' }
+};
+
+const normalizeTicketData = (data: any): Ticket => {
+  const customer = data.customer ?? data.client ?? (data.user
+    ? {
+        id: data.user.id,
+        full_name: data.user.full_name,
+        email: data.user.email,
+        avatar_url: data.user.avatar_url
+      }
+    : undefined);
+
+  const assignedAgent = data.assigned_agent ?? data.agent ?? (data.assigned_to_user
+    ? {
+        id: data.assigned_to_user.id,
+        full_name: data.assigned_to_user.full_name,
+        email: data.assigned_to_user.email
+      }
+    : undefined);
+
+  return {
+    ...data,
+    id: data.id,
+    customer,
+    customer_id: data.customer_id ?? data.user_id,
+    assigned_agent: assignedAgent,
+    assigned_agent_id: data.assigned_agent_id ?? data.assigned_to ?? data.assigned_to_id,
+    team_id: data.team_id
+  };
 };
 
 export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => {
@@ -135,7 +164,7 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
       const result = await response.json();
       
       if (result.success) {
-        setTicket(result.data);
+        setTicket(normalizeTicketData(result.data));
       } else {
         throw new Error(result.error || 'Failed to load ticket');
       }
@@ -519,23 +548,25 @@ export const TicketView: React.FC<TicketViewProps> = ({ ticketId, onClose }) => 
                 </div>
               </div>
 
-              {/* Клиент */}
-              <div>
-                <label className="text-sm font-medium mb-2 block flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Клиент
-                </label>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={ticket.customer?.avatar_url} />
-                    <AvatarFallback>{ticket.customer?.full_name?.[0] || '?'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm font-medium">{ticket.customer?.full_name || `ID: ${ticket.customer_id}`}</div>
-                    <div className="text-xs text-muted-foreground">{ticket.customer?.email || ''}</div>
+              {/* Информация о клиенте отображаем только для сотрудников */}
+              {userRole !== 'user' && (
+                <div>
+                  <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Клиент
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={ticket.customer?.avatar_url} />
+                      <AvatarFallback>{ticket.customer?.full_name?.[0] || '?'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-medium">{ticket.customer?.full_name || `ID: ${ticket.customer_id}`}</div>
+                      <div className="text-xs text-muted-foreground">{ticket.customer?.email || ''}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Команда */}
               {ticket.team && (
