@@ -181,6 +181,11 @@ const TicketsManagement: React.FC = () => {
 
       console.log('[Admin Realtime] Loading messages for ticket:', ticketId);
       await loadMessages(ticketId);
+
+      const detailedTicket = await fetchTicketDetails(ticketId);
+      if (detailedTicket) {
+        setSelectedTicket(detailedTicket);
+      }
     });
 
     const subscription = channel.subscribe((status) => {
@@ -269,11 +274,38 @@ const TicketsManagement: React.FC = () => {
     }
   };
 
+  const fetchTicketDetails = async (ticketId: string) => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        return data.data as Ticket;
+      }
+    } catch (error) {
+      console.error('Fetch ticket details error:', error);
+    }
+
+    return null;
+  };
+
   const openTicket = async (ticket: Ticket) => {
     setSelectedTicket(ticket);
     setMessages([]);
     setIsTicketDialogOpen(true);
     await loadMessages(ticket.id);
+
+    const detailedTicket = await fetchTicketDetails(ticket.id);
+    if (detailedTicket) {
+      setSelectedTicket(detailedTicket);
+    }
   };
 
   const updateTicketStatus = async (status: string) => {
