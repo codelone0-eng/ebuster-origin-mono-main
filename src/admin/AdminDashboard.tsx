@@ -202,11 +202,11 @@ const AdminDashboard = () => {
 
         // Загружаем последних пользователей
         const usersData = await adminApi.getUsers({ limit: 10 });
-        setRecentUsers(usersData.users);
+        setRecentUsers(usersData?.users || []);
 
         // Загружаем логи системы
         const logsData = await adminApi.getSystemLogs({ limit: 10 });
-        setSystemLogs(logsData.logs);
+        setSystemLogs(logsData?.logs || []);
 
         // Загружаем статистику браузеров
         const browserData = await adminApi.getBrowserStats();
@@ -218,8 +218,8 @@ const AdminDashboard = () => {
 
         // Загружаем статистику по тикетам
         const ticketData = await adminApi.getTicketStats();
-        setTicketStats(ticketData.stats);
-        setRecentTickets(ticketData.recentTickets);
+        setTicketStats(ticketData?.stats || null);
+        setRecentTickets(ticketData?.recentTickets || []);
 
         // Загружаем мониторинг системы
         await updateMonitoring();
@@ -328,7 +328,7 @@ const AdminDashboard = () => {
       });
       
       // Обновляем локальное состояние
-      setRecentUsers(prev => prev.map(user => 
+      setRecentUsers(prev => (prev || []).map(user => 
         user.id === userToBan.id ? { ...user, status: 'banned' } : user
       ));
       
@@ -355,7 +355,7 @@ const AdminDashboard = () => {
       await adminApi.updateUserStatus(userId, 'active', 'Разбанен администратором');
       
       // Обновляем локальное состояние
-      setRecentUsers(prev => prev.map(user => 
+      setRecentUsers(prev => (prev || []).map(user => 
         user.id === userId ? { ...user, status: 'active' } : user
       ));
       
@@ -691,7 +691,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentTickets.map((ticket) => (
+                    {recentTickets && recentTickets.map((ticket) => (
                       <div key={ticket.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                         <div>
                           <p className="font-medium">{ticket.subject}</p>
@@ -757,7 +757,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {systemLogs.slice(0, 5).map((log) => (
+                    {systemLogs && systemLogs.slice(0, 5).map((log) => (
                       <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
                         <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
                           {log.level}
@@ -812,7 +812,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentUsers.map((user) => (
+                    {recentUsers && recentUsers.map((user) => (
                       <div key={user.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
