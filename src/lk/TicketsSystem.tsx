@@ -25,7 +25,7 @@ import { TicketView } from './TicketView';
 import { CreateTicketModal } from './CreateTicketModal';
 
 interface Ticket {
-  id: number;
+  id: string;
   ticket_number: string;
   subject: string;
   description: string;
@@ -33,9 +33,9 @@ interface Ticket {
   priority: string;
   created_at: string;
   updated_at: string;
-  customer_id: number;
-  assigned_agent_id?: number;
-  team_id?: number;
+  customer_id: string;
+  assigned_agent_id?: string;
+  team_id?: string;
   customer?: {
     id: number;
     full_name: string;
@@ -85,7 +85,7 @@ export const TicketsSystem: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -98,6 +98,23 @@ export const TicketsSystem: React.FC = () => {
     loadTickets();
     loadStats();
   }, [filters]);
+
+  const formatTicketNumber = (value: string | number | undefined) => {
+    if (!value) return '—';
+    if (typeof value === 'number') return value.toString();
+
+    const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return sanitized.slice(0, 8) || value;
+  };
+
+  const normalizeTicket = (ticket: any): Ticket => ({
+    ...ticket,
+    id: String(ticket.id),
+    customer_id: ticket.customer_id ? String(ticket.customer_id) : String(ticket.user_id || ''),
+    assigned_agent_id: ticket.assigned_agent_id ? String(ticket.assigned_agent_id) : ticket.assigned_to ? String(ticket.assigned_to) : undefined,
+    team_id: ticket.team_id ? String(ticket.team_id) : undefined,
+    ticket_number: ticket.ticket_number || formatTicketNumber(ticket.id)
+  });
 
   const loadTickets = async () => {
     try {
@@ -118,7 +135,8 @@ export const TicketsSystem: React.FC = () => {
       const result = await response.json();
       
       if (result.success) {
-        setTickets(result.data || []);
+        const normalized = (result.data || []).map((ticket: any) => normalizeTicket(ticket));
+        setTickets(normalized);
       } else {
         throw new Error(result.error || 'Failed to load tickets');
       }
@@ -353,7 +371,7 @@ export const TicketsSystem: React.FC = () => {
               {tickets.map((ticket) => {
                 const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig] || { label: ticket.status, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
                 const priorityInfo = priorityConfig[ticket.priority as keyof typeof priorityConfig] || { label: ticket.priority, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
-                
+
                 return (
                   <Card
                     key={ticket.id}
@@ -365,19 +383,19 @@ export const TicketsSystem: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm font-mono text-muted-foreground">
-                              {ticket.ticket_number}
+                              Тикет № {ticket.ticket_number || formatTicketNumber(ticket.id)}
                             </span>
-                            <Badge 
-                              variant="secondary" 
+                            <Badge
+                              variant="secondary"
                               className={cn(
-                                "text-xs",
+                                'text-xs',
                                 statusInfo.bgLight,
                                 statusInfo.textColor
                               )}
                             >
                               {statusInfo.label}
                             </Badge>
-                            <div className={cn("w-2 h-2 rounded-full", priorityInfo.color)} />
+                            <div className={cn('w-2 h-2 rounded-full', priorityInfo.color)} />
                           </div>
                           <h4 className="font-semibold text-base mb-1 line-clamp-1">
                             {ticket.subject}
@@ -385,11 +403,13 @@ export const TicketsSystem: React.FC = () => {
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {ticket.description}
                           </p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {ticket.customer?.full_name || `ID: ${ticket.customer_id}`}
-                            </span>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                            {ticket.customer?.full_name && (
+                              <span className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {ticket.customer.full_name}
+                              </span>
+                            )}
                             {ticket.team && (
                               <span className="flex items-center gap-1">
                                 <Ticket className="h-3 w-3" />
@@ -407,7 +427,14 @@ export const TicketsSystem: React.FC = () => {
                             </span>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSelectedTicket(ticket.id);
+                          }}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>

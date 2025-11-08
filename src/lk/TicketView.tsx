@@ -26,7 +26,7 @@ import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface TicketViewProps {
-  ticketId: number;
+  ticketId: string | number;
   onClose: () => void;
 }
 
