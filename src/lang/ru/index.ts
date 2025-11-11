@@ -145,7 +145,7 @@ export const ru = {
     about: "О нас",
     privacy: "Конфиденциальность",
     terms: "Условия",
-    copyright: "© 2025 Ebuster. Все права защищены."
+    copyright: "© 2025 Ebuster. Все права принадлежат автору."
   },
   featuresGrid: {
     structuredLibrary: {

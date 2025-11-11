@@ -1,8 +1,10 @@
+import React from 'react';
 import { createRoot } from "react-dom/client";
 import LandingApp from "./LandingApp.tsx";
 import DashboardApp from "./DashboardApp.tsx";
 import AdminApp from "./AdminApp.tsx";
 import "./index.css";
+import { HelmetProvider } from 'react-helmet-async';
 
 // Определяем какое приложение загружать в зависимости от домена
 const hostname = window.location.hostname;
@@ -29,4 +31,10 @@ if (hostname === 'lk.ebuster.ru') {
   AppComponent = LandingApp;
 }
 
-createRoot(document.getElementById("root")!).render(<AppComponent />);
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <HelmetProvider>
+      <AppComponent />
+    </HelmetProvider>
+  </React.StrictMode>
+);

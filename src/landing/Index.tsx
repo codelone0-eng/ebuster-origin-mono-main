@@ -12,6 +12,7 @@ import { ExtensionWorkflow } from "@/components/ExtensionWorkflow";
 // import SpotlightCard from "@/components/SpotlightCard";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { SEO } from "@/components/SEO";
 import { 
   Zap, Shield, Layers, ArrowRight, Code2, Sparkles, 
   Terminal, Boxes, Puzzle, Orbit, Binary, Cpu, Download, Cloud, User, RefreshCw
@@ -27,6 +28,11 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background overflow-x-hidden relative">
+      <SEO
+        title="EBUSTER — расширение нового поколения для Chrome"
+        description="EBUSTER — №1 userscript менеджер с автоматизацией браузера, библиотекой скриптов и API. Бесплатная альтернатива Tampermonkey."
+        url="https://ebuster.ru/"
+      />
       <ParticleBackground />
       <div className="relative z-content">
         <AuthStatusChecker />
@@ -77,7 +83,7 @@ const Index = () => {
         </Section>
 
         {/* Features Section */}
-        <Section className="bg-background">
+        <Section id="features" className="bg-background">
           <div>
             <div className="text-center mb-12">
               <h2 className="text-5xl md:text-6xl font-bold mb-4 text-foreground">

@@ -18,9 +18,8 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.product')}</h4>
             <ul className="space-y-3">
-              <li><a href="https://ebuster.ru/advantages" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.features')}</a></li>
+              <li><a href="https://ebuster.ru/#features" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.features')}</a></li>
               <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.pricing')}</a></li>
-              <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.components')}</a></li>
             </ul>
           </div>
 
@@ -29,7 +28,6 @@ export const Footer = () => {
             <ul className="space-y-3">
               <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
               <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.support')}</a></li>
-              <li><a href="https://ebuster.ru/price#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.faq')}</a></li>
             </ul>
           </div>
 

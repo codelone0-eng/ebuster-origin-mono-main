@@ -1,16 +1,8 @@
 export const ru = {
   navigation: [
-    { href: "https://ebuster.ru/", label: "Главная" },
-    { 
-      href: "#help", 
-      label: "Помощь",
-      submenu: {
-        items: [
-          { href: "https://ebuster.ru/contacts", label: "Контакты", description: "Свяжитесь с нашей поддержкой" }
-        ]
-      }
-    },
-    { href: "https://ebuster.ru/advantages", label: "Преимущества" },
+    { href: "https://ebuster.ru/#features", label: "Возможности" },
+    { href: "https://ebuster.ru/price", label: "Тарифы" },
+    { href: "https://ebuster.ru/contacts", label: "Контакты" },
   ],
   buttons: {
     premium: "Премиум",

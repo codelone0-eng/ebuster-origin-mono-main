@@ -22,6 +22,18 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /dashboard/settings
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /tickets
+Disallow: /tickets/
+Disallow: /version-check.php
+Disallow: /api/scripts.php
+Disallow: /*.php$
+Disallow: /*.html$
+
+# Заблокированные страницы с формами авторизации/кабинетами
+Noindex: /dashboard
+Noindex: /dashboard/
+Noindex: /admin
 
 Sitemap: https://ebuster.ru/sitemap.xml

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/hooks/useLanguage';
+import { SEO } from '@/components/SEO';
 import { 
   Mail, 
   MessageCircle, 
@@ -53,6 +50,11 @@ const Contacts = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Контакты EBUSTER"
+        description="Свяжитесь с командой EBUSTER: email поддержка, Discord сообщество и система тикетов."
+        url="https://ebuster.ru/contacts"
+      />
       <Header />
       
       <div className="container mx-auto max-w-7xl px-4 py-16">

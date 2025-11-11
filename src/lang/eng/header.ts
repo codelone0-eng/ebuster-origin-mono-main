@@ -1,17 +1,8 @@
 export const eng = {
   navigation: [
-    { href: "https://ebuster.ru/", label: "Home" },
-    { 
-      href: "#help", 
-      label: "Help",
-      submenu: {
-        items: [
-          { href: "https://ebuster.ru/api-docs", label: "API Docs", description: "Interactive API documentation" },
-          { href: "https://ebuster.ru/contacts", label: "Contacts", description: "Contact our support team" }
-        ]
-      }
-    },
-    { href: "https://ebuster.ru/advantages", label: "Advantages" },
+    { href: "https://ebuster.ru/#features", label: "Features" },
+    { href: "https://ebuster.ru/price", label: "Pricing" },
+    { href: "https://ebuster.ru/contacts", label: "Contacts" },
   ],
   buttons: {
     premium: "Premium",
@@ -164,8 +155,7 @@ export const eng = {
       active: "Active",
       configure: "Configure",
       saveChanges: "Save Changes",
-      saving: "Saving...",
-      logoutAll: "Logout from all devices"
+      saving: "Saving..."
     },
     tickets: {
       createTicket: "Create Ticket",
