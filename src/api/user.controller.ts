@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import multer from 'multer';
-import * as OTPAuth from 'otpauth';
-import * as crypto from 'crypto';
+import { TOTP, Secret } from 'otpauth';
+import crypto from 'crypto';
 
 // Получение профиля пользователя
 export const getUserProfile = async (req: Request, res: Response) => {
@@ -629,11 +629,16 @@ export const verify2FASetup = async (req: Request, res: Response) => {
     const { code } = req.body;
     const userId = req.user?.id;
 
+    console.log('🔐 [verify2FASetup] Starting verification for user:', userId);
+    console.log('🔐 [verify2FASetup] Received code:', code);
+
     if (!userId) {
+      console.log('❌ [verify2FASetup] No user ID');
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+      console.log('❌ [verify2FASetup] Invalid code format');
       return res.status(400).json({ error: 'Введите 6-значный код' });
     }
 
@@ -646,6 +651,8 @@ export const verify2FASetup = async (req: Request, res: Response) => {
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
     
+    console.log('🔐 [verify2FASetup] Fetching user data from DB...');
+    
     // Получаем временный секрет
     const { data: userData, error: fetchError } = await admin
       .from('auth_users')
@@ -653,7 +660,14 @@ export const verify2FASetup = async (req: Request, res: Response) => {
       .eq('id', userId)
       .single();
 
+    console.log('🔐 [verify2FASetup] User data:', { 
+      hasSecret: !!userData?.two_factor_secret_temp, 
+      email: userData?.email,
+      error: fetchError 
+    });
+
     if (fetchError || !userData?.two_factor_secret_temp) {
+      console.log('❌ [verify2FASetup] No secret found in DB');
       return res.status(400).json({ 
         success: false,
         error: 'Секретный ключ не найден. Начните настройку заново.' 
@@ -661,14 +675,17 @@ export const verify2FASetup = async (req: Request, res: Response) => {
     }
 
     // Проверяем TOTP код с использованием OTPAuth
-    const totp = new OTPAuth.TOTP({
+    console.log('🔐 [verify2FASetup] Creating TOTP instance...');
+    const totp = new TOTP({
       issuer: 'EBUSTER',
       label: userData.email,
       algorithm: 'SHA1',
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.fromHex(userData.two_factor_secret_temp)
+      secret: Secret.fromHex(userData.two_factor_secret_temp)
     });
+    
+    console.log('🔐 [verify2FASetup] Validating code...');
 
     const delta = totp.validate({ token: code, window: 1 });
 
