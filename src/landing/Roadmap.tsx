@@ -3,7 +3,6 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Milestone, Calendar, CircleCheck, Loader2, Flag, Sparkles } from 'lucide-react';
@@ -11,6 +10,7 @@ import { Milestone, Calendar, CircleCheck, Loader2, Flag, Sparkles } from 'lucid
 const roadmapContent = {
   ru: {
     hero: {
+      badge: 'Дорожная карта EBUSTER',
       title: 'План развития EBUSTER',
       subtitle: 'Прозрачная карта обновлений и приоритетов продукта',
       description:
@@ -86,6 +86,7 @@ const roadmapContent = {
   },
   eng: {
     hero: {
+      badge: 'EBUSTER Roadmap',
       title: 'EBUSTER Roadmap',
       subtitle: 'Transparent updates and product priorities',
       description:
@@ -166,27 +167,23 @@ type Status = keyof typeof roadmapContent.ru.statusLabels;
 const statusConfig: Record<Status, {
   icon: React.ReactNode;
   dotClass: string;
-  containerClass: string;
 }> = {
   completed: {
     icon: <CircleCheck className="h-3.5 w-3.5 text-emerald-400" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(16,185,129,0.22)]',
-    containerClass: 'border border-emerald-500/40 bg-card/70 shadow-[0_10px_40px_-20px_rgba(16,185,129,0.5)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(16,185,129,0.2)]',
   },
   'in-progress': {
     icon: <Loader2 className="h-3.5 w-3.5 text-sky-400" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_0_4px_rgba(56,189,248,0.25)]',
-    containerClass: 'border border-sky-500/40 bg-card/70 shadow-[0_10px_40px_-20px_rgba(56,189,248,0.5)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_0_5px_rgba(56,189,248,0.22)]',
   },
   planned: {
     icon: <Flag className="h-3.5 w-3.5 text-amber-300" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_4px_rgba(251,191,36,0.26)]',
-    containerClass: 'border border-amber-400/45 bg-card/70 shadow-[0_10px_40px_-20px_rgba(251,191,36,0.5)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_5px_rgba(251,191,36,0.24)]',
   },
 };
 
 const statusContainerBaseClasses =
-  'inline-flex items-center gap-2 rounded-2xl px-4 py-1.5 text-sm font-medium tracking-wide backdrop-blur-md transition-all text-foreground/90';
+  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide border border-white/10 bg-[#0f111a]/90 text-muted-foreground backdrop-blur-md shadow-[0_16px_36px_-26px_rgba(0,0,0,0.85)] transition-all';
 
 const Roadmap = () => {
   const { language } = useLanguage();
@@ -204,9 +201,9 @@ const Roadmap = () => {
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
-          <div className="mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/60 backdrop-blur border content-border-50 text-muted-foreground/90">
-            <Milestone className="h-4 w-4 text-primary" />
-            <span className="text-sm tracking-wide uppercase">Roadmap</span>
+          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#0f111a]/90 border border-white/10 backdrop-blur-md shadow-[0_22px_45px_-30px_rgba(0,0,0,0.85)]">
+            <Milestone className="h-5 w-5 text-primary" />
+            <span className="text-sm font-semibold text-muted-foreground">{content.hero.badge}</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground">
             {content.hero.title.split(' ').map((word, index) => (
@@ -232,10 +229,10 @@ const Roadmap = () => {
                     <Calendar className="h-6 w-6 text-primary" />
                     <CardTitle className="text-2xl">{entry.period}</CardTitle>
                   </div>
-                  <div className={`${statusContainerBaseClasses} ${statusConfig[entry.status as Status].containerClass}`}>
+                  <div className={statusContainerBaseClasses}>
                     <span className={statusConfig[entry.status as Status].dotClass} aria-hidden="true" />
                     {statusConfig[entry.status as Status].icon}
-                    <span className="text-sm text-foreground/85">{content.statusLabels[entry.status as Status]}</span>
+                    <span className="text-sm text-muted-foreground">{content.statusLabels[entry.status as Status]}</span>
                   </div>
                 </CardHeader>
                 <CardContent>
