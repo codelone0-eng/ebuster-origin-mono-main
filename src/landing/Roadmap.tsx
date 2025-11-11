@@ -275,7 +275,7 @@ const Roadmap = () => {
                   <ul className="space-y-2 text-muted-foreground">
                     {update.points.map((point) => (
                       <li key={point} className="flex items-start gap-3">
-                        <CheckCircle2 className="mt-1 h-4 w-4 text-primary" />
+                        <CircleCheck className="mt-1 h-4 w-4 text-primary" />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -299,7 +299,7 @@ const Roadmap = () => {
             {content.influence.actions.map((action) => (
               <Card key={action} className="bg-card/40 border border-border/60 h-full">
                 <CardContent className="p-6 flex items-start gap-3">
-                  <Rocket className="mt-1 h-5 w-5 text-primary" />
+                  <Sparkles className="mt-1 h-5 w-5 text-primary" />
                   <span className="text-muted-foreground">{action}</span>
                 </CardContent>
               </Card>
