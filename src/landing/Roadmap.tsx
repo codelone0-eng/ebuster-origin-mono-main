@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Rocket, Target, Calendar, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { Milestone, Calendar, CircleCheck, Loader2, Flag, Sparkles } from 'lucide-react';
 
 const roadmapContent = {
   ru: {
@@ -163,32 +163,30 @@ const roadmapContent = {
 
 type Status = keyof typeof roadmapContent.ru.statusLabels;
 
-const statusStyles: Record<Status, string> = {
-  completed: 'bg-emerald-500/12 border border-emerald-400/40',
-  'in-progress': 'bg-primary/12 border border-primary/40',
-  planned: 'bg-amber-400/15 border border-amber-300/45',
-};
-
-const statusIcons: Record<Status, React.ReactNode> = {
-  completed: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />,
-  'in-progress': <Clock className="h-3.5 w-3.5 text-primary" />,
-  planned: <Target className="h-3.5 w-3.5 text-amber-400" />,
-};
-
-const statusDotClasses: Record<Status, string> = {
-  completed: 'h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.25)]',
-  'in-progress': 'h-2 w-2 rounded-full bg-primary shadow-[0_0_0_3px_rgba(59,130,246,0.25)]',
-  planned: 'h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.28)]',
-};
-
-const statusShadowClasses: Record<Status, string> = {
-  completed: 'shadow-[0_8px_30px_-18px_rgba(16,185,129,0.45)]',
-  'in-progress': 'shadow-[0_8px_30px_-18px_rgba(37,99,235,0.45)]',
-  planned: 'shadow-[0_8px_30px_-18px_rgba(251,191,36,0.48)]',
+const statusConfig: Record<Status, {
+  icon: React.ReactNode;
+  dotClass: string;
+  containerClass: string;
+}> = {
+  completed: {
+    icon: <CircleCheck className="h-3.5 w-3.5 text-emerald-400" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(16,185,129,0.22)]',
+    containerClass: 'border border-emerald-500/40 bg-card/70 shadow-[0_10px_40px_-20px_rgba(16,185,129,0.5)]',
+  },
+  'in-progress': {
+    icon: <Loader2 className="h-3.5 w-3.5 text-sky-400" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_0_4px_rgba(56,189,248,0.25)]',
+    containerClass: 'border border-sky-500/40 bg-card/70 shadow-[0_10px_40px_-20px_rgba(56,189,248,0.5)]',
+  },
+  planned: {
+    icon: <Flag className="h-3.5 w-3.5 text-amber-300" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_4px_rgba(251,191,36,0.26)]',
+    containerClass: 'border border-amber-400/45 bg-card/70 shadow-[0_10px_40px_-20px_rgba(251,191,36,0.5)]',
+  },
 };
 
 const statusContainerBaseClasses =
-  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide backdrop-blur-md transition-colors';
+  'inline-flex items-center gap-2 rounded-2xl px-4 py-1.5 text-sm font-medium tracking-wide backdrop-blur-md transition-all text-foreground/90';
 
 const Roadmap = () => {
   const { language } = useLanguage();
@@ -206,10 +204,10 @@ const Roadmap = () => {
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
-          <Badge className="mx-auto inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm">
-            <Rocket className="h-4 w-4" />
-            Roadmap
-          </Badge>
+          <div className="mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/60 backdrop-blur border content-border-50 text-muted-foreground/90">
+            <Milestone className="h-4 w-4 text-primary" />
+            <span className="text-sm tracking-wide uppercase">Roadmap</span>
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground">
             {content.hero.title.split(' ').map((word, index) => (
               <span key={index} className={index % 2 === 1 ? 'gradient-text' : undefined}>
@@ -234,10 +232,10 @@ const Roadmap = () => {
                     <Calendar className="h-6 w-6 text-primary" />
                     <CardTitle className="text-2xl">{entry.period}</CardTitle>
                   </div>
-                  <div className={`${statusContainerBaseClasses} ${statusStyles[entry.status as Status]} ${statusShadowClasses[entry.status as Status]}`}>
-                    <span className={statusDotClasses[entry.status as Status]} aria-hidden="true" />
-                    {statusIcons[entry.status as Status]}
-                    <span className="text-sm text-foreground/90">{content.statusLabels[entry.status as Status]}</span>
+                  <div className={`${statusContainerBaseClasses} ${statusConfig[entry.status as Status].containerClass}`}>
+                    <span className={statusConfig[entry.status as Status].dotClass} aria-hidden="true" />
+                    {statusConfig[entry.status as Status].icon}
+                    <span className="text-sm text-foreground/85">{content.statusLabels[entry.status as Status]}</span>
                   </div>
                 </CardHeader>
                 <CardContent>
