@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
+import { TwoFactorSetupModal } from '@/components/TwoFactorSetupModal';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ReferralProgram } from './ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -360,7 +361,8 @@ const DashboardContent = () => {
   
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
-  const [is2FAEnabled, setIs2FAEnabled] = useState(true);
+  const [is2FASetupOpen, setIs2FASetupOpen] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(true);
   const [isNewScriptNotificationsEnabled, setIsNewScriptNotificationsEnabled] = useState(true);
   const [isUpdateNotificationsEnabled, setIsUpdateNotificationsEnabled] = useState(true);
@@ -888,7 +890,18 @@ const DashboardContent = () => {
                           <div className="flex items-center gap-2">
                             <Switch 
                               checked={is2FAEnabled}
-                              onCheckedChange={setIs2FAEnabled}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setIs2FASetupOpen(true);
+                                } else {
+                                  setIs2FAEnabled(false);
+                                  toast({
+                                    title: 'Двухфакторная аутентификация отключена',
+                                    description: 'Вы можете включить её снова в любое время',
+                                    variant: 'success'
+                                  });
+                                }
+                              }}
                             />
                             <span className="text-sm text-muted-foreground">
                               {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
@@ -1071,6 +1084,18 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
           isOpen={isChangeEmailOpen}
           onClose={() => setIsChangeEmailOpen(false)}
           currentEmail={user.email}
+        />
+        <TwoFactorSetupModal 
+          isOpen={is2FASetupOpen}
+          onClose={() => setIs2FASetupOpen(false)}
+          onComplete={() => {
+            setIs2FAEnabled(true);
+            toast({
+              title: 'Двухфакторная аутентификация включена',
+              description: 'Ваш аккаунт теперь защищён дополнительным уровнем безопасности',
+              variant: 'success'
+            });
+          }}
         />
         
         {/* Changelog Modal */}
