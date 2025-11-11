@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import multer from 'multer';
+import * as OTPAuth from 'otpauth';
+import * as crypto from 'crypto';
 
 // Получение профиля пользователя
 export const getUserProfile = async (req: Request, res: Response) => {
@@ -579,6 +581,48 @@ export const getUserBanInfo = async (req: Request, res: Response) => {
   }
 };
 
+// Генерация секретного ключа для 2FA
+export const generate2FASecret = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const userEmail = req.user?.email;
+
+    if (!userId || !userEmail) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Генерируем случайный секретный ключ (base32)
+    const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+    
+    // Сохраняем временный секрет (пока не подтверждён)
+    await admin
+      .from('auth_users')
+      .update({
+        two_factor_secret_temp: secret,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    return res.json({
+      success: true,
+      secret,
+      qrCodeUrl: `otpauth://totp/EBUSTER:${encodeURIComponent(userEmail)}?secret=${secret}&issuer=EBUSTER`
+    });
+  } catch (error) {
+    console.error('Error generating 2FA secret:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // Проверка кода 2FA при настройке
 export const verify2FASetup = async (req: Request, res: Response) => {
   try {
@@ -589,50 +633,137 @@ export const verify2FASetup = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!code || code.length !== 6) {
+    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
       return res.status(400).json({ error: 'Введите 6-значный код' });
     }
 
-    // TODO: Реальная проверка TOTP кода через библиотеку speakeasy или otplib
-    // Временная заглушка для демонстрации
-    const isValidCode = /^\d{6}$/.test(code);
-
-    if (!isValidCode) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Неверный формат кода' 
-      });
-    }
-
-    // Генерируем резервные коды
-    const backupCodes = Array.from({ length: 8 }, () => 
-      Math.random().toString(36).substring(2, 10).toUpperCase()
-    );
-
-    // TODO: Сохранить 2FA секрет и резервные коды в БД
     const SUPABASE_URL = process.env.SUPABASE_URL;
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
     
-    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
-      const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
-      
-      // Обновляем статус 2FA в auth_users
-      await admin
-        .from('auth_users')
-        .update({
-          two_factor_enabled: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Database not configured' });
     }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+    
+    // Получаем временный секрет
+    const { data: userData, error: fetchError } = await admin
+      .from('auth_users')
+      .select('two_factor_secret_temp, email')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !userData?.two_factor_secret_temp) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Секретный ключ не найден. Начните настройку заново.' 
+      });
+    }
+
+    // Проверяем TOTP код с использованием OTPAuth
+    const totp = new OTPAuth.TOTP({
+      issuer: 'EBUSTER',
+      label: userData.email,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret: OTPAuth.Secret.fromHex(userData.two_factor_secret_temp)
+    });
+
+    const delta = totp.validate({ token: code, window: 1 });
+
+    if (delta === null) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Неверный код. Попробуйте еще раз.' 
+      });
+    }
+
+    // Генерируем резервные коды (криптографически стойкие)
+    const backupCodes = Array.from({ length: 8 }, () => {
+      const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+      return `${code.slice(0, 4)}-${code.slice(4)}`;
+    });
+
+    // Хешируем резервные коды перед сохранением
+    const bcrypt = require('bcryptjs');
+    const hashedBackupCodes = await Promise.all(
+      backupCodes.map(code => bcrypt.hash(code, 10))
+    );
+
+    // Сохраняем секрет и резервные коды в БД
+    const { error: updateError } = await admin
+      .from('auth_users')
+      .update({
+        two_factor_enabled: true,
+        two_factor_secret: userData.two_factor_secret_temp,
+        two_factor_secret_temp: null,
+        two_factor_backup_codes: hashedBackupCodes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error saving 2FA data:', updateError);
+      return res.status(500).json({ error: 'Failed to save 2FA settings' });
+    }
+
+    console.log(`✅ 2FA enabled for user ${userId}`);
 
     return res.json({
       success: true,
-      backupCodes,
+      backupCodes, // Отправляем незахешированные коды пользователю ОДИН РАЗ
       message: 'Двухфакторная аутентификация успешно настроена'
     });
   } catch (error) {
     console.error('Error verifying 2FA setup:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Отключение 2FA
+export const disable2FA = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+    
+    // Удаляем все данные 2FA
+    const { error } = await admin
+      .from('auth_users')
+      .update({
+        two_factor_enabled: false,
+        two_factor_secret: null,
+        two_factor_secret_temp: null,
+        two_factor_backup_codes: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error disabling 2FA:', error);
+      return res.status(500).json({ error: 'Failed to disable 2FA' });
+    }
+
+    console.log(`✅ 2FA disabled for user ${userId}`);
+
+    return res.json({
+      success: true,
+      message: 'Двухфакторная аутентификация отключена'
+    });
+  } catch (error) {
+    console.error('Error disabling 2FA:', error);
     return res.status(500).json({ error: 'Server error' });
   }
 };

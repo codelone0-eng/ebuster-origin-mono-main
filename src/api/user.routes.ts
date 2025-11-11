@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads, getUserBanInfo, verify2FASetup } from './user.controller';
+import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads, getUserBanInfo, generate2FASecret, verify2FASetup, disable2FA } from './user.controller';
 import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
 import multer from 'multer';
 
@@ -47,7 +47,9 @@ router.post('/activity', authenticateUser, updateUserActivity);
 router.post('/increment-downloads', authenticateUser, incrementDownloads);
 
 // 2FA
+router.post('/2fa/generate-secret', authenticateUser, generate2FASecret);
 router.post('/2fa/verify-setup', authenticateUser, verify2FASetup);
+router.post('/2fa/disable', authenticateUser, disable2FA);
 
 export default router;
 

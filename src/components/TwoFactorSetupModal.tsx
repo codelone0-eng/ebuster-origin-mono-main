@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,13 +25,48 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: 
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [copiedBackup, setCopiedBackup] = useState(false);
   const [error, setError] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
 
-  // Mock QR code and secret - в реальности получаем с бэкенда
-  const secretKey = 'JBSWY3DPEHPK3PXP';
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/EBUSTER:${encodeURIComponent(userEmail)}?secret=${secretKey}&issuer=EBUSTER`;
+  // Получаем секретный ключ с сервера при открытии модала
+  useEffect(() => {
+    if (isOpen && currentStep === 1) {
+      fetchSecret();
+    }
+  }, [isOpen]);
+
+  const fetchSecret = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
+      const token = localStorage.getItem('ebuster_token');
+      
+      const response = await fetch(`${API_URL}/api/user/2fa/generate-secret`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSecretKey(data.secret);
+        setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qrCodeUrl)}`);
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось сгенерировать секретный ключ',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching 2FA secret:', error);
+    }
+  };
 
   const steps = [
     { title: 'Установка приложения', description: 'Установите приложение для двухфакторной аутентификации' },
@@ -129,6 +164,8 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: 
     setCurrentStep(1);
     setVerificationCode('');
     setBackupCodes([]);
+    setSecretKey('');
+    setQrCodeUrl('');
   };
 
   const renderStepContent = () => {
