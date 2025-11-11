@@ -1088,6 +1088,7 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
         <TwoFactorSetupModal 
           isOpen={is2FASetupOpen}
           onClose={() => setIs2FASetupOpen(false)}
+          userEmail={user.email}
           onComplete={() => {
             setIs2FAEnabled(true);
             toast({

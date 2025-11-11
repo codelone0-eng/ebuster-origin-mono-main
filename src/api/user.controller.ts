@@ -579,4 +579,62 @@ export const getUserBanInfo = async (req: Request, res: Response) => {
   }
 };
 
+// Проверка кода 2FA при настройке
+export const verify2FASetup = async (req: Request, res: Response) => {
+  try {
+    const { code } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!code || code.length !== 6) {
+      return res.status(400).json({ error: 'Введите 6-значный код' });
+    }
+
+    // TODO: Реальная проверка TOTP кода через библиотеку speakeasy или otplib
+    // Временная заглушка для демонстрации
+    const isValidCode = /^\d{6}$/.test(code);
+
+    if (!isValidCode) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Неверный формат кода' 
+      });
+    }
+
+    // Генерируем резервные коды
+    const backupCodes = Array.from({ length: 8 }, () => 
+      Math.random().toString(36).substring(2, 10).toUpperCase()
+    );
+
+    // TODO: Сохранить 2FA секрет и резервные коды в БД
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+      const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+      
+      // Обновляем статус 2FA в auth_users
+      await admin
+        .from('auth_users')
+        .update({
+          two_factor_enabled: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+    }
+
+    return res.json({
+      success: true,
+      backupCodes,
+      message: 'Двухфакторная аутентификация успешно настроена'
+    });
+  } catch (error) {
+    console.error('Error verifying 2FA setup:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 

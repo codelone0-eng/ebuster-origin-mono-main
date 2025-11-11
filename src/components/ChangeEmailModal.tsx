@@ -144,11 +144,11 @@ export const ChangeEmailModal = ({ isOpen, onClose, currentEmail }: ChangeEmailM
             </div>
 
             {/* Security Notice */}
-            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
               <div className="flex items-start gap-2">
-                <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
-                <div className="text-sm text-blue-600">
-                  <p className="font-medium">Безопасность</p>
+                <Shield className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">Безопасность</p>
                   <p>На новый email будет отправлено письмо с кодом подтверждения</p>
                 </div>
               </div>

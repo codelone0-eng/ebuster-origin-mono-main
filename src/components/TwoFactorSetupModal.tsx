@@ -12,9 +12,10 @@ interface TwoFactorSetupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  userEmail: string;
 }
 
-export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete }: TwoFactorSetupModalProps) => {
+export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: TwoFactorSetupModalProps) => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -23,13 +24,14 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete }: TwoFactorSe
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [copiedBackup, setCopiedBackup] = useState(false);
+  const [error, setError] = useState('');
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
 
   // Mock QR code and secret - в реальности получаем с бэкенда
-  const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/EBUSTER:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=EBUSTER';
   const secretKey = 'JBSWY3DPEHPK3PXP';
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/EBUSTER:${encodeURIComponent(userEmail)}?secret=${secretKey}&issuer=EBUSTER`;
 
   const steps = [
     { title: 'Установка приложения', description: 'Установите приложение для двухфакторной аутентификации' },
@@ -74,39 +76,48 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete }: TwoFactorSe
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 6) {
-      toast({
-        title: 'Ошибка',
-        description: 'Введите 6-значный код',
-        variant: 'destructive'
-      });
+      setError('Введите 6-значный код');
       return;
     }
 
     setIsLoading(true);
+    setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Generate backup codes
-      const codes = Array.from({ length: 8 }, () => 
-        Math.random().toString(36).substring(2, 10).toUpperCase()
-      );
-      setBackupCodes(codes);
-
-      toast({
-        title: 'Успешно',
-        description: 'Код подтверждён',
-        variant: 'success'
+      // TODO: Реальная проверка кода через API
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
+      const token = localStorage.getItem('ebuster_token');
+      
+      const response = await fetch(`${API_URL}/api/users/2fa/verify-setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ code: verificationCode })
       });
 
-      nextStep();
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Generate backup codes from server response
+        const codes = data.backupCodes || Array.from({ length: 8 }, () => 
+          Math.random().toString(36).substring(2, 10).toUpperCase()
+        );
+        setBackupCodes(codes);
+
+        toast({
+          title: 'Успешно',
+          description: 'Код подтверждён',
+          variant: 'success'
+        });
+
+        nextStep();
+      } else {
+        setError(data.error || 'Неверный код. Попробуйте еще раз.');
+      }
     } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Неверный код. Попробуйте еще раз.',
-        variant: 'destructive'
-      });
+      setError('Ошибка проверки кода. Попробуйте позже.');
     } finally {
       setIsLoading(false);
     }
@@ -158,11 +169,11 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete }: TwoFactorSe
                 </ul>
               </div>
 
-              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-600">
-                    <p className="font-medium">Важно</p>
+                  <Shield className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground">Важно</p>
                     <p>Убедитесь, что у вас установлено одно из этих приложений перед продолжением</p>
                   </div>
                 </div>
@@ -253,9 +264,16 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete }: TwoFactorSe
 
               <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
                 <p className="text-xs text-muted-foreground">
-                  💡 Код обновляется каждые 30 секунд. Если код не подходит, подождите новый код.
+                  Код обновляется каждые 30 секунд. Если код не подходит, подождите новый код.
                 </p>
               </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
             </div>
           </div>
         );
