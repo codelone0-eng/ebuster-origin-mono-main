@@ -175,6 +175,17 @@ const statusIcons: Record<Status, React.ReactNode> = {
   planned: <Target className="h-4 w-4" />,
 };
 
+const statusLegendBaseClasses =
+  'inline-flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 px-5 py-2 text-sm text-muted-foreground shadow-[0_0_35px_-18px_rgba(12,16,29,0.65)] backdrop-blur-xl transition-colors hover:text-foreground';
+
+const statusLegendDotClasses: Record<Status, string> = {
+  completed: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.18)]',
+  'in-progress': 'h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(59,130,246,0.2)]',
+  planned: 'h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.22)]',
+};
+
+const statusDisplayOrder: Status[] = ['completed', 'in-progress', 'planned'];
+
 const Roadmap = () => {
   const { language } = useLanguage();
   const content = language === 'ru' ? roadmapContent.ru : roadmapContent.eng;
@@ -211,19 +222,18 @@ const Roadmap = () => {
         </section>
 
         <section className="space-y-8">
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Badge className={statusStyles.completed}>
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              {content.statusLabels.completed}
-            </Badge>
-            <Badge className={statusStyles['in-progress']}>
-              <Clock className="mr-2 h-4 w-4" />
-              {content.statusLabels['in-progress']}
-            </Badge>
-            <Badge className={statusStyles.planned}>
-              <Target className="mr-2 h-4 w-4" />
-              {content.statusLabels.planned}
-            </Badge>
+          <div className="flex flex-wrap items-center justify-center gap-4 md:flex-nowrap md:gap-6">
+            {statusDisplayOrder.map((status) => (
+              <div key={status} className={statusLegendBaseClasses}>
+                <span className={statusLegendDotClasses[status]} aria-hidden="true" />
+                <div className="flex items-center gap-2">
+                  {statusIcons[status]}
+                  <span className="font-medium tracking-wide">
+                    {content.statusLabels[status]}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="space-y-6">
