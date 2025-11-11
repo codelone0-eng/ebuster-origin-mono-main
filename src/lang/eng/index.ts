@@ -136,6 +136,7 @@ export const eng = {
     navigation: "Navigation",
     home: "Home",
     contacts: "Contacts",
+    roadmap: "Roadmap",
     pricing: "Pricing",
     company: "Company",
     about: "About",

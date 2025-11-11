@@ -136,6 +136,7 @@ export const ru = {
     navigation: "Навигация",
     home: "Главная",
     contacts: "Контакты",
+    roadmap: "Roadmap",
     pricing: "Цены",
     company: "Компания",
     about: "О нас",

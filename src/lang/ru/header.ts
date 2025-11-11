@@ -2,6 +2,7 @@ export const ru = {
   navigation: [
     { href: "https://ebuster.ru/", label: "Главная" },
     { href: "https://ebuster.ru/price", label: "Тарифы" },
+    { href: "https://ebuster.ru/roadmap", label: "Roadmap" },
     { href: "https://ebuster.ru/contacts", label: "Контакты" },
   ],
   buttons: {

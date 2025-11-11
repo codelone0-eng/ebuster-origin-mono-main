@@ -20,6 +20,7 @@ export const Footer = () => {
             <ul className="space-y-3">
               <li><a href="https://ebuster.ru/" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.home')}</a></li>
               <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.contacts')}</a></li>
+              <li><a href="https://ebuster.ru/roadmap" className="text-muted-foreground hover:text-foreground transition-colors">Roadmap</a></li>
               <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.pricing')}</a></li>
             </ul>
           </div>
