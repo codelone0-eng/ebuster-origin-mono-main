@@ -170,20 +170,20 @@ const statusConfig: Record<Status, {
 }> = {
   completed: {
     icon: <CircleCheck className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
   },
   'in-progress': {
     icon: <Loader2 className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
   },
   planned: {
     icon: <Flag className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
   },
 };
 
 const statusContainerBaseClasses =
-  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide border border-white/10 bg-[#0f111a]/90 text-muted-foreground backdrop-blur-md shadow-[0_16px_36px_-26px_rgba(0,0,0,0.85)] transition-all';
+  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-card/60 border content-border-50 text-muted-foreground backdrop-blur-sm transition-all';
 
 const Roadmap = () => {
   const { language } = useLanguage();
@@ -201,7 +201,7 @@ const Roadmap = () => {
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
-          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#0f111a]/90 border border-white/10 backdrop-blur-md shadow-[0_22px_45px_-30px_rgba(0,0,0,0.85)]">
+          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/60 border content-border-50 backdrop-blur-sm">
             <Milestone className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-semibold text-muted-foreground">{content.hero.badge}</span>
           </div>
