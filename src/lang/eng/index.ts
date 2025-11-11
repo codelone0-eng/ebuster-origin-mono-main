@@ -133,19 +133,16 @@ export const eng = {
   },
   footer: {
     description: "The professional Chrome extension that sets the standard for design and performance.",
-    product: "Product",
-    features: "Features",
+    navigation: "Navigation",
+    home: "Home",
+    contacts: "Contacts",
     pricing: "Pricing",
-    components: "Components",
-    resources: "Resources",
-    documentation: "Documentation",
-    support: "Support",
-    faq: "FAQ",
     company: "Company",
     about: "About",
+    legal: "Legal",
     privacy: "Privacy",
     terms: "Terms",
-    copyright: "© 2025 Ebuster. All rights reserved."
+    copyright: "© 2025 Ebuster. All rights belong to the author."
   },
   featuresGrid: {
     structuredLibrary: {

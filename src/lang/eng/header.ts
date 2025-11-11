@@ -1,11 +1,10 @@
 export const eng = {
   navigation: [
-    { href: "https://ebuster.ru/#features", label: "Features" },
+    { href: "https://ebuster.ru/", label: "Home" },
     { href: "https://ebuster.ru/price", label: "Pricing" },
     { href: "https://ebuster.ru/contacts", label: "Contacts" },
   ],
   buttons: {
-    premium: "Premium",
     createAccount: "Create Account",
     signIn: "Sign In",
     dashboard: "Dashboard",

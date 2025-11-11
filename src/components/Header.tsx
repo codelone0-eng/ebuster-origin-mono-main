@@ -1,4 +1,4 @@
-import { User, ArrowUpRight, Star, ChevronDown, LogIn, Shield, LogOut } from "lucide-react"
+import { User, ChevronDown, LogIn, Shield, LogOut } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 
@@ -140,11 +140,11 @@ export const Header = () => {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
       
-      <div className="relative max-w-7xl mx-auto flex h-16 items-center justify-between gap-20">
+      <div className="relative max-w-7xl mx-auto flex h-16 items-center justify-between gap-12">
 
         {/* Left - Navigation Menu */}
-        <div className="flex items-center gap-6">
-          <nav className="max-md:hidden flex items-center gap-16">
+        <div className="flex flex-1 items-center gap-6">
+          <nav className="hidden md:flex items-center gap-16">
             {navigationLinks.map((link, index) => (
               <div key={index}>
                 {link.submenu?.items ? (
@@ -196,29 +196,121 @@ export const Header = () => {
           </nav>
         </div>
 
-        {/* Right - Action Buttons */}
-        <div className="flex items-center gap-8">
-          {/* Premium Button */}
+        {/* Middle - Controls */}
+        <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle />
+          <CursorSelector 
+            currentCursor={cursorType}
+            onCursorChange={setCursorType}
+          />
           <Button 
-            variant="outline" 
-            size="sm" 
-            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 rounded-xl px-4 py-2 h-auto group"
-            onClick={() => window.location.href = 'https://ebuster.ru/price'}
+            variant="ghost" 
+            size="sm"
+            className="text-muted-foreground hover:text-foreground px-3 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200"
+            onClick={toggleLanguage}
           >
-            <Star className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-            <span className="text-sm font-semibold">{t('header.buttons.premium')}</span>
-            <ArrowUpRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
+            <span className="text-sm font-medium">{t('header.buttons.language')}</span>
           </Button>
+        </div>
 
-          {/* User Actions */}
-          <div className="flex items-center gap-4">
+        {/* Right - Authentication */}
+        <div className="flex items-center gap-4">
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+                  >
+                    <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm font-medium">
+                      {user?.full_name || user?.email?.split('@')[0] || 'Пользователь'}
+                    </span>
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="z-dropdown w-64 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
+                  <div className="space-y-2">
+                    <div className="px-3 py-2 text-sm font-medium text-foreground border-b border-border/30">
+                      {user?.full_name || user?.email}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        const isProduction = window.location.hostname !== 'localhost';
+                        if (isProduction) {
+                          window.location.href = 'https://lk.ebuster.ru/dashboard';
+                        } else {
+                          window.location.href = '/dashboard';
+                        }
+                      }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      {t('header.buttons.dashboard')}
+                    </Button>
+                    {user?.role === 'admin' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-muted-foreground hover:text-foreground"
+                        onClick={() => window.location.href = 'https://admin.ebuster.ru'}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        {t('header.buttons.adminPanel')}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-destructive hover:text-destructive"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      {t('header.buttons.logout')}
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+                onClick={handleOpenRegister}
+              >
+                <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-sm font-medium">{t('header.buttons.createAccount')}</span>
+              </Button>
+
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 rounded-xl px-4 py-2 h-auto group"
+                onClick={handleOpenLogin}
+              >
+                <LogIn className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-sm font-semibold">{t('header.buttons.signIn')}</span>
+              </Button>
+            </div>
+          )}
+
+          {/* Mobile Controls */}
+          <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
             <CursorSelector 
               currentCursor={cursorType}
               onCursorChange={setCursorType}
             />
-            
-            {/* Language Toggle */}
             <Button 
               variant="ghost" 
               size="sm"
@@ -227,178 +319,85 @@ export const Header = () => {
             >
               <span className="text-sm font-medium">{t('header.buttons.language')}</span>
             </Button>
+          </div>
 
-            {/* Auth Buttons - Show different content based on auth state */}
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
-              </div>
-            ) : user ? (
-              <div className="flex items-center gap-2">
-                {/* User Profile Button */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
-                    >
-                      <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-sm font-medium">
-                        {user?.full_name || user?.email?.split('@')[0] || 'Пользователь'}
-                      </span>
-                      <ChevronDown className="h-3 w-3 ml-1" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="z-dropdown w-64 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
-                    <div className="space-y-2">
-                      <div className="px-3 py-2 text-sm font-medium text-foreground border-b border-border/30">
-                        {user?.full_name || user?.email}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
-                        onClick={() => {
-                          const isProduction = window.location.hostname !== 'localhost';
-                          if (isProduction) {
-                            window.location.href = 'https://lk.ebuster.ru/dashboard';
-                          } else {
-                            window.location.href = '/dashboard';
-                          }
-                        }}
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        {t('header.buttons.dashboard')}
-                      </Button>
-                      {user?.role === 'admin' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-muted-foreground hover:text-foreground"
-                          onClick={() => window.location.href = 'https://admin.ebuster.ru'}
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          {t('header.buttons.adminPanel')}
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-destructive hover:text-destructive"
-                        onClick={handleSignOut}
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        {t('header.buttons.logout')}
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                {/* Create Account Button */}
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
-                  onClick={handleOpenRegister}
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  className="group size-10 rounded-xl hover:bg-accent/20 transition-all duration-200"
+                  variant="ghost"
+                  size="icon"
                 >
-                  <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-medium">{t('header.buttons.createAccount')}</span>
-                </Button>
-
-                {/* Login Button */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 rounded-xl px-4 py-2 h-auto group"
-                  onClick={handleOpenLogin}
-                >
-                  <LogIn className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold">{t('header.buttons.signIn')}</span>
-                </Button>
-              </div>
-            )}
-
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="group size-10 rounded-xl hover:bg-accent/20 transition-all duration-200"
-                    variant="ghost"
-                    size="icon"
+                  <svg
+                    className="pointer-events-none"
+                    width={18}
+                    height={18}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      className="pointer-events-none"
-                      width={18}
-                      height={18}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M4 12L20 12"
-                        className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
-                      />
-                      <path
-                        d="M4 12H20"
-                        className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
-                      />
-                      <path
-                        d="M4 12H20"
-                        className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
-                      />
-                    </svg>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="z-dropdown w-72 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
-                  <div className="space-y-1">
-                    {navigationLinks.map((link, index) => (
-                      <div key={index}>
-                        {link.submenu?.items ? (
-                          <>
-                            <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
-                              {link.label}
-                            </div>
-                            <div className="space-y-1">
-                              {link.submenu.items.map((item, itemIndex) => (
-                                <Link 
-                                  key={itemIndex}
-                                  to={item.href} 
-                                  className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
-                                >
-                                  {item.label}
-                                </Link>
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <Link 
-                            to={link.href} 
-                            className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
-                          >
+                    <path
+                      d="M4 12L20 12"
+                      className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+                    />
+                    <path
+                      d="M4 12H20"
+                      className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
+                    />
+                    <path
+                      d="M4 12H20"
+                      className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+                    />
+                  </svg>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="z-dropdown w-72 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
+                <div className="space-y-1">
+                  {navigationLinks.map((link, index) => (
+                    <div key={index}>
+                      {link.submenu?.items ? (
+                        <>
+                          <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
                             {link.label}
-                          </Link>
-                        )}
-                        {index < navigationLinks.length - 1 && (
-                          <div
-                            role="separator"
-                            aria-orientation="horizontal"
-                            className="bg-border/50 -mx-1 my-1 h-px w-full"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+                          </div>
+                          <div className="space-y-1">
+                            {link.submenu.items.map((item, itemIndex) => (
+                              <Link 
+                                key={itemIndex}
+                                to={item.href} 
+                                className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
+                              >
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <Link 
+                          to={link.href} 
+                          className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
+                        >
+                          {link.label}
+                        </Link>
+                      )}
+                      {index < navigationLinks.length - 1 && (
+                        <div
+                          role="separator"
+                          aria-orientation="horizontal"
+                          className="bg-border/50 -mx-1 my-1 h-px w-full"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
