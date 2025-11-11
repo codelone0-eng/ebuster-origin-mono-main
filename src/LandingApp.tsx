@@ -13,6 +13,7 @@ import Index from "./landing/Index";
 import Contacts from "./landing/Contacts";
 import Pricing from "./landing/Pricing";
 import About from "./landing/About";
+import Roadmap from "./landing/Roadmap";
 import Privacy from "./landing/Privacy";
 import Terms from "./landing/Terms";
 import ForgotPassword from "./lk/ForgotPassword";
@@ -57,6 +58,7 @@ const LandingApp = () => (
                   <Route path="/about" element={<About />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
+                  <Route path="/roadmap" element={<Roadmap />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/signin" element={<Login />} />
