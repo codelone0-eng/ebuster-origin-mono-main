@@ -164,27 +164,31 @@ const roadmapContent = {
 type Status = keyof typeof roadmapContent.ru.statusLabels;
 
 const statusStyles: Record<Status, string> = {
-  completed: 'bg-emerald-500/10 text-emerald-400 border border-emerald-400/30',
-  'in-progress': 'bg-primary/10 text-primary border border-primary/30',
-  planned: 'bg-amber-500/10 text-amber-400 border border-amber-400/30',
+  completed: 'bg-emerald-500/12 border border-emerald-400/40',
+  'in-progress': 'bg-primary/12 border border-primary/40',
+  planned: 'bg-amber-400/15 border border-amber-300/45',
 };
 
 const statusIcons: Record<Status, React.ReactNode> = {
-  completed: <CheckCircle2 className="h-4 w-4" />,
-  'in-progress': <Clock className="h-4 w-4" />,
-  planned: <Target className="h-4 w-4" />,
+  completed: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />,
+  'in-progress': <Clock className="h-3.5 w-3.5 text-primary" />,
+  planned: <Target className="h-3.5 w-3.5 text-amber-400" />,
 };
 
-const statusLegendBaseClasses =
-  'inline-flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 px-5 py-2 text-sm text-muted-foreground shadow-[0_0_35px_-18px_rgba(12,16,29,0.65)] backdrop-blur-xl transition-colors hover:text-foreground';
-
-const statusLegendDotClasses: Record<Status, string> = {
-  completed: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.18)]',
-  'in-progress': 'h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(59,130,246,0.2)]',
-  planned: 'h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.22)]',
+const statusDotClasses: Record<Status, string> = {
+  completed: 'h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.25)]',
+  'in-progress': 'h-2 w-2 rounded-full bg-primary shadow-[0_0_0_3px_rgba(59,130,246,0.25)]',
+  planned: 'h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.28)]',
 };
 
-const statusDisplayOrder: Status[] = ['completed', 'in-progress', 'planned'];
+const statusShadowClasses: Record<Status, string> = {
+  completed: 'shadow-[0_8px_30px_-18px_rgba(16,185,129,0.45)]',
+  'in-progress': 'shadow-[0_8px_30px_-18px_rgba(37,99,235,0.45)]',
+  planned: 'shadow-[0_8px_30px_-18px_rgba(251,191,36,0.48)]',
+};
+
+const statusContainerBaseClasses =
+  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide backdrop-blur-md transition-colors';
 
 const Roadmap = () => {
   const { language } = useLanguage();
@@ -222,20 +226,6 @@ const Roadmap = () => {
         </section>
 
         <section className="space-y-8">
-          <div className="flex flex-wrap items-center justify-center gap-4 md:flex-nowrap md:gap-6">
-            {statusDisplayOrder.map((status) => (
-              <div key={status} className={statusLegendBaseClasses}>
-                <span className={statusLegendDotClasses[status]} aria-hidden="true" />
-                <div className="flex items-center gap-2">
-                  {statusIcons[status]}
-                  <span className="font-medium tracking-wide">
-                    {content.statusLabels[status]}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
           <div className="space-y-6">
             {content.timeline.map((entry) => (
               <Card key={entry.period} className="bg-card/40 backdrop-blur border border-border/60">
@@ -244,10 +234,11 @@ const Roadmap = () => {
                     <Calendar className="h-6 w-6 text-primary" />
                     <CardTitle className="text-2xl">{entry.period}</CardTitle>
                   </div>
-                  <Badge className={`${statusStyles[entry.status as Status]} flex items-center gap-2 px-3 py-1 text-sm`}> 
+                  <div className={`${statusContainerBaseClasses} ${statusStyles[entry.status as Status]} ${statusShadowClasses[entry.status as Status]}`}>
+                    <span className={statusDotClasses[entry.status as Status]} aria-hidden="true" />
                     {statusIcons[entry.status as Status]}
-                    {content.statusLabels[entry.status as Status]}
-                  </Badge>
+                    <span className="text-sm text-foreground/90">{content.statusLabels[entry.status as Status]}</span>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-muted-foreground">
