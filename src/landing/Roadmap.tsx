@@ -169,16 +169,16 @@ const statusConfig: Record<Status, {
   dotClass: string;
 }> = {
   completed: {
-    icon: <CircleCheck className="h-3.5 w-3.5 text-emerald-400" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(16,185,129,0.2)]',
+    icon: <CircleCheck className="h-3.5 w-3.5 text-muted-foreground" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
   },
   'in-progress': {
-    icon: <Loader2 className="h-3.5 w-3.5 text-sky-400" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_0_5px_rgba(56,189,248,0.22)]',
+    icon: <Loader2 className="h-3.5 w-3.5 text-muted-foreground" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
   },
   planned: {
-    icon: <Flag className="h-3.5 w-3.5 text-amber-300" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-amber-300 shadow-[0_0_0_5px_rgba(251,191,36,0.24)]',
+    icon: <Flag className="h-3.5 w-3.5 text-muted-foreground" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/45 shadow-[0_0_0_5px_rgba(15,17,26,0.6)]',
   },
 };
 
@@ -202,7 +202,7 @@ const Roadmap = () => {
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
           <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#0f111a]/90 border border-white/10 backdrop-blur-md shadow-[0_22px_45px_-30px_rgba(0,0,0,0.85)]">
-            <Milestone className="h-5 w-5 text-primary" />
+            <Milestone className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-semibold text-muted-foreground">{content.hero.badge}</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground">
