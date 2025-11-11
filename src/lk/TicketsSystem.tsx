@@ -81,14 +81,18 @@ const priorityConfig = {
   critical: { label: 'Критический', color: 'bg-red-500' }
 };
 
-export const TicketsSystem: React.FC = () => {
+interface TicketsSystemProps {
+  initialFilter?: string;
+}
+
+export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'all' }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState({
-    status: 'all',
+    status: initialFilter,
     priority: '',
     search: ''
   });

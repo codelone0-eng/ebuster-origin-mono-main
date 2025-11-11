@@ -27,18 +27,18 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.resources')}</h4>
             <ul className="space-y-3">
-              <li><a href="https://ebuster.ru/price#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
+              <li><a href="https://ebuster.ru/price" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.documentation')}</a></li>
               <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.support')}</a></li>
-              <li><a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.faq')}</a></li>
+              <li><a href="https://ebuster.ru/price#faq" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.faq')}</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4 text-lg text-foreground">{t('index.footer.company')}</h4>
             <ul className="space-y-3">
-              <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.about')}</a></li>
-              <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.privacy')}</a></li>
-              <li><a href="https://ebuster.ru/contacts" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.terms')}</a></li>
+              <li><a href="https://ebuster.ru/about" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.about')}</a></li>
+              <li><a href="https://ebuster.ru/privacy" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.privacy')}</a></li>
+              <li><a href="https://ebuster.ru/terms" className="text-muted-foreground hover:text-foreground transition-colors">{t('index.footer.terms')}</a></li>
             </ul>
           </div>
         </div>

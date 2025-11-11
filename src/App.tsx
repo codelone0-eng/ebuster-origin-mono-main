@@ -13,7 +13,6 @@ import Index from "./landing/Index";
 import Register from "./landing/Register";
 import VerifyOtp from "./pages/VerifyOtp";
 import Contacts from "./landing/Contacts";
-import Advantages from "./landing/Advantages";
 import Pricing from "./landing/Pricing";
 import Dashboard from "./lk/Dashboard";
 import TicketPage from "./lk/TicketPage";
@@ -49,7 +48,6 @@ const App = () => (
                     <Route path="/register" element={<Register />} />
                     <Route path="/verify-otp" element={<VerifyOtp />} />
                     <Route path="/contacts" element={<Contacts />} />
-                    <Route path="/advantages" element={<Advantages />} />
                     <Route path="/price" element={<Pricing />} />
                     <Route path="/dashboard" element={
                       <ProtectedRoute>

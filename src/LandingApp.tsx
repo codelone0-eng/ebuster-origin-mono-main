@@ -11,8 +11,10 @@ import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
 import Index from "./landing/Index";
 import Contacts from "./landing/Contacts";
-import Advantages from "./landing/Advantages";
 import Pricing from "./landing/Pricing";
+import About from "./landing/About";
+import Privacy from "./landing/Privacy";
+import Terms from "./landing/Terms";
 import ForgotPassword from "./lk/ForgotPassword";
 import ResetPassword from "./lk/ResetPassword";
 import EmailConfirmation from "./lk/EmailConfirmation";
@@ -51,8 +53,10 @@ const LandingApp = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/contacts" element={<Contacts />} />
-                  <Route path="/advantages" element={<Advantages />} />
                   <Route path="/price" element={<Pricing />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/signin" element={<Login />} />

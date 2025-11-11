@@ -792,7 +792,13 @@ const DashboardContent = () => {
 
             {(activeTab === 'support' || activeTab === 'support-open' || activeTab === 'support-resolved') && (
               <div className="space-y-6">
-                <TicketsSystem />
+                <TicketsSystem 
+                  initialFilter={
+                    activeTab === 'support-open' ? 'open' : 
+                    activeTab === 'support-resolved' ? 'resolved' : 
+                    'all'
+                  } 
+                />
               </div>
             )}
 
