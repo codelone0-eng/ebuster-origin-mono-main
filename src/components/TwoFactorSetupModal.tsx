@@ -88,7 +88,7 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: 
       const API_URL = import.meta.env.VITE_API_URL || 'https://api.ebuster.ru';
       const token = localStorage.getItem('ebuster_token');
       
-      const response = await fetch(`${API_URL}/api/users/2fa/verify-setup`, {
+      const response = await fetch(`${API_URL}/api/user/2fa/verify-setup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
