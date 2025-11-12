@@ -201,6 +201,11 @@ const DashboardContent = () => {
     }
   }, [authUser, loadUserProfile]);
   
+  // Синхронизируем is2FAEnabled с user.twoFactorEnabled
+  useEffect(() => {
+    setIs2FAEnabled(user.twoFactorEnabled);
+  }, [user.twoFactorEnabled]);
+  
   const [scripts, setScripts] = useState(mockScripts);
   const [installedScripts, setInstalledScripts] = useState([]);
     const [changelogScript, setChangelogScript] = useState<{ id: string; name: string } | null>(null);
@@ -363,7 +368,7 @@ const DashboardContent = () => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
   const [is2FASetupOpen, setIs2FASetupOpen] = useState(false);
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(user.twoFactorEnabled);
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(true);
   const [isNewScriptNotificationsEnabled, setIsNewScriptNotificationsEnabled] = useState(true);
   const [isUpdateNotificationsEnabled, setIsUpdateNotificationsEnabled] = useState(true);
@@ -891,16 +896,44 @@ const DashboardContent = () => {
                           <div className="flex items-center gap-2">
                             <Switch 
                               checked={is2FAEnabled}
-                              onCheckedChange={(checked) => {
+                              onCheckedChange={async (checked) => {
                                 if (checked) {
                                   setIs2FASetupOpen(true);
                                 } else {
-                                  setIs2FAEnabled(false);
-                                  toast({
-                                    title: 'Двухфакторная аутентификация отключена',
-                                    description: 'Вы можете включить её снова в любое время',
-                                    variant: 'success'
-                                  });
+                                  // Отключаем 2FA через API
+                                  try {
+                                    const token = localStorage.getItem('ebuster_token');
+                                    const response = await fetch(`${API_CONFIG.USER_URL}/2fa/disable`, {
+                                      method: 'POST',
+                                      headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                        'Content-Type': 'application/json'
+                                      }
+                                    });
+                                    
+                                    if (response.ok) {
+                                      setIs2FAEnabled(false);
+                                      setUser(prev => ({ ...prev, twoFactorEnabled: false }));
+                                      loadUserProfile();
+                                      toast({
+                                        title: 'Двухфакторная аутентификация отключена',
+                                        description: 'Вы можете включить её снова в любое время',
+                                        variant: 'success'
+                                      });
+                                    } else {
+                                      toast({
+                                        title: 'Ошибка',
+                                        description: 'Не удалось отключить 2FA',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                  } catch (error) {
+                                    toast({
+                                      title: 'Ошибка',
+                                      description: 'Не удалось отключить 2FA',
+                                      variant: 'destructive'
+                                    });
+                                  }
                                 }
                               }}
                             />
@@ -1092,6 +1125,9 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
           userEmail={user.email}
           onComplete={() => {
             setIs2FAEnabled(true);
+            setUser(prev => ({ ...prev, twoFactorEnabled: true }));
+            // Перезагружаем профиль с сервера для синхронизации
+            loadUserProfile();
             toast({
               title: 'Двухфакторная аутентификация включена',
               description: 'Ваш аккаунт теперь защищён дополнительным уровнем безопасности',
