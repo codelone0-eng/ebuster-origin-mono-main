@@ -676,25 +676,45 @@ export const verify2FASetup = async (req: Request, res: Response) => {
 
     // Проверяем TOTP код с использованием OTPAuth
     console.log('🔐 [verify2FASetup] Creating TOTP instance...');
-    const totp = new TOTP({
-      issuer: 'EBUSTER',
-      label: userData.email,
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30,
-      secret: Secret.fromHex(userData.two_factor_secret_temp)
-    });
+    console.log('🔐 [verify2FASetup] Secret (first 10 chars):', userData.two_factor_secret_temp.substring(0, 10));
+    
+    let totp;
+    try {
+      totp = new TOTP({
+        issuer: 'EBUSTER',
+        label: userData.email,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: Secret.fromHex(userData.two_factor_secret_temp)
+      });
+      console.log('✅ [verify2FASetup] TOTP instance created successfully');
+    } catch (error) {
+      console.error('❌ [verify2FASetup] Error creating TOTP:', error);
+      return res.status(500).json({ error: 'Failed to create TOTP instance' });
+    }
     
     console.log('🔐 [verify2FASetup] Validating code...');
+    console.log('🔐 [verify2FASetup] Current server time:', new Date().toISOString());
 
-    const delta = totp.validate({ token: code, window: 1 });
+    let delta;
+    try {
+      delta = totp.validate({ token: code, window: 1 });
+      console.log('🔐 [verify2FASetup] Validation result (delta):', delta);
+    } catch (error) {
+      console.error('❌ [verify2FASetup] Error validating code:', error);
+      return res.status(500).json({ error: 'Failed to validate code' });
+    }
 
     if (delta === null) {
+      console.log('❌ [verify2FASetup] Code validation failed - invalid code');
       return res.status(400).json({ 
         success: false,
         error: 'Неверный код. Попробуйте еще раз.' 
       });
     }
+    
+    console.log('✅ [verify2FASetup] Code is valid!');
 
     // Генерируем резервные коды (криптографически стойкие)
     const backupCodes = Array.from({ length: 8 }, () => {
