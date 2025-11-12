@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import multer from 'multer';
 import { TOTP, Secret } from 'otpauth';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 // Получение профиля пользователя
 export const getUserProfile = async (req: Request, res: Response) => {
@@ -728,7 +729,6 @@ export const verify2FASetup = async (req: Request, res: Response) => {
     });
 
     // Хешируем резервные коды перед сохранением
-    const bcrypt = require('bcryptjs');
     const hashedBackupCodes = await Promise.all(
       backupCodes.map(code => bcrypt.hash(code, 10))
     );
