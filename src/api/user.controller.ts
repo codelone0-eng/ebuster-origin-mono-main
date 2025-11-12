@@ -591,8 +591,9 @@ export const generate2FASecret = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Генерируем случайный секретный ключ (base32)
-    const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
+    // Генерируем случайный секретный ключ в base32 формате
+    const secret = new Secret({ size: 20 });
+    const secretBase32 = secret.base32;
 
     const SUPABASE_URL = process.env.SUPABASE_URL;
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -607,15 +608,15 @@ export const generate2FASecret = async (req: Request, res: Response) => {
     await admin
       .from('auth_users')
       .update({
-        two_factor_secret_temp: secret,
+        two_factor_secret_temp: secretBase32,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId);
 
     return res.json({
       success: true,
-      secret,
-      qrCodeUrl: `otpauth://totp/EBUSTER:${encodeURIComponent(userEmail)}?secret=${secret}&issuer=EBUSTER`
+      secret: secretBase32,
+      qrCodeUrl: `otpauth://totp/EBUSTER:${encodeURIComponent(userEmail)}?secret=${secretBase32}&issuer=EBUSTER`
     });
   } catch (error) {
     console.error('Error generating 2FA secret:', error);
@@ -686,7 +687,7 @@ export const verify2FASetup = async (req: Request, res: Response) => {
         algorithm: 'SHA1',
         digits: 6,
         period: 30,
-        secret: Secret.fromHex(userData.two_factor_secret_temp)
+        secret: userData.two_factor_secret_temp // Уже в base32 формате
       });
       console.log('✅ [verify2FASetup] TOTP instance created successfully');
     } catch (error) {
