@@ -98,6 +98,11 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   });
   const { toast } = useToast();
 
+  // Синхронизируем фильтр с initialFilter при изменении вкладки
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, status: initialFilter }));
+  }, [initialFilter]);
+
   useEffect(() => {
     loadTickets();
     loadStats();
