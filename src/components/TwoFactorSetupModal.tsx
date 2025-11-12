@@ -33,7 +33,7 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: 
 
   // Получаем секретный ключ с сервера при открытии модала
   useEffect(() => {
-    if (isOpen && currentStep === 1) {
+    if (isOpen && !secretKey) {
       fetchSecret();
     }
   }, [isOpen]);

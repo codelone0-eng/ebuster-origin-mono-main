@@ -696,6 +696,10 @@ export const verify2FASetup = async (req: Request, res: Response) => {
     
     console.log('🔐 [verify2FASetup] Validating code...');
     console.log('🔐 [verify2FASetup] Current server time:', new Date().toISOString());
+    
+    // Для отладки: показываем текущий правильный код
+    const currentToken = totp.generate();
+    console.log('🔐 [verify2FASetup] Expected code at current time:', currentToken);
 
     let delta;
     try {
