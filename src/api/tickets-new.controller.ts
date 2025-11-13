@@ -52,7 +52,10 @@ const enrichTicketsWithUsers = async (supabase: SupabaseClient, tickets: any[]) 
 export const getUserTickets = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
+    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
+    
+    console.log('🎫 [getUserTickets] User:', userId, 'Role:', userRole);
+    
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -69,9 +72,13 @@ export const getUserTickets = async (req: Request, res: Response) => {
       `)
       ;
 
-    // Клиенты видят только свои тикеты
+    // КРИТИЧНО: Обычные пользователи видят ТОЛЬКО свои тикеты
+    // Только админы и агенты могут видеть все тикеты
     if (userRole !== 'admin' && userRole !== 'agent') {
+      console.log('🔒 [getUserTickets] Filtering tickets for user:', userId);
       query = query.eq('user_id', userId);
+    } else {
+      console.log('👮 [getUserTickets] Admin/Agent access - showing all tickets');
     }
     
     // Фильтры
@@ -98,9 +105,12 @@ export const getUserTickets = async (req: Request, res: Response) => {
 export const getAllTickets = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
+    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
+    
+    console.log('🎫 [getAllTickets] User:', userId, 'Role:', userRole);
     
     if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
+      console.log('🚫 [getAllTickets] Access denied - only admins and agents can view all tickets');
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -161,8 +171,10 @@ export const getAllTickets = async (req: Request, res: Response) => {
 export const getTicket = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
+    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
     const { id } = req.params;
+    
+    console.log('🎫 [getTicket] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
     
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -184,8 +196,9 @@ export const getTicket = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // Проверка прав доступа
+    // КРИТИЧНО: Проверка прав доступа - пользователи могут видеть только свои тикеты
     if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+      console.log('🚫 [getTicket] Access denied - user', userId, 'tried to access ticket of user', ticket.user_id);
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -241,11 +254,14 @@ export const createTicket = async (req: Request, res: Response) => {
 export const updateTicket = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
+    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
     const { id } = req.params;
     const { status, assigned_agent_id, priority, team_id, tags } = req.body;
     
+    console.log('🎫 [updateTicket] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
+    
     if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
+      console.log('🚫 [updateTicket] Access denied - only admins and agents can update tickets');
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -313,9 +329,11 @@ export const updateTicket = async (req: Request, res: Response) => {
 export const addMessage = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
+    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
     const { id } = req.params;
     const { message, is_internal } = req.body;
+    
+    console.log('🎫 [addMessage] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
     
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -339,7 +357,9 @@ export const addMessage = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
+    // КРИТИЧНО: Проверка прав доступа - пользователи могут отвечать только на свои тикеты
     if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+      console.log('🚫 [addMessage] Access denied - user', userId, 'tried to reply to ticket of user', ticket.user_id);
       return res.status(403).json({ error: 'Forbidden' });
     }
 
