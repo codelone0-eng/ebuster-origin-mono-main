@@ -9,7 +9,6 @@ const storageDir = path.resolve(__dirname, '../storage');
 const STORAGE_FILE = path.resolve(storageDir, 'admin-state.json');
 
 async function globalSetup() {
-  const baseUrl = process.env.BASE_URL || 'https://admin.ebuster.ru';
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
 
@@ -20,38 +19,44 @@ async function globalSetup() {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  console.log(`🔐 Attempting login at ${baseUrl}/login`);
-  await page.goto(`${baseUrl}/login`, { waitUntil: 'networkidle' });
+  // Логинимся через основной домен ebuster.ru, где есть страница /login
+  const loginUrl = 'https://ebuster.ru/login';
+  console.log(`🔐 Attempting login at ${loginUrl}`);
+  await page.goto(loginUrl, { waitUntil: 'networkidle' });
   
-  // Используем более надёжные селекторы
+  // Используем селекторы для полей ввода
   const emailInput = page.locator('input#email, input[name="email"]').first();
   const passwordInput = page.locator('input#password, input[name="password"]').first();
   
+  console.log('⏳ Waiting for email input to be visible');
   await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+  
   await emailInput.fill(email);
   await passwordInput.fill(password);
   
   console.log(`✅ Filled credentials for ${email}`);
   
   // Кликаем на кнопку отправки формы
-  await page.click('button[type="submit"]');
+  const submitButton = page.locator('button[type="submit"]').first();
+  await submitButton.click();
   
-  // Ждём редиректа или изменения URL
-  await page.waitForTimeout(3000);
+  // Ждём редиректа после логина
+  console.log('⏳ Waiting for navigation after login');
+  await page.waitForTimeout(5000);
   const currentUrl = page.url();
   console.log(`📍 Current URL after login: ${currentUrl}`);
   
-  // Проверяем, что мы не на странице логина
-  if (currentUrl.includes('/login')) {
-    console.error('❌ Still on login page, authentication might have failed');
-    const errorMessage = await page.locator('.error, [role="alert"], .text-destructive').textContent().catch(() => null);
-    if (errorMessage) {
-      console.error(`Error message: ${errorMessage}`);
-    }
+  // Проверяем, что логин прошёл успешно (должны быть на dashboard или admin)
+  if (currentUrl.includes('/dashboard') || currentUrl.includes('/admin')) {
+    console.log('✅ Login successful, user authenticated');
+  } else {
+    console.warn(`⚠️ Unexpected URL after login: ${currentUrl}`);
   }
 
+  // Сохраняем состояние аутентификации
   fs.mkdirSync(storageDir, { recursive: true });
   await page.context().storageState({ path: STORAGE_FILE });
+  console.log(`💾 Saved auth state to ${STORAGE_FILE}`);
 
   await browser.close();
 }
