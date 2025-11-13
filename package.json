@@ -11,7 +11,10 @@
     "preview": "vite preview",
     "server": "tsx start-server.ts",
     "server:dev": "tsx watch start-server.ts",
-    "dev:full": "concurrently \"npm run dev\" \"npm run server:dev\""
+    "dev:full": "concurrently \"npm run dev\" \"npm run server:dev\"",
+    "autotest-admin": "playwright test --config tests/config/playwright.config.ts",
+    "autotest-admin:headed": "playwright test --headed --config tests/config/playwright.config.ts",
+    "autotest-report": "allure generate reports/allure-results --clean && allure open"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -94,6 +97,9 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
+    "@playwright/test": "^1.48.2",
+    "allure-commandline": "^2.27.0",
+    "allure-playwright": "^2.12.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
     "eslint": "^9.32.0",
