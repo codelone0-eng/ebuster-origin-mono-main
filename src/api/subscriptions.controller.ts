@@ -122,7 +122,7 @@ export const createSubscription = async (req: Request, res: Response) => {
 
     // Находим пользователя по email
     const { data: user, error: userError } = await supabaseAdmin
-      .from('auth_users')
+      .from('users')
       .select('id')
       .eq('email', user_email)
       .single();
@@ -541,7 +541,7 @@ export const subscribe = async (req: Request, res: Response) => {
     }
 
     await supabaseAdmin
-      .from('auth_users')
+      .from('users')
       .update({ role_id: roleId, subscription_id: subscription.id })
       .eq('id', userId);
 

@@ -74,16 +74,16 @@ export const getSystemStats = async (req: Request, res: Response) => {
       
       // Статистика пользователей
       const { count: totalUsers } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*', { count: 'exact', head: true });
 
       const { count: activeUsers } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
       const { count: bannedUsers } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'banned');
 
@@ -91,7 +91,7 @@ export const getSystemStats = async (req: Request, res: Response) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const { count: newUsersToday } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
@@ -315,7 +315,7 @@ export const getUsers = async (req: Request, res: Response) => {
       const offset = (Number(page) - 1) * Number(limit);
 
       let query = supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -340,7 +340,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
       // Получаем общее количество для пагинации
       const { count } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*', { count: 'exact', head: true });
 
       res.json({
@@ -380,7 +380,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 
     const { data: user, error } = await supabase
-      .from('auth_users')
+      .from('users')
       .select('*')
       .eq('id', id)
       .single();
@@ -447,7 +447,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
     }
 
     const { data, error } = await supabase
-      .from('auth_users')
+      .from('users')
       .update({ 
         status,
         ban_reason: reason || null,
@@ -621,7 +621,7 @@ export const searchUsers = async (req: Request, res: Response) => {
 
     // Поиск пользователей в базе данных
     const { data: users, error } = await supabase
-      .from('auth_users')
+      .from('users')
       .select('id, email, full_name')
       .ilike('email', `%${email}%`)
       .limit(10);
@@ -848,7 +848,7 @@ export const banUser = async (req: Request, res: Response) => {
 
     // Получаем информацию о пользователе
     const { data: user, error: userError } = await supabase
-      .from('auth_users')
+      .from('users')
       .select('email, full_name')
       .eq('id', id)
       .single();
@@ -917,7 +917,7 @@ export const banUser = async (req: Request, res: Response) => {
 
     // Обновляем статус пользователя
     const { error: updateError } = await supabase
-      .from('auth_users')
+      .from('users')
       .update({ 
         status: 'banned',
         updated_at: new Date().toISOString()
@@ -1009,7 +1009,7 @@ export const autoUnbanUsers = async (req: Request, res: Response) => {
       const userIds = unbannedBans.map(ban => ban.user_id);
       
       await supabase
-        .from('auth_users')
+        .from('users')
         .update({ 
           status: 'active',
           updated_at: new Date().toISOString()

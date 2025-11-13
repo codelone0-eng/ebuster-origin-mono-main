@@ -84,7 +84,7 @@ export const usersApi = {
     if (!user) return { data: null, error: null };
 
     const { data, error } = await typedSupabase
-      .from('auth_users')
+      .from('users')
       .select('*')
       .eq('id', user.id)
       .single();
@@ -104,7 +104,7 @@ export const usersApi = {
     };
 
     const { data, error } = await typedSupabase
-      .from('auth_users')
+      .from('users')
       .update(allowedFields)
       .eq('id', user.id)
       .select()
@@ -115,7 +115,7 @@ export const usersApi = {
 
   async getAllUsers() {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -124,7 +124,7 @@ export const usersApi = {
 
   async getUserById(id: string) {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .select('*')
       .eq('id', id)
       .single();
@@ -134,7 +134,7 @@ export const usersApi = {
 
   async banUser(id: string, reason: string, expiresAt?: string) {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .update({
         is_banned: true,
         ban_reason: reason,
@@ -150,7 +150,7 @@ export const usersApi = {
 
   async unbanUser(id: string) {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .update({
         is_banned: false,
         ban_reason: null,
@@ -177,7 +177,7 @@ export const usersApi = {
 
   async updateUserRole(id: string, role: 'user' | 'admin' | 'moderator') {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .update({
         role,
         updated_at: new Date().toISOString()
@@ -191,7 +191,7 @@ export const usersApi = {
 
   async updateUserSubscription(id: string, subscriptionType: 'free' | 'premium' | 'pro', expiresAt?: string) {
     const { data, error } = await typedSupabaseAdmin
-      .from('auth_users')
+      .from('users')
       .update({
         subscription_type: subscriptionType,
         subscription_expires_at: expiresAt,

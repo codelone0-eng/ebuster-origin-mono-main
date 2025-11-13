@@ -139,7 +139,7 @@ export const getUserReferrals = async (req: Request, res: Response) => {
       .from('referral_uses')
       .select(`
         *,
-        referred_user:auth_users!referred_user_id(id, email, full_name, created_at),
+        referred_user:users!referred_user_id(id, email, full_name, created_at),
         subscription:subscriptions(id, plan, status, start_date, end_date)
       `)
       .eq('referrer_user_id', userId)
@@ -237,7 +237,7 @@ export const getAllReferralCodes = async (req: Request, res: Response) => {
       .from('referral_codes')
       .select(`
         *,
-        user:auth_users(id, email, full_name)
+        user:users(id, email, full_name)
       `, { count: 'exact' });
 
     if (search) {
@@ -317,8 +317,8 @@ export const getAllReferralUses = async (req: Request, res: Response) => {
       .from('referral_uses')
       .select(`
         *,
-        referrer:auth_users!referrer_user_id(id, email, full_name),
-        referred:auth_users!referred_user_id(id, email, full_name),
+        referrer:users!referrer_user_id(id, email, full_name),
+        referred:users!referred_user_id(id, email, full_name),
         subscription:subscriptions(id, plan, status)
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -373,7 +373,7 @@ export const getReferralSystemStats = async (req: Request, res: Response) => {
       .from('referral_stats')
       .select(`
         *,
-        user:auth_users(id, email, full_name)
+        user:users(id, email, full_name)
       `)
       .order('total_referrals', { ascending: false })
       .limit(10);
@@ -404,7 +404,7 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
 
     // Получаем всех пользователей без реферальных кодов
     const { data: users } = await supabase
-      .from('auth_users')
+      .from('users')
       .select('id, email')
       .not('id', 'in', `(SELECT user_id FROM referral_codes)`);
 

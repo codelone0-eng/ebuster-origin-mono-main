@@ -246,7 +246,7 @@ export const deleteRole = async (req: Request, res: Response) => {
 
     // Проверяем, что роль не используется
     const { count } = await supabase
-      .from('auth_users')
+      .from('users')
       .select('*', { count: 'exact', head: true })
       .eq('role_id', id);
 
@@ -311,7 +311,7 @@ export const assignRoleToUser = async (req: Request, res: Response) => {
     const supabase = getSupabaseClient();
 
     const { data: user, error } = await supabase
-      .from('auth_users')
+      .from('users')
       .update({ role_id: roleId })
       .eq('id', targetUserId)
       .select()

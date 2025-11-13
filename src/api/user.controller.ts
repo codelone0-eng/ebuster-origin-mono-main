@@ -24,7 +24,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
       console.log('🔍 [getUserProfile] Getting profile for authenticated user:', req.user.id);
       
       const { data, error } = await admin
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('id', req.user.id)
         .single();
@@ -34,7 +34,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
           // Пользователь не найден в users, попробуем auth_users
           console.log('🔍 [getUserProfile] User not found in users table, trying auth_users');
           const { data: authData, error: authError } = await admin
-            .from('auth_users')
+            .from('users')
             .select('id, email, full_name, avatar_url, created_at')
             .eq('id', req.user.id)
             .single();
@@ -95,7 +95,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
     }
 
     const { data, error } = await admin
-      .from('auth_users')
+      .from('users')
       .select('*')
       .eq('email', email)
       .single();
@@ -158,7 +158,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
     
     // Сначала проверяем, есть ли пользователь с таким email
     const { data: existingUser } = await admin
-      .from('auth_users')
+      .from('users')
       .select('id')
       .eq('email', email)
       .single();
@@ -182,7 +182,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
       console.log('🔄 [upsertUserProfile] Updating users table with data:', updateData);
       
       result = await admin
-        .from('auth_users')
+        .from('users')
         .update(updateData)
         .eq('id', existingUser.id)
         .select()
@@ -205,7 +205,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
       }
       
       result = await admin
-        .from('auth_users')
+        .from('users')
         .insert(insertData)
         .select()
         .single();
@@ -217,7 +217,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
     if (!error && data) {
       try {
         const { data: authUser, error: authUserError } = await admin
-          .from('auth_users')
+          .from('users')
           .select('id, full_name')
           .eq('email', email)
           .single();
@@ -237,7 +237,7 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
           }
           
           const { error: updateError } = await admin
-            .from('auth_users')
+            .from('users')
             .update(authUpdateData)
             .eq('id', authUser.id);
             
@@ -313,7 +313,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     // Обновляем URL аватара в базе данных
     console.log('🔄 [uploadAvatar] Updating users table for email:', email);
     const { data: userData, error: userError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({ avatar_url: avatarUrl })
       .eq('email', email)
       .select()
@@ -330,7 +330,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     console.log('🔄 [uploadAvatar] Updating auth_users table for email:', email);
     try {
       const { error: authUpdateError } = await admin
-        .from('auth_users')
+        .from('users')
         .update({ avatar_url: avatarUrl })
         .eq('email', email);
 
@@ -381,7 +381,7 @@ export const removeAvatar = async (req: Request, res: Response) => {
 
     // Получаем текущий аватар пользователя
     const { data: userData, error: userError } = await admin
-      .from('auth_users')
+      .from('users')
       .select('avatar_url')
       .eq('email', email)
       .single();
@@ -419,7 +419,7 @@ export const removeAvatar = async (req: Request, res: Response) => {
     // Обновляем URL аватара в базе данных (устанавливаем null)
     console.log('🔄 [removeAvatar] Updating users table for email:', email);
     const { data: updatedUser, error: updateError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({ avatar_url: null })
       .eq('email', email)
       .select()
@@ -467,7 +467,7 @@ export const updateUserActivity = async (req: Request, res: Response) => {
 
     // Обновляем активность в auth_users
     const { error } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         browser,
         location,
@@ -507,7 +507,7 @@ export const incrementDownloads = async (req: Request, res: Response) => {
 
     // Получаем текущее значение
     const { data: user, error: fetchError } = await admin
-      .from('auth_users')
+      .from('users')
       .select('downloads')
       .eq('id', userId)
       .single();
@@ -519,7 +519,7 @@ export const incrementDownloads = async (req: Request, res: Response) => {
 
     // Увеличиваем счетчик
     const { error: updateError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         downloads: (user?.downloads || 0) + 1,
         last_active: new Date().toISOString()
@@ -607,7 +607,7 @@ export const generate2FASecret = async (req: Request, res: Response) => {
     
     // Сохраняем временный секрет (пока не подтверждён)
     await admin
-      .from('auth_users')
+      .from('users')
       .update({
         two_factor_secret_temp: secretBase32,
         updated_at: new Date().toISOString()
@@ -657,7 +657,7 @@ export const verify2FASetup = async (req: Request, res: Response) => {
     
     // Получаем временный секрет
     const { data: userData, error: fetchError } = await admin
-      .from('auth_users')
+      .from('users')
       .select('two_factor_secret_temp, email')
       .eq('id', userId)
       .single();
@@ -735,7 +735,7 @@ export const verify2FASetup = async (req: Request, res: Response) => {
 
     // Сохраняем секрет и резервные коды в БД
     const { error: updateError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         two_factor_enabled: true,
         two_factor_secret: userData.two_factor_secret_temp,
@@ -783,7 +783,7 @@ export const disable2FA = async (req: Request, res: Response) => {
     
     // Удаляем все данные 2FA
     const { error } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         two_factor_enabled: false,
         two_factor_secret: null,
@@ -873,7 +873,7 @@ export const requestPasswordChangeOtp = async (req: Request, res: Response) => {
 
     // Получаем пользователя
     const { data: user, error: userError } = await admin
-      .from('auth_users')
+      .from('users')
       .select('id, email, password_hash')
       .eq('id', userId)
       .single();
@@ -894,7 +894,7 @@ export const requestPasswordChangeOtp = async (req: Request, res: Response) => {
 
     // Сохраняем OTP в БД
     const { error: updateError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         otp: otpCode,
         otp_expiry: otpExpiry.toISOString(),
@@ -956,7 +956,7 @@ export const confirmPasswordChange = async (req: Request, res: Response) => {
 
     // Получаем пользователя с OTP
     const { data: user, error: userError } = await admin
-      .from('auth_users')
+      .from('users')
       .select('id, email, otp, otp_expiry')
       .eq('id', userId)
       .single();
@@ -983,7 +983,7 @@ export const confirmPasswordChange = async (req: Request, res: Response) => {
 
     // Обновляем пароль и очищаем OTP
     const { error: updateError } = await admin
-      .from('auth_users')
+      .from('users')
       .update({
         password_hash: hashedPassword,
         otp: null,
@@ -1030,7 +1030,7 @@ export const logoutAllDevices = async (req: Request, res: Response) => {
     const tokenVersion = Date.now().toString();
     
     const { error } = await admin
-      .from('auth_users')
+      .from('users')
       .update({ 
         token_version: tokenVersion,
         updated_at: new Date().toISOString()

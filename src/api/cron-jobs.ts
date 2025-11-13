@@ -16,13 +16,13 @@ const autoUnbanUsers = async () => {
       auth: { persistSession: false }
     });
 
-    // Получаем все активные временные баны с истекшим сроком
+    // Получаем все активные баны с истекшим сроком
     const { data: expiredBans, error: fetchError } = await supabase
       .from('user_bans')
-      .select('user_id, ban_id')
+      .select('user_id, id')
       .eq('is_active', true)
-      .eq('ban_type', 'temporary')
-      .lte('unban_date', new Date().toISOString());
+      .not('expires_at', 'is', null)
+      .lte('expires_at', new Date().toISOString());
 
     if (fetchError) {
       console.error('❌ [CRON] Ошибка получения банов:', fetchError);
@@ -36,8 +36,8 @@ const autoUnbanUsers = async () => {
     // Деактивируем баны
     const { error: updateBansError } = await supabase
       .from('user_bans')
-      .update({ is_active: false, updated_at: new Date().toISOString() })
-      .in('ban_id', expiredBans.map(b => b.ban_id));
+      .update({ is_active: false, unbanned_at: new Date().toISOString() })
+      .in('id', expiredBans.map(b => b.id));
 
     if (updateBansError) {
       console.error('❌ [CRON] Ошибка деактивации банов:', updateBansError);
@@ -47,7 +47,7 @@ const autoUnbanUsers = async () => {
     // Обновляем статус пользователей
     const userIds = expiredBans.map(b => b.user_id);
     const { error: updateUsersError } = await supabase
-      .from('auth_users')
+      .from('users')
       .update({ status: 'active', updated_at: new Date().toISOString() })
       .in('id', userIds);
 

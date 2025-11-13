@@ -281,7 +281,7 @@ export const verifyApiKey = async (req: Request, res: Response, next: any) => {
     const supabase = getSupabaseClient();
     const { data: key, error } = await supabase
       .from('api_keys')
-      .select('*, auth_users!inner(id, email, role_id, roles!inner(name, features, limits))')
+      .select('*, users!inner(id, email, role_id, roles!inner(name, features, limits))')
       .eq('api_key', apiKey)
       .eq('is_active', true)
       .single();
@@ -308,7 +308,7 @@ export const verifyApiKey = async (req: Request, res: Response, next: any) => {
       .eq('id', key.id);
 
     // Добавляем пользователя в request
-    (req as any).user = key.auth_users;
+    (req as any).user = key.users;
     (req as any).apiKey = key;
 
     next();

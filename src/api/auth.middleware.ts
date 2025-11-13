@@ -67,7 +67,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
     if (supabase) {
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('id, email, full_name, email_confirmed, status, role, token_version')
         .eq('id', decoded.userId)
         .single();
@@ -161,7 +161,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
       console.log('🔍 [optionalAuthenticateUser] Ищем пользователя в auth_users:', decoded.userId);
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('id, email, full_name, email_confirmed, status, role')
         .eq('id', decoded.userId)
         .single();

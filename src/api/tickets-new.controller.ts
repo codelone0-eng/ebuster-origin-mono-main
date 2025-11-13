@@ -29,7 +29,7 @@ const enrichTicketsWithUsers = async (supabase: SupabaseClient, tickets: any[]) 
   if (!uniqueUserIds.length) return tickets;
 
   const { data: users, error } = await supabase
-    .from('auth_users')
+    .from('users')
     .select('id, full_name, email, avatar_url')
     .in('id', uniqueUserIds);
 

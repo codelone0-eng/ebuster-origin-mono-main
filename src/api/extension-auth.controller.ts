@@ -426,7 +426,7 @@ export const exchangeCode = async (req: Request, res: Response) => {
         
         // Получаем полные данные пользователя из БД
         const { data: user, error: userError } = await supabase
-            .from('auth_users')
+            .from('users')
             .select('id, email, full_name, avatar_url, role, created_at')
             .eq('id', codeData.userId)
             .single();

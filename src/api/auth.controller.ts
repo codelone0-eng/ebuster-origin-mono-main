@@ -33,7 +33,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'ebuster_2024_super_secure_jwt_key_
 // Временное хранилище пользователей (пока не создана таблица auth_users)
 const users: User[] = [];
 
-// Supabase клиент для работы с auth_users таблицей
+// Supabase клиент для работы с users таблицей
 const getSupabaseAdmin = () => {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -84,7 +84,7 @@ export const registerUser = async (req: Request, res: Response) => {
     if (supabase) {
       // Используем Supabase
       const { data: existingUser } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('id')
         .eq('email', email)
         .single();
@@ -115,7 +115,7 @@ export const registerUser = async (req: Request, res: Response) => {
     if (supabase) {
       // Создание в Supabase
       const { data, error: insertError } = await supabase
-        .from('auth_users')
+        .from('users')
         .insert({
           email,
           password_hash,
@@ -208,7 +208,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
     if (supabase) {
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('email', email)
         .eq('confirmation_token', otp)
@@ -243,7 +243,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
     // Подтверждаем email и активируем пользователя
     if (supabase) {
       const { error: updateError } = await supabase
-        .from('auth_users')
+        .from('users')
         .update({
           email_confirmed: true,
           status: 'active',
@@ -363,7 +363,7 @@ export const loginUser = async (req: Request, res: Response) => {
     if (supabase) {
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('email', email)
         .single();
@@ -432,7 +432,7 @@ export const loginUser = async (req: Request, res: Response) => {
         const location = `IP: ${ip}`;
         
         await supabase
-          .from('auth_users')
+          .from('users')
           .update({
             last_login_at: new Date().toISOString(),
             last_active: new Date().toISOString(),
@@ -536,7 +536,7 @@ export const confirmEmail = async (req: Request, res: Response) => {
     if (supabase) {
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('email', email)
         .eq('confirmation_token', token)
@@ -551,7 +551,7 @@ export const confirmEmail = async (req: Request, res: Response) => {
 
       // Подтверждение email в Supabase
       const { error: updateError } = await supabase
-        .from('auth_users')
+        .from('users')
         .update({
           email_confirmed: true,
           confirmation_token: null,
@@ -621,7 +621,7 @@ export const verifyToken = async (req: Request, res: Response) => {
     if (supabase) {
       // Поиск в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('id, email, full_name, email_confirmed')
         .eq('id', decoded.userId)
         .single();
@@ -681,7 +681,7 @@ export const logoutUser = async (req: Request, res: Response) => {
         const supabase = getSupabaseAdmin();
         
         await supabase
-          .from('auth_users')
+          .from('users')
           .update({ last_login_at: new Date().toISOString() })
           .eq('id', decoded.userId);
       } catch (updateError) {
@@ -731,7 +731,7 @@ export const listUsersDebug = async (req: Request, res: Response) => {
     if (supabase) {
       // Получение из Supabase
       const { data: usersData, error } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('id, email, full_name, email_confirmed, created_at')
         .order('created_at', { ascending: false });
       
@@ -769,7 +769,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     if (supabase) {
       const { data } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('email', email)
         .single();
@@ -793,7 +793,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // Сохраняем токен
     if (supabase) {
       await supabase
-        .from('auth_users')
+        .from('users')
         .update({ 
           reset_token: resetToken,
           reset_token_expiry: resetTokenExpiry.toISOString()
@@ -845,7 +845,7 @@ export const updatePasswordWithToken = async (req: Request, res: Response) => {
 
     if (supabase) {
       const { data } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('reset_token', token)
         .single();
@@ -870,7 +870,7 @@ export const updatePasswordWithToken = async (req: Request, res: Response) => {
     // Обновляем пароль и подтверждаем email
     if (supabase) {
       await supabase
-        .from('auth_users')
+        .from('users')
         .update({ 
           password_hash: passwordHash,
           reset_token: null,
@@ -910,7 +910,7 @@ export const clearUsersDebug = async (req: Request, res: Response) => {
     if (supabase) {
       // Очистка в Supabase
       const { error } = await supabase
-        .from('auth_users')
+        .from('users')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000'); // Удаляем всех пользователей
       
@@ -947,7 +947,7 @@ export const resendOtp = async (req: Request, res: Response) => {
     if (supabase) {
       // Поиск пользователя в Supabase
       const { data, error: userError } = await supabase
-        .from('auth_users')
+        .from('users')
         .select('*')
         .eq('email', email)
         .single();
@@ -985,7 +985,7 @@ export const resendOtp = async (req: Request, res: Response) => {
     // Обновляем OTP код в базе
     if (supabase) {
       const { error: updateError } = await supabase
-        .from('auth_users')
+        .from('users')
         .update({
           confirmation_token: newOtpCode,
           otp_expiry: otpExpiry.toISOString()
