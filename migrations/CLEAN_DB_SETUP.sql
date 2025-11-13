@@ -438,71 +438,57 @@ INSERT INTO roles (name, display_name, description, display_order) VALUES
 ('admin', 'Администратор', 'Полный доступ', 4)
 ON CONFLICT (name) DO NOTHING;
 
--- Реферальная система (всё в одной таблице)
 CREATE TABLE IF NOT EXISTS referrals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
-    -- Реферер (кто пригласил)
-    referrer_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    referrer_code VARCHAR(50),
-    
-    -- Приглашённый
-    referred_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    
+    entry_type VARCHAR(10) NOT NULL DEFAULT 'code', -- code / use
+    parent_id UUID REFERENCES referrals(id) ON DELETE CASCADE,
+
+    -- Реферер (владелец кода)
+    referrer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Приглашённый пользователь (для entry_type = 'use')
+    referred_id UUID REFERENCES users(id) ON DELETE SET NULL,
+
+    -- Код и условия
+    code VARCHAR(50),
+    discount_type VARCHAR(20) DEFAULT 'percentage',
+    discount_value DECIMAL(10,2) DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    max_uses INTEGER,
+    expires_at TIMESTAMP WITH TIME ZONE,
+
     -- Награда
-    reward_amount DECIMAL(10,2) DEFAULT 0,
+    reward_type VARCHAR(20) DEFAULT 'commission',
+    reward_value DECIMAL(10,2) DEFAULT 0,
+    reward_status VARCHAR(20) DEFAULT 'pending',
     reward_paid BOOLEAN DEFAULT false,
-    
-    -- Статус
+
+    subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+
+    -- Статус использования
     status VARCHAR(50) DEFAULT 'pending',
-    
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    metadata JSONB DEFAULT '{}'::jsonb,
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    used_at TIMESTAMP WITH TIME ZONE
 );
 
+ALTER TABLE referrals
+    ADD CONSTRAINT referrals_entry_type_check
+    CHECK (
+        (entry_type = 'code' AND parent_id IS NULL AND code IS NOT NULL)
+        OR (entry_type = 'use' AND parent_id IS NOT NULL)
+    );
+
+CREATE UNIQUE INDEX idx_referrals_code_unique ON referrals(code) WHERE entry_type = 'code';
+CREATE INDEX idx_referrals_parent_id ON referrals(parent_id);
 CREATE INDEX idx_referrals_referrer ON referrals(referrer_id);
 CREATE INDEX idx_referrals_referred ON referrals(referred_id);
-CREATE INDEX idx_referrals_code ON referrals(referrer_code);
+CREATE INDEX idx_referrals_entry_type ON referrals(entry_type);
 
--- Алиасы для совместимости со старым кодом
+-- VIEW для совместимости со старым кодом тикетов
 CREATE VIEW support_tickets AS SELECT * FROM tickets;
-
--- VIEW для referral_codes (для совместимости)
-CREATE VIEW referral_codes AS 
-SELECT DISTINCT
-    gen_random_uuid() as id,
-    referrer_code as code,
-    referrer_id as user_id,
-    COUNT(*) OVER (PARTITION BY referrer_code) as uses_count,
-    NULL::INTEGER as max_uses,
-    true as is_active,
-    NULL::TIMESTAMP WITH TIME ZONE as expires_at,
-    MIN(created_at) OVER (PARTITION BY referrer_code) as created_at,
-    NOW() as updated_at
-FROM referrals
-WHERE referrer_code IS NOT NULL;
-
--- VIEW для referral_uses (для совместимости)
-CREATE VIEW referral_uses AS
-SELECT 
-    id,
-    NULL::UUID as referral_code_id,
-    referrer_id as referrer_user_id,
-    referred_id as referred_user_id,
-    reward_amount,
-    created_at
-FROM referrals;
-
--- VIEW для referral_stats (для совместимости)
-CREATE VIEW referral_stats AS
-SELECT 
-    gen_random_uuid() as id,
-    referrer_id as user_id,
-    COUNT(*) as total_referrals,
-    SUM(reward_amount) as total_earnings,
-    COUNT(*) FILTER (WHERE status = 'active') as active_referrals,
-    MAX(created_at) as updated_at
-FROM referrals
-GROUP BY referrer_id;
 
 -- =====================================================
 -- УСТАНОВКА ЗАВЕРШЕНА

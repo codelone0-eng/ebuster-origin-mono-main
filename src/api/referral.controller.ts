@@ -31,6 +31,97 @@ const generateRandomCode = (): string => {
   return code;
 };
 
+type ReferralEntry = {
+  id: string;
+  entry_type: 'code' | 'use';
+  parent_id: string | null;
+  referrer_id: string;
+  referred_id: string | null;
+  code: string | null;
+  discount_type: string | null;
+  discount_value: number | null;
+  is_active: boolean | null;
+  max_uses: number | null;
+  expires_at: string | null;
+  reward_type: string | null;
+  reward_value: number | null;
+  reward_status: string | null;
+  reward_paid: boolean | null;
+  subscription_id: string | null;
+  status: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at?: string;
+  used_at?: string | null;
+  referrer?: {
+    id: string;
+    email: string;
+    full_name: string | null;
+  } | null;
+  referred?: {
+    id: string;
+    email: string;
+    full_name: string | null;
+  } | null;
+  subscription?: {
+    id: string;
+    plan: string;
+    status: string;
+    expires_at?: string | null;
+  } | null;
+  uses?: { id: string }[];
+};
+
+const normalizeCodeResponse = (row: ReferralEntry, usageCount: number) => ({
+  id: row.id,
+  code: row.code,
+  uses_count: usageCount,
+  max_uses: row.max_uses,
+  discount_type: row.discount_type,
+  discount_value: row.discount_value,
+  is_active: row.is_active ?? true,
+  expires_at: row.expires_at,
+  created_at: row.created_at,
+  updated_at: row.updated_at ?? row.created_at
+});
+
+const normalizeUseResponse = (row: ReferralEntry) => ({
+  id: row.id,
+  parent_id: row.parent_id,
+  referrer_user_id: row.referrer_id,
+  referred_user_id: row.referred_id,
+  reward_type: row.reward_type,
+  reward_value: row.reward_value,
+  reward_status: row.reward_status,
+  status: row.status,
+  created_at: row.created_at,
+  used_at: row.used_at ?? row.created_at,
+  referrer: row.referrer
+    ? {
+        id: row.referrer.id,
+        email: row.referrer.email,
+        full_name: row.referrer.full_name
+      }
+    : null,
+  referred: row.referred
+    ? {
+        id: row.referred.id,
+        email: row.referred.email,
+        full_name: row.referred.full_name
+      }
+    : null,
+  subscription: row.subscription
+    ? {
+        id: row.subscription.id,
+        plan: row.subscription.plan,
+        status: row.subscription.status
+      }
+    : null
+});
+
+const buildReferralCodeObject = (row: ReferralEntry & { uses?: { id: string }[] }) =>
+  normalizeCodeResponse(row, row.uses?.length ?? 0);
+
 // Создать реферальный код для пользователя
 const createReferralCodeForUser = async (userId: string, supabase: any) => {
   const code = generateRandomCode();
