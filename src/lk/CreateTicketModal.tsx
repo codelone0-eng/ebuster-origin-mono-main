@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
 import { API_CONFIG } from '@/config/api';
@@ -129,17 +130,17 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
           <div className="space-y-2">
             <Label htmlFor="priority">Приоритет</Label>
-            <select
-              id="priority"
-              className="w-full rounded-md border content-border-40 bg-card/60 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <option value="low">Низкий</option>
-              <option value="medium">Средний</option>
-              <option value="high">Высокий</option>
-              <option value="critical">Критический</option>
-            </select>
+            <Select value={priority} onValueChange={setPriority}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Выберите приоритет" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Низкий</SelectItem>
+                <SelectItem value="medium">Средний</SelectItem>
+                <SelectItem value="high">Высокий</SelectItem>
+                <SelectItem value="critical">Критический</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Кнопки */}

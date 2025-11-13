@@ -85,7 +85,7 @@ export const getUserTickets = async (req: Request, res: Response) => {
     if (status && status !== 'all') query = query.eq('status', status);
     if (priority) query = query.eq('priority', priority);
     if (search) {
-      query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%`);
+      query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%,ticket_number.ilike.%${search}%`);
     }
 
     const { data, error } = await query.order('created_at', { ascending: false });

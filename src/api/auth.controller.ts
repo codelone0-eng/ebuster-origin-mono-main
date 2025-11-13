@@ -438,6 +438,23 @@ export const loginUser = async (req: Request, res: Response) => {
           .eq('id', user.id);
           
         console.log(`✅ Updated user activity: ${browser}, ${location}`);
+        
+        // Логируем вход в историю
+        try {
+          await supabase
+            .from('login_history')
+            .insert({
+              user_id: user.id,
+              ip_address: typeof ip === 'string' ? ip.split(',')[0].trim() : String(ip),
+              user_agent: userAgent,
+              location,
+              browser,
+              success: true
+            });
+          console.log(`✅ Login history recorded for user ${user.id}`);
+        } catch (historyError) {
+          console.warn('Failed to record login history:', historyError);
+        }
       } catch (updateError) {
         console.warn('Failed to update user activity:', updateError);
       }
