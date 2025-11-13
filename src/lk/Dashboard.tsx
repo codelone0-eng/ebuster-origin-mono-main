@@ -20,6 +20,7 @@ import { ReferralProgram } from './ReferralProgram';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TicketsSystem } from './TicketsSystem';
 import { ScriptChangelog } from './ScriptChangelog';
+import { LoginHistory } from './LoginHistory';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
@@ -943,12 +944,13 @@ const DashboardContent = () => {
                           </div>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full">
-                        <LogOut className="h-4 w-4 mr-2" />
-                        {t('header.dashboard.settings.logoutAll')}
-                      </Button>
                     </CardContent>
                   </Card>
+                </div>
+                
+                {/* История входов */}
+                <div className="mt-6">
+                  <LoginHistory />
                 </div>
                 
                 {/* API Keys Section */}

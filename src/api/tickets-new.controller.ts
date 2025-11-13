@@ -73,12 +73,12 @@ export const getUserTickets = async (req: Request, res: Response) => {
       ;
 
     // КРИТИЧНО: Обычные пользователи видят ТОЛЬКО свои тикеты
-    // Только админы и агенты могут видеть все тикеты
-    if (userRole !== 'admin' && userRole !== 'agent') {
+    // Только админы могут видеть все тикеты (в админке admin.ebuster.ru)
+    if (userRole !== 'admin') {
       console.log('🔒 [getUserTickets] Filtering tickets for user:', userId);
       query = query.eq('user_id', userId);
     } else {
-      console.log('👮 [getUserTickets] Admin/Agent access - showing all tickets');
+      console.log('👮 [getUserTickets] Admin access - showing all tickets');
     }
     
     // Фильтры
@@ -109,8 +109,8 @@ export const getAllTickets = async (req: Request, res: Response) => {
     
     console.log('🎫 [getAllTickets] User:', userId, 'Role:', userRole);
     
-    if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
-      console.log('🚫 [getAllTickets] Access denied - only admins and agents can view all tickets');
+    if (!userId || userRole !== 'admin') {
+      console.log('🚫 [getAllTickets] Access denied - only admins can view all tickets');
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -197,7 +197,7 @@ export const getTicket = async (req: Request, res: Response) => {
     }
 
     // КРИТИЧНО: Проверка прав доступа - пользователи могут видеть только свои тикеты
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+    if (userRole !== 'admin' && ticket.user_id !== userId) {
       console.log('🚫 [getTicket] Access denied - user', userId, 'tried to access ticket of user', ticket.user_id);
       return res.status(403).json({ error: 'Forbidden' });
     }
@@ -260,8 +260,8 @@ export const updateTicket = async (req: Request, res: Response) => {
     
     console.log('🎫 [updateTicket] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
     
-    if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
-      console.log('🚫 [updateTicket] Access denied - only admins and agents can update tickets');
+    if (!userId || userRole !== 'admin') {
+      console.log('🚫 [updateTicket] Access denied - only admins can update tickets');
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -343,7 +343,7 @@ export const addMessage = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const isInternalNote = is_internal && (userRole === 'admin' || userRole === 'agent');
+    const isInternalNote = is_internal && userRole === 'admin';
     
     const supabase = getSupabase();
     
@@ -358,7 +358,7 @@ export const addMessage = async (req: Request, res: Response) => {
     }
 
     // КРИТИЧНО: Проверка прав доступа - пользователи могут отвечать только на свои тикеты
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+    if (userRole !== 'admin' && ticket.user_id !== userId) {
       console.log('🚫 [addMessage] Access denied - user', userId, 'tried to reply to ticket of user', ticket.user_id);
       return res.status(403).json({ error: 'Forbidden' });
     }

@@ -810,4 +810,87 @@ export const disable2FA = async (req: Request, res: Response) => {
   }
 };
 
+// Получить историю авторизаций пользователя
+export const getLoginHistory = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Получаем историю авторизаций из таблицы login_history
+    const { data: loginHistory, error } = await admin
+      .from('login_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('Error fetching login history:', error);
+      // Если таблица не существует, возвращаем пустой массив
+      return res.json({ success: true, data: [] });
+    }
+
+    return res.json({ success: true, data: loginHistory || [] });
+  } catch (error) {
+    console.error('Error getting login history:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Выйти из всех устройств (инвалидировать все токены)
+export const logoutAllDevices = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Обновляем токен-версию пользователя, чтобы инвалидировать все старые токены
+    const tokenVersion = Date.now().toString();
+    
+    const { error } = await admin
+      .from('auth_users')
+      .update({ 
+        token_version: tokenVersion,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error logging out from all devices:', error);
+      return res.status(500).json({ error: 'Failed to logout from all devices' });
+    }
+
+    console.log(`✅ User ${userId} logged out from all devices`);
+
+    return res.json({
+      success: true,
+      message: 'Вы вышли из всех устройств'
+    });
+  } catch (error) {
+    console.error('Error logging out from all devices:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 
