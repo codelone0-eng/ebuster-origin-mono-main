@@ -15,6 +15,7 @@ COPY src/api ./src/api
 COPY src/lib ./src/lib
 COPY src/config ./src/config
 COPY src/services ./src/services
+COPY src/utils ./src/utils
 COPY tsconfig*.json ./
 
 # Устанавливаем tsx для запуска TypeScript
