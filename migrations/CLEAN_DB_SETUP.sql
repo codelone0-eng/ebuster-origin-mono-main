@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS scripts (
     -- Дополнительно
     tags TEXT[],
     icon_url TEXT,
+    changelog TEXT,
     
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -372,6 +373,136 @@ GRANT ALL ON api_keys TO postgres, anon, authenticated, service_role;
 GRANT ALL ON subscriptions TO postgres, anon, authenticated, service_role;
 GRANT ALL ON login_history TO postgres, anon, authenticated, service_role;
 GRANT ALL ON user_bans TO postgres, anon, authenticated, service_role;
+
+-- =====================================================
+-- 12. ДОПОЛНИТЕЛЬНЫЕ ТАБЛИЦЫ
+-- =====================================================
+
+-- Таблица связи пользователей и скриптов
+CREATE TABLE IF NOT EXISTS user_scripts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    script_id UUID REFERENCES scripts(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    installed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, script_id)
+);
+
+CREATE INDEX idx_user_scripts_user_id ON user_scripts(user_id);
+CREATE INDEX idx_user_scripts_script_id ON user_scripts(script_id);
+
+-- Таблица категорий скриптов
+CREATE TABLE IF NOT EXISTS script_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    icon VARCHAR(50),
+    color VARCHAR(20),
+    display_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_script_categories_slug ON script_categories(slug);
+CREATE INDEX idx_script_categories_active ON script_categories(is_active);
+
+-- Вставка дефолтных категорий
+INSERT INTO script_categories (name, slug, description, icon, color, display_order) VALUES
+('UI', 'ui', 'Улучшения пользовательского интерфейса', '🎨', '#3b82f6', 1),
+('Privacy', 'privacy', 'Приватность и безопасность', '🔒', '#8b5cf6', 2),
+('Productivity', 'productivity', 'Продуктивность и автоматизация', '⚡', '#10b981', 3),
+('General', 'general', 'Общие скрипты', '📦', '#6b7280', 4)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Таблица ролей
+CREATE TABLE IF NOT EXISTS roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(50) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    permissions JSONB DEFAULT '[]'::jsonb,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_roles_name ON roles(name);
+
+-- Вставка дефолтных ролей
+INSERT INTO roles (name, display_name, description, display_order) VALUES
+('user', 'Пользователь', 'Обычный пользователь', 1),
+('premium', 'Premium', 'Premium подписка', 2),
+('pro', 'Pro', 'Pro подписка', 3),
+('admin', 'Администратор', 'Полный доступ', 4)
+ON CONFLICT (name) DO NOTHING;
+
+-- Реферальная система (всё в одной таблице)
+CREATE TABLE IF NOT EXISTS referrals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- Реферер (кто пригласил)
+    referrer_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    referrer_code VARCHAR(50),
+    
+    -- Приглашённый
+    referred_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    
+    -- Награда
+    reward_amount DECIMAL(10,2) DEFAULT 0,
+    reward_paid BOOLEAN DEFAULT false,
+    
+    -- Статус
+    status VARCHAR(50) DEFAULT 'pending',
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_referrals_referrer ON referrals(referrer_id);
+CREATE INDEX idx_referrals_referred ON referrals(referred_id);
+CREATE INDEX idx_referrals_code ON referrals(referrer_code);
+
+-- Алиасы для совместимости со старым кодом
+CREATE VIEW support_tickets AS SELECT * FROM tickets;
+
+-- VIEW для referral_codes (для совместимости)
+CREATE VIEW referral_codes AS 
+SELECT DISTINCT
+    gen_random_uuid() as id,
+    referrer_code as code,
+    referrer_id as user_id,
+    COUNT(*) OVER (PARTITION BY referrer_code) as uses_count,
+    NULL::INTEGER as max_uses,
+    true as is_active,
+    NULL::TIMESTAMP WITH TIME ZONE as expires_at,
+    MIN(created_at) OVER (PARTITION BY referrer_code) as created_at,
+    NOW() as updated_at
+FROM referrals
+WHERE referrer_code IS NOT NULL;
+
+-- VIEW для referral_uses (для совместимости)
+CREATE VIEW referral_uses AS
+SELECT 
+    id,
+    NULL::UUID as referral_code_id,
+    referrer_id as referrer_user_id,
+    referred_id as referred_user_id,
+    reward_amount,
+    created_at
+FROM referrals;
+
+-- VIEW для referral_stats (для совместимости)
+CREATE VIEW referral_stats AS
+SELECT 
+    gen_random_uuid() as id,
+    referrer_id as user_id,
+    COUNT(*) as total_referrals,
+    SUM(reward_amount) as total_earnings,
+    COUNT(*) FILTER (WHERE status = 'active') as active_referrals,
+    MAX(created_at) as updated_at
+FROM referrals
+GROUP BY referrer_id;
 
 -- =====================================================
 -- УСТАНОВКА ЗАВЕРШЕНА

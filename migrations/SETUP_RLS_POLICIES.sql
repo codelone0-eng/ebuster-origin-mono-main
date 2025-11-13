@@ -16,6 +16,10 @@ ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_bans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_scripts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE script_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
 -- 2. ПОЛИТИКИ ДЛЯ USERS
@@ -293,6 +297,101 @@ CREATE POLICY "Admins can update bans" ON user_bans
 -- Админы видят все баны
 CREATE POLICY "Admins can view all bans" ON user_bans
     FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- =====================================================
+-- 11. ПОЛИТИКИ ДЛЯ USER_SCRIPTS
+-- =====================================================
+
+-- Пользователи видят только свои установленные скрипты
+CREATE POLICY "Users can view own installed scripts" ON user_scripts
+    FOR SELECT USING (auth.uid() = user_id);
+
+-- Пользователи могут устанавливать скрипты
+CREATE POLICY "Users can install scripts" ON user_scripts
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Пользователи могут удалять свои установленные скрипты
+CREATE POLICY "Users can uninstall own scripts" ON user_scripts
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- Админы видят все
+CREATE POLICY "Admins can view all installed scripts" ON user_scripts
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- =====================================================
+-- 12. ПОЛИТИКИ ДЛЯ SCRIPT_CATEGORIES
+-- =====================================================
+
+-- Все могут видеть категории
+CREATE POLICY "Anyone can view categories" ON script_categories
+    FOR SELECT USING (true);
+
+-- Только админы могут управлять категориями
+CREATE POLICY "Admins can manage categories" ON script_categories
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- =====================================================
+-- 13. ПОЛИТИКИ ДЛЯ ROLES
+-- =====================================================
+
+-- Все могут видеть роли
+CREATE POLICY "Anyone can view roles" ON roles
+    FOR SELECT USING (true);
+
+-- Только админы могут управлять ролями
+CREATE POLICY "Admins can manage roles" ON roles
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- =====================================================
+-- 14. ПОЛИТИКИ ДЛЯ REFERRALS
+-- =====================================================
+
+-- Пользователи видят свои рефералы (как реферер или приглашённый)
+CREATE POLICY "Users can view own referrals" ON referrals
+    FOR SELECT USING (
+        auth.uid() = referrer_id OR auth.uid() = referred_id
+    );
+
+-- Система может создавать рефералы
+CREATE POLICY "System can create referrals" ON referrals
+    FOR INSERT WITH CHECK (true);
+
+-- Система может обновлять рефералы
+CREATE POLICY "System can update referrals" ON referrals
+    FOR UPDATE USING (true);
+
+-- Админы видят все рефералы
+CREATE POLICY "Admins can view all referrals" ON referrals
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Админы могут управлять рефералами
+CREATE POLICY "Admins can manage referrals" ON referrals
+    FOR ALL USING (
         EXISTS (
             SELECT 1 FROM users
             WHERE id = auth.uid() AND role = 'admin'

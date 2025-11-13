@@ -66,6 +66,7 @@
 - ✅ `name` (не `title`)
 - ✅ `downloads` (не `downloads_count`)
 - ✅ `views`, `is_public`, `icon_url`
+- ✅ `changelog` TEXT
 
 ### `user_bans`
 - ✅ `id` (не `ban_id`)
@@ -75,6 +76,15 @@
 ### `tickets`
 - ✅ `ticket_number` VARCHAR(50) UNIQUE NOT NULL
 - ✅ `user_email` VARCHAR(255)
+
+### Новые таблицы
+- ✅ `user_scripts` - связь пользователей и скриптов
+- ✅ `script_categories` - категории скриптов (с дефолтными значениями)
+- ✅ `roles` - роли пользователей (user, premium, pro, admin)
+- ✅ `referral_codes` - реферальные коды
+- ✅ `referral_uses` - использования кодов
+- ✅ `referral_stats` - статистика рефералов
+- ✅ `support_tickets` - VIEW алиас для `tickets` (для совместимости)
 
 ---
 

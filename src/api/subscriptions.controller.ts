@@ -12,7 +12,7 @@ export const getSubscriptions = async (req: Request, res: Response) => {
       .from('subscriptions')
       .select(`
         *,
-        auth_users!subscriptions_user_id_fkey (
+        users!subscriptions_user_id_fkey (
           email,
           full_name
         )

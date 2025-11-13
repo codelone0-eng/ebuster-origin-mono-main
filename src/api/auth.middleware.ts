@@ -158,7 +158,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
     const supabase = getSupabaseAdmin();
 
     if (supabase) {
-      console.log('🔍 [optionalAuthenticateUser] Ищем пользователя в auth_users:', decoded.userId);
+      console.log('🔍 [optionalAuthenticateUser] Ищем пользователя в users:', decoded.userId);
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('users')
