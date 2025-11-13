@@ -1,8 +1,12 @@
 import { chromium } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-const STORAGE_FILE = path.resolve(__dirname, '../storage/admin-state.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const storageDir = path.resolve(__dirname, '../storage');
+const STORAGE_FILE = path.resolve(storageDir, 'admin-state.json');
 
 async function globalSetup() {
   const baseUrl = process.env.BASE_URL || 'https://admin.ebuster.ru';
@@ -24,7 +28,7 @@ async function globalSetup() {
     page.click('button[type="submit"]'),
   ]);
 
-  fs.mkdirSync(path.dirname(STORAGE_FILE), { recursive: true });
+  fs.mkdirSync(storageDir, { recursive: true });
   await page.context().storageState({ path: STORAGE_FILE });
 
   await browser.close();
