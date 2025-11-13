@@ -65,9 +65,14 @@ docker-compose restart
 
 ### Таблица `users` (было `auth_users`)
 - ✅ Добавлено поле `token_version` (BIGINT) для больших значений
-- ✅ Реферальная система встроена
-- ✅ 2FA поддержка
-- ✅ Токены восстановления/подтверждения
+- ✅ Реферальная система встроена (`referral_code`, `referred_by`, `referral_earnings`)
+- ✅ 2FA поддержка (`two_factor_enabled`, `two_factor_secret`, `two_factor_backup_codes`)
+- ✅ Токены восстановления/подтверждения (`reset_token`, `confirmation_token`)
+- ✅ OTP поля (`otp`, `otp_expiry`)
+- ✅ Счётчики активности (`downloads`, `scripts`)
+- ✅ Баны (`is_banned`, `ban_reason`, `ban_expires_at`)
+- ✅ Подписки (`subscription_type`, `subscription_expires_at`, `subscription_id`)
+- ✅ Роли (`role`, `role_id`)
 
 ### Таблица `user_bans`
 - ✅ Поля: `id`, `user_id`, `reason`, `banned_by`, `is_active`, `banned_at`, `expires_at`, `unbanned_at`

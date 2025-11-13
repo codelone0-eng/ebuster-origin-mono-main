@@ -19,7 +19,18 @@ CREATE TABLE IF NOT EXISTS users (
     -- Статус и роль
     status VARCHAR(50) DEFAULT 'active',
     role VARCHAR(50) DEFAULT 'user',
+    role_id UUID,
     email_confirmed BOOLEAN DEFAULT false,
+    
+    -- Баны (дублирование для совместимости)
+    is_banned BOOLEAN DEFAULT false,
+    ban_reason TEXT,
+    ban_expires_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Подписка (дублирование для совместимости)
+    subscription_type VARCHAR(50) DEFAULT 'free',
+    subscription_expires_at TIMESTAMP WITH TIME ZONE,
+    subscription_id UUID,
     
     -- 2FA
     two_factor_enabled BOOLEAN DEFAULT false,
@@ -32,6 +43,7 @@ CREATE TABLE IF NOT EXISTS users (
     browser VARCHAR(255),
     location VARCHAR(255),
     downloads INTEGER DEFAULT 0,
+    scripts INTEGER DEFAULT 0,
     
     -- Реферальная система
     referral_code VARCHAR(50) UNIQUE,
@@ -46,6 +58,10 @@ CREATE TABLE IF NOT EXISTS users (
     reset_token_expiry TIMESTAMP WITH TIME ZONE,
     confirmation_token TEXT,
     confirmation_token_expiry TIMESTAMP WITH TIME ZONE,
+    
+    -- OTP для различных операций
+    otp TEXT,
+    otp_expiry TIMESTAMP WITH TIME ZONE,
     
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
