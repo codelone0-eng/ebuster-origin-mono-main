@@ -489,12 +489,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Удаляем токены используя функцию removeToken (она удаляет и cookie и localStorage)
     removeToken();
     
-    // Удаляем остальные данные из localStorage
+    // Удаляем остальные данные из localStorage и sessionStorage
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('lastEmail');
     localStorage.removeItem('referral_code');
     localStorage.removeItem('pending_referral_code');
     localStorage.removeItem('dashboardActiveTab');
+    sessionStorage.clear();
     
     // Восстанавливаем настройки
     if (theme) localStorage.setItem('theme', theme);
@@ -508,8 +509,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout API error:', err);
     }
     
-    // Редирект на главную страницу ebuster.ru
-    window.location.href = 'https://ebuster.ru';
+    // Если мы на lk.ebuster.ru, перенаправляем на ebuster.ru/logout для очистки токенов там
+    if (window.location.hostname === 'lk.ebuster.ru') {
+      window.location.href = 'https://ebuster.ru/logout';
+    } else {
+      // Если уже на ebuster.ru, просто перенаправляем на главную
+      window.location.href = 'https://ebuster.ru';
+    }
   };
 
   const resetPassword = async (email: string) => {

@@ -85,7 +85,9 @@ export const LoginHistory: React.FC = () => {
         // Очищаем токен и перенаправляем на страницу входа
         setTimeout(() => {
           localStorage.removeItem('ebuster_token');
-          window.location.href = '/login';
+          sessionStorage.clear();
+          // Перенаправляем на главный домен
+          window.location.href = 'https://ebuster.ru/login';
         }, 2000);
       } else {
         toast({
@@ -117,22 +119,53 @@ export const LoginHistory: React.FC = () => {
   };
 
   const parseUserAgent = (userAgent: string = '') => {
-    // Простой парсинг user agent
     let browser = 'Unknown';
     let os = 'Unknown';
+    let device = '';
 
-    if (userAgent.includes('Chrome')) browser = 'Chrome';
+    // Определяем браузер
+    if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) browser = 'Chrome';
     else if (userAgent.includes('Firefox')) browser = 'Firefox';
-    else if (userAgent.includes('Safari')) browser = 'Safari';
-    else if (userAgent.includes('Edge')) browser = 'Edge';
+    else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+    else if (userAgent.includes('Edge') || userAgent.includes('Edg/')) browser = 'Edge';
+    else if (userAgent.includes('Opera') || userAgent.includes('OPR')) browser = 'Opera';
 
-    if (userAgent.includes('Windows')) os = 'Windows';
-    else if (userAgent.includes('Mac')) os = 'macOS';
-    else if (userAgent.includes('Linux')) os = 'Linux';
-    else if (userAgent.includes('Android')) os = 'Android';
-    else if (userAgent.includes('iOS')) os = 'iOS';
+    // Определяем ОС и устройство
+    if (userAgent.includes('Android')) {
+      os = 'Android';
+      // Пытаемся извлечь модель устройства
+      const modelMatch = userAgent.match(/\(([^)]+)\)/);
+      if (modelMatch) {
+        const details = modelMatch[1];
+        // Ищем модель телефона (обычно идёт после "Build/" или последнее слово перед "Build/")
+        const buildMatch = details.match(/([^;]+)\s+Build\//);
+        if (buildMatch) {
+          device = buildMatch[1].trim();
+        } else {
+          // Берём последнюю часть до Build или весь текст
+          const parts = details.split(';');
+          device = parts[parts.length - 1].trim();
+        }
+      }
+    } else if (userAgent.includes('iPhone')) {
+      os = 'iOS';
+      device = 'iPhone';
+    } else if (userAgent.includes('iPad')) {
+      os = 'iOS';
+      device = 'iPad';
+    } else if (userAgent.includes('Windows')) {
+      os = 'Windows';
+      if (userAgent.includes('Windows NT 10.0')) device = 'Windows 10/11';
+      else if (userAgent.includes('Windows NT 6.3')) device = 'Windows 8.1';
+      else if (userAgent.includes('Windows NT 6.2')) device = 'Windows 8';
+      else if (userAgent.includes('Windows NT 6.1')) device = 'Windows 7';
+    } else if (userAgent.includes('Mac OS X') || userAgent.includes('Macintosh')) {
+      os = 'macOS';
+    } else if (userAgent.includes('Linux')) {
+      os = 'Linux';
+    }
 
-    return { browser, os };
+    return { browser, os, device };
   };
 
   const formatDate = (dateString: string) => {
@@ -198,7 +231,7 @@ export const LoginHistory: React.FC = () => {
         ) : (
           <div className="space-y-3">
             {loginHistory.map((record) => {
-              const { browser, os } = parseUserAgent(record.user_agent);
+              const { browser, os, device } = parseUserAgent(record.user_agent);
               
               return (
                 <div
@@ -217,7 +250,7 @@ export const LoginHistory: React.FC = () => {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
-                        {browser} на {os}
+                        {browser} на {os}{device ? ` • ${device}` : ''}
                       </span>
                       {record.success ? (
                         <Badge variant="outline" className="text-xs">

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads, getUserBanInfo, generate2FASecret, verify2FASetup, disable2FA, getLoginHistory, logoutAllDevices } from './user.controller';
+import { upsertUserProfile, getUserProfile, uploadAvatar, removeAvatar, updateUserActivity, incrementDownloads, getUserBanInfo, generate2FASecret, verify2FASetup, disable2FA, getLoginHistory, logoutAllDevices, requestPasswordChangeOtp, confirmPasswordChange } from './user.controller';
 import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
 import multer from 'multer';
 
@@ -54,6 +54,10 @@ router.post('/2fa/disable', authenticateUser, disable2FA);
 // Security & Sessions
 router.get('/login-history', authenticateUser, getLoginHistory);
 router.post('/logout-all-devices', authenticateUser, logoutAllDevices);
+
+// Password Change with OTP
+router.post('/password/request-otp', authenticateUser, requestPasswordChangeOtp);
+router.post('/password/confirm-change', authenticateUser, confirmPasswordChange);
 
 export default router;
 

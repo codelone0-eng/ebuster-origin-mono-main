@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
-import { ChangePasswordModal } from '@/components/ChangePasswordModal';
+import { ChangePasswordWithOtpModal } from '@/components/ChangePasswordWithOtpModal';
 import { ChangeEmailModal } from '@/components/ChangeEmailModal';
 import { TwoFactorSetupModal } from '@/components/TwoFactorSetupModal';
 import { AvatarUpload } from '@/components/AvatarUpload';
@@ -1112,7 +1112,7 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
       </div>
         
       {/* Modals */}
-      <ChangePasswordModal 
+      <ChangePasswordWithOtpModal 
           isOpen={isChangePasswordOpen}
           onClose={() => setIsChangePasswordOpen(false)}
         />

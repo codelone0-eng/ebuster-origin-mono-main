@@ -399,9 +399,13 @@ export const loginUser = async (req: Request, res: Response) => {
       });
     }
 
-    // Создание JWT токена
+    // Создание JWT токена с версией токена
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { 
+        userId: user.id, 
+        email: user.email,
+        tokenVersion: user.token_version || null
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );

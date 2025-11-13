@@ -68,7 +68,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       // Поиск в Supabase
       const { data, error: userError } = await supabase
         .from('auth_users')
-        .select('id, email, full_name, email_confirmed, status, role')
+        .select('id, email, full_name, email_confirmed, status, role, token_version')
         .eq('id', decoded.userId)
         .single();
 
@@ -80,6 +80,15 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       }
       
       console.log('✅ [authenticateUser] Пользователь найден:', data.email);
+      
+      // Проверка token_version (если пользователь вышел из всех устройств)
+      if (data.token_version && decoded.tokenVersion !== data.token_version) {
+        console.log('❌ [authenticateUser] Токен устарел (пользователь вышел из всех устройств)');
+        return res.status(401).json({
+          error: 'Сессия устарела. Пожалуйста, войдите снова.',
+          tokenExpired: true
+        });
+      }
       
       // Проверка бана
       if (data.status === 'banned') {

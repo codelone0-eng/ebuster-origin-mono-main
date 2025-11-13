@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { smtpConfig, emailSettings, EmailType, EmailData } from '../config/smtp.config';
+import { generateEmailConfirmation, generatePasswordReset, generatePasswordChange, generateEmailChange } from '../utils/emailTemplates';
 
 // Создаем transporter для SMTP
 const createTransporter = () => {
@@ -286,8 +287,116 @@ export class EmailService {
     });
   }
 
-  // Отправка OTP кода
+  // Отправка OTP кода для регистрации
   async sendOtpEmail(email: string, otpCode: string, userName: string): Promise<boolean> {
+    try {
+      const emailTemplate = generateEmailConfirmation(otpCode);
+      
+      const mailOptions = {
+        from: `${emailSettings.from.name} <${emailSettings.from.address}>`,
+        to: email,
+        replyTo: emailSettings.replyTo,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        headers: {
+          'X-Mailer': 'EBUSTER Email Service',
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ OTP код отправлен:', result.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки OTP:', error);
+      return false;
+    }
+  }
+
+  // Отправка OTP кода для сброса пароля
+  async sendPasswordResetOtp(email: string, otpCode: string): Promise<boolean> {
+    try {
+      const emailTemplate = generatePasswordReset(otpCode);
+      
+      const mailOptions = {
+        from: `${emailSettings.from.name} <${emailSettings.from.address}>`,
+        to: email,
+        replyTo: emailSettings.replyTo,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        headers: {
+          'X-Mailer': 'EBUSTER Email Service',
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ OTP код для сброса пароля отправлен:', result.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки OTP для сброса пароля:', error);
+      return false;
+    }
+  }
+
+  // Отправка OTP кода для смены пароля
+  async sendPasswordChangeOtp(email: string, otpCode: string): Promise<boolean> {
+    try {
+      const emailTemplate = generatePasswordChange(otpCode);
+      
+      const mailOptions = {
+        from: `${emailSettings.from.name} <${emailSettings.from.address}>`,
+        to: email,
+        replyTo: emailSettings.replyTo,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        headers: {
+          'X-Mailer': 'EBUSTER Email Service',
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ OTP код для смены пароля отправлен:', result.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки OTP для смены пароля:', error);
+      return false;
+    }
+  }
+
+  // Отправка OTP кода для смены email
+  async sendEmailChangeOtp(email: string, newEmail: string, otpCode: string): Promise<boolean> {
+    try {
+      const emailTemplate = generateEmailChange(otpCode, newEmail);
+      
+      const mailOptions = {
+        from: `${emailSettings.from.name} <${emailSettings.from.address}>`,
+        to: email,
+        replyTo: emailSettings.replyTo,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        headers: {
+          'X-Mailer': 'EBUSTER Email Service',
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ OTP код для смены email отправлен:', result.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки OTP для смены email:', error);
+      return false;
+    }
+  }
+
+  // Старый метод для обратной совместимости (удалить после рефакторинга)
+  async sendOtpEmailOld(email: string, otpCode: string, userName: string): Promise<boolean> {
     try {
       const mailOptions = {
         from: `${emailSettings.from.name} <${emailSettings.from.address}>`,

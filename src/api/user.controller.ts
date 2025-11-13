@@ -848,6 +848,167 @@ export const getLoginHistory = async (req: Request, res: Response) => {
   }
 };
 
+// Запросить OTP для смены пароля
+export const requestPasswordChangeOtp = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { currentPassword } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!currentPassword) {
+      return res.status(400).json({ error: 'Current password is required' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Получаем пользователя
+    const { data: user, error: userError } = await admin
+      .from('auth_users')
+      .select('id, email, password_hash')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Проверяем текущий пароль
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Неверный текущий пароль' });
+    }
+
+    // Генерируем OTP код
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
+
+    // Сохраняем OTP в БД
+    const { error: updateError } = await admin
+      .from('auth_users')
+      .update({
+        otp: otpCode,
+        otp_expiry: otpExpiry.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error saving OTP:', updateError);
+      return res.status(500).json({ error: 'Failed to generate OTP' });
+    }
+
+    // Отправляем OTP на email
+    const { emailService } = await import('../services/email.service');
+    const emailSent = await emailService.sendPasswordChangeOtp(user.email, otpCode);
+
+    if (!emailSent) {
+      return res.status(500).json({ error: 'Failed to send OTP email' });
+    }
+
+    console.log(`✅ OTP для смены пароля отправлен пользователю ${userId}`);
+
+    return res.json({
+      success: true,
+      message: 'OTP код отправлен на ваш email'
+    });
+  } catch (error) {
+    console.error('Error requesting password change OTP:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Подтвердить смену пароля с OTP
+export const confirmPasswordChange = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { otpCode, newPassword } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!otpCode || !newPassword) {
+      return res.status(400).json({ error: 'OTP code and new password are required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Пароль должен содержать минимум 8 символов' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase not configured' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+    // Получаем пользователя с OTP
+    const { data: user, error: userError } = await admin
+      .from('auth_users')
+      .select('id, email, otp, otp_expiry')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Проверяем OTP
+    if (!user.otp || !user.otp_expiry) {
+      return res.status(400).json({ error: 'OTP не был запрошен' });
+    }
+
+    if (user.otp !== otpCode) {
+      return res.status(400).json({ error: 'Неверный OTP код' });
+    }
+
+    if (new Date(user.otp_expiry) < new Date()) {
+      return res.status(400).json({ error: 'OTP код истёк. Запросите новый' });
+    }
+
+    // Хешируем новый пароль
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Обновляем пароль и очищаем OTP
+    const { error: updateError } = await admin
+      .from('auth_users')
+      .update({
+        password_hash: hashedPassword,
+        otp: null,
+        otp_expiry: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error updating password:', updateError);
+      return res.status(500).json({ error: 'Failed to update password' });
+    }
+
+    console.log(`✅ Пароль успешно изменён для пользователя ${userId}`);
+
+    return res.json({
+      success: true,
+      message: 'Пароль успешно изменён'
+    });
+  } catch (error) {
+    console.error('Error confirming password change:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // Выйти из всех устройств (инвалидировать все токены)
 export const logoutAllDevices = async (req: Request, res: Response) => {
   try {
