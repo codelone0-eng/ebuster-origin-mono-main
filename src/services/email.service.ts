@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { smtpConfig, emailSettings, EmailType, EmailData } from '../config/smtp.config';
-import { generateEmailConfirmation, generatePasswordReset, generatePasswordChange, generateEmailChange } from '../utils/emailTemplates';
+import { generateEmailConfirmation, generatePasswordReset, generatePasswordChange, generateEmailChange } from '../utils/emailTemplates.js';
 
 // Создаем transporter для SMTP
 const createTransporter = () => {
