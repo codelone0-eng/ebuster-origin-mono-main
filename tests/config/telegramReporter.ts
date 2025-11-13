@@ -11,6 +11,11 @@ const formatDuration = (ms: number) => {
   return `${minutes}m ${seconds}s`;
 };
 
+// Экранирование специальных символов для Telegram MarkdownV2
+const escapeMarkdown = (text: string): string => {
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&');
+};
+
 async function sendTelegramMessage(message: string) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.warn('[telegram-reporter] TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы, сообщение не отправлено');
@@ -26,13 +31,15 @@ async function sendTelegramMessage(message: string) {
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
-        parse_mode: 'Markdown'
+        parse_mode: 'HTML'
       })
     });
 
     if (!response.ok) {
       const body = await response.text();
       console.warn('[telegram-reporter] Failed to send message', response.status, body);
+    } else {
+      console.log('[telegram-reporter] ✅ Message sent successfully');
     }
   } catch (error) {
     console.error('[telegram-reporter] Error sending message', error);
@@ -57,33 +64,42 @@ class TelegramReporter implements Reporter {
 
   async onEnd(result: FullResult) {
     const duration = Date.now() - this.startTime;
-    const passed = this.totalTests - this.failedTests.length - result.interrupted ? 0 : 0;
+    const passed = this.totalTests - this.failedTests.length;
+    const skipped = result.status === 'interrupted' ? 0 : 0;
 
-    const summaryLines = [
-      `*${PROJECT_NAME}*`,
-      `Статус: ${result.status === 'passed' ? '✅ Успешно' : result.status === 'failed' ? '❌ Ошибки' : '⚠️ Прервано'}`,
-      `Всего тестов: ${this.totalTests}`,
-      `Упавших: ${this.failedTests.length}`,
-      `Время: ${formatDuration(duration)}`
-    ];
+    // Используем HTML-разметку вместо Markdown
+    const statusEmoji = result.status === 'passed' ? '✅' : result.status === 'failed' ? '❌' : '⚠️';
+    const statusText = result.status === 'passed' ? 'Успешно' : result.status === 'failed' ? 'Ошибки' : 'Прервано';
+    
+    let message = `<b>${PROJECT_NAME}</b>\n\n`;
+    message += `Статус: ${statusEmoji} ${statusText}\n`;
+    message += `Всего тестов: ${this.totalTests}\n`;
+    message += `Пройдено: ${passed}\n`;
+    message += `Упало: ${this.failedTests.length}\n`;
+    message += `Время: ${formatDuration(duration)}\n`;
 
     if (this.failedTests.length > 0) {
+      message += `\n<b>Ошибки:</b>\n`;
+      
       const failedDetails = this.failedTests
-        .slice(0, 5) // ограничим список
-        .map(({ test, result: testResult }) => {
-          const annotations = testResult.error?.message || '';
-          return `• ${test.title}\n  ${annotations.split('\n')[0]}`;
+        .slice(0, 5)
+        .map(({ test }) => {
+          // Экранируем HTML-символы в названии теста
+          const title = test.title
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          return `• ${title}`;
         });
 
-      summaryLines.push('\n*Ошибки:*');
-      summaryLines.push(...failedDetails);
+      message += failedDetails.join('\n');
 
       if (this.failedTests.length > 5) {
-        summaryLines.push(`…и ещё ${this.failedTests.length - 5}`);
+        message += `\n…и ещё ${this.failedTests.length - 5}`;
       }
     }
 
-    await sendTelegramMessage(summaryLines.join('\n'));
+    await sendTelegramMessage(message);
   }
 }
 

@@ -139,6 +139,15 @@ npm run autotest-allure
 ### Telegram
 Автоматически отправляется после каждого прогона (если настроен `TELEGRAM_BOT_TOKEN`).
 
+#### Отправить последний отчёт вручную
+```bash
+# Убедитесь, что переменные окружения заданы
+export $(grep -v '^#' .env.autotest | xargs)
+
+# Отправить последний отчёт в Telegram
+npm run autotest-send-report
+```
+
 ## CI/CD Integration
 
 ### GitHub Actions
