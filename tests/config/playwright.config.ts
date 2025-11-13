@@ -17,11 +17,13 @@ export default defineConfig({
   globalSetup: path.resolve(__dirname, './globalSetup.ts'),
   reporter: [
     ['list'],
+    ['html', { outputFolder: path.resolve(__dirname, '../reports/html'), open: 'never' }],
     ['allure-playwright', {
       outputFolder: path.resolve(__dirname, '../reports/allure-results'),
       detail: true,
       suiteTitle: false,
-    }]
+    }],
+    [path.resolve(__dirname, './telegramReporter.ts'), { projectName: process.env.PROJECT_NAME }]
   ],
   use: {
     baseURL: process.env.BASE_URL || 'https://admin.ebuster.ru',
