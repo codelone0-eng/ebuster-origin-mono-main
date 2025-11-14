@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import http from 'http';
+import { exec } from 'child_process';
 
 const app = express();
 const server = http.createServer(app);
@@ -54,6 +55,41 @@ function broadcast(data) {
 // REST API для получения текущего состояния
 app.get('/status', (req, res) => {
   res.json(currentState);
+});
+
+// Run tests endpoint
+app.post('/run', (req, res) => {
+  if (currentState.status === 'running') {
+    return res.status(409).json({ error: 'Tests already running' });
+  }
+  
+  // Reset state
+  currentState = {
+    status: 'running',
+    startTime: new Date().toISOString(),
+    endTime: null,
+    suites: [],
+    summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
+    logs: [{ timestamp: new Date().toISOString(), message: 'Starting test run...' }]
+  };
+  
+  broadcast({ type: 'testStart', data: currentState });
+  
+  // Trigger test run via Docker
+  exec('docker compose run --rm autotest-runner npm run test:all', (error, stdout, stderr) => {
+    if (error) {
+      console.error('Test execution error:', error);
+      currentState.logs.push({ 
+        timestamp: new Date().toISOString(), 
+        message: `Error: ${error.message}` 
+      });
+    }
+    currentState.status = 'idle';
+    currentState.endTime = new Date().toISOString();
+    broadcast({ type: 'end', data: currentState });
+  });
+  
+  res.json({ message: 'Tests started', status: currentState.status });
 });
 
 // REST API для получения логов

@@ -22,7 +22,7 @@
     "test:api-lk": "playwright test --config tests/config/playwright.api-lk.config.ts",
     "test:all": "tsx tests/scripts/run-all-tests.ts",
     "test:dashboard": "tsx tests/scripts/generate-dashboard.ts",
-    "test:dashboard:live": "tsx tests/scripts/generate-live-dashboard.ts",
+    "test:dashboard:live": "tsx tests/scripts/generate-professional-dashboard.ts",
     "test:serve": "tsx tests/scripts/serve-reports.ts"
   },
   "dependencies": {
