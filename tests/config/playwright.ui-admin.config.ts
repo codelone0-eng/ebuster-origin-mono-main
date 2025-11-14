@@ -15,7 +15,8 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: path.resolve(__dirname, '../reports/ui-admin/html'), open: 'never' }],
     ['json', { outputFile: path.resolve(__dirname, '../reports/ui-admin/results.json') }],
-    ['list']
+    ['list'],
+    [path.resolve(__dirname, '../reporters/live-reporter.ts')]
   ],
   use: {
     baseURL: process.env.BASE_URL || 'https://admin.ebuster.ru',

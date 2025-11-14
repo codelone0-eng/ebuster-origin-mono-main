@@ -15,7 +15,8 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: path.resolve(__dirname, '../reports/api-lk/html'), open: 'never' }],
     ['json', { outputFile: path.resolve(__dirname, '../reports/api-lk/results.json') }],
-    ['list']
+    ['list'],
+    [path.resolve(__dirname, '../reporters/live-reporter.ts')]
   ],
   use: {
     baseURL: process.env.API_URL || 'https://api.ebuster.ru',

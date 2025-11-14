@@ -209,6 +209,14 @@ async function main() {
   
   // Копируем отчёты в публичную директорию для деплоя
   copyReportsToPublic();
+  
+  // Генерируем live-дашборд
+  console.log('\n📊 Generating live dashboard...');
+  try {
+    execSync('npm run test:dashboard:live', { stdio: 'inherit' });
+  } catch (error) {
+    console.warn('⚠️  Failed to generate live dashboard');
+  }
 
   // Возвращаем код ошибки, если есть упавшие тесты
   const hasFailures = results.some(r => r.status === 'failed' || r.status === 'error');

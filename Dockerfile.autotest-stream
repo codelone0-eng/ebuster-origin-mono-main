@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Копируем package files
+COPY package*.json ./
+
+# Устанавливаем только необходимые зависимости
+RUN npm install express cors ws
+
+# Копируем сервер для live-стрима
+COPY tests/stream-server ./stream-server
+
+EXPOSE 3002
+
+CMD ["node", "stream-server/index.js"]

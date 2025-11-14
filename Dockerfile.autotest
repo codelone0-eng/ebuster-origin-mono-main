@@ -1,0 +1,28 @@
+FROM mcr.microsoft.com/playwright:v1.48.2-jammy
+
+WORKDIR /app
+
+# Копируем package files
+COPY package*.json ./
+
+# Устанавливаем зависимости
+RUN npm install
+
+# Копируем исходники тестов и скрипты
+COPY tests ./tests
+COPY tsconfig*.json ./
+COPY run-tests-and-deploy.sh ./
+COPY .env.autotest* ./
+
+# Делаем скрипт исполняемым
+RUN chmod +x run-tests-and-deploy.sh
+
+# Создаём директории для отчётов
+RUN mkdir -p tests/public/autotest tests/reports tests/storage
+
+# Устанавливаем переменные окружения
+ENV NODE_ENV=production
+ENV CI=true
+
+# Команда по умолчанию
+CMD ["npm", "run", "test:all"]
