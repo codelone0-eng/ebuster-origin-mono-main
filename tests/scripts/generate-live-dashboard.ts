@@ -47,17 +47,23 @@ function generateLiveDashboard() {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --background: #f0f0f0;
-      --foreground: #333333;
-      --card: #f5f5f5;
-      --muted-foreground: #666666;
-      --border: #d0d0d0;
-      --primary: #606060;
+      /* Dark Graphite Theme - точная копия основного сайта */
+      --background: #1a1a1a;
+      --foreground: #d9d9d9;
+      --card: #202020;
+      --card-foreground: #d9d9d9;
+      --muted: #2a2a2a;
+      --muted-foreground: #808080;
+      --border: #1a1a1a;
+      --content-border: #606060;
+      --primary: #a0a0a0;
+      --primary-foreground: #1a1a1a;
       --success: #10b981;
       --error: #e06666;
       --warning: #f59e0b;
-      --radius: 8px;
-      --shadow: 0px 2px 6px rgba(0, 0, 0, 0.08);
+      --radius: 0.35rem;
+      --shadow: 0px 2px 0px 0px hsl(0 0% 20% / 0.15), 0px 1px 2px -1px hsl(0 0% 20% / 0.15);
+      --shadow-md: 0px 2px 0px 0px hsl(0 0% 20% / 0.15), 0px 2px 4px -1px hsl(0 0% 20% / 0.15);
     }
 
     * {
@@ -81,7 +87,7 @@ function generateLiveDashboard() {
 
     header {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--content-border);
       border-radius: var(--radius);
       padding: 24px;
       margin-bottom: 24px;
@@ -92,6 +98,7 @@ function generateLiveDashboard() {
       font-size: 28px;
       font-weight: 600;
       margin-bottom: 8px;
+      color: var(--foreground);
     }
 
     .subtitle {
@@ -111,18 +118,20 @@ function generateLiveDashboard() {
     }
 
     .status-badge.idle {
-      background: #e0e0e0;
-      color: #666;
+      background: var(--muted);
+      color: var(--muted-foreground);
     }
 
     .status-badge.running {
-      background: #fef3c7;
-      color: #92400e;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid var(--warning);
     }
 
     .status-badge.completed {
-      background: #d1fae5;
-      color: #065f46;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid var(--success);
     }
 
     .status-dot {
@@ -147,7 +156,7 @@ function generateLiveDashboard() {
 
     .stat-card {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--content-border);
       border-radius: var(--radius);
       padding: 20px;
       box-shadow: var(--shadow);
@@ -177,7 +186,7 @@ function generateLiveDashboard() {
 
     .suite-card {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--content-border);
       border-radius: var(--radius);
       padding: 20px;
       box-shadow: var(--shadow);
@@ -186,7 +195,8 @@ function generateLiveDashboard() {
 
     .suite-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
     }
 
     .suite-header {
@@ -199,6 +209,7 @@ function generateLiveDashboard() {
     .suite-title {
       font-size: 18px;
       font-weight: 600;
+      color: var(--foreground);
     }
 
     .suite-status {
@@ -209,13 +220,15 @@ function generateLiveDashboard() {
     }
 
     .suite-status.passed {
-      background: #d1fae5;
-      color: #065f46;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid var(--success);
     }
 
     .suite-status.failed {
-      background: #fee2e2;
-      color: #991b1b;
+      background: rgba(224, 102, 102, 0.15);
+      color: var(--error);
+      border: 1px solid var(--error);
     }
 
     .suite-stats {
@@ -244,7 +257,7 @@ function generateLiveDashboard() {
 
     .logs {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--content-border);
       border-radius: var(--radius);
       padding: 20px;
       margin-top: 24px;
@@ -255,13 +268,15 @@ function generateLiveDashboard() {
     .logs h2 {
       font-size: 18px;
       margin-bottom: 12px;
+      color: var(--foreground);
     }
 
     .log-entry {
-      font-family: 'Fira Code', monospace;
+      font-family: 'Fira Code', 'SF Mono', Monaco, monospace;
       font-size: 13px;
       padding: 4px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--muted);
+      color: var(--foreground);
     }
 
     .log-entry:last-child {
