@@ -23,7 +23,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html/lk
 COPY --from=builder /app/dist /usr/share/nginx/html/admin
 
 # Создаём директорию для autotest (будет монтироваться volume)
-RUN mkdir -p /usr/share/nginx/html/autotest
+# НЕ копируем плейсхолдер - он будет сгенерирован автоматически
 
 # Копируем nginx конфиг
 COPY nginx.conf /etc/nginx/nginx.conf

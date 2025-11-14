@@ -31,3 +31,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Test reports and generated dashboards
+tests/reports/
+tests/storage/
+tests/public/autotest/index.html
