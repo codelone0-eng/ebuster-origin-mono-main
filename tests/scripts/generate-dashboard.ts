@@ -11,6 +11,9 @@ const dashboardHTML = `<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ebuster Test Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -19,132 +22,227 @@ const dashboardHTML = `<!DOCTYPE html>
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, rgba(36, 142, 255, 0.15) 0%, rgba(9, 18, 48, 0.9) 55%, rgba(2, 6, 21, 1) 100%);
+      color: rgba(240, 245, 255, 0.95);
       min-height: 100vh;
-      padding: 20px;
+      padding: clamp(16px, 3vw, 40px);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
     }
 
     .container {
-      max-width: 1400px;
+      width: min(1320px, 100%);
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(20px, 4vw, 36px);
     }
 
     .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: clamp(16px, 3vw, 30px);
+      padding: clamp(24px, 4vw, 40px);
+      background: linear-gradient(135deg, rgba(20, 40, 80, 0.9), rgba(10, 15, 35, 0.85));
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: "";
+      position: absolute;
+      inset: -30% 50% auto -10%;
+      background: radial-gradient(circle, rgba(30, 149, 255, 0.35) 0%, rgba(30, 149, 255, 0) 70%);
+      filter: blur(20px);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-mark {
+      width: clamp(52px, 8vw, 72px);
+      height: clamp(52px, 8vw, 72px);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(15, 134, 255, 0.95), rgba(70, 198, 255, 0.9));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 35px rgba(24, 118, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .logo-mark span {
+      font-size: clamp(22px, 4vw, 26px);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(6, 9, 25, 0.95);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .header h1 {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: rgba(244, 247, 255, 0.98);
     }
 
     .header p {
-      font-size: 1.2rem;
-      opacity: 0.9;
+      font-size: clamp(15px, 2vw, 18px);
+      color: rgba(195, 208, 232, 0.85);
+      font-weight: 500;
     }
 
     .summary {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, rgba(6, 10, 31, 0.92), rgba(10, 21, 53, 0.85));
+      border-radius: clamp(24px, 4vw, 32px);
+      padding: clamp(24px, 4vw, 38px);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
     }
 
     .summary h2 {
-      margin-bottom: 20px;
-      color: #333;
+      margin-bottom: clamp(18px, 3vw, 26px);
+      color: rgba(230, 237, 255, 0.95);
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: clamp(16px, 3vw, 24px);
+      margin-bottom: clamp(20px, 3vw, 28px);
     }
 
     .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
+      background: linear-gradient(145deg, rgba(22, 44, 88, 0.9), rgba(12, 26, 58, 0.8));
+      color: rgba(235, 240, 255, 0.95);
+      padding: clamp(18px, 3vw, 26px);
+      border-radius: 24px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 18px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40% -40% 40%;
+      background: radial-gradient(circle, rgba(40, 160, 255, 0.15) 0%, rgba(40, 160, 255, 0) 70%);
+      opacity: 0.8;
+      pointer-events: none;
     }
 
     .stat-card.passed {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      background: linear-gradient(145deg, rgba(26, 110, 106, 0.95), rgba(16, 72, 70, 0.85));
     }
 
     .stat-card.failed {
-      background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+      background: linear-gradient(145deg, rgba(124, 32, 48, 0.96), rgba(80, 14, 26, 0.9));
     }
 
     .stat-card.skipped {
-      background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+      background: linear-gradient(145deg, rgba(118, 88, 28, 0.94), rgba(62, 42, 12, 0.88));
     }
 
     .stat-card h3 {
-      font-size: 2.5rem;
-      margin-bottom: 5px;
+      font-size: clamp(32px, 4vw, 46px);
+      font-weight: 700;
+      line-height: 1.1;
     }
 
     .stat-card p {
-      font-size: 0.9rem;
-      opacity: 0.9;
+      font-size: clamp(14px, 2vw, 16px);
+      color: rgba(235, 240, 255, 0.7);
     }
 
     .test-suites {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: clamp(20px, 3vw, 28px);
     }
 
     .suite-card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: linear-gradient(145deg, rgba(6, 12, 36, 0.92), rgba(10, 20, 48, 0.85));
+      border-radius: clamp(22px, 3vw, 28px);
+      padding: clamp(20px, 3vw, 30px);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.42);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
       cursor: pointer;
     }
 
     .suite-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      transform: translateY(-10px);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+      border-color: rgba(30, 142, 255, 0.4);
     }
 
     .suite-header {
       display: flex;
       align-items: center;
       margin-bottom: 15px;
+      gap: 14px;
     }
 
     .suite-icon {
-      font-size: 2rem;
-      margin-right: 15px;
+      font-size: clamp(28px, 4vw, 36px);
+      width: clamp(46px, 6vw, 54px);
+      height: clamp(46px, 6vw, 54px);
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(28, 135, 255, 0.24), rgba(60, 170, 255, 0.12));
+      color: rgba(186, 210, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .suite-title {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .suite-title h3 {
-      font-size: 1.3rem;
-      color: #333;
-      margin-bottom: 5px;
+      font-size: clamp(18px, 2.5vw, 22px);
+      color: rgba(231, 240, 255, 0.96);
+      font-weight: 600;
     }
 
     .suite-title p {
-      font-size: 0.85rem;
-      color: #666;
+      font-size: clamp(13px, 2vw, 15px);
+      color: rgba(200, 210, 235, 0.65);
     }
 
     .suite-status {
-      font-size: 2rem;
+      font-size: clamp(26px, 4vw, 32px);
     }
 
     .suite-stats {
