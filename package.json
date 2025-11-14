@@ -15,7 +15,14 @@
     "autotest-admin": "playwright test --config tests/config/playwright.config.ts",
     "autotest-admin:headed": "playwright test --headed --config tests/config/playwright.config.ts",
     "autotest-report": "allure generate reports/allure-results --clean && allure open",
-    "autotest-send-report": "tsx tests/scripts/send-last-report.ts"
+    "autotest-send-report": "tsx tests/scripts/send-last-report.ts",
+    "test:ui-admin": "playwright test --config tests/config/playwright.ui-admin.config.ts",
+    "test:ui-lk": "playwright test --config tests/config/playwright.ui-lk.config.ts",
+    "test:api-admin": "playwright test --config tests/config/playwright.api-admin.config.ts",
+    "test:api-lk": "playwright test --config tests/config/playwright.api-lk.config.ts",
+    "test:all": "tsx tests/scripts/run-all-tests.ts",
+    "test:dashboard": "tsx tests/scripts/generate-dashboard.ts",
+    "test:serve": "tsx tests/scripts/serve-reports.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
