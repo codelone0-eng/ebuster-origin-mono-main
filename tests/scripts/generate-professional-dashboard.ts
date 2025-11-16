@@ -22,18 +22,51 @@ interface TestSummary {
 function generateProfessionalDashboard() {
   const summaryPath = path.join(REPORTS_DIR, 'summary.json');
   let results: TestSummary[] = [];
-  let lastUpdate = new Date().toISOString();
+  const now = new Date();
+  let lastUpdate = now.toISOString();
 
   if (fs.existsSync(summaryPath)) {
-    const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
-    results = summary.results || [];
-    lastUpdate = summary.timestamp || new Date().toISOString();
+    try {
+      const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+      results = summary.results || [];
+      lastUpdate = summary.timestamp || now.toISOString();
+    } catch (error) {
+      console.error('Error reading summary:', error);
+    }
   }
 
   const totalPassed = results.reduce((sum, r) => sum + r.passed, 0);
   const totalFailed = results.reduce((sum, r) => sum + r.failed, 0);
   const totalSkipped = results.reduce((sum, r) => sum + r.skipped, 0);
   const totalTests = results.reduce((sum, r) => sum + r.total, 0);
+
+  // Форматируем дату безопасно
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        return new Date().toLocaleString('ru-RU');
+      }
+      return date.toLocaleString('ru-RU');
+    } catch {
+      return new Date().toLocaleString('ru-RU');
+    }
+  };
+
+  const formatTime = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        return new Date().toLocaleTimeString('ru-RU');
+      }
+      return date.toLocaleTimeString('ru-RU');
+    } catch {
+      return new Date().toLocaleTimeString('ru-RU');
+    }
+  };
+
+  const formattedDate = formatDate(lastUpdate);
+  const formattedTime = formatTime(lastUpdate);
 
   const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -504,45 +537,68 @@ function generateProfessionalDashboard() {
       </div>
       <div class="logs-container" id="logs">
         <div class="log-entry">
-          <span class="log-time">${new Date(lastUpdate).toLocaleTimeString('ru-RU')}</span>
+          <span class="log-time">${formattedTime}</span>
           <span class="log-message">Система готова к запуску тестов</span>
         </div>
       </div>
     </div>
 
     <footer>
-      Последнее обновление: <span id="last-update">${new Date(lastUpdate).toLocaleString('ru-RU')}</span>
+      Последнее обновление: <span id="last-update">${formattedDate}</span>
     </footer>
   </div>
 
   <script>
+    console.log('[Dashboard] Initializing...');
+    console.log('[Dashboard] Location:', window.location.href);
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + window.location.host + '/ws');
+    const wsUrl = protocol + '//' + window.location.host + '/ws';
+    console.log('[Dashboard] WebSocket URL:', wsUrl);
+    
+    const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
-      console.log('Connected to live stream');
+      console.log('[WebSocket] Connected successfully');
       updateStatus('idle', 'Подключено');
     };
 
     ws.onmessage = (event) => {
-      const { type, data } = JSON.parse(event.data);
-      
-      if (type === 'state') {
-        updateDashboard(data);
-      } else if (type === 'testStart') {
-        updateStatus('running', 'Тесты выполняются');
-        document.getElementById('run-tests').disabled = true;
-      } else if (type === 'testEnd') {
-        addLog(data.logs[data.logs.length - 1]);
-      } else if (type === 'end') {
-        updateStatus('idle', 'Тесты завершены');
-        document.getElementById('run-tests').disabled = false;
-        setTimeout(() => location.reload(), 2000);
+      console.log('[WebSocket] Message received:', event.data);
+      try {
+        const { type, data } = JSON.parse(event.data);
+        console.log('[WebSocket] Parsed message type:', type);
+        
+        if (type === 'state') {
+          console.log('[WebSocket] State update:', data);
+          updateDashboard(data);
+        } else if (type === 'testStart') {
+          console.log('[WebSocket] Tests started');
+          updateStatus('running', 'Тесты выполняются');
+          document.getElementById('run-tests').disabled = true;
+        } else if (type === 'testEnd') {
+          console.log('[WebSocket] Test ended:', data);
+          addLog(data.logs[data.logs.length - 1]);
+        } else if (type === 'end') {
+          console.log('[WebSocket] All tests completed');
+          updateStatus('idle', 'Тесты завершены');
+          document.getElementById('run-tests').disabled = false;
+          setTimeout(() => location.reload(), 2000);
+        }
+      } catch (error) {
+        console.error('[WebSocket] Parse error:', error);
       }
     };
 
-    ws.onerror = () => updateStatus('idle', 'Ошибка подключения');
-    ws.onclose = () => updateStatus('idle', 'Отключено');
+    ws.onerror = (error) => {
+      console.error('[WebSocket] Error:', error);
+      updateStatus('idle', 'Ошибка подключения');
+    };
+    
+    ws.onclose = (event) => {
+      console.log('[WebSocket] Closed:', event.code, event.reason);
+      updateStatus('idle', 'Отключено');
+    };
 
     function updateStatus(status, text) {
       const indicator = document.getElementById('status');
@@ -586,16 +642,29 @@ function generateProfessionalDashboard() {
     }
 
     async function runTests() {
+      console.log('[Dashboard] Run tests button clicked');
       if (confirm('Запустить все тесты? Это может занять несколько минут.')) {
         try {
+          console.log('[Dashboard] Sending POST /stream/run');
           const response = await fetch('/stream/run', { method: 'POST' });
+          console.log('[Dashboard] Response status:', response.status);
+          
           if (response.ok) {
+            const result = await response.json();
+            console.log('[Dashboard] Response data:', result);
             updateStatus('running', 'Запуск тестов...');
             document.getElementById('run-tests').disabled = true;
+          } else {
+            const error = await response.text();
+            console.error('[Dashboard] Error response:', error);
+            alert('Ошибка запуска: ' + error);
           }
         } catch (error) {
-          alert('Ошибка запуска тестов');
+          console.error('[Dashboard] Fetch error:', error);
+          alert('Ошибка запуска тестов: ' + error.message);
         }
+      } else {
+        console.log('[Dashboard] Test run cancelled by user');
       }
     }
   </script>
