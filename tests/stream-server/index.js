@@ -11,6 +11,9 @@ const wss = new WebSocketServer({ server });
 app.use(cors());
 app.use(express.json());
 
+const DOCKER_WORKDIR = process.env.DOCKER_PROJECT_DIR || '/workspace';
+const DOCKER_RUN_COMMAND = process.env.DOCKER_RUN_COMMAND || 'docker compose run --rm autotest-runner npm run test:all';
+
 // Хранилище текущего состояния тестов
 let currentState = {
   status: 'idle', // idle, running, completed
@@ -76,14 +79,39 @@ app.post('/run', (req, res) => {
   broadcast({ type: 'testStart', data: currentState });
   
   // Trigger test run via Docker
-  exec('docker compose run --rm autotest-runner npm run test:all', (error, stdout, stderr) => {
+  currentState.logs.push({
+    timestamp: new Date().toISOString(),
+    level: 'info',
+    message: 'Запускаем docker compose для выполнения тестов...'
+  });
+  broadcast({ type: 'state', data: currentState });
+
+  exec(DOCKER_RUN_COMMAND, { cwd: DOCKER_WORKDIR }, (error, stdout, stderr) => {
+    if (stdout) {
+      currentState.logs.push({
+        timestamp: new Date().toISOString(),
+        level: 'debug',
+        message: stdout.trim()
+      });
+    }
+
+    if (stderr) {
+      currentState.logs.push({
+        timestamp: new Date().toISOString(),
+        level: 'warn',
+        message: stderr.trim()
+      });
+    }
+
     if (error) {
       console.error('Test execution error:', error);
       currentState.logs.push({ 
         timestamp: new Date().toISOString(), 
-        message: `Error: ${error.message}` 
+        level: 'error',
+        message: `Ошибка запуска тестов: ${error.message}` 
       });
     }
+
     currentState.status = 'idle';
     currentState.endTime = new Date().toISOString();
     broadcast({ type: 'end', data: currentState });
