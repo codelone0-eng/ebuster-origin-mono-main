@@ -5,8 +5,9 @@ WORKDIR /app
 # Копируем package files
 COPY package*.json ./
 
-# Устанавливаем только необходимые зависимости
-RUN npm install express cors ws
+# Устанавливаем системные пакеты и зависимости
+RUN apk add --no-cache docker-cli docker-cli-compose bash \
+  && npm install express cors ws
 
 # Копируем сервер для live-стрима
 COPY tests/stream-server ./stream-server
