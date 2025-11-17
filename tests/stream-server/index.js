@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const DOCKER_WORKDIR = process.env.DOCKER_PROJECT_DIR || '/workspace';
-const DOCKER_RUN_COMMAND = process.env.DOCKER_RUN_COMMAND || 'docker compose run --rm autotest-runner npm run test:all';
+const DOCKER_RUN_COMMAND = process.env.DOCKER_RUN_COMMAND || 'docker compose -f docker-compose.yml run --rm --no-deps --no-build autotest-runner npm run test:all';
 
 // Хранилище текущего состояния тестов
 let currentState = {
