@@ -33,8 +33,12 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - api
-      - autotest-stream
+      api:
+        condition: service_started
+      autotest-stream:
+        condition: service_started
+      autotest-dashboard-init:
+        condition: service_completed_successfully
     networks:
       - ebuster-network
     volumes:
@@ -63,6 +67,25 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # Initial dashboard generator (runs once to seed volume)
+  autotest-dashboard-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.autotest
+    container_name: ebuster-autotest-dashboard-init
+    restart: "no"
+    command: ["npm", "run", "test:dashboard:live"]
+    env_file:
+      - .env.autotest
+    environment:
+      - NODE_ENV=production
+      - CI=true
+      - STREAM_URL=http://autotest-stream:3002
+    networks:
+      - ebuster-network
+    volumes:
+      - autotest_reports:/app/tests/public/autotest
 
   # Autotest Runner (запускается по требованию)
   autotest-runner:
