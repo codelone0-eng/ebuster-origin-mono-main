@@ -79,10 +79,10 @@ function formatErrorDetails(error) {
 
 function formatLocation(location) {
   if (!location) return '';
-  const parts = [];
-  if (location.file) parts.push(location.file.replace(/\\/g, '/'));
-  if (location.line) parts.push(location.line);
-  return parts.length ? ` (${parts.join(':')})` : '';
+  const normalized = (location.file || '').replace(/\\/g, '/');
+  const cleaned = normalized.replace(/^.*?\/app\//, '');
+  const linePart = location.line ? `, строка ${location.line}` : '';
+  return cleaned ? `Файл: ${cleaned}${linePart}` : '';
 }
 
 const TITLE_TRANSLATIONS = new Map([
@@ -91,20 +91,22 @@ const TITLE_TRANSLATIONS = new Map([
   ['route /tickets should be accessible', 'Страница /tickets открывается'],
   ['route /scripts should be accessible', 'Страница /scripts открывается'],
   ['route /subscriptions should be accessible', 'Страница /subscriptions открывается'],
+  ['route /referrals should be accessible', 'Страница /referrals открывается'],
+  ['route /settings should be accessible', 'Страница настроек открывается'],
   ['should display referrals overview', 'Раздел «Рефералы» показывает сводку'],
   ['should display referral stats', 'Раздел «Рефералы» показывает статистику'],
   ['should display referral codes list', 'Список реферальных кодов отображается'],
   ['should have referral management actions', 'Доступны действия управления рефералами'],
-  ['should display scripts list', 'Раздел «Скрипты» показывает список'],
-  ['should have add script button', 'Кнопка добавления скрипта отображается'],
-  ['should filter scripts by category', 'Фильтр скриптов по категории работает'],
-  ['should open script details', 'Карточка скрипта открывается'],
-  ['should have script actions (edit, delete, publish)', 'Для скриптов доступны действия редактирования, удаления и публикации'],
-  ['should display subscriptions list', 'Раздел «Подписки» показывает список'],
+  ['should display scripts list', 'Список скриптов отображается'],
+  ['should have add script button', 'Кнопка добавления скрипта'],
+  ['should filter scripts by category', 'Фильтр скриптов по категории'],
+  ['should open script details', 'Просмотр карточки скрипта'],
+  ['should have script actions (edit, delete, publish)', 'Действия со скриптами: редактирование, удаление, публикация'],
+  ['should display subscriptions list', 'Список подписок отображается'],
   ['should display subscription stats', 'Раздел «Подписки» показывает статистику'],
-  ['should filter subscriptions by status', 'Фильтр подписок по статусу работает'],
-  ['should have subscription actions', 'Для подписок доступны действия управления'],
-  ['should display tickets list', 'Раздел «Тикеты» показывает список'],
+  ['should filter subscriptions by status', 'Фильтр подписок по статусу'],
+  ['should have subscription actions', 'Действия с подписками'],
+  ['should display tickets list', 'Список тикетов отображается']
 ]);
 
 function capitalize(text = '') {
@@ -141,6 +143,10 @@ function humanizeTitle(title = '') {
     .replace(/\bscripts?\b/gi, 'скрипты')
     .replace(/\busers?\b/gi, 'пользователи')
     .replace(/\bdashboard\b/gi, 'dashboard')
+    .replace(/\bdetails\b/gi, 'детали')
+    .replace(/\blist\b/gi, 'список')
+    .replace(/\bbutton\b/gi, 'кнопка')
+    .replace(/\bactions?\b/gi, 'действия')
     .replace(/["']/g, '');
 
   result = result.replace(/\s+/g, ' ').trim();
@@ -160,6 +166,14 @@ function describeLocator(locator = '') {
       base = 'кнопка';
     } else if (/input/i.test(selector)) {
       base = 'поле ввода';
+    } else if (/table tbody tr/.test(selector) && /script-card/.test(selector)) {
+      base = 'строка или карточка в списке скриптов';
+    } else if (/table tbody tr/.test(selector)) {
+      base = 'строка в таблице';
+    } else if (/script-card/.test(selector)) {
+      base = 'карточка скрипта';
+    } else if (/\[role="dialog"\]/.test(selector)) {
+      base = 'диалоговое окно';
     } else {
       base = `элемент «${selector}»`;
     }
@@ -350,13 +364,14 @@ app.post('/update', (req, res) => {
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: `▶️ Запуск: ${title}${location}`
+        message: `▶️ Старт: ${humanizeTitle(title)}${location ? ` — ${location}` : ''}`
       });
       break;
     }
       
     case 'testEnd': {
       const title = data.test?.title || 'Неизвестный тест';
+      const humanTitle = humanizeTitle(title);
       const location = formatLocation(data.test?.location);
       const resultStatus = normalizeResultStatus(data.result?.status);
       const duration = formatDuration(data.result?.duration);
@@ -367,19 +382,29 @@ app.post('/update', (req, res) => {
       if (resultStatus === 'failed') currentState.summary.failed += 1;
       if (resultStatus === 'skipped') currentState.summary.skipped += 1;
 
-      const logParts = [
-        resultStatus === 'passed' ? '✅ Успех' : resultStatus === 'failed' ? '❌ Ошибка' : '⏭️ Пропущен',
-        title,
-        `(${duration})`
-      ];
-      if (errorDetails) {
-        logParts.push(`→ ${errorDetails}`);
+      const statusPrefix = resultStatus === 'passed'
+        ? '✅ Успех'
+        : resultStatus === 'failed'
+          ? '❌ Ошибка'
+          : '⏭️ Пропущен';
+
+      const messageParts = [`${statusPrefix}: ${humanTitle}`];
+      if (resultStatus === 'passed') {
+        messageParts.push(`выполнено за ${duration}`);
       }
+      if (resultStatus === 'failed') {
+        messageParts.push(errorDetails || describeLocator(data.result?.locator || '') || 'Ожидание не выполнено');
+      }
+      if (location) {
+        messageParts.push(location);
+      }
+
+      const message = messageParts.join(' — ');
 
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: resultStatus === 'failed' ? 'error' : resultStatus === 'skipped' ? 'warn' : 'info',
-        message: `${logParts.join(' ')}${location}`
+        message
       });
 
       currentState.testResults[data.test?.title || `test-${Date.now()}`] = {
