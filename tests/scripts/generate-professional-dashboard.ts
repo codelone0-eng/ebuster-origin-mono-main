@@ -557,7 +557,8 @@ function generateProfessionalDashboard() {
     console.log('[Dashboard] WebSocket URL:', wsUrl);
     
     const ws = new WebSocket(wsUrl);
-    
+    updateLastUpdate();
+
     ws.onopen = () => {
       console.log('[WebSocket] Connected successfully');
       updateStatus('idle', 'Подключено');
@@ -578,12 +579,13 @@ function generateProfessionalDashboard() {
           document.getElementById('run-tests').disabled = true;
         } else if (type === 'testEnd') {
           console.log('[WebSocket] Test ended:', data);
-          addLog(data.logs[data.logs.length - 1]);
+          if (data.logs && data.logs.length) {
+            addLog(data.logs[data.logs.length - 1]);
+          }
         } else if (type === 'end') {
           console.log('[WebSocket] All tests completed');
           updateStatus('idle', 'Тесты завершены');
           document.getElementById('run-tests').disabled = false;
-          setTimeout(() => location.reload(), 2000);
         }
       } catch (error) {
         console.error('[WebSocket] Parse error:', error);
@@ -605,22 +607,40 @@ function generateProfessionalDashboard() {
       const statusText = document.getElementById('status-text');
       indicator.className = 'status-indicator ' + status;
       statusText.textContent = text;
+      updateLastUpdate();
     }
 
     function updateDashboard(state) {
-      document.getElementById('total').textContent = state.summary.total;
-      document.getElementById('passed').textContent = state.summary.passed;
-      document.getElementById('failed').textContent = state.summary.failed;
-      document.getElementById('skipped').textContent = state.summary.skipped;
-      
+      const summary = state.summary || { total: 0, passed: 0, failed: 0, skipped: 0 };
+      document.getElementById('total').textContent = String(summary.total ?? 0);
+      document.getElementById('passed').textContent = String(summary.passed ?? 0);
+      document.getElementById('failed').textContent = String(summary.failed ?? 0);
+      document.getElementById('skipped').textContent = String(summary.skipped ?? 0);
+      updateLastUpdate();
+
       const logsContainer = document.getElementById('logs');
-      logsContainer.innerHTML = state.logs.map(log => 
-        \`<div class="log-entry">
-          <span class="log-time">\${new Date(log.timestamp).toLocaleTimeString('ru-RU')}</span>
-          <span class="log-message">\${log.message}</span>
-        </div>\`
-      ).join('');
-      
+      const logs = Array.isArray(state.logs) ? state.logs : [];
+
+      if (!logs.length) {
+        logsContainer.innerHTML = `
+          <div class="log-entry">
+            <span class="log-time">${new Date().toLocaleTimeString('ru-RU')}</span>
+            <span class="log-message">Система готова к запуску тестов</span>
+          </div>
+        `;
+      } else {
+        logsContainer.innerHTML = logs.map(log => {
+          const time = new Date(log?.timestamp || Date.now()).toLocaleTimeString('ru-RU');
+          const message = log?.message ?? '';
+          return `
+          <div class="log-entry">
+            <span class="log-time">${time}</span>
+            <span class="log-message">${message}</span>
+          </div>
+        `;
+        }).join('');
+      }
+
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 
@@ -629,16 +649,24 @@ function generateProfessionalDashboard() {
       const logsContainer = document.getElementById('logs');
       const entry = document.createElement('div');
       entry.className = 'log-entry';
-      entry.innerHTML = \`
-        <span class="log-time">\${new Date(log.timestamp).toLocaleTimeString('ru-RU')}</span>
-        <span class="log-message">\${log.message}</span>
-      \`;
+      entry.innerHTML = `
+        <span class="log-time">${new Date(log.timestamp || Date.now()).toLocaleTimeString('ru-RU')}</span>
+        <span class="log-message">${log.message || ''}</span>
+      `;
       logsContainer.appendChild(entry);
       logsContainer.scrollTop = logsContainer.scrollHeight;
+      updateLastUpdate();
     }
 
     function clearLogs() {
-      document.getElementById('logs').innerHTML = '';
+      const logsContainer = document.getElementById('logs');
+      logsContainer.innerHTML = `
+        <div class="log-entry">
+          <span class="log-time">${new Date().toLocaleTimeString('ru-RU')}</span>
+          <span class="log-message">Логи очищены</span>
+        </div>
+      `;
+      updateLastUpdate();
     }
 
     async function runTests() {
@@ -654,6 +682,7 @@ function generateProfessionalDashboard() {
             console.log('[Dashboard] Response data:', result);
             updateStatus('running', 'Запуск тестов...');
             document.getElementById('run-tests').disabled = true;
+            updateLastUpdate();
           } else {
             const error = await response.text();
             console.error('[Dashboard] Error response:', error);
@@ -665,6 +694,14 @@ function generateProfessionalDashboard() {
         }
       } else {
         console.log('[Dashboard] Test run cancelled by user');
+        updateLastUpdate();
+      }
+    }
+
+    function updateLastUpdate() {
+      const element = document.getElementById('last-update');
+      if (element) {
+        element.textContent = new Date().toLocaleString('ru-RU');
       }
     }
   </script>

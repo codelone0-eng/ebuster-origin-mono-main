@@ -12,7 +12,12 @@ app.use(cors());
 app.use(express.json());
 
 const DOCKER_WORKDIR = process.env.DOCKER_PROJECT_DIR || '/workspace';
-const DOCKER_RUN_COMMAND = process.env.DOCKER_RUN_COMMAND || 'docker compose -f docker-compose.yml run --rm --no-deps --no-build autotest-runner npm run test:all';
+const DOCKER_ENV_FILE = process.env.DOCKER_ENV_FILE || '/srv/ebuster/.env.autotest';
+const DOCKER_NETWORK = process.env.DOCKER_NETWORK || 'ebuster_ebuster-network';
+const DOCKER_REPORT_VOLUME = process.env.DOCKER_REPORT_VOLUME || 'ebuster_autotest_reports';
+const DOCKER_STORAGE_VOLUME = process.env.DOCKER_STORAGE_VOLUME || 'ebuster_autotest_storage';
+const DOCKER_AUTOTEST_IMAGE = process.env.DOCKER_AUTOTEST_IMAGE || 'ebuster-autotest-runner';
+const DOCKER_RUN_COMMAND = process.env.DOCKER_RUN_COMMAND || `sh -c "docker rm -f autotest-runner-on-demand >/dev/null 2>&1 || true && docker run --rm --name autotest-runner-on-demand --network ${DOCKER_NETWORK} --env-file ${DOCKER_ENV_FILE} -v ${DOCKER_REPORT_VOLUME}:/app/tests/public/autotest -v ${DOCKER_STORAGE_VOLUME}:/app/tests/storage ${DOCKER_AUTOTEST_IMAGE} npm run test:all"`;
 
 // Хранилище текущего состояния тестов
 let currentState = {
