@@ -85,6 +85,31 @@ function formatLocation(location) {
   return cleaned ? `Файл: ${cleaned}${linePart}` : '';
 }
 
+function detectCategory(location, title = '') {
+  const filePath = (location?.file || '').toLowerCase();
+  const testTitle = title.toLowerCase();
+
+  const checks = [filePath, testTitle].join(' ');
+
+  if (/tests\/ui\/admin/.test(filePath)) return 'ADMIN UI';
+  if (/tests\\ui\\admin/.test(filePath)) return 'ADMIN UI';
+
+  if (/tests\/ui\/lk/.test(filePath)) return 'LK UI';
+  if (/tests\\ui\\lk/.test(filePath)) return 'LK UI';
+
+  if (/tests\/ui\//.test(filePath) || /tests\\ui\\/.test(filePath)) return 'UI';
+
+  if (/tests\/api\//.test(filePath) || /tests\\api\\/.test(filePath)) {
+    if (/admin/.test(checks)) return 'ADMIN API';
+    if (/lk/.test(checks)) return 'LK API';
+    return 'API';
+  }
+
+  if (/tests\/e2e\//.test(filePath) || /tests\\e2e\\/.test(filePath)) return 'E2E';
+
+  return 'Прочие тесты';
+}
+
 const TITLE_TRANSLATIONS = new Map([
   ['route /dashboard should be accessible', 'Страница /dashboard открывается'],
   ['route /users should be accessible', 'Страница /users открывается'],
@@ -218,7 +243,8 @@ let currentState = {
     skipped: 0
   },
   logs: [],
-  testResults: {}
+  testResults: {},
+  categorySummary: {}
 };
 
 // WebSocket соединения
@@ -270,7 +296,8 @@ app.post('/run', (req, res) => {
       level: 'info',
       message: 'Запрос на запуск тестов принят. Инициализируем окружение...'
     }],
-    testResults: {}
+    testResults: {},
+    categorySummary: {}
   };
   
   broadcast({ type: 'testStart', data: currentState });
@@ -355,6 +382,7 @@ app.post('/update', (req, res) => {
       currentState.summary = { total: 0, passed: 0, failed: 0, skipped: 0 };
       currentState.logs = [];
       currentState.testResults = {};
+      currentState.categorySummary = {};
       break;
     }
       
@@ -376,11 +404,20 @@ app.post('/update', (req, res) => {
       const resultStatus = normalizeResultStatus(data.result?.status);
       const duration = formatDuration(data.result?.duration);
       const errorDetails = formatErrorDetails(data.result?.error);
+      const category = detectCategory(data.test?.location, title);
 
       currentState.summary.total += 1;
       if (resultStatus === 'passed') currentState.summary.passed += 1;
       if (resultStatus === 'failed') currentState.summary.failed += 1;
       if (resultStatus === 'skipped') currentState.summary.skipped += 1;
+
+      if (!currentState.categorySummary[category]) {
+        currentState.categorySummary[category] = { total: 0, passed: 0, failed: 0, skipped: 0 };
+      }
+      currentState.categorySummary[category].total += 1;
+      if (resultStatus === 'passed') currentState.categorySummary[category].passed += 1;
+      if (resultStatus === 'failed') currentState.categorySummary[category].failed += 1;
+      if (resultStatus === 'skipped') currentState.categorySummary[category].skipped += 1;
 
       const statusPrefix = resultStatus === 'passed'
         ? '✅ Успех'
@@ -411,7 +448,8 @@ app.post('/update', (req, res) => {
         status: resultStatus,
         duration,
         error: errorDetails,
-        location
+        location,
+        category
       };
 
       currentState.suites = currentState.suites.map((suite) => {

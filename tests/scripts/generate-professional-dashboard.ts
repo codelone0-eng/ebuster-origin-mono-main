@@ -8,6 +8,8 @@ const __dirname = path.dirname(__filename);
 const REPORTS_DIR = path.resolve(__dirname, '../reports');
 const PUBLIC_DIR = path.resolve(__dirname, '../public/autotest');
 
+const CATEGORY_ORDER = ['ADMIN UI', 'LK UI', 'ADMIN API', 'LK API', 'UI', 'API', 'E2E', 'Прочие тесты'];
+
 interface TestSummary {
   suite: string;
   displayName: string;
@@ -17,6 +19,66 @@ interface TestSummary {
   skipped: number;
   total: number;
   duration: number;
+}
+
+function buildCategoryCardMarkup(category: string, stats: CategoryStats = { total: 0, passed: 0, failed: 0, skipped: 0 }): string {
+  const total = stats.total || 0;
+  const passed = stats.passed || 0;
+  const failed = stats.failed || 0;
+  const skipped = stats.skipped || 0;
+  const successRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+  const formatNumber = (value: number) => value.toLocaleString('ru-RU');
+
+  return `
+    <div class="category-card" data-category="${category}">
+      <div class="category-card-header">
+        <span class="category-name">${category}</span>
+        <span class="category-total">${formatNumber(total)} тестов</span>
+      </div>
+      <div class="category-rate">${successRate}% успеха</div>
+      <div class="category-metrics">
+        <div class="category-metric success">
+          <span class="metric-label">Успешно</span>
+          <span class="metric-value">${formatNumber(passed)}</span>
+        </div>
+        <div class="category-metric error">
+          <span class="metric-label">Провалено</span>
+          <span class="metric-value">${formatNumber(failed)}</span>
+        </div>
+        <div class="category-metric skipped">
+          <span class="metric-label">Пропущено</span>
+          <span class="metric-value">${formatNumber(skipped)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+interface CategoryStats {
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+}
+
+function detectCategory(summary: TestSummary): string {
+  const suitePath = summary.suite?.toLowerCase() || '';
+  const display = summary.displayName?.toLowerCase() || '';
+  const combined = `${suitePath} ${display}`;
+
+  if (suitePath.includes('ui/admin') || combined.includes('admin ui')) return 'ADMIN UI';
+  if (suitePath.includes('ui/lk') || combined.includes('lk ui')) return 'LK UI';
+
+  if (suitePath.includes('/ui') || suitePath.startsWith('ui/')) return 'UI';
+
+  if (suitePath.includes('api/admin') || combined.includes('admin api')) return 'ADMIN API';
+  if (suitePath.includes('api/lk') || combined.includes('lk api')) return 'LK API';
+  if (suitePath.includes('/api') || suitePath.startsWith('api/')) return 'API';
+
+  if (suitePath.includes('/e2e') || suitePath.startsWith('e2e')) return 'E2E';
+
+  return 'Прочие тесты';
 }
 
 function generateProfessionalDashboard() {
@@ -39,6 +101,28 @@ function generateProfessionalDashboard() {
   const totalFailed = results.reduce((sum, r) => sum + r.failed, 0);
   const totalSkipped = results.reduce((sum, r) => sum + r.skipped, 0);
   const totalTests = results.reduce((sum, r) => sum + r.total, 0);
+
+  const categoryTotals: Record<string, CategoryStats> = {};
+  for (const summary of results) {
+    const category = detectCategory(summary);
+    if (!categoryTotals[category]) {
+      categoryTotals[category] = { total: 0, passed: 0, failed: 0, skipped: 0 };
+    }
+
+    categoryTotals[category].total += summary.total ?? 0;
+    categoryTotals[category].passed += summary.passed ?? 0;
+    categoryTotals[category].failed += summary.failed ?? 0;
+    categoryTotals[category].skipped += summary.skipped ?? 0;
+  }
+
+  const orderedCategories = CATEGORY_ORDER.filter(category => categoryTotals[category]);
+  const extraCategories = Object.keys(categoryTotals)
+    .filter(category => !CATEGORY_ORDER.includes(category))
+    .sort();
+
+  const initialCategoryHtml = [...orderedCategories, ...extraCategories]
+    .map(category => buildCategoryCardMarkup(category, categoryTotals[category]))
+    .join('') || '<div class="category-empty">Нет данных по категориям</div>';
 
   // Форматируем дату безопасно
   const formatDate = (dateStr: string) => {
@@ -346,6 +430,108 @@ function generateProfessionalDashboard() {
       text-decoration: underline;
     }
 
+    .category-section {
+      margin-bottom: 24px;
+      background: var(--card);
+      border: 1px solid var(--content-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .category-section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .category-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--content-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .category-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--muted-foreground);
+    }
+
+    .category-name {
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .category-total {
+      font-size: 13px;
+    }
+
+    .category-rate {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .category-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .category-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      border-radius: var(--radius);
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .category-metric.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .category-metric.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .category-metric.skipped {
+      border-left: 3px solid var(--warning);
+    }
+
+    .metric-label {
+      color: var(--muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .category-empty {
+      color: var(--muted-foreground);
+      font-size: 14px;
+    }
+
     .logs-section {
       background: var(--card);
       border: 1px solid var(--content-border);
@@ -477,6 +663,19 @@ function generateProfessionalDashboard() {
         </div>
         <div class="stat-value" id="skipped">${totalSkipped}</div>
         <div class="stat-label">Пропущено</div>
+      </div>
+    </div>
+
+    <div class="category-section">
+      <h2>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9V7a5 5 0 0110 0v2" />
+        </svg>
+        Статистика по блокам
+      </h2>
+      <div class="category-grid" id="category-grid">
+        ${initialCategoryHtml}
       </div>
     </div>
 
@@ -633,6 +832,8 @@ function generateProfessionalDashboard() {
       }
 
       logsContainer.scrollTop = logsContainer.scrollHeight;
+
+      updateCategoryCards(state.categorySummary || {});
     }
 
     function addLog(log) {
@@ -648,6 +849,64 @@ function generateProfessionalDashboard() {
       logsContainer.innerHTML = '';
       logsContainer.appendChild(createLogEntry(Date.now(), 'Логи очищены'));
       updateLastUpdate();
+    }
+
+    const CATEGORY_ORDER = ${JSON.stringify(CATEGORY_ORDER)};
+
+    function updateCategoryCards(summary) {
+      const container = document.getElementById('category-grid');
+      if (!container) return;
+
+      const entries = Object.entries(summary || {});
+      if (!entries.length) {
+        container.innerHTML = '<div class="category-empty">Нет данных по категориям</div>';
+        return;
+      }
+
+      const ordered = CATEGORY_ORDER.filter(key => summary[key]);
+      const extras = entries
+        .map(([key]) => key)
+        .filter(key => !CATEGORY_ORDER.includes(key))
+        .sort();
+
+      const formatNumber = (value) => Number(value || 0).toLocaleString('ru-RU');
+
+      const renderCard = (category) => {
+        const stats = summary[category] || { total: 0, passed: 0, failed: 0, skipped: 0 };
+        const total = Number(stats.total || 0);
+        const passed = Number(stats.passed || 0);
+        const failed = Number(stats.failed || 0);
+        const skipped = Number(stats.skipped || 0);
+        const successRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+        return \`
+          <div class="category-card" data-category="\${category}">
+            <div class="category-card-header">
+              <span class="category-name">\${category}</span>
+              <span class="category-total">\${formatNumber(total)} тестов</span>
+            </div>
+            <div class="category-rate">\${successRate}% успеха</div>
+            <div class="category-metrics">
+              <div class="category-metric success">
+                <span class="metric-label">Успешно</span>
+                <span class="metric-value">\${formatNumber(passed)}</span>
+              </div>
+              <div class="category-metric error">
+                <span class="metric-label">Провалено</span>
+                <span class="metric-value">\${formatNumber(failed)}</span>
+              </div>
+              <div class="category-metric skipped">
+                <span class="metric-label">Пропущено</span>
+                <span class="metric-value">\${formatNumber(skipped)}</span>
+              </div>
+            </div>
+          </div>
+        \`;
+      };
+
+      container.innerHTML = [...ordered, ...extras]
+        .map(renderCard)
+        .join('');
     }
 
     function createLogEntry(timestamp, message) {
