@@ -619,26 +619,15 @@ function generateProfessionalDashboard() {
       updateLastUpdate();
 
       const logsContainer = document.getElementById('logs');
-      const logs = Array.isArray(state.logs) ? state.logs : [];
+      logsContainer.innerHTML = '';
 
+      const logs = Array.isArray(state.logs) ? state.logs : [];
       if (!logs.length) {
-        logsContainer.innerHTML = `
-          <div class="log-entry">
-            <span class="log-time">${new Date().toLocaleTimeString('ru-RU')}</span>
-            <span class="log-message">Система готова к запуску тестов</span>
-          </div>
-        `;
+        logsContainer.appendChild(createLogEntry(Date.now(), 'Система готова к запуску тестов'));
       } else {
-        logsContainer.innerHTML = logs.map(log => {
-          const time = new Date(log?.timestamp || Date.now()).toLocaleTimeString('ru-RU');
-          const message = log?.message ?? '';
-          return `
-          <div class="log-entry">
-            <span class="log-time">${time}</span>
-            <span class="log-message">${message}</span>
-          </div>
-        `;
-        }).join('');
+        logs.forEach(log => {
+          logsContainer.appendChild(createLogEntry(log?.timestamp ?? Date.now(), log?.message ?? ''));
+        });
       }
 
       logsContainer.scrollTop = logsContainer.scrollHeight;
@@ -647,26 +636,32 @@ function generateProfessionalDashboard() {
     function addLog(log) {
       if (!log) return;
       const logsContainer = document.getElementById('logs');
-      const entry = document.createElement('div');
-      entry.className = 'log-entry';
-      entry.innerHTML = `
-        <span class="log-time">${new Date(log.timestamp || Date.now()).toLocaleTimeString('ru-RU')}</span>
-        <span class="log-message">${log.message || ''}</span>
-      `;
-      logsContainer.appendChild(entry);
+      logsContainer.appendChild(createLogEntry(log.timestamp ?? Date.now(), log.message ?? ''));
       logsContainer.scrollTop = logsContainer.scrollHeight;
       updateLastUpdate();
     }
 
     function clearLogs() {
       const logsContainer = document.getElementById('logs');
-      logsContainer.innerHTML = `
-        <div class="log-entry">
-          <span class="log-time">${new Date().toLocaleTimeString('ru-RU')}</span>
-          <span class="log-message">Логи очищены</span>
-        </div>
-      `;
+      logsContainer.innerHTML = '';
+      logsContainer.appendChild(createLogEntry(Date.now(), 'Логи очищены'));
       updateLastUpdate();
+    }
+
+    function createLogEntry(timestamp, message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const timeEl = document.createElement('span');
+      timeEl.className = 'log-time';
+      timeEl.textContent = new Date(timestamp).toLocaleTimeString('ru-RU');
+
+      const messageEl = document.createElement('span');
+      messageEl.className = 'log-message';
+      messageEl.textContent = message;
+
+      entry.append(timeEl, messageEl);
+      return entry;
     }
 
     async function runTests() {
