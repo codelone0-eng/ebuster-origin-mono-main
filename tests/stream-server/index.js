@@ -40,6 +40,48 @@ function buildDockerRunCommand() {
   };
 }
 
+const FAILURE_STATUSES = new Set(['failed', 'timedOut', 'interrupted']);
+
+function normalizeResultStatus(status = '') {
+  if (FAILURE_STATUSES.has(status)) return 'failed';
+  if (status === 'skipped') return 'skipped';
+  return 'passed';
+}
+
+function formatDuration(ms = 0) {
+  if (!Number.isFinite(ms)) return 'неизвестно';
+  if (ms >= 1000) {
+    const seconds = ms / 1000;
+    const formatted = seconds >= 10 ? Math.round(seconds).toString() : seconds.toFixed(1);
+    return `${formatted.replace('.', ',')} с`;
+  }
+  return `${Math.round(ms)} мс`;
+}
+
+function stripAnsi(value = '') {
+  return value.replace(/\u001b\[[0-9;]*m/g, '');
+}
+
+function formatErrorDetails(error) {
+  if (!error) return '';
+  const rawMessage = typeof error === 'string'
+    ? error
+    : stripAnsi(error.message || error.value || '');
+  const lines = rawMessage.split('\n').map(line => line.trim()).filter(Boolean);
+  if (!lines.length) return '';
+  const primary = lines[0];
+  const secondary = lines.find(line => line && line !== primary);
+  return secondary ? `${primary}. ${secondary}` : primary;
+}
+
+function formatLocation(location) {
+  if (!location) return '';
+  const parts = [];
+  if (location.file) parts.push(location.file.replace(/\\/g, '/'));
+  if (location.line) parts.push(location.line);
+  return parts.length ? ` (${parts.join(':')})` : '';
+}
+
 // Хранилище текущего состояния тестов
 let currentState = {
   status: 'idle', // idle, running, completed
@@ -52,7 +94,8 @@ let currentState = {
     failed: 0,
     skipped: 0
   },
-  logs: []
+  logs: [],
+  testResults: {}
 };
 
 // WebSocket соединения
@@ -99,7 +142,12 @@ app.post('/run', (req, res) => {
     endTime: null,
     suites: [],
     summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
-    logs: [{ timestamp: new Date().toISOString(), message: 'Starting test run...' }]
+    logs: [{
+      timestamp: new Date().toISOString(),
+      level: 'info',
+      message: 'Запрос на запуск тестов принят. Инициализируем окружение...'
+    }],
+    testResults: {}
   };
   
   broadcast({ type: 'testStart', data: currentState });
@@ -108,7 +156,7 @@ app.post('/run', (req, res) => {
   currentState.logs.push({
     timestamp: new Date().toISOString(),
     level: 'info',
-    message: 'Запускаем docker compose для выполнения тестов...'
+    message: 'Запускаем docker-контейнер autotest-runner для выполнения тестов...'
   });
   broadcast({ type: 'state', data: currentState });
 
@@ -129,7 +177,7 @@ app.post('/run', (req, res) => {
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: 'debug',
-        message: stdout.trim()
+        message: stripAnsi(stdout.trim())
       });
     }
 
@@ -137,7 +185,7 @@ app.post('/run', (req, res) => {
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: 'warn',
-        message: stderr.trim()
+        message: stripAnsi(stderr.trim())
       });
     }
 
@@ -171,54 +219,105 @@ app.post('/update', (req, res) => {
   const { type, data } = req.body;
   
   switch (type) {
-    case 'begin':
+    case 'begin': {
       currentState.status = 'running';
       currentState.startTime = new Date().toISOString();
-      currentState.suites = data.suites || [];
+      currentState.suites = (data.suites || []).map((suite) => ({
+        ...suite,
+        passed: 0,
+        failed: 0,
+        skipped: 0,
+        status: 'idle'
+      }));
       currentState.summary = { total: 0, passed: 0, failed: 0, skipped: 0 };
       currentState.logs = [];
+      currentState.testResults = {};
       break;
+    }
       
-    case 'testBegin':
+    case 'testBegin': {
+      const title = data.test?.title || 'Неизвестный тест';
+      const location = formatLocation(data.test?.location);
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: `▶️ Starting: ${data.test.title}`
+        message: `▶️ Запуск: ${title}${location}`
       });
       break;
+    }
       
-    case 'testEnd':
-      const status = data.result.status;
-      currentState.summary.total++;
-      if (status === 'passed') currentState.summary.passed++;
-      else if (status === 'failed') currentState.summary.failed++;
-      else if (status === 'skipped') currentState.summary.skipped++;
-      
-      const emoji = status === 'passed' ? '✅' : status === 'failed' ? '❌' : '⏭️';
+    case 'testEnd': {
+      const title = data.test?.title || 'Неизвестный тест';
+      const location = formatLocation(data.test?.location);
+      const resultStatus = normalizeResultStatus(data.result?.status);
+      const duration = formatDuration(data.result?.duration);
+      const errorDetails = formatErrorDetails(data.result?.error);
+
+      currentState.summary.total += 1;
+      if (resultStatus === 'passed') currentState.summary.passed += 1;
+      if (resultStatus === 'failed') currentState.summary.failed += 1;
+      if (resultStatus === 'skipped') currentState.summary.skipped += 1;
+
+      const logParts = [
+        resultStatus === 'passed' ? '✅ Успех' : resultStatus === 'failed' ? '❌ Ошибка' : '⏭️ Пропущен',
+        title,
+        `(${duration})`
+      ];
+      if (errorDetails) {
+        logParts.push(`→ ${errorDetails}`);
+      }
+
       currentState.logs.push({
         timestamp: new Date().toISOString(),
-        level: status === 'failed' ? 'error' : 'info',
-        message: `${emoji} ${data.test.title} (${data.result.duration}ms)`
+        level: resultStatus === 'failed' ? 'error' : resultStatus === 'skipped' ? 'warn' : 'info',
+        message: `${logParts.join(' ')}${location}`
       });
+
+      currentState.testResults[data.test?.title || `test-${Date.now()}`] = {
+        status: resultStatus,
+        duration,
+        error: errorDetails,
+        location
+      };
+
+      currentState.suites = currentState.suites.map((suite) => {
+        if (!Array.isArray(data.test?.tags)) return suite;
+        const belongsToSuite = data.test.tags.some(tag => tag && suite.title && tag.startsWith(`suite:${suite.title}`));
+        if (!belongsToSuite) return suite;
+
+        const suiteUpdate = { ...suite };
+        if (resultStatus === 'passed') suiteUpdate.passed += 1;
+        if (resultStatus === 'failed') suiteUpdate.failed += 1;
+        if (resultStatus === 'skipped') suiteUpdate.skipped += 1;
+        suiteUpdate.status = resultStatus === 'failed' ? 'failed' : suiteUpdate.status === 'failed' ? 'failed' : 'passed';
+        return suiteUpdate;
+      });
+
       break;
+    }
       
-    case 'end':
+    case 'end': {
       currentState.status = 'completed';
       currentState.endTime = new Date().toISOString();
+      const summaryMessage = currentState.summary.failed > 0
+        ? `⚠️ Тестирование завершено с ошибками: ${currentState.summary.passed}/${currentState.summary.total} успешных`
+        : `✅ Тестирование завершено успешно: ${currentState.summary.passed}/${currentState.summary.total}`;
       currentState.logs.push({
         timestamp: new Date().toISOString(),
-        level: 'info',
-        message: `✅ Tests completed: ${currentState.summary.passed}/${currentState.summary.total} passed`
+        level: currentState.summary.failed > 0 ? 'warn' : 'info',
+        message: summaryMessage
       });
       break;
+    }
       
-    case 'log':
+    case 'log': {
       currentState.logs.push({
         timestamp: new Date().toISOString(),
         level: data.level || 'info',
-        message: data.message
+        message: stripAnsi(data.message || '')
       });
       break;
+    }
   }
   
   // Broadcast обновление всем подключенным клиентам

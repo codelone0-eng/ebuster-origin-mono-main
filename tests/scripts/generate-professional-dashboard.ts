@@ -579,12 +579,14 @@ function generateProfessionalDashboard() {
           document.getElementById('run-tests').disabled = true;
         } else if (type === 'testEnd') {
           console.log('[WebSocket] Test ended:', data);
+          updateDashboard(data);
           if (data.logs && data.logs.length) {
             addLog(data.logs[data.logs.length - 1]);
           }
         } else if (type === 'end') {
           console.log('[WebSocket] All tests completed');
           updateStatus('idle', 'Тесты завершены');
+          updateDashboard(data);
           document.getElementById('run-tests').disabled = false;
         }
       } catch (error) {
