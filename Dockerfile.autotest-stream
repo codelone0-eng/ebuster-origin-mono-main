@@ -5,8 +5,8 @@ WORKDIR /app
 # Устанавливаем системные пакеты (кэшируется отдельным слоем)
 RUN apk add --no-cache docker-cli docker-cli-compose bash
 
-# Устанавливаем npm пакеты (кэшируется отдельным слоем)
-RUN npm install --global express cors ws && npm cache clean --force
+# Устанавливаем npm пакеты локально (кэшируется отдельным слоем)
+RUN npm init -y && npm install express cors ws && npm cache clean --force
 
 # Копируем сервер для live-стрима
 COPY tests/stream-server ./stream-server
