@@ -2,32 +2,23 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Оптимизация: устанавливаем только критичные системные пакеты
-RUN apk add --no-cache --virtual .build-deps python3 make g++ \
-  && apk add --no-cache tini
+COPY package*.json package-lock.json ./
 
-COPY package*.json ./
-
-# Экстремальная оптимизация: npm ci с production флагами
-RUN npm ci --omit=dev --prefer-offline --no-audit --no-fund \
-  && npm cache clean --force \
-  && apk del .build-deps
+# Быстрая установка зависимостей
+RUN npm ci --omit=dev --no-audit --no-fund \
+  && npm cache clean --force
 
 # Production stage - минимальный образ
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Оптимизация: создаём non-root пользователя
-RUN addgroup -g 1001 -S nodejs \
-  && adduser -S nodejs -u 1001 \
-  && apk add --no-cache tini
+# Устанавливаем только необходимое
+RUN apk add --no-cache tini \
+  && npm install -g tsx
 
 # Копируем зависимости из deps stage
 COPY --from=deps /app/node_modules ./node_modules
-
-# Устанавливаем tsx глобально с оптимизацией
-RUN npm install -g tsx --prefer-offline --no-audit --no-fund
 
 # Копируем исходники API (меняются часто - в конце)
 COPY server.ts ./
@@ -40,16 +31,11 @@ COPY src/utils ./src/utils
 COPY tsconfig*.json ./
 COPY package*.json ./
 
-# Переключаемся на non-root пользователя
-USER nodejs
-
 EXPOSE 3001
-
-# Оптимизация: используем tini для правильной обработки сигналов
-ENTRYPOINT ["/sbin/tini", "--"]
 
 # Оптимизация: NODE_ENV и memory limits
 ENV NODE_ENV=production \
-    NODE_OPTIONS="--max-old-space-size=2048 --optimize-for-size"
+    NODE_OPTIONS="--max-old-space-size=2048"
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["tsx", "start-server.ts"]
