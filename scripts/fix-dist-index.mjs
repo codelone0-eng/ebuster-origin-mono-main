@@ -27,7 +27,6 @@ async function main() {
       .join('\n');
 
     const scriptTag = `    <script type="module" crossorigin src="/assets/${mainJs}"></script>`;
-    const payload = [cssTags, scriptTag].filter(Boolean).join('\n');
 
     let html = originalHtml;
 
@@ -40,16 +39,20 @@ async function main() {
     // Remove duplicate index-*.css links
     html = html.replace(/\s*<link[^>]+href="\/assets\/index-[^"]+\.css"[^>]*>\s*/g, '\n');
 
-    const injection = `\n${payload}\n`;
+    if (cssTags) {
+      if (/<\/head>/i.test(html)) {
+        html = html.replace(/<\/head>/i, `\n${cssTags}\n  </head>`);
+      } else {
+        html = html.replace(/<body([^>]*)>/i, `<body$1>\n${cssTags}`);
+      }
+    }
 
-    if (/<div id="root"><\/div>/i.test(html)) {
-      html = html.replace(/<div id="root"><\/div>/i, `<div id="root"></div>${injection}`);
-    } else if (/<body[^>]*>/i.test(html)) {
-      html = html.replace(/<body([^>]*)>/i, `<body$1>${injection}`);
-    } else if (/<\/body>/i.test(html)) {
-      html = html.replace(/<\/body>/i, `${injection}</body>`);
-    } else {
-      html += injection;
+    if (scriptTag) {
+      if (/<\/body>/i.test(html)) {
+        html = html.replace(/<\/body>/i, `\n${scriptTag}\n  </body>`);
+      } else {
+        html += `\n${scriptTag}\n`;
+      }
     }
 
     await fs.writeFile(indexPath, html, 'utf8');
