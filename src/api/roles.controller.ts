@@ -22,8 +22,7 @@ export const getRoles = async (req: Request, res: Response) => {
 
     const { data: roles, error } = await supabase
       .from('roles')
-      .select('*')
-      .eq('is_active', true)
+      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -97,17 +96,12 @@ export const createRole = async (req: Request, res: Response) => {
       name,
       display_name,
       description,
-      price_monthly,
-      price_yearly,
-      features,
-      limits,
-      is_active,
-      is_subscription,
+      permissions,
       display_order
     } = req.body;
 
     // Валидация
-    if (!name || !display_name || !features || !limits) {
+    if (!name || !display_name) {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields'
@@ -122,15 +116,10 @@ export const createRole = async (req: Request, res: Response) => {
         name,
         display_name,
         description,
-        price_monthly: price_monthly || 0,
-        price_yearly: price_yearly || 0,
-        features,
-        limits,
-        is_active: is_active !== undefined ? is_active : true,
-        is_subscription: is_subscription !== undefined ? is_subscription : false,
+        permissions: permissions ?? {},
         display_order: display_order || 0
       })
-      .select()
+      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
       .single();
 
     if (error) {
@@ -173,12 +162,7 @@ export const updateRole = async (req: Request, res: Response) => {
       name,
       display_name,
       description,
-      price_monthly,
-      price_yearly,
-      features,
-      limits,
-      is_active,
-      is_subscription,
+      permissions,
       display_order
     } = req.body;
 
@@ -188,19 +172,14 @@ export const updateRole = async (req: Request, res: Response) => {
     if (name !== undefined) updateData.name = name;
     if (display_name !== undefined) updateData.display_name = display_name;
     if (description !== undefined) updateData.description = description;
-    if (price_monthly !== undefined) updateData.price_monthly = price_monthly;
-    if (price_yearly !== undefined) updateData.price_yearly = price_yearly;
-    if (features !== undefined) updateData.features = features;
-    if (limits !== undefined) updateData.limits = limits;
-    if (is_active !== undefined) updateData.is_active = is_active;
-    if (is_subscription !== undefined) updateData.is_subscription = is_subscription;
+    if (permissions !== undefined) updateData.permissions = permissions;
     if (display_order !== undefined) updateData.display_order = display_order;
 
     const { data: role, error } = await supabase
       .from('roles')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
       .single();
 
     if (error) {

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { Buffer } from 'buffer';
 
 // Ленивая инициализация Supabase клиента
 let supabaseClient: any = null;
@@ -30,14 +31,36 @@ const getSupabaseClient = () => {
 };
 
 // Интерфейсы
-interface Script {
+interface DbScript {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  author_id?: string | null;
+  author_name: string | null;
+  code: string;
+  version: string | null;
+  status: string | null;
+  is_featured: boolean | null;
+  is_public: boolean | null;
+  tags: string[] | null;
+  icon_url: string | null;
+  changelog: string | null;
+  downloads: number | null;
+  views?: number | null;
+  rating: number | null;
+  created_at: string;
+  updated_at: string;
+  last_downloaded_at: string | null;
+}
+
+interface ScriptResponse {
   id: string;
   title: string;
   description: string;
   code: string;
   category: string;
   tags: string[];
-  author_id?: string;
   author_name: string;
   version: string;
   status: 'draft' | 'published' | 'archived' | 'banned';
@@ -48,13 +71,12 @@ interface Script {
   rating_count: number;
   file_size: number;
   file_type: string;
-  compatibility: any;
-  requirements: string[];
   changelog?: string;
   created_at: string;
   updated_at: string;
-  published_at?: string;
-  last_downloaded_at?: string;
+  published_at?: string | null;
+  last_downloaded_at?: string | null;
+  icon_url?: string | null;
 }
 
 interface CreateScriptRequest {
@@ -65,10 +87,7 @@ interface CreateScriptRequest {
   tags: string[];
   author_name: string;
   is_featured?: boolean;
-  is_premium?: boolean;
   file_type?: string;
-  compatibility?: any;
-  requirements?: string[];
   changelog?: string;
 }
 
@@ -80,12 +99,37 @@ interface UpdateScriptRequest {
   tags?: string[];
   status?: 'draft' | 'published' | 'archived' | 'banned';
   is_featured?: boolean;
-  is_premium?: boolean;
   file_type?: string;
-  compatibility?: any;
-  requirements?: string[];
   changelog?: string;
 }
+
+const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
+  const code = script.code || '';
+  return {
+    id: script.id,
+    title: script.name ?? '',
+    description: script.description ?? '',
+    code,
+    category: script.category ?? 'general',
+    tags: Array.isArray(script.tags) ? script.tags : [],
+    author_name: script.author_name ?? 'Admin',
+    version: script.version ?? '1.0.0',
+    status: (script.status as ScriptResponse['status']) ?? 'active',
+    is_featured: Boolean(script.is_featured),
+    is_premium: false,
+    downloads_count: script.downloads ?? 0,
+    rating: script.rating ?? 0,
+    rating_count: 0,
+    file_size: Buffer.byteLength(code, 'utf8'),
+    file_type: 'javascript',
+    changelog: script.changelog ?? undefined,
+    created_at: script.created_at,
+    updated_at: script.updated_at,
+    published_at: null,
+    last_downloaded_at: script.last_downloaded_at ?? null,
+    icon_url: script.icon_url ?? null
+  };
+};
 
 // Получение списка скриптов
 export const getScripts = async (req: Request, res: Response) => {
@@ -97,7 +141,6 @@ export const getScripts = async (req: Request, res: Response) => {
       category = '', 
       status = '', // Убираем фильтр по умолчанию для админ-панели
       featured = '',
-      premium = '',
       sort = 'created_at',
       order = 'desc'
     } = req.query;
@@ -128,14 +171,9 @@ export const getScripts = async (req: Request, res: Response) => {
       query = query.eq('is_featured', true);
     }
 
-    // Фильтрация по premium
-    if (premium === 'true') {
-      query = query.eq('is_premium', true);
-    }
-
     // Поиск по названию или описанию
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
     }
 
     // Пагинация
@@ -155,7 +193,7 @@ export const getScripts = async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        scripts: scripts || [],
+        scripts: (scripts || []).map((item: DbScript) => mapDbScriptToResponse(item)),
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -194,7 +232,7 @@ export const getScriptById = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: script
+      data: mapDbScriptToResponse(script as DbScript)
     });
   } catch (error) {
     console.error('Ошибка получения скрипта:', error);
@@ -222,21 +260,17 @@ export const createScript = async (req: Request, res: Response) => {
 
     // Подготовка данных для вставки
     const newScript = {
-      title: scriptData.title,
+      name: scriptData.title,
       description: scriptData.description || '',
       code: scriptData.code,
       category: scriptData.category || 'general',
       tags: scriptData.tags || [],
       author_name: scriptData.author_name || 'Admin',
       version: '1.0.0',
-      status: 'draft' as const,
-      is_featured: scriptData.is_featured || false,
-      is_premium: scriptData.is_premium || false,
-      file_type: scriptData.file_type || 'javascript',
-      compatibility: scriptData.compatibility || {},
-      requirements: scriptData.requirements || ['none'],
-      changelog: scriptData.changelog || '',
-      file_size: new Blob([scriptData.code]).size
+      status: 'draft',
+      is_featured: scriptData.is_featured ?? false,
+      is_public: true,
+      changelog: scriptData.changelog || ''
     };
 
     const { data: script, error } = await supabase
@@ -251,7 +285,7 @@ export const createScript = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      data: script
+      data: mapDbScriptToResponse(script as DbScript)
     });
   } catch (error) {
     console.error('Ошибка создания скрипта:', error);
@@ -269,19 +303,33 @@ export const updateScript = async (req: Request, res: Response) => {
     const updateData: UpdateScriptRequest = req.body;
     const supabase = getSupabaseClient();
 
-    // Если обновляется код, пересчитываем размер файла
-    if (updateData.code) {
-      updateData.file_size = new Blob([updateData.code]).size;
-    }
+    const dbUpdate: Record<string, unknown> = {};
 
-    // Если статус меняется на published, устанавливаем published_at
-    if (updateData.status === 'published') {
-      updateData.published_at = new Date().toISOString();
+    if (updateData.title !== undefined) dbUpdate.name = updateData.title;
+    if (updateData.description !== undefined) dbUpdate.description = updateData.description;
+    if (updateData.code !== undefined) dbUpdate.code = updateData.code;
+    if (updateData.category !== undefined) dbUpdate.category = updateData.category;
+    if (updateData.tags !== undefined) dbUpdate.tags = updateData.tags;
+    if (updateData.status !== undefined) dbUpdate.status = updateData.status;
+    if (updateData.is_featured !== undefined) dbUpdate.is_featured = updateData.is_featured;
+    if (updateData.changelog !== undefined) dbUpdate.changelog = updateData.changelog;
+
+    if (Object.keys(dbUpdate).length === 0) {
+      const { data: current } = await supabase
+        .from('scripts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      return res.json({
+        success: true,
+        data: mapDbScriptToResponse(current as DbScript)
+      });
     }
 
     const { data: script, error } = await supabase
       .from('scripts')
-      .update(updateData)
+      .update(dbUpdate)
       .eq('id', id)
       .select()
       .single();
@@ -292,7 +340,7 @@ export const updateScript = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: script
+      data: mapDbScriptToResponse(script as DbScript)
     });
   } catch (error) {
     console.error('Ошибка обновления скрипта:', error);
@@ -355,7 +403,7 @@ export const downloadScript = async (req: Request, res: Response) => {
       });
     }
 
-    console.log('✅ Скрипт найден:', script.title);
+    console.log('✅ Скрипт найден:', script.name);
 
     // Записываем загрузку в таблицу script_downloads
     // Триггер автоматически обновит downloads_count в таблице scripts
@@ -377,9 +425,9 @@ export const downloadScript = async (req: Request, res: Response) => {
       success: true,
       data: {
         id: script.id,
-        title: script.title,
+        title: script.name,
         code: script.code,
-        file_type: script.file_type,
+        file_type: 'javascript',
         version: script.version,
         author_name: script.author_name
       }
@@ -413,7 +461,7 @@ export const rateScript = async (req: Request, res: Response) => {
     // Проверяем, что скрипт существует и опубликован
     const { data: script, error: scriptError } = await supabase
       .from('scripts')
-      .select('id, title')
+      .select('id, name')
       .eq('id', id)
       .eq('status', 'published')
       .single();
@@ -667,14 +715,18 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
         installed_at,
         scripts (
           id,
-          title,
+          name,
           description,
           code,
           version,
           author_name,
           category,
           tags,
-          updated_at
+          updated_at,
+          downloads,
+          status,
+          changelog,
+          icon_url
         )
       `)
       .eq('user_id', userId);
@@ -686,7 +738,7 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
       data: installedScripts?.map((item: any) => ({
         script_id: item.script_id,
         installed_at: item.installed_at,
-        script: item.scripts
+        script: item.scripts ? mapDbScriptToResponse(item.scripts as DbScript) : null
       })) || []
     });
   } catch (error) {
@@ -755,7 +807,7 @@ export const installScriptForUser = async (req: Request, res: Response) => {
     res.json({
       success: true,
       message: 'Скрипт установлен',
-      script
+      script: mapDbScriptToResponse(script as DbScript)
     });
   } catch (error) {
     console.error('Ошибка установки скрипта:', error);
@@ -909,7 +961,7 @@ export const checkScriptUpdates = async (req: Request, res: Response) => {
     for (const installed of installedScripts) {
       const { data: script } = await supabase
         .from('scripts')
-        .select('id, version, updated_at')
+        .select('id, version, updated_at, name')
         .eq('id', installed.id)
         .single();
 
@@ -918,7 +970,8 @@ export const checkScriptUpdates = async (req: Request, res: Response) => {
           id: script.id,
           oldVersion: installed.version,
           newVersion: script.version,
-          updated_at: script.updated_at
+          updated_at: script.updated_at,
+          name: script.name
         });
       }
     }

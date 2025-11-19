@@ -17,21 +17,21 @@ interface Role {
   id: string;
   name: string;
   display_name: string;
-  features: any;
-  limits: any;
+  description: string | null;
+  permissions: Record<string, unknown> | null;
+  display_order: number | null;
 }
 
-interface Subscription {
+interface UserWithRole {
   id: string;
-  user_id: string;
-  role_id: string;
-  status: string;
-  end_date?: string;
+  role_id: string | null;
+  status: string | null;
+  role?: Role | null;
 }
 
 export class PermissionsService {
   private roleCache: Map<string, Role> = new Map();
-  private userRoleCache: Map<string, { role: Role; timestamp: number }> = new Map();
+  private userRoleCache: Map<string, { role: Role | null; timestamp: number }> = new Map();
   private CACHE_TTL = 5 * 60 * 1000; // 5 минут
 
   /**
@@ -47,30 +47,32 @@ export class PermissionsService {
 
       const supabase = getSupabaseClient();
 
-      // Получаем пользователя с его ролью
-      const { data: user, error: userError } = await supabase
-        .from('auth_users')
+      const { data, error } = await supabase
+        .from('users')
         .select(`
+          id,
           role_id,
-          roles:role_id (
+          status,
+          role:roles!users_role_id_fkey (
             id,
             name,
             display_name,
-            features,
-            limits
+            description,
+            permissions,
+            display_order
           )
         `)
         .eq('id', userId)
         .single();
 
-      if (userError || !user || !user.roles) {
-        console.error('Error fetching user role:', userError);
+      if (error) {
+        console.error('[PermissionsService] Error fetching user role', error);
         return null;
       }
 
-      const role = user.roles as unknown as Role;
-      
-      // Кешируем
+      const user = data as unknown as UserWithRole | null;
+      const role = user?.role ?? null;
+
       this.userRoleCache.set(userId, { role, timestamp: Date.now() });
 
       return role;
@@ -88,13 +90,16 @@ export class PermissionsService {
       const role = await this.getUserRole(userId);
       if (!role) return false;
 
-      // Разбираем путь типа "scripts.can_create"
+      if (!role.permissions) {
+        return false;
+      }
+
       const keys = featurePath.split('.');
-      let value: any = role.features;
+      let value: unknown = role.permissions;
 
       for (const key of keys) {
-        if (value && typeof value === 'object' && key in value) {
-          value = value[key];
+        if (value && typeof value === 'object' && key in (value as Record<string, unknown>)) {
+          value = (value as Record<string, unknown>)[key];
         } else {
           return false;
         }
@@ -113,17 +118,25 @@ export class PermissionsService {
   async checkLimit(userId: string, limitKey: string, currentValue: number): Promise<{ allowed: boolean; limit: number; remaining: number }> {
     try {
       const role = await this.getUserRole(userId);
-      if (!role) {
+      if (!role || !role.permissions) {
         return { allowed: false, limit: 0, remaining: 0 };
       }
 
-      const limit = role.limits[limitKey];
-      
-      // -1 означает unlimited
-      if (limit === -1) {
+      const limits = (role.permissions as Record<string, unknown>)?.limits;
+      if (!limits || typeof limits !== 'object') {
+        return { allowed: false, limit: 0, remaining: 0 };
+      }
+
+      const limitValue = (limits as Record<string, unknown>)[limitKey];
+      if (limitValue === undefined || limitValue === null) {
+        return { allowed: false, limit: 0, remaining: 0 };
+      }
+
+      if (limitValue === -1) {
         return { allowed: true, limit: -1, remaining: -1 };
       }
 
+      const limit = Number(limitValue) || 0;
       const remaining = Math.max(0, limit - currentValue);
       const allowed = currentValue < limit;
 
@@ -140,7 +153,7 @@ export class PermissionsService {
   async getUserFeatures(userId: string): Promise<any> {
     try {
       const role = await this.getUserRole(userId);
-      return role?.features || {};
+      return (role?.permissions as Record<string, unknown>)?.features || {};
     } catch (error) {
       console.error('Error getting user features:', error);
       return {};
@@ -153,7 +166,8 @@ export class PermissionsService {
   async getUserLimits(userId: string): Promise<any> {
     try {
       const role = await this.getUserRole(userId);
-      return role?.limits || {};
+      const permissions = role?.permissions as Record<string, unknown> | undefined;
+      return permissions?.limits || {};
     } catch (error) {
       console.error('Error getting user limits:', error);
       return {};
@@ -169,23 +183,18 @@ export class PermissionsService {
 
       const { data: subscription, error } = await supabase
         .from('subscriptions')
-        .select('*')
+        .select('end_date')
         .eq('user_id', userId)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
-      if (error || !subscription) return false;
+      if (error || !subscription) {
+        return false;
+      }
 
-      // Проверяем срок действия
       if (subscription.end_date) {
         const endDate = new Date(subscription.end_date);
-        if (endDate < new Date()) {
-          // Подписка истекла, обновляем статус
-          await supabase
-            .from('subscriptions')
-            .update({ status: 'expired' })
-            .eq('id', subscription.id);
-          
+        if (Number.isNaN(endDate.getTime()) || endDate < new Date()) {
           return false;
         }
       }

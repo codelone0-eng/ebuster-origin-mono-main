@@ -1,319 +1,252 @@
 import { Request, Response } from 'express';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const getSupabase = () => {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-  
+
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     throw new Error('Supabase credentials not configured');
   }
-  
+
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     auth: { persistSession: false }
   });
 };
 
-const enrichTicketsWithUsers = async (supabase: SupabaseClient, tickets: any[]) => {
-  if (!tickets?.length) return tickets;
+const TICKET_SELECT = `
+  id,
+  ticket_number,
+  user_id,
+  user_email,
+  subject,
+  message,
+  priority,
+  status,
+  category,
+  created_at,
+  updated_at,
+  closed_at
+`;
 
-  const missingClientIds = tickets
-    .filter((ticket) => ticket.user_id && !ticket.client)
-    .map((ticket) => ticket.user_id);
-
-  const missingAgentIds = tickets
-    .filter((ticket) => ticket.assigned_to && !ticket.agent)
-    .map((ticket) => ticket.assigned_to);
-
-  const uniqueUserIds = Array.from(new Set([...missingClientIds, ...missingAgentIds]));
-  if (!uniqueUserIds.length) return tickets;
-
-  const { data: users, error } = await supabase
-    .from('users')
-    .select('id, full_name, email, avatar_url')
-    .in('id', uniqueUserIds);
-
-  if (error) {
-    console.error('[tickets] Failed to enrich users data:', error);
-    return tickets;
+const ensureAuthenticated = (req: Request, res: Response) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return null;
   }
 
-  const userMap = new Map(users?.map((user) => [user.id, user]));
-
-  return tickets.map((ticket) => ({
-    ...ticket,
-    client: ticket.client || (ticket.user_id ? userMap.get(ticket.user_id) || null : null),
-    agent: ticket.agent || (ticket.assigned_to ? userMap.get(ticket.assigned_to) || null : null)
-  }));
+  return { userId, role: (req as any).user?.role || 'user' };
 };
 
+const generateTicketNumber = () => {
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `TICKET-${Date.now()}-${suffix}`;
+};
 
-// Получить тикеты пользователя (клиент видит только свои)
 export const getUserTickets = async (req: Request, res: Response) => {
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
+
   try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
-    
-    console.log('🎫 [getUserTickets] User:', userId, 'Role:', userRole);
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const { status, priority, search } = req.query;
     const supabase = getSupabase();
-    
-    let query = supabase
-      .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `)
-      ;
+    const { status, priority, search } = req.query;
 
-    // КРИТИЧНО: Обычные пользователи видят ТОЛЬКО свои тикеты
-    // Только админы могут видеть все тикеты (в админке admin.ebuster.ru)
-    if (userRole !== 'admin') {
-      console.log('🔒 [getUserTickets] Filtering tickets for user:', userId);
-      query = query.eq('user_id', userId);
-    } else {
-      console.log('👮 [getUserTickets] Admin access - showing all tickets');
+    let query = supabase
+      .from('tickets')
+      .select(TICKET_SELECT)
+      .order('created_at', { ascending: false });
+
+    if (auth.role !== 'admin') {
+      query = query.eq('user_id', auth.userId);
     }
-    
-    // Фильтры
-    if (status && status !== 'all') query = query.eq('status', status);
-    if (priority) query = query.eq('priority', priority);
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
+
+    if (priority) {
+      query = query.eq('priority', priority);
+    }
+
     if (search) {
       query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%,ticket_number.ilike.%${search}%`);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query;
 
     if (error) throw error;
 
-    const enrichedTickets = await enrichTicketsWithUsers(supabase, data || []);
-    console.log('[getUserTickets] Sample ticket data:', data?.[0]);
-    res.json({ success: true, data: enrichedTickets });
+    res.json({ success: true, data: data || [] });
   } catch (error: any) {
     console.error('Get user tickets error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Получить все тикеты (админы и агенты)
 export const getAllTickets = async (req: Request, res: Response) => {
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
+
+  if (auth.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
-    
-    console.log('🎫 [getAllTickets] User:', userId, 'Role:', userRole);
-    
-    if (!userId || userRole !== 'admin') {
-      console.log('🚫 [getAllTickets] Access denied - only admins can view all tickets');
-      return res.status(403).json({ error: 'Forbidden' });
+    const supabase = getSupabase();
+    const { status, priority, search, page = 1, limit = 50 } = req.query;
+
+    const offset = (Number(page) - 1) * Number(limit);
+
+    let query = supabase
+      .from('tickets')
+      .select(TICKET_SELECT, { count: 'exact' })
+      .range(offset, offset + Number(limit) - 1)
+      .order('created_at', { ascending: false });
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
     }
 
-    const { status, priority, team_id, assigned_to, search, page = 1, limit = 50 } = req.query;
-    const supabase = getSupabase();
-    
-    let query = supabase
-      .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `, { count: 'exact' })
-      ;
-    
-    // Агенты видят только тикеты своих команд
-    if (userRole === 'agent') {
-      const { data: teams } = await supabase
-        .from('team_members')
-        .select('team_id')
-        .eq('user_id', userId);
-      
-      if (teams && teams.length > 0) {
-        const teamIds = teams.map(t => t.team_id);
-        query = query.in('team_id', teamIds);
-      } else {
-        return res.json({ success: true, data: [], count: 0 });
-      }
+    if (priority) {
+      query = query.eq('priority', priority);
     }
-    
-    // Фильтры
-    if (status && status !== 'all') query = query.eq('status', status);
-    if (priority) query = query.eq('priority', priority);
-    if (team_id) query = query.eq('team_id', team_id);
-    if (assigned_to) query = query.eq('assigned_agent_id', assigned_to);
+
     if (search) {
       query = query.or(`subject.ilike.%${search}%,message.ilike.%${search}%,ticket_number.ilike.%${search}%`);
     }
 
-    // Пагинация
-    const offset = (Number(page) - 1) * Number(limit);
-    query = query.range(offset, offset + Number(limit) - 1);
-
-    const { data, error, count } = await query.order('created_at', { ascending: false });
+    const { data, error, count } = await query;
 
     if (error) throw error;
 
-    const enrichedTickets = await enrichTicketsWithUsers(supabase, data || []);
-    console.log('[getAllTickets] Sample ticket data:', data?.[0]);
-    res.json({ success: true, data: enrichedTickets, count, page: Number(page), limit: Number(limit) });
+    res.json({
+      success: true,
+      data: data || [],
+      count: count || 0,
+      page: Number(page),
+      limit: Number(limit)
+    });
   } catch (error: any) {
     console.error('Get all tickets error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Получить один тикет
 export const getTicket = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
-    const { id } = req.params;
-    
-    console.log('🎫 [getTicket] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
 
+  try {
     const supabase = getSupabase();
+    const { id } = req.params;
+
     const { data: ticket, error } = await supabase
-      .from('support_tickets')
-      .select(`
-        *,
-        client:auth_users!support_tickets_user_id_fkey(id, full_name, email, avatar_url),
-        agent:auth_users!support_tickets_assigned_to_fkey(id, full_name, email, avatar_url)
-      `)
+      .from('tickets')
+      .select(TICKET_SELECT)
       .eq('id', id)
       .single();
 
     if (error) throw error;
+
     if (!ticket) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // КРИТИЧНО: Проверка прав доступа - пользователи могут видеть только свои тикеты
-    if (userRole !== 'admin' && ticket.user_id !== userId) {
-      console.log('🚫 [getTicket] Access denied - user', userId, 'tried to access ticket of user', ticket.user_id);
+    if (auth.role !== 'admin' && ticket.user_id !== auth.userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const [enrichedTicket] = await enrichTicketsWithUsers(supabase, [ticket]);
-
-    console.log('[getTicket] Ticket data:', enrichedTicket);
-    res.json({ success: true, data: enrichedTicket });
+    res.json({ success: true, data: ticket });
   } catch (error: any) {
     console.error('Get ticket error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Создать тикет
 export const createTicket = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
 
-    const { subject, message, priority } = req.body;
-    
+  try {
+    const supabase = getSupabase();
+    const { subject, message, priority = 'medium', category = 'general' } = req.body;
+
     if (!subject || !message) {
       return res.status(400).json({ error: 'Subject and message are required' });
     }
 
-    const supabase = getSupabase();
-    
-    // Создаем тикет
-    const { data: ticket, error: ticketError } = await supabase
-      .from('support_tickets')
-      .insert({
-        user_id: userId,
-        subject,
-        message,
-        priority: priority || 'medium',
-        status: 'new'
-      })
-      .select('*')
+    const payload = {
+      ticket_number: generateTicketNumber(),
+      user_id: auth.userId,
+      user_email: (req as any).user?.email || null,
+      subject,
+      message,
+      priority,
+      category,
+      status: 'new'
+    };
+
+    const { data, error } = await supabase
+      .from('tickets')
+      .insert(payload)
+      .select(TICKET_SELECT)
       .single();
 
-    if (ticketError) throw ticketError;
+    if (error) throw error;
 
-    res.json({ success: true, data: ticket });
+    res.status(201).json({ success: true, data });
   } catch (error: any) {
     console.error('Create ticket error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Обновить тикет
 export const updateTicket = async (req: Request, res: Response) => {
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
+
+  if (auth.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
-    const { id } = req.params;
-    const { status, assigned_agent_id, priority, team_id, tags } = req.body;
-    
-    console.log('🎫 [updateTicket] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
-    
-    if (!userId || userRole !== 'admin') {
-      console.log('🚫 [updateTicket] Access denied - only admins can update tickets');
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-
     const supabase = getSupabase();
-    
-    // Получаем текущий тикет
-    const { data: oldTicket } = await supabase
-      .from('support_tickets')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { id } = req.params;
+    const { status, priority, category, message } = req.body;
 
-    if (!oldTicket) {
-      return res.status(404).json({ error: 'Ticket not found' });
-    }
-    
-    const updateData: any = {};
-    
-    // Обновляем поля
-    if (status !== undefined && status !== oldTicket.status) {
+    const updateData: Record<string, unknown> = {};
+
+    if (status) {
       updateData.status = status;
       updateData.updated_at = new Date().toISOString();
-      
-      if (status === 'closed' && !oldTicket.closed_at) {
-        updateData.closed_at = new Date().toISOString();
-      }
+      updateData.closed_at = status === 'closed' ? new Date().toISOString() : null;
     }
-    
-    if (assigned_agent_id !== undefined && assigned_agent_id !== oldTicket.assigned_to) {
-      updateData.assigned_to = assigned_agent_id;
-      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
-    }
-    
-    if (priority && priority !== oldTicket.priority) {
+
+    if (priority) {
       updateData.priority = priority;
-      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
+      updateData.updated_at = updateData.updated_at || new Date().toISOString();
     }
-    
-    if (tags) {
-      updateData.tags = tags;
-      if (!updateData.updated_at) updateData.updated_at = new Date().toISOString();
+
+    if (category) {
+      updateData.category = category;
+      updateData.updated_at = updateData.updated_at || new Date().toISOString();
     }
-    
+
+    if (message) {
+      updateData.message = message;
+      updateData.updated_at = updateData.updated_at || new Date().toISOString();
+    }
+
     if (Object.keys(updateData).length === 0) {
-      return res.json({ success: true, data: oldTicket });
+      return res.status(400).json({ error: 'Nothing to update' });
     }
-    
+
     const { data, error } = await supabase
-      .from('support_tickets')
+      .from('tickets')
       .update(updateData)
       .eq('id', id)
-      .select('*')
+      .select(TICKET_SELECT)
       .single();
 
     if (error) throw error;
@@ -325,129 +258,89 @@ export const updateTicket = async (req: Request, res: Response) => {
   }
 };
 
-// Добавить сообщение к тикету
 export const addMessage = async (req: Request, res: Response) => {
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
+
   try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role || 'user'; // По умолчанию 'user'
+    const supabase = getSupabase();
     const { id } = req.params;
-    const { message, is_internal } = req.body;
-    
-    console.log('🎫 [addMessage] User:', userId, 'Role:', userRole, 'Ticket ID:', id);
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const { message } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const isInternalNote = is_internal && userRole === 'admin';
-    
-    const supabase = getSupabase();
-    
-    const { data: ticket } = await supabase
-      .from('support_tickets')
-      .select('user_id, status, assigned_to')
+    const { data: ticket, error: ticketError } = await supabase
+      .from('tickets')
+      .select('user_id, status')
       .eq('id', id)
       .single();
+
+    if (ticketError) throw ticketError;
 
     if (!ticket) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // КРИТИЧНО: Проверка прав доступа - пользователи могут отвечать только на свои тикеты
-    if (userRole !== 'admin' && ticket.user_id !== userId) {
-      console.log('🚫 [addMessage] Access denied - user', userId, 'tried to reply to ticket of user', ticket.user_id);
+    if (auth.role !== 'admin' && ticket.user_id !== auth.userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const { data: newMessage, error } = await supabase
+    const { data, error } = await supabase
       .from('ticket_messages')
       .insert({
         ticket_id: id,
-        author_id: userId,
+        user_id: auth.userId,
         message,
-        is_internal: isInternalNote || false,
-        is_system: false
+        is_admin: auth.role === 'admin'
       })
-      .select(`
-        *,
-        author:auth_users(id, full_name, email, avatar_url, role)
-      `)
+      .select('*')
       .single();
 
     if (error) throw error;
 
-    const updateData: any = {
-      updated_at: new Date().toISOString()
-    };
-    
-    if (ticket.status === 'new' && ticket.assigned_to) {
-      updateData.status = 'open';
-    }
-    
-    if (ticket.status === 'pending_customer' && ticket.user_id === userId) {
-      updateData.status = 'open';
-    }
+    await supabase
+      .from('tickets')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', id);
 
-    if (Object.keys(updateData).length > 0) {
-      await supabase
-        .from('support_tickets')
-        .update(updateData)
-        .eq('id', id);
-    }
-
-    res.json({ success: true, data: newMessage });
+    res.json({ success: true, data });
   } catch (error: any) {
     console.error('Add message error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Получить сообщения тикета
 export const getTicketMessages = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
-    const { id } = req.params;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
 
+  try {
     const supabase = getSupabase();
-    
-    const { data: ticket } = await supabase
-      .from('support_tickets')
+    const { id } = req.params;
+
+    const { data: ticket, error: ticketError } = await supabase
+      .from('tickets')
       .select('user_id')
       .eq('id', id)
       .single();
+
+    if (ticketError) throw ticketError;
 
     if (!ticket) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    if (userRole !== 'admin' && userRole !== 'agent' && ticket.user_id !== userId) {
+    if (auth.role !== 'admin' && ticket.user_id !== auth.userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    let query = supabase
+    const { data, error } = await supabase
       .from('ticket_messages')
-      .select(`
-        *,
-        author:auth_users(id, full_name, email, avatar_url, role),
-        attachments:ticket_attachments(*)
-      `)
-      .eq('ticket_id', id);
-
-    // Клиенты не видят внутренние заметки
-    if (userRole !== 'admin' && userRole !== 'agent') {
-      query = query.or('is_internal.eq.false,is_internal.is.null');
-    }
-
-    const { data, error } = await query.order('created_at', { ascending: true });
+      .select('*')
+      .eq('ticket_id', id)
+      .order('created_at', { ascending: true });
 
     if (error) throw error;
 
@@ -458,102 +351,31 @@ export const getTicketMessages = async (req: Request, res: Response) => {
   }
 };
 
-// Загрузить вложение
-export const uploadAttachment = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
-    const { ticketId, messageId } = req.params;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const supabase = getSupabase();
-    
-    // Проверяем права доступа к тикету
-    const { data: ticket } = await supabase
-      .from('support_tickets')
-      .select('user_id')
-      .eq('id', ticketId)
-      .single();
-
-    if (!ticket) {
-      return res.status(404).json({ error: 'Ticket not found' });
-    }
-
-    if (userRole !== 'admin' && ticket.user_id !== userId) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-
-    // TODO: Реализовать полную загрузку файла через Supabase Storage
-    // Пока возвращаем заглушку с URL для загрузки
-    res.json({ 
-      success: true, 
-      data: { 
-        message: 'File upload ready',
-        uploadUrl: `/storage/ticket-attachments/${ticketId}/${messageId || 'ticket'}/`,
-        ticketId,
-        messageId 
-      } 
-    });
-  } catch (error: any) {
-    console.error('Upload attachment error:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-
-// Получить статистику (dashboard)
 export const getTicketStats = async (req: Request, res: Response) => {
+  const auth = ensureAuthenticated(req, res);
+  if (!auth) return;
+
+  if (auth.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
-    const userId = (req as any).user?.id;
-    const userRole = (req as any).user?.role;
-    
-    if (!userId || (userRole !== 'admin' && userRole !== 'agent')) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-
     const supabase = getSupabase();
-    
-    const { data: statusCounts } = await supabase
-      .from('support_tickets')
-      .select('status')
-      ;
 
-    const stats = {
-      new: statusCounts?.filter(t => t.status === 'new').length || 0,
-      open: statusCounts?.filter(t => t.status === 'open').length || 0,
-      pending_customer: statusCounts?.filter(t => t.status === 'pending_customer').length || 0,
-      pending_internal: statusCounts?.filter(t => t.status === 'pending_internal').length || 0,
-      resolved: statusCounts?.filter(t => t.status === 'resolved').length || 0,
-      closed: statusCounts?.filter(t => t.status === 'closed').length || 0,
-      total: statusCounts?.length || 0
-    };
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('status');
 
-    const { data: responseTime } = await supabase
-      .from('support_tickets')
-      .select('created_at, first_response_at')
-      .not('first_response_at', 'is', null)
-      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    if (error) throw error;
 
-    let avgResponseTime = 0;
-    if (responseTime && responseTime.length > 0) {
-      const times = responseTime.map(t => {
-        const created = new Date(t.created_at).getTime();
-        const responded = new Date(t.first_response_at).getTime();
-        return (responded - created) / (1000 * 60 * 60);
-      });
-      avgResponseTime = times.reduce((a, b) => a + b, 0) / times.length;
-    }
+    const stats = (data || []).reduce<Record<string, number>>((acc, ticket) => {
+      const status = ticket.status || 'unknown';
+      acc[status] = (acc[status] || 0) + 1;
+      acc.total = (acc.total || 0) + 1;
+      return acc;
+    }, { total: 0 });
 
-    res.json({ 
-      success: true, 
-      data: {
-        ...stats,
-        avgResponseTimeHours: Math.round(avgResponseTime * 10) / 10
-      }
-    });
+    res.json({ success: true, data: stats });
   } catch (error: any) {
     console.error('Get ticket stats error:', error);
     res.status(500).json({ error: error.message });

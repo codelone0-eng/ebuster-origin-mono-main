@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 import multer from 'multer';
 import { TOTP, Secret } from 'otpauth';
 import crypto from 'crypto';
@@ -25,51 +24,14 @@ export const getUserProfile = async (req: Request, res: Response) => {
       
       const { data, error } = await admin
         .from('users')
-        .select('*')
+        .select('id, email, full_name, avatar_url, role, status, created_at, updated_at')
         .eq('id', req.user.id)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Пользователь не найден в users, попробуем auth_users
-          console.log('🔍 [getUserProfile] User not found in users table, trying auth_users');
-          const { data: authData, error: authError } = await admin
-            .from('users')
-            .select('id, email, full_name, avatar_url, created_at')
-            .eq('id', req.user.id)
-            .single();
-
-          if (authError) {
-            return res.status(404).json({ error: 'User not found' });
-          }
-
-          // Получаем подписку пользователя
-          const { data: subscription } = await admin
-            .from('subscriptions')
-            .select('plan')
-            .eq('user_id', req.user.id)
-            .eq('status', 'active')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          return res.json({
-            success: true,
-            data: {
-              id: authData.id,
-              email: authData.email,
-              full_name: authData.full_name,
-              avatar_url: authData.avatar_url,
-              role: 'user',
-              created_at: authData.created_at,
-              subscription_plan: subscription?.plan || 'free'
-            }
-          });
-        }
-        return res.status(500).json({ error: error.message });
+      if (error || !data) {
+        return res.status(404).json({ error: 'User not found' });
       }
 
-      // Получаем подписку пользователя
       const { data: subscription } = await admin
         .from('subscriptions')
         .select('plan')
@@ -96,7 +58,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
     const { data, error } = await admin
       .from('users')
-      .select('*')
+      .select('id, email, full_name, avatar_url, role, status, created_at, updated_at')
       .eq('email', email)
       .single();
 
@@ -153,105 +115,70 @@ export const upsertUserProfile = async (req: Request, res: Response) => {
     if (!id || !email) {
       return res.status(400).json({ error: 'id and email are required' });
     }
-    // Генерируем UUID для public.users (может отличаться от auth_users id)
-    const userUuid = uuidv4();
-    
-    // Сначала проверяем, есть ли пользователь с таким email
-    const { data: existingUser } = await admin
+    // Сначала проверяем, есть ли пользователь с таким ID
+    const { data: existingUser, error: fetchError } = await admin
       .from('users')
       .select('id')
-      .eq('email', email)
-      .single();
+      .eq('id', id)
+      .maybeSingle();
 
-    let result;
+    if (fetchError) {
+      console.error('❌ [upsertUserProfile] Fetch error:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+
+    const timestamp = new Date().toISOString();
+    const baseData: Record<string, unknown> = {
+      email,
+      updated_at: timestamp
+    };
+
+    if (full_name !== undefined) {
+      baseData.full_name = full_name;
+    }
+    if (avatar_url !== undefined) {
+      baseData.avatar_url = avatar_url;
+    }
+
+    let userRecord;
+
     if (existingUser) {
-      // Обновляем существующего пользователя в public.users
-      const updateData: any = {
-        updated_at: new Date().toISOString(),
-      };
-      
-      // Обновляем только переданные поля
-      if (full_name !== undefined) {
-        updateData.full_name = full_name;
-      }
-      // Обновляем avatar_url только если он явно передан и не null
-      if (avatar_url !== undefined && avatar_url !== null) {
-        updateData.avatar_url = avatar_url;
-      }
-      
-      console.log('🔄 [upsertUserProfile] Updating users table with data:', updateData);
-      
-      result = await admin
+      console.log('🔄 [upsertUserProfile] Updating users table with data:', baseData);
+      const { data: updatedUser, error: updateError } = await admin
         .from('users')
-        .update(updateData)
-        .eq('id', existingUser.id)
-        .select()
+        .update(baseData)
+        .eq('id', id)
+        .select('id, email, full_name, avatar_url, role, status, created_at, updated_at')
         .single();
+
+      if (updateError) {
+        console.error('❌ [upsertUserProfile] Update error:', updateError);
+        return res.status(500).json({ error: 'Failed to update user profile' });
+      }
+
+      userRecord = updatedUser;
     } else {
-      // Создаем нового пользователя в public.users
-      const insertData: any = {
-        id: userUuid,
-        email,
-        updated_at: new Date().toISOString(),
+      const insertData: Record<string, unknown> = {
+        id,
+        created_at: timestamp,
+        ...baseData
       };
-      
-      // Добавляем только переданные поля
-      if (full_name !== undefined) {
-        insertData.full_name = full_name;
-      }
-      // Добавляем avatar_url только если он явно передан и не null
-      if (avatar_url !== undefined && avatar_url !== null) {
-        insertData.avatar_url = avatar_url;
-      }
-      
-      result = await admin
+
+      const { data: newUser, error: insertError } = await admin
         .from('users')
         .insert(insertData)
-        .select()
+        .select('id, email, full_name, avatar_url, role, status, created_at, updated_at')
         .single();
-    }
 
-    const { data, error } = result;
-
-    // Также обновляем данные в auth_users если пользователь существует
-    if (!error && data) {
-      try {
-        const { data: authUser, error: authUserError } = await admin
-          .from('users')
-          .select('id, full_name')
-          .eq('email', email)
-          .single();
-
-        if (authUser) {
-          const authUpdateData: any = {
-            updated_at: new Date().toISOString(),
-          };
-          
-          // Обновляем только переданные поля
-          if (full_name !== undefined) {
-            authUpdateData.full_name = full_name;
-          }
-          // Обновляем avatar_url только если он явно передан (не undefined)
-          if (avatar_url !== undefined) {
-            authUpdateData.avatar_url = avatar_url;
-          }
-          
-          const { error: updateError } = await admin
-            .from('users')
-            .update(authUpdateData)
-            .eq('id', authUser.id);
-            
-          if (updateError) {
-            console.log('⚠️ [upsertUserProfile] Auth_users update error:', updateError);
-          }
-        }
-      } catch (authUpdateError) {
-        // Не прерываем выполнение, так как основное обновление прошло успешно
+      if (insertError) {
+        console.error('❌ [upsertUserProfile] Insert error:', insertError);
+        return res.status(500).json({ error: 'Failed to create user profile' });
       }
+
+      userRecord = newUser;
     }
 
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ success: true, data });
+    return res.json({ success: true, data: userRecord });
   } catch (e: any) {
     return res.status(500).json({ error: e?.message || 'Server error' });
   }
@@ -325,27 +252,6 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     }
 
     console.log('✅ [uploadAvatar] Users table updated:', userData);
-
-    // Также обновляем в auth_users (если колонка avatar_url существует)
-    console.log('🔄 [uploadAvatar] Updating auth_users table for email:', email);
-    try {
-      const { error: authUpdateError } = await admin
-        .from('users')
-        .update({ avatar_url: avatarUrl })
-        .eq('email', email);
-
-      if (authUpdateError) {
-        console.log('⚠️ [uploadAvatar] Auth_users update error:', authUpdateError);
-        // Если ошибка связана с отсутствием колонки, это не критично
-        if (authUpdateError.message.includes('avatar_url') && authUpdateError.message.includes('column')) {
-          console.log('ℹ️ [uploadAvatar] Avatar URL will be stored only in users table');
-        }
-      } else {
-        console.log('✅ [uploadAvatar] Auth_users table updated successfully');
-      }
-    } catch (authError) {
-      console.log('⚠️ [uploadAvatar] Auth_users update exception:', authError);
-    }
 
     return res.json({ 
       success: true, 
@@ -465,7 +371,6 @@ export const updateUserActivity = async (req: Request, res: Response) => {
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
 
-    // Обновляем активность в auth_users
     const { error } = await admin
       .from('users')
       .update({
