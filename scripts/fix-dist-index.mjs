@@ -7,15 +7,10 @@ const assetsDir = path.join(distDir, 'assets');
 
 async function main() {
   try {
-    const [html, assetEntries] = await Promise.all([
+    const [originalHtml, assetEntries] = await Promise.all([
       fs.readFile(indexPath, 'utf8'),
       fs.readdir(assetsDir),
     ]);
-
-    if (!html.includes('/src/main.tsx')) {
-      console.log('index.html already contains built asset references. Skipping patch.');
-      return;
-    }
 
     const jsFiles = assetEntries.filter((file) => file.endsWith('.js'));
     const cssFiles = assetEntries.filter((file) => file.endsWith('.css'));
@@ -32,15 +27,32 @@ async function main() {
       .join('\n');
 
     const scriptTag = `    <script type="module" crossorigin src="/assets/${mainJs}"></script>`;
+    const payload = [cssTags, scriptTag].filter(Boolean).join('\n');
 
-    const replacement = [cssTags, scriptTag].filter(Boolean).join('\n') + '\n';
+    let html = originalHtml;
 
-    const nextHtml = html.replace(
-      /\s*<script type="module"\s+src="\/src\/main\.tsx"><\/script>\s*/,
-      `\n${replacement}`,
-    );
+    // Remove any legacy script tags pointing to /src/main.tsx
+    html = html.replace(/\s*<script[^>]+src="\/src\/main\.tsx"[^>]*><\/script>\s*/g, '\n');
 
-    await fs.writeFile(indexPath, nextHtml, 'utf8');
+    // Remove previously injected index-*.js tags (avoid duplicates on rebuild)
+    html = html.replace(/\s*<script[^>]+src="\/assets\/index-[^"]+\.js"[^>]*><\/script>\s*/g, '\n');
+
+    // Remove duplicate index-*.css links
+    html = html.replace(/\s*<link[^>]+href="\/assets\/index-[^"]+\.css"[^>]*>\s*/g, '\n');
+
+    const injection = `\n${payload}\n`;
+
+    if (/<div id="root"><\/div>/i.test(html)) {
+      html = html.replace(/<div id="root"><\/div>/i, `<div id="root"></div>${injection}`);
+    } else if (/<body[^>]*>/i.test(html)) {
+      html = html.replace(/<body([^>]*)>/i, `<body$1>${injection}`);
+    } else if (/<\/body>/i.test(html)) {
+      html = html.replace(/<\/body>/i, `${injection}</body>`);
+    } else {
+      html += injection;
+    }
+
+    await fs.writeFile(indexPath, html, 'utf8');
     console.log('✅ Patched dist/index.html with hashed asset references');
   } catch (error) {
     console.error('Failed to patch dist/index.html', error);
