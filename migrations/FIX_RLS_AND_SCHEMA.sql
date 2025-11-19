@@ -80,13 +80,6 @@ CREATE POLICY "Service role can manage referrals" ON referrals
     USING (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role')
     WITH CHECK (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role');
 
--- User Scripts: разрешаем service role полный доступ
-DROP POLICY IF EXISTS "Service role can manage user_scripts" ON user_scripts;
-CREATE POLICY "Service role can manage user_scripts" ON user_scripts
-    FOR ALL 
-    USING (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role')
-    WITH CHECK (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role');
-
 -- =====================================================
 -- 4. ДОБАВЛЕНИЕ ПУБЛИЧНОГО ДОСТУПА К КАТЕГОРИЯМ
 -- =====================================================
@@ -153,6 +146,13 @@ CREATE POLICY "Admins can view all user scripts" ON user_scripts
             WHERE id = auth.uid() AND role = 'admin'
         )
     );
+
+-- Service role: разрешаем полный доступ (ВАЖНО: должно быть последним!)
+DROP POLICY IF EXISTS "Service role can manage user_scripts" ON user_scripts;
+CREATE POLICY "Service role can manage user_scripts" ON user_scripts
+    FOR ALL 
+    USING (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role')
+    WITH CHECK (current_setting('request.jwt.claims', true)::json->>'role' = 'service_role');
 
 -- =====================================================
 -- ПРОВЕРКА РЕЗУЛЬТАТОВ
