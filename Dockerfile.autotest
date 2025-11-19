@@ -2,11 +2,11 @@ FROM mcr.microsoft.com/playwright:v1.56.1-jammy
 
 WORKDIR /app
 
-# Копируем package files
+# Копируем package files (кэшируется если не меняются)
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install
+# Устанавливаем зависимости (npm ci быстрее npm install)
+RUN npm ci && npm cache clean --force
 
 # Копируем исходники тестов и скрипты
 COPY tests ./tests

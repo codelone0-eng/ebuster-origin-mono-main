@@ -1,14 +1,51 @@
+# Dependencies
 node_modules
 npm-debug.log
+package-lock.json
+
+# Build outputs
 dist
+build
+.next
+out
+
+# Git
 .git
 .gitignore
+.github
+
+# Environment
 .env.local
 .env.*.local
+
+# Documentation
 *.md
+README.md
+CHANGELOG.md
+
+# Database
 *.sql
+migrations/*.sql
+
+# IDE
 .vscode
 .idea
+*.swp
+*.swo
+
+# Testing
 coverage
+.nyc_output
+tests/reports
+tests/storage
+tests/public/autotest
+
+# OS
 .DS_Store
 Thumbs.db
+*.log
+
+# Misc
+*.bak
+*.tmp
+.cache

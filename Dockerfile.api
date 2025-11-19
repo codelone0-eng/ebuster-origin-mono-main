@@ -1,14 +1,35 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Копируем package files
+# Оптимизация: устанавливаем только критичные системные пакеты
+RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+  && apk add --no-cache tini
+
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --omit=dev && npm cache clean --force
+# Экстремальная оптимизация: npm ci с production флагами
+RUN npm ci --omit=dev --prefer-offline --no-audit --no-fund \
+  && npm cache clean --force \
+  && apk del .build-deps
 
-# Копируем исходники API
+# Production stage - минимальный образ
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Оптимизация: создаём non-root пользователя
+RUN addgroup -g 1001 -S nodejs \
+  && adduser -S nodejs -u 1001 \
+  && apk add --no-cache tini
+
+# Копируем зависимости из deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Устанавливаем tsx глобально с оптимизацией
+RUN npm install -g tsx --prefer-offline --no-audit --no-fund
+
+# Копируем исходники API (меняются часто - в конце)
 COPY server.ts ./
 COPY start-server.ts ./
 COPY src/api ./src/api
@@ -17,10 +38,18 @@ COPY src/config ./src/config
 COPY src/services ./src/services
 COPY src/utils ./src/utils
 COPY tsconfig*.json ./
+COPY package*.json ./
 
-# Устанавливаем tsx для запуска TypeScript
-RUN npm install -g tsx
+# Переключаемся на non-root пользователя
+USER nodejs
 
 EXPOSE 3001
+
+# Оптимизация: используем tini для правильной обработки сигналов
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Оптимизация: NODE_ENV и memory limits
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=2048 --optimize-for-size"
 
 CMD ["tsx", "start-server.ts"]
