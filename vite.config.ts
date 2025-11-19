@@ -16,16 +16,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Экстремальная оптимизация production build
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-    },
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {

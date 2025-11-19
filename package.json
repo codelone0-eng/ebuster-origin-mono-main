@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "NODE_ENV=production vite build --mode production",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
-    "build:fast": "NODE_ENV=production vite build --mode production --minify terser",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "NODE_ENV=production tsx start-server.ts",
