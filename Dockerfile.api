@@ -2,10 +2,10 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-COPY package*.json package-lock.json ./
+COPY package*.json ./
 
 # Быстрая установка зависимостей
-RUN npm ci --omit=dev --no-audit --no-fund \
+RUN npm install --omit=dev --no-audit --no-fund \
   && npm cache clean --force
 
 # Production stage - минимальный образ
