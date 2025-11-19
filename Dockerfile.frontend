@@ -20,6 +20,7 @@ COPY package*.json ./
 COPY src ./src
 COPY public ./public
 COPY index.html ./
+COPY scripts ./scripts
 COPY vite.config.ts ./
 COPY tsconfig*.json ./
 
