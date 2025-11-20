@@ -15,7 +15,13 @@ const getSupabaseClient = () => {
   }
 
   supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false }
+    auth: { 
+      persistSession: false,
+      autoRefreshToken: false
+    },
+    db: {
+      schema: 'public'
+    }
   });
 
   return supabaseClient;
@@ -272,7 +278,7 @@ export const getUserReferrals = async (req: Request, res: Response) => {
       .select(`
         *,
         referred:users!referrals_referred_id_fkey(id, email, full_name, created_at),
-        subscription:subscriptions(id, plan, status, start_date, end_date)
+        subscription:subscriptions(id, plan, status, started_at, expires_at)
       `)
       .eq('entry_type', 'use')
       .eq('referrer_id', userId)

@@ -750,9 +750,9 @@ const DashboardContent = () => {
 
                 <div className="space-y-4">
                   {installedScripts.length === 0 ? (
-                    <Card className="p-12 text-center">
+                    <Card className="p-12 text-center border-primary/20">
                       <div className="flex flex-col items-center gap-4">
-                        <Library className="h-12 w-12 text-muted-foreground" />
+                        <Library className="h-12 w-12 text-primary/50" />
                         <div>
                           <h3 className="text-lg font-semibold text-foreground mb-2">
                             {t('header.dashboard.installed.noScripts')}
@@ -774,7 +774,7 @@ const DashboardContent = () => {
                     const scriptVersion = item.script?.version || item.version || '1.0.0';
 
                     return (
-                      <Card key={item.script_id} className="group hover:shadow-lg transition-all duration-200">
+                      <Card key={item.script_id} className="group hover:shadow-lg hover:border-primary/30 transition-all duration-200 border-border/50">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -883,10 +883,10 @@ const DashboardContent = () => {
                           />
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={handleSaveProfile} disabled={isSaving}>
+                      <GradientButton className="w-full" onClick={handleSaveProfile} disabled={isSaving}>
                         <UserCheck className="h-4 w-4 mr-2" />
                         {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
-                      </Button>
+                      </GradientButton>
                     </CardContent>
                   </Card>
                 </div>
@@ -922,7 +922,7 @@ const DashboardContent = () => {
                           <Mail className="h-4 w-4 mr-2" />
                           {t('header.dashboard.settings.changeEmail')}
                         </GradientButton>
-                        <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
                           <div className="flex items-center gap-2">
                             <Shield className="h-4 w-4 text-primary" />
                             <span className="text-sm font-medium">{t('header.dashboard.settings.twoFactorAuth')}</span>
