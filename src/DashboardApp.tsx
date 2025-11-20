@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
+import { useThemeInit } from "@/hooks/useThemeInit";
 import Dashboard from "./lk/Dashboard";
 import TicketPage from "./lk/TicketPage";
 import BanPage from "./landing/BanPage";
@@ -17,8 +18,11 @@ import Error404 from "./landing/Error404";
 
 const queryClient = new QueryClient();
 
-const DashboardApp = () => (
-  <QueryClientProvider client={queryClient}>
+const DashboardApp = () => {
+  useThemeInit();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <CursorProvider>
         <AuthProvider>
@@ -60,6 +64,7 @@ const DashboardApp = () => (
       </CursorProvider>
     </LanguageProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default DashboardApp;
