@@ -289,10 +289,9 @@ export const verifyOtp = async (req: Request, res: Response) => {
     if (supabase) {
       try {
         const { data: existingCode } = await supabase
-          .from('referrals')
+          .from('referral_codes')
           .select('id')
-          .eq('entry_type', 'code')
-          .eq('referrer_id', user.id)
+          .eq('user_id', user.id)
           .single();
 
         if (!existingCode) {
@@ -306,15 +305,15 @@ export const verifyOtp = async (req: Request, res: Response) => {
           };
 
           const referralCode = generateRandomCode();
-          await supabase.from('referrals').insert({
-            entry_type: 'code',
-            referrer_id: user.id,
+          await supabase.from('referral_codes').insert({
+            user_id: user.id,
             code: referralCode,
             discount_type: 'percentage',
             discount_value: 10,
             is_active: true
           });
 
+          await supabase.from('referral_stats').insert({ user_id: user.id });
           console.log('✅ Реферальный код создан для пользователя:', user.id);
         }
       } catch (error) {
