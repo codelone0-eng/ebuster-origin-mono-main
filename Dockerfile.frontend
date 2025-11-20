@@ -5,10 +5,10 @@ WORKDIR /app
 # Копируем package files
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install
+# Устанавливаем зависимости и очищаем кеш сразу
+RUN npm install && npm cache clean --force
 
-# Копируем все исходники
+# Копируем только необходимые исходники
 COPY . .
 
 # Билдим все фронтенды

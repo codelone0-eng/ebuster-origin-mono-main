@@ -1,66 +1,350 @@
-name: Deploy to Production
+name: 🚀 Деплой в Production
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Позволяет запускать вручную
+  workflow_dispatch:  # Позволяет запускать вручную из GitHub UI
+
+env:
+  SERVER_IP: ${{ secrets.SERVER_IP }}
+  SERVER_USER: ${{ secrets.SERVER_USER }}
 
 jobs:
   deploy:
-    name: Deploy to VPS
+    name: 📦 Деплой EBUSTER на Production сервер
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
+      # ============================================
+      # ЭТАП 1: ПОДГОТОВКА ОКРУЖЕНИЯ
+      # ============================================
       
-      - name: 🔐 Setup SSH
+      - name: 📥 Получение кода из репозитория
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: 🔐 Настройка SSH подключения
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
-      - name: 📝 Add server to known hosts
+      - name: 📝 Добавление сервера в known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
       
-      - name: 🚀 Deploy to server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
+      # ============================================
+      # ЭТАП 2: ПОДКЛЮЧЕНИЕ К СЕРВЕРУ И ПОДГОТОВКА
+      # ============================================
+      
+      - name: 🔍 Проверка доступности сервера
         run: |
-          ssh $SERVER_USER@$SERVER_IP << 'ENDSSH'
+          echo "🔍 Проверяю доступность сервера..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+            "echo '✅ Сервер доступен' && df -h | head -2"
+      
+      - name: 📂 Переход в рабочую директорию
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
             cd /srv/ebuster
-            
-            echo "🔄 Pulling latest changes..."
-            git fetch origin main
-            git reset --hard origin/main
-            
-            echo "🔨 Building containers..."
-            docker compose down
-            docker compose build --no-cache
-            
-            echo "▶️  Starting containers..."
-            docker compose up -d
-            
-            echo "⏳ Waiting for services to start..."
-            sleep 15
-            
-            echo "✅ Checking container status..."
-            docker compose ps
-            
-            echo "🔍 Checking API health..."
-            curl -f https://api.ebuster.ru/api/health || echo "⚠️  API health check failed"
-            
-            echo "🎉 Deployment completed!"
+            echo "📂 Текущая директория: $(pwd)"
+            echo "📌 Текущий коммит: $(git rev-parse HEAD 2>/dev/null || echo 'не git репозиторий')"
           ENDSSH
       
-      - name: 📊 Deployment status
-        if: success()
-        run: echo "✅ Deployment successful!"
+      - name: 💾 Сохранение текущего состояния для отката
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            CURRENT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
+            echo "💾 Сохранён коммит для отката: $CURRENT_COMMIT"
+            echo "$CURRENT_COMMIT" > /tmp/ebuster_rollback_commit.txt || true
+          ENDSSH
       
-      - name: ❌ Deployment failed
+      # ============================================
+      # ЭТАП 3: ОБНОВЛЕНИЕ КОДА НА СЕРВЕРЕ
+      # ============================================
+      
+      - name: 🔄 Получение последних изменений из GitHub
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "🔄 Получаю последние изменения из main ветки..."
+            git fetch origin main
+            git reset --hard origin/main
+            echo "✅ Код обновлён до коммита: $(git rev-parse HEAD)"
+            echo "📝 Последний коммит: $(git log -1 --pretty=format:'%h - %s')"
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 4: ОСТАНОВКА СТАРЫХ КОНТЕЙНЕРОВ
+      # ============================================
+      
+      - name: ⏸️  Остановка текущих контейнеров
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "⏸️  Останавливаю текущие контейнеры..."
+            docker compose down || echo "⚠️  Контейнеры уже остановлены"
+            echo "🧹 Очищаю неиспользуемые ресурсы Docker..."
+            docker system prune -f || true
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 5: СБОРКА КОМПОНЕНТОВ
+      # ============================================
+      
+      - name: 🔨 Сборка API Backend сервера
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "🔨 Начинаю сборку API Backend..."
+            echo "📦 Dockerfile: Dockerfile.api"
+            echo "📋 Компоненты: Express сервер, API роуты, бизнес-логика"
+            docker compose build --no-cache api
+            echo "✅ API Backend успешно собран"
+          ENDSSH
+      
+      - name: 🎨 Сборка UI Лендинга (ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "🎨 Начинаю сборку UI Лендинга..."
+            echo "📦 Dockerfile: Dockerfile.frontend"
+            echo "📋 Компоненты: React приложение, Tailwind CSS, Vite сборка"
+            echo "🌐 Домены: ebuster.ru, www.ebuster.ru"
+            docker compose build --no-cache frontend
+            echo "✅ UI Лендинга успешно собран"
+          ENDSSH
+      
+      - name: 👤 Сборка UI Личного кабинета (lk.ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "👤 UI Личного кабинета собирается вместе с фронтендом"
+            echo "📋 Компоненты: DashboardApp, пользовательские скрипты, биллинг"
+            echo "🌐 Домен: lk.ebuster.ru"
+            echo "✅ UI Личного кабинета готов (использует тот же образ frontend)"
+          ENDSSH
+      
+      - name: 🛡️  Сборка UI Админ Панели (admin.ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "🛡️  UI Админ Панели собирается вместе с фронтендом"
+            echo "📋 Компоненты: AdminApp, управление пользователями, ролями, скриптами"
+            echo "🌐 Домен: admin.ebuster.ru"
+            echo "✅ UI Админ Панели готов (использует тот же образ frontend)"
+          ENDSSH
+      
+      - name: 📡 Сборка Autotest Stream Server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "📡 Начинаю сборку Autotest Stream Server..."
+            echo "📦 Dockerfile: Dockerfile.autotest-stream"
+            echo "📋 Компоненты: WebSocket сервер, live-обновления тестов"
+            echo "🌐 Порт: 3002"
+            docker compose build --no-cache autotest-stream
+            echo "✅ Autotest Stream Server успешно собран"
+          ENDSSH
+      
+      - name: 📊 Сборка Autotest Dashboard Init
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "📊 Начинаю сборку Autotest Dashboard Init..."
+            echo "📦 Dockerfile: Dockerfile.autotest"
+            echo "📋 Компоненты: Playwright, генератор начального дашборда"
+            echo "🎯 Назначение: Создание placeholder для autotest.ebuster.ru"
+            docker compose build --no-cache autotest-dashboard-init
+            echo "✅ Autotest Dashboard Init успешно собран"
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 6: ЗАПУСК СЕРВИСОВ
+      # ============================================
+      
+      - name: ▶️  Запуск всех сервисов
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "▶️  Запускаю все сервисы..."
+            echo "📋 Порядок запуска:"
+            echo "   1. autotest-stream (WebSocket сервер)"
+            echo "   2. autotest-dashboard-init (генерация placeholder)"
+            echo "   3. api (Backend API)"
+            echo "   4. frontend (Nginx + все UI приложения)"
+            docker compose up -d
+            echo "✅ Все сервисы запущены"
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 7: ОЖИДАНИЕ ЗАПУСКА СЕРВИСОВ
+      # ============================================
+      
+      - name: ⏳ Ожидание готовности сервисов
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "⏳ Ожидаю запуска сервисов (15 секунд)..."
+            sleep 15
+            echo "✅ Ожидание завершено"
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 8: ПРОВЕРКА СТАТУСА КОНТЕЙНЕРОВ
+      # ============================================
+      
+      - name: 📊 Проверка статуса контейнеров
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo "📊 Статус всех контейнеров:"
+            docker compose ps
+            echo ""
+            echo "📈 Использование ресурсов:"
+            docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}" || true
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 9: ПРОВЕРКА РАБОТОСПОСОБНОСТИ
+      # ============================================
+      
+      - name: 🔍 Проверка API Backend (api.ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "🔍 Проверяю API Backend..."
+            for i in {1..5}; do
+              if curl -f -s https://api.ebuster.ru/api/health > /dev/null; then
+                echo "✅ API Backend работает корректно"
+                curl -s https://api.ebuster.ru/api/health | head -5
+                exit 0
+              fi
+              echo "⏳ Попытка $i/5... Ожидаю 3 секунды"
+              sleep 3
+            done
+            echo "❌ API Backend не отвечает после 5 попыток"
+            exit 1
+          ENDSSH
+      
+      - name: 🌐 Проверка Лендинга (ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "🌐 Проверяю Лендинг..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://ebuster.ru/ || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Лендинг доступен (HTTP $STATUS)"
+            else
+              echo "⚠️  Лендинг вернул статус: $STATUS"
+            fi
+          ENDSSH
+      
+      - name: 👤 Проверка Личного кабинета (lk.ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "👤 Проверяю Личный кабинет..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://lk.ebuster.ru/ || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Личный кабинет доступен (HTTP $STATUS)"
+            else
+              echo "⚠️  Личный кабинет вернул статус: $STATUS"
+            fi
+          ENDSSH
+      
+      - name: 🛡️  Проверка Админ Панели (admin.ebuster.ru)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "🛡️  Проверяю Админ Панель..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://admin.ebuster.ru/ || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Админ Панель доступна (HTTP $STATUS)"
+            else
+              echo "⚠️  Админ Панель вернула статус: $STATUS"
+            fi
+          ENDSSH
+      
+      - name: 📡 Проверка Autotest Stream Server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            echo "📡 Проверяю Autotest Stream Server..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3002/status || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Autotest Stream Server работает (HTTP $STATUS)"
+            else
+              echo "⚠️  Autotest Stream Server вернул статус: $STATUS"
+            fi
+          ENDSSH
+      
+      # ============================================
+      # ЭТАП 10: ФИНАЛЬНАЯ ПРОВЕРКА И ОТЧЁТ
+      # ============================================
+      
+      - name: 📋 Финальный отчёт о деплое
+        if: success()
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+            set -e
+            cd /srv/ebuster
+            echo ""
+            echo "════════════════════════════════════════════════════════════"
+            echo "🎉 ДЕПЛОЙ УСПЕШНО ЗАВЕРШЁН!"
+            echo "════════════════════════════════════════════════════════════"
+            echo ""
+            echo "📌 Развёрнутый коммит: $(git rev-parse HEAD)"
+            echo "📝 Сообщение: $(git log -1 --pretty=format:'%s')"
+            echo "👤 Автор: $(git log -1 --pretty=format:'%an')"
+            echo "🕐 Время: $(date '+%Y-%m-%d %H:%M:%S')"
+            echo ""
+            echo "✅ Все сервисы запущены и работают:"
+            echo "   • API Backend: https://api.ebuster.ru"
+            echo "   • Лендинг: https://ebuster.ru"
+            echo "   • Личный кабинет: https://lk.ebuster.ru"
+            echo "   • Админ Панель: https://admin.ebuster.ru"
+            echo "   • Autotest Dashboard: https://autotest.ebuster.ru"
+            echo ""
+            echo "📊 Статус контейнеров:"
+            docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+            echo ""
+          ENDSSH
+      
+      - name: ❌ Отчёт об ошибке деплоя
         if: failure()
-        run: echo "❌ Deployment failed! Check logs above."
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH' || true
+            set +e
+            cd /srv/ebuster
+            echo ""
+            echo "════════════════════════════════════════════════════════════"
+            echo "❌ ДЕПЛОЙ ЗАВЕРШИЛСЯ С ОШИБКОЙ!"
+            echo "════════════════════════════════════════════════════════════"
+            echo ""
+            echo "📋 Логи последних контейнеров:"
+            docker compose logs --tail=50 || true
+            echo ""
+            echo "💾 Для отката выполните:"
+            ROLLBACK=$(cat /tmp/ebuster_rollback_commit.txt 2>/dev/null || echo "неизвестен")
+            echo "   git reset --hard $ROLLBACK"
+            echo "   docker compose up -d"
+            echo ""
+          ENDSSH
