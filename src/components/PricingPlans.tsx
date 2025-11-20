@@ -138,9 +138,11 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ onSubscribe }) => {
   const getFeaturesList = (features: any) => {
     const list: string[] = [];
 
-    if (features.scripts) {
+    if (features && features.scripts) {
       const count = features.scripts.max_count;
-      list.push(count === -1 ? 'Неограниченные скрипты' : `До ${count} скриптов`);
+      if (count !== undefined && count !== null) {
+        list.push(count === -1 ? 'Неограниченные скрипты' : `До ${count} скриптов`);
+      }
       
       if (features.scripts.can_publish) list.push('Публикация скриптов');
       if (features.scripts.can_feature) list.push('Featured размещение');

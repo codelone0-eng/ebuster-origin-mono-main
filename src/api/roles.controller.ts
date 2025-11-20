@@ -22,7 +22,7 @@ export const getRoles = async (req: Request, res: Response) => {
 
     const { data: roles, error } = await supabase
       .from('roles')
-      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
+      .select('id, name, display_name, description, price_monthly, price_yearly, features, limits, is_active, is_subscription, display_order, created_at, updated_at')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -119,7 +119,7 @@ export const createRole = async (req: Request, res: Response) => {
         permissions: permissions ?? {},
         display_order: display_order || 0
       })
-      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
+      .select('id, name, display_name, description, price_monthly, price_yearly, features, limits, is_active, is_subscription, display_order, created_at, updated_at')
       .single();
 
     if (error) {
@@ -179,7 +179,7 @@ export const updateRole = async (req: Request, res: Response) => {
       .from('roles')
       .update(updateData)
       .eq('id', id)
-      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
+      .select('id, name, display_name, description, price_monthly, price_yearly, features, limits, is_active, is_subscription, display_order, created_at, updated_at')
       .single();
 
     if (error) {
