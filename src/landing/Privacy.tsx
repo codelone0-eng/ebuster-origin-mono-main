@@ -18,7 +18,7 @@ const Privacy = () => {
         </div>
 
         <div className="space-y-8">
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Shield className="h-6 w-6 text-primary" />
@@ -35,7 +35,7 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Lock className="h-6 w-6 text-primary" />
@@ -55,7 +55,7 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Eye className="h-6 w-6 text-primary" />
@@ -72,7 +72,7 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <FileText className="h-6 w-6 text-primary" />

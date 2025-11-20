@@ -143,7 +143,14 @@ export const eng = {
     legal: "Legal",
     privacy: "Privacy",
     terms: "Terms",
-    copyright: "© 2025 Ebuster. All rights belong to the author."
+    copyright: "© 2025 Ebuster. All rights belong to the author.",
+    product: "Product",
+    resources: "Resources",
+    features: "Features",
+    components: "Components",
+    documentation: "Documentation",
+    support: "Support",
+    faq: "FAQ"
   },
   featuresGrid: {
     structuredLibrary: {

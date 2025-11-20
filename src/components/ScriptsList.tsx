@@ -600,7 +600,7 @@ const ScriptsList: React.FC = () => {
       </div>
 
       {/* Фильтры и поиск */}
-      <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+        <Card className="bg-card/50 backdrop-blur-sm border border-dashed border-border/30">
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-64">
@@ -655,11 +655,11 @@ const ScriptsList: React.FC = () => {
         {filteredScripts.map((script) => (
           <Card
             key={script.id}
-            className="relative overflow-hidden rounded-xl border border-border/40 bg-card/70 shadow-sm transition-colors duration-200 hover:border-border/20 hover:bg-card/80"
+            className="relative overflow-hidden rounded-xl border border-dashed border-border/40 bg-card/70 shadow-sm transition-colors duration-200 hover:border-border/20 hover:bg-card/80"
           >
             <div className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 min-w-0 items-start gap-4">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-border/30 bg-card text-muted-foreground">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-border/30 bg-card text-muted-foreground">
                   <Code className="h-5 w-5" />
                 </div>
 
@@ -692,8 +692,8 @@ const ScriptsList: React.FC = () => {
                     </Badge>
                     <span className="flex items-center gap-1">
                       <Star className="h-3 w-3 text-primary" />
-                      <span className="font-medium text-foreground">{script.rating.toFixed(1)}</span>
-                      <span className="text-muted-foreground">({script.rating_count})</span>
+                      <span className="font-medium text-foreground">{(script.rating ?? 0).toFixed(1)}</span>
+                      <span className="text-muted-foreground">({script.rating_count ?? 0})</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Download className="h-3 w-3" />
@@ -759,7 +759,7 @@ const ScriptsList: React.FC = () => {
 
       {/* Пустое состояние */}
       {filteredScripts.length === 0 && !loading && (
-        <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+        <Card className="bg-card/50 backdrop-blur-sm border border-dashed border-border/30">
           <CardContent className="p-8 text-center">
             <Code className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">{t('header.dashboard.scripts.notFound')}</h3>

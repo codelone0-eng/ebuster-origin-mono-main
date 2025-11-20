@@ -105,6 +105,7 @@ interface UpdateScriptRequest {
 
 const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
   const code = script.code || '';
+  const rating = typeof script.rating === 'number' ? script.rating : (script.rating ? parseFloat(String(script.rating)) : 0);
   return {
     id: script.id,
     title: script.name ?? '',
@@ -118,7 +119,7 @@ const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
     is_featured: Boolean(script.is_featured),
     is_premium: false,
     downloads_count: script.downloads ?? 0,
-    rating: script.rating ?? 0,
+    rating: isNaN(rating) ? 0 : rating,
     rating_count: 0,
     file_size: Buffer.byteLength(code, 'utf8'),
     file_type: 'javascript',
@@ -726,7 +727,8 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
           downloads,
           status,
           changelog,
-          icon_url
+          icon_url,
+          rating
         )
       `)
       .eq('user_id', userId);
@@ -735,11 +737,13 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: installedScripts?.map((item: any) => ({
-        script_id: item.script_id,
-        installed_at: item.installed_at,
-        script: item.scripts ? mapDbScriptToResponse(item.scripts as DbScript) : null
-      })) || []
+      data: installedScripts
+        ?.filter((item: any) => item.scripts !== null) // Фильтруем записи с null скриптами
+        .map((item: any) => ({
+          script_id: item.script_id,
+          installed_at: item.installed_at,
+          script: mapDbScriptToResponse(item.scripts as DbScript)
+        })) || []
     });
   } catch (error) {
     console.error('Ошибка получения установленных скриптов:', error);

@@ -143,7 +143,14 @@ export const ru = {
     legal: "Юридическая информация",
     privacy: "Конфиденциальность",
     terms: "Условия",
-    copyright: "© 2025 Ebuster. Все права принадлежат автору."
+    copyright: "© 2025 Ebuster. Все права принадлежат автору.",
+    product: "Продукт",
+    resources: "Ресурсы",
+    features: "Возможности",
+    components: "Компоненты",
+    documentation: "Документация",
+    support: "Поддержка",
+    faq: "FAQ"
   },
   featuresGrid: {
     structuredLibrary: {

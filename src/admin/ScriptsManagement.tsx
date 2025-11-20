@@ -503,7 +503,7 @@ const ScriptsManagement: React.FC = () => {
                     </span>
                     <span className="flex items-center gap-1">
                       <Star className="h-3 w-3" />
-                      {script.rating.toFixed(1)} ({script.rating_count})
+                      {(script.rating ?? 0).toFixed(1)} ({script.rating_count ?? 0})
                     </span>
                   </div>
                   <span className="flex items-center gap-1">

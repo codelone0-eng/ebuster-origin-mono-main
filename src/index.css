@@ -381,79 +381,97 @@ textarea:focus-visible {
   ring-offset: 0 !important;
 }
 
-/* Content border styles for dark theme */
+/* Content border styles for dark theme - dashed borders like shadcn */
 .dark .content-border {
   border-color: #606060 !important;
+  border-style: dashed !important;
 }
 
 .dark .content-border-50 {
   border-color: rgba(96, 96, 96, 0.5) !important;
+  border-style: dashed !important;
 }
 
 .dark .content-border-70 {
   border-color: rgba(96, 96, 96, 0.7) !important;
+  border-style: dashed !important;
 }
 
 .dark .content-border-30 {
   border-color: rgba(96, 96, 96, 0.3) !important;
+  border-style: dashed !important;
 }
 
 .dark .content-border-20 {
   border-color: rgba(96, 96, 96, 0.2) !important;
+  border-style: dashed !important;
 }
 
 .dark .content-border-40 {
   border-color: rgba(96, 96, 96, 0.4) !important;
+  border-style: dashed !important;
 }
 
-/* Content border styles for light theme */
+/* Content border styles for light theme - dashed borders like shadcn */
 .content-border {
   border-color: #d0d0d0 !important;
+  border-style: dashed !important;
 }
 
 .content-border-50 {
   border-color: rgba(208, 208, 208, 0.5) !important;
+  border-style: dashed !important;
 }
 
 .content-border-70 {
   border-color: rgba(208, 208, 208, 0.7) !important;
+  border-style: dashed !important;
 }
 
 .content-border-30 {
   border-color: rgba(208, 208, 208, 0.3) !important;
+  border-style: dashed !important;
 }
 
 .content-border-20 {
   border-color: rgba(208, 208, 208, 0.2) !important;
+  border-style: dashed !important;
 }
 
 .content-border-40 {
   border-color: rgba(208, 208, 208, 0.4) !important;
+  border-style: dashed !important;
 }
 
-/* Content border styles for green theme */
+/* Content border styles for green theme - dashed borders like shadcn */
 .green .content-border {
   border-color: #10b981 !important;
+  border-style: dashed !important;
 }
 
 .green .content-border-50 {
   border-color: rgba(16, 185, 129, 0.5) !important;
+  border-style: dashed !important;
 }
 
 .green .content-border-70 {
   border-color: rgba(16, 185, 129, 0.7) !important;
+  border-style: dashed !important;
 }
 
 .green .content-border-30 {
   border-color: rgba(16, 185, 129, 0.3) !important;
+  border-style: dashed !important;
 }
 
 .green .content-border-20 {
   border-color: rgba(16, 185, 129, 0.2) !important;
+  border-style: dashed !important;
 }
 
 .green .content-border-40 {
   border-color: rgba(16, 185, 129, 0.4) !important;
+  border-style: dashed !important;
 }
 
   /* Remove focus outline from all form elements */

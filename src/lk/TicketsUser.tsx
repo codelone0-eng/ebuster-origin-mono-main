@@ -471,7 +471,7 @@ const TicketsUser: React.FC = () => {
 
                 {isTicketClosed(selectedTicket) ? (
                   <div className="space-y-4 pt-4 border-t">
-                    <div className="rounded-xl border content-border-40 bg-muted/40 p-4">
+                    <div className="rounded-xl border border-dashed content-border-40 bg-muted/40 p-4">
                       <h5 className="font-semibold mb-1">Тикет закрыт</h5>
                       <p className="text-sm text-muted-foreground">
                         Тикет закрыт {selectedTicket.closed_at ? new Date(selectedTicket.closed_at).toLocaleString() : ''}

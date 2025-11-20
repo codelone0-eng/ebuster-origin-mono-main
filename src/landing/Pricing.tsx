@@ -163,7 +163,7 @@ const Pricing = () => {
         <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border content-border-50 mb-8">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border border-dashed content-border-50 mb-8">
             <Crown className="h-5 w-5 text-primary" />
             <span className="text-sm font-semibold text-muted-foreground">{t('pricing.hero.badge')}</span>
           </div>
@@ -190,7 +190,7 @@ const Pricing = () => {
 
         {/* Переключатель периода */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 p-1 bg-card/50 backdrop-blur-sm border border-border/30 rounded-lg">
+          <div className="inline-flex items-center gap-2 p-1 bg-card/50 backdrop-blur-sm border border-dashed border-border/30 rounded-lg">
             <Button
               variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
               size="sm"
@@ -279,7 +279,7 @@ const Pricing = () => {
                           <div className="text-center mb-6">
                             <div className={cn(
                               "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
-                              isPremium ? "bg-primary/10 border-primary/20" : "bg-muted/20 border-border/30"
+                              isPremium ? "bg-primary/10 border-primary/20 border-dashed" : "bg-muted/20 border-border/30 border-dashed"
                             )}>
                               {isPremium ? (
                                 <Crown className="h-6 w-6 text-primary" />

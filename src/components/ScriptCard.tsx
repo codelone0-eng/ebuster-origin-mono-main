@@ -109,10 +109,10 @@ export function ScriptCard({ script, onView, onDownload }: ScriptCardProps) {
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
               <span className="font-semibold text-sm">
-                {script.rating.toFixed(1)}
+                {(script.rating ?? 0).toFixed(1)}
               </span>
               <span className="text-xs text-muted-foreground">
-                ({script.rating_count})
+                ({script.rating_count ?? 0})
               </span>
             </div>
             

@@ -42,7 +42,7 @@ const Index = () => {
         {/* Hero Section */}
         <Section className="bg-gradient-to-b from-background via-muted/5 to-background">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-sm border content-border-50 mb-8 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-sm border border-dashed content-border-50 mb-8 animate-fade-in">
               <Code2 className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">{t('index.hero.badge')}</span>
             </div>
@@ -70,7 +70,7 @@ const Index = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-14 px-8 text-lg bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-accent/50"
+                    className="h-14 px-8 text-lg bg-card/50 backdrop-blur-sm border border-dashed content-border-50 hover:bg-accent/50"
                     onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
                   >
                     <Terminal className="mr-2 h-5 w-5" />
@@ -98,7 +98,7 @@ const Index = () => {
             {/* Main Feature Showcase */}
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
               {/* Large Feature Card (без метрик) */}
-              <div className="lg:row-span-2 bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-12 relative overflow-hidden group transition-all duration-300">
+              <div className="lg:row-span-2 bg-card/50 backdrop-blur-sm border border-dashed content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-12 relative overflow-hidden group transition-all duration-300">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-foreground/5 to-transparent rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                 <Layers className="h-16 w-16 mb-6 relative z-content text-foreground" />
                 <h3 className="text-4xl font-bold mb-4 relative z-content text-foreground">{t('index.features.modularArchitecture.title')}</h3>
@@ -109,7 +109,7 @@ const Index = () => {
               </div>
 
               {/* Smaller Feature Cards */}
-              <div className="bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-8 group transition-all duration-300">
+              <div className="bg-card/50 backdrop-blur-sm border border-dashed content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-8 group transition-all duration-300">
                 <Zap className="h-12 w-12 mb-4 group-hover:scale-110 transition-transform text-foreground" />
                 <h3 className="text-2xl font-bold mb-3 text-foreground">{t('index.features.blazingFast.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -117,7 +117,7 @@ const Index = () => {
                 </p>
               </div>
 
-              <div className="bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-8 group transition-all duration-300">
+              <div className="bg-card/50 backdrop-blur-sm border border-dashed content-border-50 hover:bg-card/70 hover:content-border-70 rounded-3xl p-8 group transition-all duration-300">
                 <Shield className="h-12 w-12 mb-4 group-hover:scale-110 transition-transform text-foreground" />
                 <h3 className="text-2xl font-bold mb-3 text-foreground">{t('index.features.fortKnoxSecurity.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -138,7 +138,7 @@ const Index = () => {
               ].map((feature, i) => (
                 <div 
                   key={i}
-                  className="bg-card/50 backdrop-blur-sm border content-border-50 hover:bg-card/70 hover:content-border-70 rounded-2xl p-8 text-center group transition-all duration-300"
+                  className="bg-card/50 backdrop-blur-sm border border-dashed content-border-50 hover:bg-card/70 hover:content-border-70 rounded-2xl p-8 text-center group transition-all duration-300"
                 >
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/50 mb-4 group-hover:scale-110 transition-transform">
                     <feature.icon className="h-8 w-8 text-foreground" />
@@ -167,7 +167,7 @@ const Index = () => {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Code2 className="h-6 w-6 text-primary" />
               </div>
@@ -175,7 +175,7 @@ const Index = () => {
               <p className="text-muted-foreground">{t('index.extensionFeatures.scriptManager.description')}</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Cloud className="h-6 w-6 text-primary" />
               </div>
@@ -183,7 +183,7 @@ const Index = () => {
               <p className="text-muted-foreground">{t('index.extensionFeatures.cloudSync.description')}</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <User className="h-6 w-6 text-primary" />
               </div>
@@ -191,7 +191,7 @@ const Index = () => {
               <p className="text-muted-foreground">{t('index.extensionFeatures.guestMode.description')}</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <RefreshCw className="h-6 w-6 text-primary" />
               </div>
@@ -199,7 +199,7 @@ const Index = () => {
               <p className="text-muted-foreground">{t('index.extensionFeatures.autoUpdates.description')}</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
@@ -207,7 +207,7 @@ const Index = () => {
               <p className="text-muted-foreground">{t('index.extensionFeatures.security.description')}</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
+            <div className="bg-card/50 backdrop-blur-sm border border-dashed border-border rounded-2xl p-6 hover:bg-card/70 transition-all group">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>
@@ -246,7 +246,7 @@ const Index = () => {
       </ScrollReveal>
 
       {/* Footer - Outside of MagneticScroll */}
-          <footer className="py-16 px-4 border-t content-border bg-background">
+          <footer className="py-16 px-4 border-t border-dashed content-border bg-background">
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-5 gap-8 mb-8">
             <div className="md:col-span-2">
@@ -284,7 +284,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="pt-6 border-t content-border text-center">
+          <div className="pt-6 border-t border-dashed content-border text-center">
             <div className="text-sm text-muted-foreground">
               {t('index.footer.copyright')}
             </div>

@@ -183,7 +183,7 @@ const statusConfig: Record<Status, {
 };
 
 const statusContainerBaseClasses =
-  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-card/60 border content-border-50 text-muted-foreground backdrop-blur-sm transition-all';
+  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-card/60 border border-dashed content-border-50 text-muted-foreground backdrop-blur-sm transition-all';
 
 const Roadmap = () => {
   const { language } = useLanguage();
@@ -201,7 +201,7 @@ const Roadmap = () => {
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
-          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/60 border content-border-50 backdrop-blur-sm">
+          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/60 border border-dashed content-border-50 backdrop-blur-sm">
             <Milestone className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-semibold text-muted-foreground">{content.hero.badge}</span>
           </div>
@@ -223,7 +223,7 @@ const Roadmap = () => {
         <section className="space-y-8">
           <div className="space-y-6">
             {content.timeline.map((entry) => (
-              <Card key={entry.period} className="bg-card/40 backdrop-blur border border-border/60">
+              <Card key={entry.period} className="bg-card/40 backdrop-blur border border-dashed border-border/60">
                 <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-3">
                     <Calendar className="h-6 w-6 text-primary" />
@@ -258,7 +258,7 @@ const Roadmap = () => {
           </h2>
           <div className="space-y-6">
             {content.updates.list.map((update) => (
-              <Card key={update.date} className="bg-card/40 border border-border/60">
+              <Card key={update.date} className="bg-card/40 border border-dashed border-border/60">
                 <CardHeader>
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                     <div className="flex items-center gap-3 text-primary">
@@ -294,7 +294,7 @@ const Roadmap = () => {
           </p>
           <div className="grid gap-4 md:grid-cols-3 text-left">
             {content.influence.actions.map((action) => (
-              <Card key={action} className="bg-card/40 border border-border/60 h-full">
+              <Card key={action} className="bg-card/40 border border-dashed border-border/60 h-full">
                 <CardContent className="p-6 flex items-start gap-3">
                   <Sparkles className="mt-1 h-5 w-5 text-primary" />
                   <span className="text-muted-foreground">{action}</span>

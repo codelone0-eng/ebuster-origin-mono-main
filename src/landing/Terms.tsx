@@ -18,7 +18,7 @@ const Terms = () => {
         </div>
 
         <div className="space-y-8">
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <FileText className="h-6 w-6 text-primary" />
@@ -35,7 +35,7 @@ const Terms = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <CheckCircle className="h-6 w-6 text-primary" />
@@ -55,7 +55,7 @@ const Terms = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <AlertCircle className="h-6 w-6 text-primary" />
@@ -76,7 +76,7 @@ const Terms = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <XCircle className="h-6 w-6 text-primary" />
@@ -97,7 +97,7 @@ const Terms = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/30 backdrop-blur-sm border content-border-30">
+          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <FileText className="h-6 w-6 text-primary" />

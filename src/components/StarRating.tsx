@@ -79,7 +79,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       </div>
       {showValue && (
         <span className="text-sm text-muted-foreground ml-1">
-          {rating.toFixed(1)}
+          {(rating ?? 0).toFixed(1)}
         </span>
       )}
     </div>
