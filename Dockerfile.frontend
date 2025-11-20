@@ -14,9 +14,6 @@ COPY . .
 # Билдим все фронтенды
 RUN npm run build
 
-# Исправляем пути к assets в index.html
-RUN node scripts/fix-dist-index.mjs
-
 # Production stage с nginx
 FROM nginx:alpine
 
