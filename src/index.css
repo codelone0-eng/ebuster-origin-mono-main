@@ -72,7 +72,7 @@
     --spacing: 0.25rem;
   }
 
-  .dark {
+  :root.dark {
     --background: 0 0% 10%;
     --foreground: 0 0% 85%;
     --card: 0 0% 12%;
@@ -126,7 +126,7 @@
     --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 20% / 0.38);
   }
 
-  .green {
+  :root.green {
     --background: 0 0% 10%;
     --foreground: 0 0% 85%;
     --card: 0 0% 12%;
