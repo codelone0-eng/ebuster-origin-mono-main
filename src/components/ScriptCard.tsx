@@ -98,7 +98,7 @@ export function ScriptCard({ script, onView, onDownload }: ScriptCardProps) {
             {script.category}
           </Badge>
           <span className="text-xs text-muted-foreground">
-            {(script.file_size / 1024).toFixed(2)} KB
+            {((script.file_size ?? 0) / 1024).toFixed(2)} KB
           </span>
         </div>
 

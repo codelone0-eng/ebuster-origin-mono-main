@@ -462,9 +462,9 @@ const SubscriptionsManagement: React.FC = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.revenue.monthly.toFixed(2)}</div>
+              <div className="text-2xl font-bold">${(stats?.revenue?.monthly ?? 0).toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                Всего: ${stats.revenue.total.toFixed(2)}
+                Всего: ${(stats?.revenue?.total ?? 0).toFixed(2)}
               </p>
             </CardContent>
           </Card>

@@ -313,7 +313,7 @@ export const ReferralManagement: React.FC = () => {
                         <span>Использований: {code.uses_count}{code.max_uses ? `/${code.max_uses}` : ''}</span>
                         <span>Скидка: {code.discount_value}%</span>
                         <span>Рефералов: {code.stats?.[0]?.total_referrals || 0}</span>
-                        <span>Заработано: ${code.stats?.[0]?.total_earnings?.toFixed(2) || '0.00'}</span>
+                        <span>Заработано: ${(code.stats?.[0]?.total_earnings ?? 0).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export const ReferralManagement: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <div className="font-medium text-green-600">
-                      +${use.reward_value.toFixed(2)}
+                      +${(use.reward_value ?? 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export const ReferralManagement: React.FC = () => {
                   <div className="text-right">
                     <div className="font-bold text-lg">{referrer.total_referrals}</div>
                     <div className="text-sm text-muted-foreground">
-                      ${referrer.total_earnings.toFixed(2)} заработано
+                      ${(referrer.total_earnings ?? 0).toFixed(2)} заработано
                     </div>
                   </div>
                 </div>

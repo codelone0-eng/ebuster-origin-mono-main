@@ -355,7 +355,7 @@ const ScriptsManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Средний рейтинг</p>
-                  <p className="text-2xl font-bold">{stats.averageRating.toFixed(1)}</p>
+                  <p className="text-2xl font-bold">{(stats?.averageRating ?? 0).toFixed(1)}</p>
                 </div>
                 <Star className="h-8 w-8 text-yellow-600" />
               </div>

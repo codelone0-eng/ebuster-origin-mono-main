@@ -177,9 +177,9 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats?.total_earnings.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
-              ${stats?.paid_earnings.toFixed(2) || '0.00'} выплачено
+              ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
             </p>
           </CardContent>
         </Card>
@@ -190,7 +190,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats?.pending_earnings.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               Будет выплачено в конце месяца
             </p>
@@ -203,7 +203,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.conversion_rate.toFixed(1) || '0.0'}%</div>
+            <div className="text-2xl font-bold">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">
               Процент оформивших подписку
             </p>
@@ -308,7 +308,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                   </div>
                   <div className="text-right">
                     <div className="font-medium text-green-600">
-                      +${referral.reward_value.toFixed(2)}
+                      +${(referral.reward_value ?? 0).toFixed(2)}
                     </div>
                     <Badge
                       variant={
