@@ -221,7 +221,7 @@ export const SubscriptionsManagementNew: React.FC = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.revenue.monthly.toFixed(0)} ₽</div>
+              <div className="text-2xl font-bold">{(stats?.revenue?.monthly ?? 0).toFixed(0)} ₽</div>
             </CardContent>
           </Card>
         </div>

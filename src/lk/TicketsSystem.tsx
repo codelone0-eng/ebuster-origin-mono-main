@@ -281,7 +281,7 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.avgResponseTimeHours.toFixed(1)}ч
+                {(stats?.avgResponseTimeHours ?? 0).toFixed(1)}ч
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 За последние 30 дней
