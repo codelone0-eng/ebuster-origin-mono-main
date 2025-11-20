@@ -2,11 +2,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Устанавливаем системные пакеты (кэшируется отдельным слоем)
-RUN apk add --no-cache docker-cli docker-cli-compose bash
+# Копируем package files
+COPY package*.json ./
 
-# Устанавливаем npm пакеты локально (кэшируется отдельным слоем)
-RUN npm init -y && npm install express cors ws && npm cache clean --force
+# Устанавливаем системные пакеты и зависимости
+RUN apk add --no-cache docker-cli docker-cli-compose bash \
+  && npm install express cors ws
 
 # Копируем сервер для live-стрима
 COPY tests/stream-server ./stream-server

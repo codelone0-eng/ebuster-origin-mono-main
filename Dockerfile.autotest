@@ -2,9 +2,11 @@ FROM mcr.microsoft.com/playwright:v1.56.1-jammy
 
 WORKDIR /app
 
+# Копируем package files
 COPY package*.json ./
 
-RUN npm install && npm cache clean --force
+# Устанавливаем зависимости
+RUN npm install
 
 # Копируем исходники тестов и скрипты
 COPY tests ./tests

@@ -114,7 +114,7 @@ const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
     tags: Array.isArray(script.tags) ? script.tags : [],
     author_name: script.author_name ?? 'Admin',
     version: script.version ?? '1.0.0',
-    status: (script.status as ScriptResponse['status']) ?? 'active',
+    status: (script.status as ScriptResponse['status']) ?? 'draft',
     is_featured: Boolean(script.is_featured),
     is_premium: false,
     downloads_count: script.downloads ?? 0,
@@ -514,7 +514,16 @@ export const rateScript = async (req: Request, res: Response) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === '42501') {
+          console.error('🚫 Недостаточно прав для обновления script_ratings. Проверьте GRANT.', error);
+          return res.status(403).json({
+            success: false,
+            error: 'Недостаточно прав для обновления оценок. Добавьте GRANT ALL ON TABLE script_ratings TO service_role;'
+          });
+        }
+        throw error;
+      }
       result = data;
       console.log('✅ Оценка обновлена');
     } else {
@@ -536,7 +545,16 @@ export const rateScript = async (req: Request, res: Response) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === '42501') {
+          console.error('🚫 Недостаточно прав для создания записей в script_ratings. Проверьте GRANT.', error);
+          return res.status(403).json({
+            success: false,
+            error: 'Недостаточно прав для создания оценок. Добавьте GRANT ALL ON TABLE script_ratings TO service_role;'
+          });
+        }
+        throw error;
+      }
       result = data;
       console.log('✅ Новая оценка создана');
     }
@@ -795,6 +813,13 @@ export const installScriptForUser = async (req: Request, res: Response) => {
       });
 
     if (installError) {
+      if ((installError as any).code === '42501') {
+        console.error('🚫 [installScriptForUser] Недостаточно прав для записи в user_scripts. Проверьте GRANT.', installError);
+        return res.status(403).json({
+          success: false,
+          error: 'Недостаточно прав для сохранения установленных скриптов. Добавьте GRANT ALL ON TABLE user_scripts TO service_role;'
+        });
+      }
       console.error('❌ [installScriptForUser] Ошибка сохранения:', installError);
       throw installError;
     }
@@ -843,6 +868,13 @@ export const uninstallScriptForUser = async (req: Request, res: Response) => {
       .eq('script_id', scriptId);
 
     if (error) {
+      if ((error as any).code === '42501') {
+        console.error('🚫 [uninstallScriptForUser] Недостаточно прав для удаления из user_scripts. Проверьте GRANT.', error);
+        return res.status(403).json({
+          success: false,
+          error: 'Недостаточно прав для удаления установленных скриптов. Добавьте GRANT ALL ON TABLE user_scripts TO service_role;'
+        });
+      }
       console.error('❌ [uninstallScriptForUser] Ошибка удаления:', error);
       throw error;
     }

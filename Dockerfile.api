@@ -1,26 +1,14 @@
-FROM node:20-alpine AS deps
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
+# Копируем package files
 COPY package*.json ./
 
-# Быстрая установка зависимостей
-RUN npm install --omit=dev --no-audit --no-fund \
-  && npm cache clean --force
+# Устанавливаем зависимости
+RUN npm install --omit=dev && npm cache clean --force
 
-# Production stage - минимальный образ
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Устанавливаем только необходимое
-RUN apk add --no-cache tini \
-  && npm install -g tsx
-
-# Копируем зависимости из deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-# Копируем исходники API (меняются часто - в конце)
+# Копируем исходники API
 COPY server.ts ./
 COPY start-server.ts ./
 COPY src/api ./src/api
@@ -29,13 +17,10 @@ COPY src/config ./src/config
 COPY src/services ./src/services
 COPY src/utils ./src/utils
 COPY tsconfig*.json ./
-COPY package*.json ./
+
+# Устанавливаем tsx для запуска TypeScript
+RUN npm install -g tsx
 
 EXPOSE 3001
 
-# Оптимизация: NODE_ENV и memory limits
-ENV NODE_ENV=production \
-    NODE_OPTIONS="--max-old-space-size=2048"
-
-ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["tsx", "start-server.ts"]

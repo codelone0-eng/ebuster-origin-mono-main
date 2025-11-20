@@ -10,7 +10,6 @@ jobs:
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Увеличен timeout для сборки
     
     steps:
       - name: 📥 Checkout code
@@ -39,14 +38,9 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            echo "🔨 Building containers with BuildKit and cache..."
-            export DOCKER_BUILDKIT=1
-            export COMPOSE_DOCKER_CLI_BUILD=1
-            
+            echo "🔨 Building containers..."
             docker compose down
-            
-            # Сборка с кэшированием (без --no-cache для ускорения)
-            docker compose build --parallel
+            docker compose build --no-cache
             
             echo "▶️  Starting containers..."
             docker compose up -d

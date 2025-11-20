@@ -4,22 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-      cache_from:
-        - ebuster-api:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
     container_name: ebuster-api
     restart: unless-stopped
     ports:
       - "3001:3001"
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
     env_file:
       - .env
     environment:
@@ -39,23 +27,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-      cache_from:
-        - ebuster-frontend:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
     container_name: ebuster-frontend
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
     depends_on:
       api:
         condition: service_started
@@ -80,22 +56,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.autotest-stream
-      cache_from:
-        - ebuster-autotest-stream:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
     container_name: ebuster-autotest-stream
     restart: unless-stopped
     ports:
       - "3002:3002"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
     networks:
       - ebuster-network
     volumes:
@@ -112,10 +76,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.autotest
-      cache_from:
-        - ebuster-autotest:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
     container_name: ebuster-autotest-dashboard-init
     restart: "no"
     command: ["npm", "run", "test:dashboard:live"]
@@ -135,10 +95,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.autotest
-      cache_from:
-        - ebuster-autotest:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
     container_name: ebuster-autotest-runner
     env_file:
       - .env.autotest

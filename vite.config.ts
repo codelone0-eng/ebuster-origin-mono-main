@@ -5,7 +5,6 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/',
   server: {
     host: "::",
     port: 8080,
@@ -15,27 +14,5 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  build: {
-    target: 'esnext',
-    minify: 'esbuild',
-    modulePreload: {
-      polyfill: true,
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['lucide-react', 'sonner'],
-        },
-      },
-    },
-    chunkSizeWarningLimit: 1000,
-    sourcemap: false,
-    cssCodeSplit: true,
-    assetsInlineLimit: 4096,
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
   },
 }));
