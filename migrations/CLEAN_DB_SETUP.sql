@@ -373,6 +373,7 @@ GRANT ALL ON api_keys TO postgres, anon, authenticated, service_role;
 GRANT ALL ON subscriptions TO postgres, anon, authenticated, service_role;
 GRANT ALL ON login_history TO postgres, anon, authenticated, service_role;
 GRANT ALL ON user_bans TO postgres, anon, authenticated, service_role;
+GRANT ALL ON user_scripts TO postgres, anon, authenticated, service_role;
 
 -- =====================================================
 -- 12. ДОПОЛНИТЕЛЬНЫЕ ТАБЛИЦЫ

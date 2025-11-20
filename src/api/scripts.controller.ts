@@ -24,7 +24,18 @@ const getSupabaseClient = () => {
   
   console.log('✅ Создаем Supabase клиент для скриптов');
   supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false }
+    auth: { 
+      persistSession: false,
+      autoRefreshToken: false
+    },
+    db: {
+      schema: 'public'
+    },
+    global: {
+      headers: {
+        'x-client-info': 'ebuster-api'
+      }
+    }
   });
   
   return supabaseClient;
