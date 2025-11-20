@@ -234,13 +234,21 @@
       (function () {
         try {
           var stored = localStorage.getItem('theme');
-          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (stored === 'dark' || (!stored && prefersDark)) {
-            document.documentElement.classList.add('dark');
+          var theme = stored || 'dark'; // По умолчанию тёмная тема
+          
+          // Удаляем все возможные классы тем
+          document.documentElement.classList.remove('dark', 'light', 'green');
+          
+          // Применяем сохранённую или дефолтную тему
+          if (theme === 'dark' || theme === 'light' || theme === 'green') {
+            document.documentElement.classList.add(theme);
           } else {
-            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('dark');
           }
-        } catch (e) {}
+        } catch (e) {
+          // Fallback на тёмную тему при ошибке
+          document.documentElement.classList.add('dark');
+        }
       })();
     </script>
     <div id="root"></div>
