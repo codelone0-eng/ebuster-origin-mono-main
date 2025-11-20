@@ -733,23 +733,60 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
       `)
       .eq('user_id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ [getUserInstalledScripts] Ошибка Supabase:', error);
+      throw error;
+    }
+
+    console.log('📦 [getUserInstalledScripts] Получено записей:', installedScripts?.length || 0);
+
+    const result = installedScripts
+      ?.filter((item: any) => {
+        // Фильтруем записи с null скриптами или пустыми массивами
+        if (!item.scripts) return false;
+        // Если scripts - массив, берем первый элемент
+        if (Array.isArray(item.scripts)) {
+          return item.scripts.length > 0;
+        }
+        return true;
+      })
+      .map((item: any) => {
+        // Обрабатываем случай, когда scripts может быть массивом
+        let scriptData = item.scripts;
+        if (Array.isArray(scriptData)) {
+          scriptData = scriptData[0];
+        }
+        
+        if (!scriptData) {
+          console.warn('⚠️ [getUserInstalledScripts] Пустой скрипт для script_id:', item.script_id);
+          return null;
+        }
+
+        try {
+          return {
+            script_id: item.script_id,
+            installed_at: item.installed_at,
+            script: mapDbScriptToResponse(scriptData as DbScript)
+          };
+        } catch (mapError) {
+          console.error('❌ [getUserInstalledScripts] Ошибка маппинга скрипта:', mapError, scriptData);
+          return null;
+        }
+      })
+      .filter((item: any) => item !== null) || [];
+
+    console.log('✅ [getUserInstalledScripts] Возвращаем скриптов:', result.length);
 
     res.json({
       success: true,
-      data: installedScripts
-        ?.filter((item: any) => item.scripts !== null) // Фильтруем записи с null скриптами
-        .map((item: any) => ({
-          script_id: item.script_id,
-          installed_at: item.installed_at,
-          script: mapDbScriptToResponse(item.scripts as DbScript)
-        })) || []
+      data: result
     });
-  } catch (error) {
-    console.error('Ошибка получения установленных скриптов:', error);
+  } catch (error: any) {
+    console.error('❌ [getUserInstalledScripts] Ошибка получения установленных скриптов:', error);
     res.status(500).json({
       success: false,
-      error: 'Ошибка получения установленных скриптов'
+      error: 'Ошибка получения установленных скриптов',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

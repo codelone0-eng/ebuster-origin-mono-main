@@ -232,7 +232,8 @@ const DashboardContent = () => {
           const data = await response.json();
           console.log('📊 Данные установленных скриптов:', data);
           if (data.success && data.data) {
-            let installedScripts = data.data;
+            // Фильтруем null скрипты на клиенте тоже
+            let installedScripts = data.data.filter((item: any) => item.script !== null && item.script !== undefined);
             
             // Проверяем наличие скриптов в расширении
             if ((window as any).EbusterBridge) {
@@ -284,12 +285,30 @@ const DashboardContent = () => {
             }
             
             setInstalledScripts(installedScripts);
+          } else {
+            console.warn('⚠️ [Dashboard] Некорректный ответ API:', data);
+            setInstalledScripts([]);
           }
         } else {
-          console.error('❌ Ошибка загрузки скриптов:', response.status);
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('❌ Ошибка загрузки скриптов:', response.status, errorData);
+          setInstalledScripts([]); // Устанавливаем пустой массив вместо undefined
+          
+          toast({
+            title: 'Ошибка загрузки скриптов',
+            description: errorData.error || 'Не удалось загрузить установленные скрипты',
+            variant: 'destructive'
+          });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Failed to load installed scripts:', error);
+        setInstalledScripts([]); // Устанавливаем пустой массив вместо undefined
+        
+        toast({
+          title: 'Ошибка загрузки скриптов',
+          description: error.message || 'Произошла ошибка при загрузке скриптов',
+          variant: 'destructive'
+        });
       }
     };
     
@@ -316,11 +335,17 @@ const DashboardContent = () => {
             .then(res => res.json())
             .then(data => {
               if (data.success && data.data) {
-                setInstalledScripts(data.data);
+                const filtered = data.data.filter((item: any) => item.script !== null && item.script !== undefined);
+                setInstalledScripts(filtered);
                 console.log('✅ [Dashboard] Список установленных скриптов обновлен');
+              } else {
+                setInstalledScripts([]);
               }
             })
-            .catch(err => console.error('❌ [Dashboard] Ошибка обновления списка:', err));
+            .catch(err => {
+              console.error('❌ [Dashboard] Ошибка обновления списка:', err);
+              setInstalledScripts([]);
+            });
           }
         }, 300);
       }
@@ -352,12 +377,18 @@ const DashboardContent = () => {
             if (response.ok) {
               const data = await response.json();
               if (data.success && data.data) {
-                setInstalledScripts(data.data);
+                const filtered = data.data.filter((item: any) => item.script !== null && item.script !== undefined);
+                setInstalledScripts(filtered);
+              } else {
+                setInstalledScripts([]);
               }
+            } else {
+              setInstalledScripts([]);
             }
           }
         } catch (error) {
           console.error('❌ [Dashboard] Ошибка удаления скрипта:', error);
+          setInstalledScripts([]);
         }
       }
     };
@@ -735,7 +766,9 @@ const DashboardContent = () => {
                         </GradientButton>
                       </div>
                     </Card>
-                  ) : installedScripts.map((item: any) => {
+                  ) : installedScripts
+                    .filter((item: any) => item.script !== null && item.script !== undefined) // Фильтруем null скрипты
+                    .map((item: any) => {
                     const scriptTitle = item.script?.title || item.script?.name || 'Скрипт';
                     const scriptDescription = item.script?.short_description || item.script?.description || '';
                     const scriptVersion = item.script?.version || item.version || '1.0.0';
