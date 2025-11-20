@@ -1,26 +1,44 @@
 FROM node:20-alpine AS base
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
+
 WORKDIR /app
 
-# Копируем package files
-COPY package*.json ./
+FROM base AS deps
 
-# Устанавливаем зависимости
-RUN npm install --omit=dev && npm cache clean --force
+COPY package.json package-lock.json* pnpm-lock.yaml* bun.lockb* ./
 
-# Копируем исходники API
+RUN \
+  if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f bun.lockb ]; then npm install; \
+  else npm install; fi
+
+FROM deps AS build
+
+COPY tsconfig*.json ./
 COPY server.ts ./
 COPY start-server.ts ./
-COPY src/api ./src/api
-COPY src/lib ./src/lib
-COPY src/config ./src/config
-COPY src/services ./src/services
-COPY src/utils ./src/utils
-COPY tsconfig*.json ./
+COPY src ./src
 
-# Устанавливаем tsx для запуска TypeScript
-RUN npm install -g tsx
+RUN npx tsc --project tsconfig.node.json --outDir dist
+
+FROM node:20-alpine AS runner
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+RUN addgroup -S ebuster && adduser -S ebuster -G ebuster
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY package.json ./
+
+USER ebuster
 
 EXPOSE 3001
 
-CMD ["tsx", "start-server.ts"]
+CMD ["node", "dist/start-server.js"]
