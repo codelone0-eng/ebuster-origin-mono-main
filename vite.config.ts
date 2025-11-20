@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     cssCodeSplit: false,
     cssMinify: true,
-    minify: 'terser',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
