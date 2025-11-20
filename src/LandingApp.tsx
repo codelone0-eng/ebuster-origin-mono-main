@@ -9,7 +9,6 @@ import { CustomCursor } from "@/components/CustomCursor";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
-import { useThemeInit } from "@/hooks/useThemeInit";
 import Index from "./landing/Index";
 import Contacts from "./landing/Contacts";
 import Pricing from "./landing/Pricing";
@@ -40,21 +39,18 @@ const RedirectTo = ({ url }: { url: string }) => {
   return null;
 };
 
-const LandingApp = () => {
-  useThemeInit();
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <CursorProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <BeamsUpstream />
-              <CustomCursor />
-              <div className="relative z-content">
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
+const LandingApp = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <CursorProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <BeamsUpstream />
+            <CustomCursor />
+            <div className="relative z-content">
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/contacts" element={<Contacts />} />
@@ -93,7 +89,6 @@ const LandingApp = () => {
       </CursorProvider>
     </LanguageProvider>
   </QueryClientProvider>
-  );
-};
+);
 
 export default LandingApp;

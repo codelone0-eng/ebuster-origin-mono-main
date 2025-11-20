@@ -115,24 +115,24 @@ export const getSystemStats = async (req: Request, res: Response) => {
         activeScripts = 0;
       }
 
-      // Статистика тикетов (если есть таблица tickets)
+      // Статистика тикетов
       let totalTickets = 0;
       let openTickets = 0;
       let resolvedTickets = 0;
       try {
         const { count: ticketsCount } = await supabase
-          .from('support_tickets')
+          .from('tickets')
           .select('*', { count: 'exact', head: true });
         totalTickets = ticketsCount || 0;
 
         const { count: openTicketsCount } = await supabase
-          .from('support_tickets')
+          .from('tickets')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'open');
         openTickets = openTicketsCount || 0;
 
         const { count: resolvedTicketsCount } = await supabase
-          .from('support_tickets')
+          .from('tickets')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'resolved');
         resolvedTickets = resolvedTicketsCount || 0;
@@ -196,13 +196,13 @@ export const getAdminTicketStats = async (req: Request, res: Response) => {
 
     // Получаем количество тикетов по каждому статусу
     const { data: statusCounts, error: statsError } = await supabase
-      .from('support_tickets')
+      .from('tickets')
       .select('status')
       .eq('is_deleted', false);
 
     if (statsError) {
       // Если таблица не существует, возвращаем пустые данные
-      console.log('support_tickets table not found, returning empty stats');
+      console.log('tickets table not found, returning empty stats');
       return res.json({
         success: true,
         data: {
@@ -226,8 +226,8 @@ export const getAdminTicketStats = async (req: Request, res: Response) => {
 
     // Получаем 5 последних тикетов с информацией о пользователе
     const { data: recentTickets, error: recentError } = await supabase
-      .from('support_tickets')
-      .select('id, subject, status, created_at, customer:auth_users(email, full_name)')
+      .from('tickets')
+      .select('id, subject, status, created_at, customer:users!tickets_user_id_fkey(email, full_name)')
       .eq('is_deleted', false)
       .order('created_at', { ascending: false })
       .limit(5);
@@ -394,7 +394,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
 
     // Дополнительная статистика пользователя
     const { count: userTickets } = await supabase
-      .from('support_tickets')
+      .from('tickets')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', id)
       .catch(() => ({ count: 0 }));

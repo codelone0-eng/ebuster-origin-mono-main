@@ -63,7 +63,7 @@ interface ScriptResponse {
   tags: string[];
   author_name: string;
   version: string;
-  status: 'draft' | 'published' | 'archived' | 'banned' | 'active';
+  status: 'draft' | 'published' | 'archived' | 'banned';
   is_featured: boolean;
   is_premium: boolean;
   downloads_count: number;
@@ -118,7 +118,7 @@ const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
     is_featured: Boolean(script.is_featured),
     is_premium: false,
     downloads_count: script.downloads ?? 0,
-    rating: Number(script.rating) || 0,
+    rating: script.rating ?? 0,
     rating_count: 0,
     file_size: Buffer.byteLength(code, 'utf8'),
     file_type: 'javascript',

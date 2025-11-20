@@ -9,18 +9,14 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CursorProvider } from "@/contexts/CursorContext";
 import { AuthProvider } from "@/contexts/CustomAuthContext";
-import { useThemeInit } from "@/hooks/useThemeInit";
 import AdminDashboard from "./admin/AdminDashboard";
 import Error404 from "./landing/Error404";
 import Error403 from "./landing/Error403";
 
 const queryClient = new QueryClient();
 
-const AdminApp = () => {
-  useThemeInit();
-  
-  return (
-    <QueryClientProvider client={queryClient}>
+const AdminApp = () => (
+  <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <CursorProvider>
         <AuthProvider>
@@ -55,7 +51,6 @@ const AdminApp = () => {
       </CursorProvider>
     </LanguageProvider>
   </QueryClientProvider>
-  );
-};
+);
 
 export default AdminApp;

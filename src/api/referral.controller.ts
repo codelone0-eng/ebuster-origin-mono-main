@@ -122,14 +122,15 @@ const normalizeUseResponse = (row: ReferralEntry) => ({
 const buildReferralCodeObject = (row: ReferralEntry & { uses?: { id: string }[] }) =>
   normalizeCodeResponse(row, row.uses?.length ?? 0);
 
-// Создать реферальный код для пользователя
+// Создать реферальный код для пользователя в unified referrals table
 const createReferralCodeForUser = async (userId: string, supabase: any) => {
   const code = generateRandomCode();
   
   const { data, error } = await supabase
-    .from('referral_codes')
+    .from('referrals')
     .insert({
-      user_id: userId,
+      entry_type: 'code',
+      referrer_id: userId,
       code: code,
       discount_type: 'percentage',
       discount_value: 10,
@@ -142,11 +143,6 @@ const createReferralCodeForUser = async (userId: string, supabase: any) => {
     console.error('Ошибка создания реферального кода:', error);
     return null;
   }
-
-  // Создаем статистику
-  await supabase
-    .from('referral_stats')
-    .insert({ user_id: userId });
 
   return data;
 };
@@ -161,19 +157,20 @@ export const getUserReferralCode = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
-    // Пытаемся получить существующий код
-    let { data, error } = await supabase
-      .from('referral_codes')
+    // Получаем код из unified referrals table
+    let { data: codeEntry, error } = await supabase
+      .from('referrals')
       .select('*')
-      .eq('user_id', userId)
+      .eq('entry_type', 'code')
+      .eq('referrer_id', userId)
       .single();
 
     // Если код не найден, создаем новый
     if (error && error.code === 'PGRST116') {
       console.log('Реферальный код не найден, создаем новый для пользователя:', userId);
-      data = await createReferralCodeForUser(userId, supabase);
+      codeEntry = await createReferralCodeForUser(userId, supabase);
       
-      if (!data) {
+      if (!codeEntry) {
         return res.status(500).json({ success: false, error: 'Не удалось создать реферальный код' });
       }
     } else if (error) {
@@ -181,14 +178,22 @@ export const getUserReferralCode = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Ошибка получения кода' });
     }
 
-    res.json({ success: true, data });
+    // Подсчитываем использования
+    const { count: usesCount } = await supabase
+      .from('referrals')
+      .select('*', { count: 'exact', head: true })
+      .eq('entry_type', 'use')
+      .eq('parent_id', codeEntry.id);
+
+    const response = normalizeCodeResponse(codeEntry, usesCount || 0);
+    res.json({ success: true, data: response });
   } catch (error) {
     console.error('Ошибка:', error);
     res.status(500).json({ success: false, error: 'Ошибка сервера' });
   }
 };
 
-// Получить статистику рефералов
+// Получить статистику рефералов (вычисляется из unified referrals table)
 export const getUserReferralStats = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -198,25 +203,60 @@ export const getUserReferralStats = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
-    const { data, error } = await supabase
-      .from('referral_stats')
-      .select('*')
-      .eq('user_id', userId)
+    // Получаем код пользователя
+    const { data: codeEntry } = await supabase
+      .from('referrals')
+      .select('id')
+      .eq('entry_type', 'code')
+      .eq('referrer_id', userId)
       .single();
 
-    if (error) {
-      console.error('Ошибка получения статистики:', error);
-      return res.status(500).json({ success: false, error: 'Ошибка получения статистики' });
+    if (!codeEntry) {
+      return res.json({ 
+        success: true, 
+        data: {
+          total_referrals: 0,
+          active_referrals: 0,
+          total_earnings: 0,
+          pending_earnings: 0,
+          paid_earnings: 0,
+          conversion_rate: 0
+        }
+      });
     }
 
-    res.json({ success: true, data });
+    // Получаем все использования
+    const { data: uses } = await supabase
+      .from('referrals')
+      .select('reward_value, reward_status, reward_paid, subscription_id')
+      .eq('entry_type', 'use')
+      .eq('parent_id', codeEntry.id);
+
+    const totalReferrals = uses?.length || 0;
+    const activeReferrals = uses?.filter(u => u.subscription_id).length || 0;
+    const paidEarnings = uses?.filter(u => u.reward_paid).reduce((sum, u) => sum + (u.reward_value || 0), 0) || 0;
+    const pendingEarnings = uses?.filter(u => !u.reward_paid && u.reward_status === 'pending').reduce((sum, u) => sum + (u.reward_value || 0), 0) || 0;
+    const totalEarnings = paidEarnings + pendingEarnings;
+    const conversionRate = totalReferrals > 0 ? (activeReferrals / totalReferrals) * 100 : 0;
+
+    res.json({ 
+      success: true, 
+      data: {
+        total_referrals: totalReferrals,
+        active_referrals: activeReferrals,
+        total_earnings: totalEarnings,
+        pending_earnings: pendingEarnings,
+        paid_earnings: paidEarnings,
+        conversion_rate: conversionRate
+      }
+    });
   } catch (error) {
     console.error('Ошибка:', error);
     res.status(500).json({ success: false, error: 'Ошибка сервера' });
   }
 };
 
-// Получить список приглашенных
+// Получить список приглашенных из unified referrals table
 export const getUserReferrals = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -226,14 +266,16 @@ export const getUserReferrals = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
+    // Получаем все использования кода пользователя
     const { data, error } = await supabase
-      .from('referral_uses')
+      .from('referrals')
       .select(`
         *,
-        referred_user:users!referred_user_id(id, email, full_name, created_at),
+        referred:users!referrals_referred_id_fkey(id, email, full_name, created_at),
         subscription:subscriptions(id, plan, status, start_date, end_date)
       `)
-      .eq('referrer_user_id', userId)
+      .eq('entry_type', 'use')
+      .eq('referrer_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -241,7 +283,17 @@ export const getUserReferrals = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Ошибка получения рефералов' });
     }
 
-    res.json({ success: true, data });
+    // Нормализуем ответ для обратной совместимости
+    const normalized = data?.map(use => ({
+      id: use.id,
+      created_at: use.created_at,
+      referred_user: use.referred,
+      subscription: use.subscription,
+      reward_value: use.reward_value,
+      reward_status: use.reward_status
+    })) || [];
+
+    res.json({ success: true, data: normalized });
   } catch (error) {
     console.error('Ошибка:', error);
     res.status(500).json({ success: false, error: 'Ошибка сервера' });
@@ -258,9 +310,11 @@ export const applyReferralCode = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
+    // Находим реферальный код в unified referrals table
     const { data: referralCode, error: codeError } = await supabase
-      .from('referral_codes')
+      .from('referrals')
       .select('*')
+      .eq('entry_type', 'code')
       .eq('code', code.toUpperCase())
       .eq('is_active', true)
       .single();
@@ -269,26 +323,38 @@ export const applyReferralCode = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Код не найден' });
     }
 
-    if (referralCode.max_uses && referralCode.uses_count >= referralCode.max_uses) {
-      return res.status(400).json({ success: false, error: 'Лимит использований исчерпан' });
+    // Проверяем лимит использований
+    if (referralCode.max_uses) {
+      const { count: usesCount } = await supabase
+        .from('referrals')
+        .select('*', { count: 'exact', head: true })
+        .eq('entry_type', 'use')
+        .eq('parent_id', referralCode.id);
+      
+      if (usesCount && usesCount >= referralCode.max_uses) {
+        return res.status(400).json({ success: false, error: 'Лимит использований исчерпан' });
+      }
     }
 
     if (referralCode.expires_at && new Date(referralCode.expires_at) < new Date()) {
       return res.status(400).json({ success: false, error: 'Срок действия истек' });
     }
 
-    if (referralCode.user_id === userId) {
+    if (referralCode.referrer_id === userId) {
       return res.status(400).json({ success: false, error: 'Нельзя использовать свой код' });
     }
 
+    // Создаем запись об использовании
     const { data: referralUse, error: useError } = await supabase
-      .from('referral_uses')
+      .from('referrals')
       .insert({
-        referral_code_id: referralCode.id,
-        referrer_user_id: referralCode.user_id,
-        referred_user_id: userId,
+        entry_type: 'use',
+        parent_id: referralCode.id,
+        referrer_id: referralCode.referrer_id,
+        referred_id: userId,
         reward_type: 'commission',
-        reward_value: referralCode.discount_value
+        reward_value: referralCode.discount_value,
+        used_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -324,12 +390,14 @@ export const getAllReferralCodes = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'Database not configured' });
     }
 
+    // Получаем все реферальные коды из unified referrals table
     let query = supabase
-      .from('referral_codes')
+      .from('referrals')
       .select(`
         *,
-        user:users(id, email, full_name)
-      `, { count: 'exact' });
+        user:users!referrals_referrer_id_fkey(id, email, full_name)
+      `, { count: 'exact' })
+      .eq('entry_type', 'code');
 
     if (search) {
       query = query.ilike('code', `%${search}%`);
@@ -375,9 +443,10 @@ export const updateReferralCode = async (req: Request, res: Response) => {
     }
 
     const { data, error } = await supabase
-      .from('referral_codes')
+      .from('referrals')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
+      .eq('entry_type', 'code')
       .select()
       .single();
 
@@ -405,13 +474,14 @@ export const getAllReferralUses = async (req: Request, res: Response) => {
 
     const offset = (Number(page) - 1) * Number(limit);
     const { data, error, count } = await supabase
-      .from('referral_uses')
+      .from('referrals')
       .select(`
         *,
-        referrer:users!referrer_user_id(id, email, full_name),
-        referred:users!referred_user_id(id, email, full_name),
+        referrer:users!referrals_referrer_id_fkey(id, email, full_name),
+        referred:users!referrals_referred_id_fkey(id, email, full_name),
         subscription:subscriptions(id, plan, status)
       `, { count: 'exact' })
+      .eq('entry_type', 'use')
       .order('created_at', { ascending: false })
       .range(offset, offset + Number(limit) - 1);
 
@@ -448,26 +518,52 @@ export const getReferralSystemStats = async (req: Request, res: Response) => {
     }
 
     const { count: totalCodes } = await supabase
-      .from('referral_codes')
-      .select('*', { count: 'exact', head: true });
+      .from('referrals')
+      .select('*', { count: 'exact', head: true })
+      .eq('entry_type', 'code');
 
     const { count: activeCodes } = await supabase
-      .from('referral_codes')
+      .from('referrals')
       .select('*', { count: 'exact', head: true })
+      .eq('entry_type', 'code')
       .eq('is_active', true);
 
     const { count: totalUses } = await supabase
-      .from('referral_uses')
-      .select('*', { count: 'exact', head: true });
+      .from('referrals')
+      .select('*', { count: 'exact', head: true })
+      .eq('entry_type', 'use');
 
-    const { data: topReferrers } = await supabase
-      .from('referral_stats')
-      .select(`
-        *,
-        user:users(id, email, full_name)
-      `)
-      .order('total_referrals', { ascending: false })
-      .limit(10);
+    // Получаем топ рефереров (вычисляем из использований)
+    const { data: allUses } = await supabase
+      .from('referrals')
+      .select('referrer_id, reward_value')
+      .eq('entry_type', 'use');
+
+    // Группируем по referrer_id
+    const referrerStats = allUses?.reduce((acc: any, use: any) => {
+      if (!acc[use.referrer_id]) {
+        acc[use.referrer_id] = { total_referrals: 0, total_earnings: 0 };
+      }
+      acc[use.referrer_id].total_referrals++;
+      acc[use.referrer_id].total_earnings += use.reward_value || 0;
+      return acc;
+    }, {}) || {};
+
+    // Получаем информацию о пользователях
+    const topReferrerIds = Object.keys(referrerStats)
+      .sort((a, b) => referrerStats[b].total_referrals - referrerStats[a].total_referrals)
+      .slice(0, 10);
+
+    const { data: topReferrersData } = await supabase
+      .from('users')
+      .select('id, email, full_name')
+      .in('id', topReferrerIds);
+
+    const topReferrers = topReferrersData?.map(user => ({
+      user_id: user.id,
+      ...referrerStats[user.id],
+      user
+    })) || [];
 
     res.json({
       success: true,
@@ -494,10 +590,17 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
     }
 
     // Получаем всех пользователей без реферальных кодов
+    const { data: existingCodes } = await supabase
+      .from('referrals')
+      .select('referrer_id')
+      .eq('entry_type', 'code');
+
+    const existingReferrerIds = existingCodes?.map(c => c.referrer_id) || [];
+
     const { data: users } = await supabase
       .from('users')
       .select('id, email')
-      .not('id', 'in', `(SELECT user_id FROM referral_codes)`);
+      .not('id', 'in', `(${existingReferrerIds.join(',')})`);
 
     if (!users || users.length === 0) {
       return res.json({
@@ -519,7 +622,8 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
 
     // Создаем коды для каждого пользователя
     const codes = users.map(user => ({
-      user_id: user.id,
+      entry_type: 'code',
+      referrer_id: user.id,
       code: generateRandomCode(),
       discount_type: 'percentage',
       discount_value: 10,
@@ -527,22 +631,12 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
     }));
 
     const { error: codesError } = await supabase
-      .from('referral_codes')
+      .from('referrals')
       .insert(codes);
 
     if (codesError) {
       console.error('Ошибка создания кодов:', codesError);
       return res.status(500).json({ success: false, error: 'Ошибка создания кодов' });
-    }
-
-    // Создаем статистику
-    const stats = users.map(user => ({ user_id: user.id }));
-    const { error: statsError } = await supabase
-      .from('referral_stats')
-      .insert(stats);
-
-    if (statsError) {
-      console.error('Ошибка создания статистики:', statsError);
     }
 
     res.json({
@@ -577,8 +671,9 @@ export const regenerateAllReferralCodes = async (req: Request, res: Response) =>
 
     // Получаем все существующие коды
     const { data: existingCodes, error: fetchError } = await supabase
-      .from('referral_codes')
-      .select('id, user_id');
+      .from('referrals')
+      .select('id, referrer_id')
+      .eq('entry_type', 'code');
 
     if (fetchError) {
       console.error('Ошибка получения кодов:', fetchError);
@@ -599,9 +694,10 @@ export const regenerateAllReferralCodes = async (req: Request, res: Response) =>
       const newCode = generateRandomCode();
       
       const { error: updateError } = await supabase
-        .from('referral_codes')
-        .update({ code: newCode })
-        .eq('id', codeRecord.id);
+        .from('referrals')
+        .update({ code: newCode, updated_at: new Date().toISOString() })
+        .eq('id', codeRecord.id)
+        .eq('entry_type', 'code');
 
       if (!updateError) {
         regenerated++;
