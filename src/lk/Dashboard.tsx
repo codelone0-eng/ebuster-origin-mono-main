@@ -900,7 +900,7 @@ const DashboardContent = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Shield className="h-5 w-5" />
+                        <Shield className="h-5 w-5 text-primary" />
                         {t('header.dashboard.settings.security')}
                       </CardTitle>
                     </CardHeader>
@@ -911,7 +911,7 @@ const DashboardContent = () => {
                           className="w-full justify-start"
                           onClick={() => setIsChangePasswordOpen(true)}
                         >
-                          <Key className="h-4 w-4 mr-2" />
+                          <Key className="h-4 w-4 mr-2 text-primary" />
                           {t('header.dashboard.settings.changePassword')}
                         </GradientButton>
                         <GradientButton 
@@ -919,7 +919,7 @@ const DashboardContent = () => {
                           className="w-full justify-start"
                           onClick={() => setIsChangeEmailOpen(true)}
                         >
-                          <Mail className="h-4 w-4 mr-2" />
+                          <Mail className="h-4 w-4 mr-2 text-primary" />
                           {t('header.dashboard.settings.changeEmail')}
                         </GradientButton>
                         <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">

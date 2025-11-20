@@ -1,31 +1,5 @@
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-
-let supabaseClient: any = null;
-
-const getSupabaseClient = () => {
-  if (supabaseClient) return supabaseClient;
-
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.warn('⚠️ Supabase credentials not configured');
-    return null;
-  }
-
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { 
-      persistSession: false,
-      autoRefreshToken: false
-    },
-    db: {
-      schema: 'public'
-    }
-  });
-
-  return supabaseClient;
-};
+import { getSupabaseAdmin } from './supabase-admin';
 
 // Генерация случайного реферального кода
 const generateRandomCode = (): string => {
@@ -157,7 +131,7 @@ const createReferralCodeForUser = async (userId: string, supabase: any) => {
 export const getUserReferralCode = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -203,7 +177,7 @@ export const getUserReferralCode = async (req: Request, res: Response) => {
 export const getUserReferralStats = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -266,7 +240,7 @@ export const getUserReferralStats = async (req: Request, res: Response) => {
 export const getUserReferrals = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -310,7 +284,7 @@ export const getUserReferrals = async (req: Request, res: Response) => {
 export const applyReferralCode = async (req: Request, res: Response) => {
   try {
     const { code, userId } = req.body;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -390,7 +364,7 @@ export const applyReferralCode = async (req: Request, res: Response) => {
 export const getAllReferralCodes = async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 50, search = '' } = req.query;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -442,7 +416,7 @@ export const updateReferralCode = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -472,7 +446,7 @@ export const updateReferralCode = async (req: Request, res: Response) => {
 export const getAllReferralUses = async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 50 } = req.query;
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -517,7 +491,7 @@ export const getAllReferralUses = async (req: Request, res: Response) => {
 // ADMIN: Получить статистику системы
 export const getReferralSystemStats = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -589,7 +563,7 @@ export const getReferralSystemStats = async (req: Request, res: Response) => {
 // ADMIN: Инициализация реферальных кодов для существующих пользователей
 export const initializeReferralCodes = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
@@ -659,7 +633,7 @@ export const initializeReferralCodes = async (req: Request, res: Response) => {
 // ADMIN: Перегенерация всех реферальных кодов
 export const regenerateAllReferralCodes = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdmin();
 
     if (!supabase) {
       return res.status(500).json({ success: false, error: 'Database not configured' });
