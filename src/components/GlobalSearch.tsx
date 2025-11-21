@@ -190,12 +190,13 @@ interface GlobalSearchProps {
   onClose: () => void;
 }
 
-export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+export const GlobalSearchComponent: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<(SearchResult & { score: number })[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -203,6 +204,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
       setQuery('');
       setResults([]);
       setSelectedIndex(0);
+      resultRefs.current = [];
     }
   }, [isOpen]);
 
@@ -229,6 +231,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
     setResults(searchResults);
     setSelectedIndex(0);
+    resultRefs.current = [];
   }, [query]);
 
   const handleSelect = (result: SearchResult) => {
@@ -238,11 +241,19 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
+      if (!results.length) return;
       e.preventDefault();
-      setSelectedIndex(prev => (prev + 1) % results.length);
+      setSelectedIndex(prev => {
+        const nextIndex = prev >= results.length - 1 ? 0 : prev + 1;
+        return nextIndex;
+      });
     } else if (e.key === 'ArrowUp') {
+      if (!results.length) return;
       e.preventDefault();
-      setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
+      setSelectedIndex(prev => {
+        const nextIndex = prev <= 0 ? results.length - 1 : prev - 1;
+        return nextIndex;
+      });
     } else if (e.key === 'Enter' && results[selectedIndex]) {
       e.preventDefault();
       handleSelect(results[selectedIndex]);
@@ -250,6 +261,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
       onClose();
     }
   };
+
+  useEffect(() => {
+    const current = resultRefs.current[selectedIndex];
+    if (current) {
+      current.scrollIntoView({ block: 'nearest' });
+    }
+  }, [selectedIndex, results.length]);
 
   if (!isOpen) return null;
 
@@ -291,6 +309,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
                 return (
                   <button
                     key={result.id}
+                    ref={(el) => {
+                      resultRefs.current[index] = el;
+                    }}
                     onClick={() => handleSelect(result)}
                     className={cn(
                       "w-full flex items-center gap-4 px-4 py-3 text-left transition-colors border-b border-border/20 last:border-0",
