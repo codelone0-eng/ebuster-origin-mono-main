@@ -911,24 +911,19 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ formData, setFormData, onSubmit
         </p>
         <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/20">
           {availableRoles.map((role) => {
-            const isChecked = formData.allowed_roles.includes(role.name);
+            const isChecked = roleInList(formData.allowed_roles, role.name);
             return (
               <div key={role.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`role_${role.id}`}
                   checked={isChecked}
                   onCheckedChange={(checked) => {
-                    if (checked) {
-                      setFormData({
-                        ...formData,
-                        allowed_roles: [...formData.allowed_roles, role.name]
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        allowed_roles: formData.allowed_roles.filter(r => r !== role.name)
-                      });
-                    }
+                    setFormData({
+                      ...formData,
+                      allowed_roles: checked
+                        ? addRoleToList(formData.allowed_roles, role.name)
+                        : removeRoleFromList(formData.allowed_roles, role.name)
+                    });
                   }}
                 />
                 <label
