@@ -1,962 +1,1040 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Download, 
-  Star, 
-  Code, 
-  Tag,
-  Calendar,
-  User,
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Plus,
+  RefreshCcw,
+  Save,
+  Loader2,
+  Search,
   FileText,
-  Settings,
-  History
+  Tag,
+  Users,
+  Shield,
+  Clock,
+  Download,
+  Star,
+  ClipboardCopy,
+  Trash2,
+  History,
+  ShieldAlert,
+  KeyRound,
+  Code2,
+  BookOpen,
+  Settings2
 } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
-import { API_CONFIG } from '@/config/api';
+
+import {
+  CreateScriptPayload,
+  ScriptListParams,
+  ScriptRecord,
+  ScriptStatus,
+  ScriptVisibility,
+  ScriptPricingPlan
+} from '@/api/types/scripts';
+import { scriptsAdminApi } from './api/scriptsAdminApi';
 import { ScriptVersionManager } from './ScriptVersionManager';
+import { useDetailedPermissions } from '@/hooks/useDetailedPermissions';
+import { CodeEditor } from '@/components/editors/CodeEditor';
+import { MarkdownEditor } from '@/components/editors/MarkdownEditor';
+import { KeyValueEditor } from '@/components/editors/KeyValueEditor';
+import { QueryState } from '@/components/state/QueryState';
+import { EmptyState } from '@/components/state/EmptyState';
+import { ScriptAuditPanel } from './components/ScriptAuditPanel';
+import { ScriptChecksPanel } from './components/ScriptChecksPanel';
+import { ScriptAccessPanel } from './components/ScriptAccessPanel';
 
-const sanitizeRoleNames = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    value.forEach((entry) => {
-      const str = typeof entry === 'string' ? entry : typeof entry === 'number' ? String(entry) : '';
-      const cleaned = str.trim();
-      if (!cleaned) return;
-      const key = cleaned.toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      result.push(cleaned);
-    });
-    return result;
-  }
-
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (!trimmed) return [];
-
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed)) {
-        return sanitizeRoleNames(parsed);
-      }
-    } catch (_) {
-      // Игнорируем ошибки парсинга, пойдём дальше и разделим строку вручную
-    }
-
-    return sanitizeRoleNames(trimmed.split(/[,;\s]+/g));
-  }
-
-  return [];
+const statusLabels: Record<ScriptStatus, string> = {
+  draft: 'Черновик',
+  pending_review: 'На проверке',
+  rejected: 'Отклонён',
+  published: 'Опубликован',
+  archived: 'Архив',
+  banned: 'Заблокирован'
 };
 
-const normalizeAllowedRolesValue = (value: unknown, fallback: string[] = ['user']): string[] => {
-  const normalized = sanitizeRoleNames(value);
-  if (normalized.length > 0) {
-    return normalized;
-  }
-  return sanitizeRoleNames(fallback);
+const statusColors: Record<ScriptStatus, string> = {
+  draft: 'bg-yellow-100 text-yellow-900',
+  pending_review: 'bg-blue-100 text-blue-900',
+  rejected: 'bg-red-100 text-red-900',
+  published: 'bg-emerald-100 text-emerald-900',
+  archived: 'bg-muted text-muted-foreground',
+  banned: 'bg-destructive text-destructive-foreground'
 };
 
-const dedupeRolesByName = <T extends { id?: string; name?: string; display_name?: string }>(roles: T[]): T[] => {
-  const seen = new Set<string>();
-  return roles.filter((role) => {
-    const key = (role.name || role.display_name || '').trim().toLowerCase();
-    if (!key) {
-      return false;
-    }
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
+const visibilityLabels: Record<ScriptVisibility, string> = {
+  public: 'Публичный',
+  private: 'Приватный',
+  internal: 'Внутренний'
 };
 
-const roleInList = (roles: string[], roleName: string): boolean => {
-  const target = roleName.trim().toLowerCase();
-  return roles.some((role) => role.trim().toLowerCase() === target);
+const pricingLabels: Record<ScriptPricingPlan, string> = {
+  free: 'Free',
+  pro: 'Pro',
+  premium: 'Premium',
+  enterprise: 'Enterprise',
+  custom: 'Custom'
 };
 
-const addRoleToList = (roles: string[], roleName: string): string[] => {
-  return sanitizeRoleNames([...roles, roleName]);
+type FilterState = {
+  status: ScriptStatus | 'all';
+  visibility: ScriptVisibility | 'all';
+  pricing_plan: ScriptPricingPlan | 'all';
+  sort: 'created_at' | 'updated_at' | 'rating' | 'downloads';
+  order: 'asc' | 'desc';
+  limit: number;
+  page: number;
 };
 
-const removeRoleFromList = (roles: string[], roleName: string): string[] => {
-  const target = roleName.trim().toLowerCase();
-  return sanitizeRoleNames(roles.filter((role) => role.trim().toLowerCase() !== target));
-};
-
-const DEFAULT_ALLOWED_ROLES = ['user'];
-
-type RoleOption = {
-  id: string;
-  name: string;
-  display_name: string;
-};
-
-const normalizeRolesResponse = (roles: unknown): RoleOption[] => {
-  if (!Array.isArray(roles)) return [];
-
-  const deduped = dedupeRolesByName(roles);
-
-  return deduped.map((role, index) => {
-    const name = typeof role.name === 'string' && role.name.trim().length > 0
-      ? role.name.trim()
-      : typeof role.display_name === 'string' && role.display_name.trim().length > 0
-        ? role.display_name.trim().toLowerCase().replace(/\s+/g, '_')
-        : `role_${index + 1}`;
-
-    const display_name = typeof role.display_name === 'string' && role.display_name.trim().length > 0
-      ? role.display_name.trim()
-      : name;
-
-    return {
-      id: typeof role.id === 'string' && role.id.trim().length > 0 ? role.id : `role-${index}-${name}`,
-      name,
-      display_name,
-    } satisfies RoleOption;
-  });
-};
-
-interface Script {
-  id: string;
+interface FormState {
   title: string;
-  description: string;
+  short_description: string;
+  full_description: string;
   code: string;
-  category: string;
-  tags: string[];
-  author_name: string;
-  version: string;
-  status: 'draft' | 'published' | 'archived' | 'banned';
-  is_featured: boolean;
-  is_premium: boolean;
-  allowed_roles: string[]; // Роли, которым доступен скрипт
-  downloads_count: number;
-  rating: number;
-  rating_count: number;
-  file_size: number;
-  file_type: string;
-  created_at: string;
-  updated_at: string;
-  published_at?: string;
+  tagsText: string;
+  allowedRolesText: string;
+  status: ScriptStatus;
+  visibility: ScriptVisibility;
+  pricing_plan: ScriptPricingPlan;
 }
 
-interface ScriptStats {
-  totalScripts: number;
-  publishedScripts: number;
-  draftScripts: number;
-  totalDownloads: number;
-  totalRatings: number;
-  averageRating: number;
-  topCategories: Array<{ category: string; count: number }>;
-}
+const buildFormState = (script: ScriptRecord): FormState => ({
+  title: script.name,
+  short_description: script.short_description ?? '',
+  full_description: script.full_description ?? '',
+  code: script.code ?? '',
+  tagsText: (script.tags ?? []).join(', '),
+  allowedRolesText: (script.allowed_roles ?? []).join(', '),
+  status: script.status ?? 'draft',
+  visibility: script.visibility ?? 'public',
+  pricing_plan: script.pricing_plan ?? 'free'
+});
+
+const parseList = (value: string): string[] =>
+  value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const buildUpdatePayload = (
+  script: ScriptRecord,
+  form: FormState
+): Partial<CreateScriptPayload> => {
+  const payload: Partial<CreateScriptPayload> = {};
+
+  if (form.title !== script.name) {
+    payload.title = form.title;
+  }
+  if (form.short_description !== (script.short_description ?? '')) {
+    payload.short_description = form.short_description;
+  }
+  if (form.full_description !== (script.full_description ?? '')) {
+    payload.full_description = form.full_description;
+  }
+  if (form.code !== (script.code ?? '')) {
+    payload.code = form.code;
+  }
+
+  const tags = parseList(form.tagsText);
+  if (JSON.stringify(tags) !== JSON.stringify(script.tags ?? [])) {
+    payload.tags = tags;
+  }
+
+  const allowedRoles = parseList(form.allowedRolesText);
+  if (JSON.stringify(allowedRoles) !== JSON.stringify(script.allowed_roles ?? [])) {
+    payload.allowed_roles = allowedRoles.length > 0 ? allowedRoles : ['user'];
+  }
+
+  if (form.status !== (script.status ?? 'draft')) {
+    payload.status = form.status;
+  }
+  if (form.visibility !== (script.visibility ?? 'public')) {
+    payload.visibility = form.visibility;
+  }
+  if (form.pricing_plan !== (script.pricing_plan ?? 'free')) {
+    payload.pricing_plan = form.pricing_plan;
+  }
+
+  return payload;
+};
 
 const ScriptsManagement: React.FC = () => {
-  const { t } = useLanguage();
-  const [scripts, setScripts] = useState<Script[]>([]);
-  const [stats, setStats] = useState<ScriptStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedScript, setSelectedScript] = useState<Script | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const permissions = useDetailedPermissions();
 
-  // Форма для создания/редактирования скрипта
-  const [formData, setFormData] = useState<{
-    title: string;
-    description: string;
-    code: string;
-    category: string;
-    tags: string[];
-    author_name: string;
-    is_featured: boolean;
-    is_premium: boolean;
-    allowed_roles: string[];
-    file_type: string;
-    status: 'draft' | 'published' | 'archived' | 'banned';
-  }>({
-    title: '',
-    description: '',
-    code: '',
-    category: 'general',
-    tags: [],
-    author_name: 'Admin',
-    is_featured: false,
-    is_premium: false,
-    allowed_roles: sanitizeRoleNames(DEFAULT_ALLOWED_ROLES), // По умолчанию доступно всем пользователям
-    file_type: 'javascript',
-    status: 'draft'
+  const [filters, setFilters] = useState<FilterState>({
+    status: 'all',
+    visibility: 'all',
+    pricing_plan: 'all',
+    sort: 'created_at',
+    order: 'desc',
+    limit: 20,
+    page: 1
+  });
+  const [search, setSearch] = useState('');
+  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const listParams: ScriptListParams = useMemo(() => ({
+    page: filters.page,
+    limit: filters.limit,
+    sort: filters.sort,
+    order: filters.order,
+    search: search || undefined,
+    status:
+      filters.status !== 'all'
+        ? (filters.status as ScriptStatus)
+        : undefined,
+    visibility:
+      filters.visibility !== 'all'
+        ? (filters.visibility as ScriptVisibility)
+        : undefined,
+    pricing_plan:
+      filters.pricing_plan !== 'all'
+        ? (filters.pricing_plan as ScriptPricingPlan)
+        : undefined
+  }), [filters, search]);
+
+  const scriptsQuery = useQuery({
+    queryKey: ['admin-scripts', listParams],
+    queryFn: () => scriptsAdminApi.list(listParams)
   });
 
-  // Список доступных ролей
-  const [availableRoles, setAvailableRoles] = useState<RoleOption[]>([]);
-
-  // Загрузка данных
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Загружаем роли
-      const rolesResponse = await fetch(`${API_CONFIG.BASE_URL}/api/roles`);
-      const rolesData = await rolesResponse.json();
-      if (rolesData.success) {
-        const normalizedRoles = normalizeRolesResponse(rolesData.data);
-        setAvailableRoles(normalizedRoles);
-      }
-      
-      // Загружаем скрипты
-      const scriptsResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`);
-      const scriptsData = await scriptsResponse.json();
-      
-      if (scriptsData.success) {
-        const normalizedScripts: Script[] = (scriptsData.data.scripts || []).map((script: any) => ({
-          ...script,
-          allowed_roles: normalizeAllowedRolesValue(script?.allowed_roles, DEFAULT_ALLOWED_ROLES)
-        }));
-        setScripts(normalizedScripts);
-      }
-
-      // Загружаем статистику
-      const statsResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/stats`);
-      const statsData = await statsResponse.json();
-      
-      if (statsData.success) {
-        setStats(statsData.data);
-      }
-    } catch (error) {
-      console.error('Ошибка загрузки данных скриптов:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const scripts = scriptsQuery.data?.items ?? [];
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  // Создание нового скрипта
-  const handleCreateScript = async () => {
-    try {
-      console.log('Creating script with data:', formData);
-      
-      const payload = {
-        ...formData,
-        allowed_roles: normalizeAllowedRolesValue(formData.allowed_roles, DEFAULT_ALLOWED_ROLES)
-      };
-
-      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      console.log('Response:', data);
-      
-      if (data.success) {
-        setIsCreateDialogOpen(false);
-        resetForm();
-        loadData();
-      } else {
-        console.error('Ошибка создания скрипта:', data.error);
-      }
-    } catch (error) {
-      console.error('Ошибка создания скрипта:', error);
+    if (!selectedScriptId && scripts.length > 0) {
+      setSelectedScriptId(scripts[0].id);
     }
-  };
+  }, [scripts, selectedScriptId]);
 
-  // Обновление скрипта
-  const handleUpdateScript = async () => {
-    if (!selectedScript) return;
-
-    try {
-      const payload = {
-        ...formData,
-        allowed_roles: normalizeAllowedRolesValue(formData.allowed_roles, DEFAULT_ALLOWED_ROLES)
-      };
-
-      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/${selectedScript.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        setSelectedScript(null);
-        resetForm();
-        loadData();
-      } else {
-        console.error('Ошибка обновления скрипта:', data.error);
-      }
-    } catch (error) {
-      console.error('Ошибка обновления скрипта:', error);
-    }
-  };
-
-  // Удаление скрипта
-  const handleDeleteScript = async (scriptId: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот скрипт?')) return;
-
-    try {
-      const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/${scriptId}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        loadData();
-      } else {
-        console.error('Ошибка удаления скрипта:', data.error);
-      }
-    } catch (error) {
-      console.error('Ошибка удаления скрипта:', error);
-    }
-  };
-
-  // Сброс формы
-  const resetForm = () => {
-    const defaultFormData: typeof formData = {
-      title: '',
-      description: '',
-      code: '',
-      category: 'general',
-      tags: [],
-      author_name: 'Admin',
-      is_featured: false,
-      is_premium: false,
-      allowed_roles: sanitizeRoleNames(DEFAULT_ALLOWED_ROLES),
-      file_type: 'javascript',
-      status: 'draft' as 'draft' | 'published' | 'archived' | 'banned'
-    };
-    console.log('Resetting form to:', defaultFormData);
-    setFormData(defaultFormData);
-  };
-
-  // Открытие диалога редактирования
-  const openEditDialog = (script: Script) => {
-    setSelectedScript(script);
-    setFormData({
-      title: script.title,
-      description: script.description,
-      code: script.code,
-      category: script.category,
-      tags: script.tags || [],
-      author_name: script.author_name,
-      is_featured: script.is_featured,
-      is_premium: script.is_premium,
-      allowed_roles: normalizeAllowedRolesValue(script.allowed_roles, DEFAULT_ALLOWED_ROLES),
-      file_type: script.file_type,
-      status: script.status
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  // Фильтрация скриптов
-  const filteredScripts = scripts.filter(script => {
-    const matchesSearch = script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         script.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || categoryFilter === 'all' || script.category === categoryFilter;
-    const matchesStatus = !statusFilter || statusFilter === 'all' || script.status === statusFilter;
-    
-    return matchesSearch && matchesCategory && matchesStatus;
+  const scriptQuery = useQuery({
+    queryKey: ['admin-script', selectedScriptId],
+    enabled: Boolean(selectedScriptId),
+    queryFn: () => scriptsAdminApi.getById(selectedScriptId as string)
   });
 
-  // Получение цвета статуса
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      case 'banned': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const queryClientInvalidations = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-script', selectedScriptId] });
+  };
+
+  const createScript = useMutation({
+    mutationFn: (payload: CreateScriptPayload) => scriptsAdminApi.create(payload),
+    onSuccess: (data) => {
+      toast({ title: 'Скрипт создан', description: 'Черновик сохранён' });
+      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+      setSelectedScriptId(data.id);
+      setIsCreateOpen(false);
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось создать скрипт',
+        variant: 'destructive'
+      });
     }
-  };
+  });
 
-  // Получение цвета категории
-  const getCategoryColor = (category: string) => {
-    const colors: { [key: string]: string } = {
-      'ui': 'bg-blue-100 text-blue-800',
-      'privacy': 'bg-purple-100 text-purple-800',
-      'productivity': 'bg-green-100 text-green-800',
-      'general': 'bg-gray-100 text-gray-800'
-    };
-    return colors[category] || colors['general'];
-  };
+  const updateScript = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateScriptPayload> }) =>
+      scriptsAdminApi.update(id, payload),
+    onSuccess: () => {
+      toast({ title: 'Изменения сохранены' });
+      queryClientInvalidations();
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось сохранить изменения',
+        variant: 'destructive'
+      });
+    }
+  });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Загрузка скриптов...</div>
-      </div>
-    );
-  }
+  const deleteScript = useMutation({
+    mutationFn: (id: string) => scriptsAdminApi.remove(id),
+    onSuccess: (_, id) => {
+      toast({ title: 'Скрипт удалён' });
+      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+      if (selectedScriptId === id) {
+        setSelectedScriptId(null);
+      }
+    },
+    onError: () => {
+      toast({ title: 'Не удалось удалить скрипт', variant: 'destructive' });
+    }
+  });
+
+  const selectedScript = scriptQuery.data ?? null;
 
   return (
-    <div className="space-y-6">
-      {/* Заголовок и статистика */}
-      <div className="flex items-center justify-between">
+    <div className="flex h-full flex-col">
+      <header className="flex items-center justify-between border-b p-4">
         <div>
-          <h2 className="text-2xl font-bold">Управление скриптами</h2>
-          <p className="text-muted-foreground">Создавайте и управляйте пользовательскими скриптами</p>
+          <h1 className="text-2xl font-bold">Управление скриптами</h1>
+          <p className="text-sm text-muted-foreground">
+            Настройка, публикация и контроль доступа для пользовательских скриптов
+          </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Создать скрипт
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => scriptsQuery.refetch()}
+            disabled={scriptsQuery.isLoading}
+          >
+            <RefreshCcw className="mr-2 h-4 w-4" /> Обновить
+          </Button>
+          {permissions.canManageScripts() && (
+            <Button onClick={() => setIsCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Новый скрипт
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Создать новый скрипт</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <ScriptForm 
-                formData={formData}
-                setFormData={setFormData}
-                onSubmit={handleCreateScript}
-                submitText="Создать скрипт"
-                onCancel={() => setIsCreateDialogOpen(false)}
-                availableRoles={availableRoles}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Статистика */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Всего скриптов</p>
-                  <p className="text-2xl font-bold">{stats.totalScripts}</p>
-                </div>
-                <Code className="h-8 w-8 text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Опубликовано</p>
-                  <p className="text-2xl font-bold">{stats.publishedScripts}</p>
-                </div>
-                <FileText className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Загрузок</p>
-                  <p className="text-2xl font-bold">{stats.totalDownloads}</p>
-                </div>
-                <Download className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Средний рейтинг</p>
-                  <p className="text-2xl font-bold">{(stats?.averageRating ?? 0).toFixed(1)}</p>
-                </div>
-                <Star className="h-8 w-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
+          )}
         </div>
-      )}
+      </header>
 
-      {/* Фильтры */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-4">
-            <Input
-              placeholder="Поиск скриптов..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-xs"
-            />
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Все категории" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все категории</SelectItem>
-                <SelectItem value="ui">UI</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
-                <SelectItem value="productivity">Productivity</SelectItem>
-                <SelectItem value="general">General</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Все статусы" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="published">Опубликовано</SelectItem>
-                <SelectItem value="draft">Черновик</SelectItem>
-                <SelectItem value="archived">Архив</SelectItem>
-                <SelectItem value="banned">Забанено</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="grid h-full grid-cols-[320px_1fr] divide-x">
+        <aside className="flex h-full flex-col">
+          <FiltersPanel
+            search={search}
+            onSearchChange={setSearch}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+
+          <div className="flex-1 overflow-y-auto">
+            {scriptsQuery.isLoading ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Загрузка...
+              </div>
+            ) : scriptsQuery.isError ? (
+              <div className="p-6 text-sm text-destructive">
+                Не удалось загрузить список скриптов
+              </div>
+            ) : scripts.length === 0 ? (
+              <div className="p-6 text-sm text-muted-foreground">
+                Скрипты не найдены. Попробуйте изменить фильтры или создать новый.
+              </div>
+            ) : (
+              <div className="space-y-3 p-4">
+                {scripts.map((script) => (
+                  <ScriptListItem
+                    key={script.id}
+                    script={script}
+                    isActive={selectedScriptId === script.id}
+                    onSelect={() => setSelectedScriptId(script.id)}
+                    onDuplicate={() =>
+                      scriptsAdminApi
+                        .duplicate(script.id, { title: `${script.name} (копия)` })
+                        .then((copy) => {
+                          toast({ title: 'Скрипт дублирован' });
+                          queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+                          setSelectedScriptId(copy.id);
+                        })
+                        .catch(() =>
+                          toast({
+                            title: 'Не удалось дублировать',
+                            variant: 'destructive'
+                          })
+                        )
+                    }
+                    onDelete={() => deleteScript.mutate(script.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </aside>
 
-      {/* Список скриптов */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredScripts.map((script) => (
-          <Card key={script.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg line-clamp-1">{script.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                    {script.description}
-                  </p>
-                </div>
-                <div className="flex gap-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedScript(script);
-                      setIsViewDialogOpen(true);
-                    }}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => openEditDialog(script)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedScript(script);
-                      setIsVersionDialogOpen(true);
-                    }}
-                    title="История версий"
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteScript(script.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3">
-                {/* Статус и категория */}
-                <div className="flex gap-2">
-                  <Badge className={getStatusColor(script.status)}>
-                    {script.status}
-                  </Badge>
-                  <Badge className={getCategoryColor(script.category)}>
-                    {script.category}
-                  </Badge>
-                  {script.is_featured && (
-                    <Badge className="bg-yellow-100 text-yellow-800">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                  {script.is_premium && (
-                    <Badge className="bg-purple-100 text-purple-800">
-                      Premium
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Теги */}
-                {script.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {script.tags.slice(0, 3).map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        <Tag className="h-3 w-3 mr-1" />
-                        {tag}
-                      </Badge>
-                    ))}
-                    {script.tags.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{script.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-
-                {/* Статистика */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <Download className="h-3 w-3" />
-                      {script.downloads_count}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3" />
-                      {(script.rating ?? 0).toFixed(1)} ({script.rating_count ?? 0})
-                    </span>
-                  </div>
-                  <span className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    {script.author_name}
-                  </span>
-                </div>
-
-                {/* Дата создания */}
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  {new Date(script.created_at).toLocaleDateString()}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Диалог просмотра скрипта */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedScript?.title}</DialogTitle>
-          </DialogHeader>
-          {selectedScript && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Описание</label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {selectedScript.description}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Автор</label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {selectedScript.author_name}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Код скрипта</label>
-                <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto mt-1">
-                  {selectedScript.code}
-                </pre>
-              </div>
+        <main className="flex h-full flex-col overflow-hidden">
+          {selectedScript ? (
+            <ScriptDetails
+              script={selectedScript}
+              isSaving={updateScript.isPending}
+              onSave={(payload) => updateScript.mutate({ id: selectedScript.id, payload })}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+              Выберите скрипт в списке слева
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </main>
+      </div>
 
-      {/* Диалог редактирования скрипта */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Редактировать скрипт</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <ScriptForm 
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleUpdateScript}
-              submitText="Сохранить изменения"
-              onCancel={() => setIsEditDialogOpen(false)}
-              availableRoles={availableRoles}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Диалог управления версиями */}
-      <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Управление версиями: {selectedScript?.title}</DialogTitle>
-          </DialogHeader>
-          {selectedScript && (
-            <ScriptVersionManager 
-              scriptId={selectedScript.id}
-              currentVersion={selectedScript.version}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <CreateScriptModal
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onCreate={(payload) => createScript.mutate(payload)}
+        isSubmitting={createScript.isPending}
+      />
     </div>
   );
 };
 
-// Компонент формы для создания/редактирования скрипта
-interface ScriptFormProps {
-  formData: {
-    title: string;
-    description: string;
-    code: string;
-    category: string;
-    tags: string[];
-    author_name: string;
-    is_featured: boolean;
-    is_premium: boolean;
-    allowed_roles: string[];
-    file_type: string;
-    status: 'draft' | 'published' | 'archived' | 'banned';
-  };
-  setFormData: (data: any) => void;
-  onSubmit: () => void;
-  submitText: string;
-  onCancel: () => void;
-  availableRoles: Array<{ id: string; name: string; display_name: string }>;
+interface FiltersPanelProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  filters: FilterState;
+  onFiltersChange: (value: FilterState) => void;
 }
 
-const ScriptForm: React.FC<ScriptFormProps> = ({ formData, setFormData, onSubmit, submitText, onCancel, availableRoles }) => {
-  const [tagInput, setTagInput] = useState('');
+const FiltersPanel: React.FC<FiltersPanelProps> = ({ search, onSearchChange, filters, onFiltersChange }) => (
+  <div className="space-y-4 border-b p-4">
+    <div className="flex items-center gap-2">
+      <Search className="h-4 w-4 text-muted-foreground" />
+      <Input
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder="Поиск по названию или описанию"
+      />
+    </div>
 
-  // Валидация формы
-  const isFormValid = formData.title.trim() && formData.code.trim();
+    <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">Статус</span>
+        <Select
+          value={filters.status}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, page: 1, status: value as FilterState['status'] })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все</SelectItem>
+            {Object.keys(statusLabels).map((status) => (
+              <SelectItem key={status} value={status}>
+                {statusLabels[status as ScriptStatus]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-  // Отладочная информация
-  console.log('ScriptForm render - formData:', formData);
-  console.log('ScriptForm render - isFormValid:', isFormValid);
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">Видимость</span>
+        <Select
+          value={filters.visibility}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, page: 1, visibility: value as FilterState['visibility'] })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все</SelectItem>
+            {Object.keys(visibilityLabels).map((visibility) => (
+              <SelectItem key={visibility} value={visibility}>
+                {visibilityLabels[visibility as ScriptVisibility]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()]
-      });
-      setTagInput('');
-    }
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">План</span>
+        <Select
+          value={filters.pricing_plan}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, page: 1, pricing_plan: value as FilterState['pricing_plan'] })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все</SelectItem>
+            {Object.keys(pricingLabels).map((plan) => (
+              <SelectItem key={plan} value={plan}>
+                {pricingLabels[plan as ScriptPricingPlan]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">Сортировка</span>
+        <Select
+          value={`${filters.sort}.${filters.order}`}
+          onValueChange={(value) => {
+            const [sort, order] = value.split('.') as [FilterState['sort'], FilterState['order']];
+            onFiltersChange({ ...filters, sort, order });
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created_at.desc">Сначала новые</SelectItem>
+            <SelectItem value="created_at.asc">Сначала старые</SelectItem>
+            <SelectItem value="updated_at.desc">Недавно обновлённые</SelectItem>
+            <SelectItem value="rating.desc">По рейтингу</SelectItem>
+            <SelectItem value="downloads.desc">По скачиваниям</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">На странице</span>
+        <Select
+          value={String(filters.limit)}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, limit: Number(value), page: 1 })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 30, 50].map((limit) => (
+              <SelectItem key={limit} value={String(limit)}>
+                {limit}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1">
+        <span className="text-xs text-muted-foreground">Страница</span>
+        <Input
+          type="number"
+          min={1}
+          value={filters.page}
+          onChange={(e) =>
+            onFiltersChange({ ...filters, page: Math.max(1, Number(e.target.value)) })
+          }
+        />
+      </div>
+    </div>
+  </div>
+);
+
+interface ScriptListItemProps {
+  script: ScriptRecord;
+  isActive: boolean;
+  onSelect: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}
+
+const ScriptListItem: React.FC<ScriptListItemProps> = ({ script, isActive, onSelect, onDuplicate, onDelete }) => (
+  <Card
+    className={`cursor-pointer transition-shadow ${isActive ? 'border-primary shadow-md' : 'hover:shadow'} `}
+    onClick={onSelect}
+  >
+    <CardContent className="space-y-3 p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Badge className={statusColors[script.status ?? 'draft']}>
+              {statusLabels[script.status ?? 'draft']}
+            </Badge>
+            <Badge variant="outline">{pricingLabels[script.pricing_plan ?? 'free']}</Badge>
+          </div>
+          <h3 className="mt-2 line-clamp-1 text-sm font-semibold">{script.name}</h3>
+          <p className="line-clamp-2 text-xs text-muted-foreground">
+            {script.short_description || 'Описание не задано'}
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
+          >
+            <ClipboardCopy className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <Download className="h-3 w-3" />
+          {script.downloads ?? 0}
+        </span>
+        <span className="flex items-center gap-1">
+          <Star className="h-3 w-3" />
+          {(script.rating ?? 0).toFixed(1)}
+        </span>
+        <span className="flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {new Date(script.updated_at).toLocaleDateString('ru-RU')}
+        </span>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+interface ScriptDetailsProps {
+  script: ScriptRecord;
+  isSaving: boolean;
+  onSave: (payload: Partial<CreateScriptPayload>) => void;
+}
+
+const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave }) => {
+  const { toast } = useToast();
+  const [tab, setTab] = useState('overview');
+  const [formState, setFormState] = useState<FormState>(() => buildFormState(script));
+  const [showAudit, setShowAudit] = useState(false);
+  const [showChecks, setShowChecks] = useState(false);
+  const [showAccess, setShowAccess] = useState(false);
+
+  useEffect(() => {
+    setFormState(buildFormState(script));
+  }, [script]);
+
+  const handleChange = (field: keyof FormState, value: string) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter((tag: string) => tag !== tagToRemove)
-    });
+  const handleSave = () => {
+    const payload = buildUpdatePayload(script, formState);
+    if (Object.keys(payload).length === 0) {
+      toast({ title: 'Изменений нет', description: 'Сохранение не требуется' });
+      return;
+    }
+    onSave(payload);
+  };
+
+  const tags = parseList(formState.tagsText);
+  const allowedRoles = parseList(formState.allowedRolesText);
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="border-b p-4">
+        <h2 className="text-xl font-semibold">{script.name}</h2>
+        <p className="text-sm text-muted-foreground">
+          {visibilityLabels[script.visibility ?? 'public']} · {pricingLabels[script.pricing_plan ?? 'free']}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 border-b px-4 py-2">
+        <Button
+          variant={showAudit ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowAudit(!showAudit)}
+        >
+          <History className="mr-2 h-4 w-4" />
+          Аудит
+        </Button>
+        <Button
+          variant={showChecks ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowChecks(!showChecks)}
+        >
+          <ShieldAlert className="mr-2 h-4 w-4" />
+          Проверки
+        </Button>
+        <Button
+          variant={showAccess ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowAccess(!showAccess)}
+        >
+          <KeyRound className="mr-2 h-4 w-4" />
+          Доступ
+        </Button>
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden">
+        <TabsList className="grid grid-cols-5">
+          <TabsTrigger value="overview">Обзор</TabsTrigger>
+          <TabsTrigger value="editor">
+            <Code2 className="mr-2 h-4 w-4" />
+            Код
+          </TabsTrigger>
+          <TabsTrigger value="docs">
+            <BookOpen className="mr-2 h-4 w-4" />
+            Документация
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings2 className="mr-2 h-4 w-4" />
+            Настройки
+          </TabsTrigger>
+          <TabsTrigger value="versions">Версии</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="h-full overflow-y-auto p-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="h-4 w-4 text-primary" />
+                  Краткое описание
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p>{script.short_description || 'Описание не заполнено'}</p>
+                <Separator />
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary">{script.category}</Badge>
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      <Tag className="mr-1 h-3 w-3" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Users className="h-4 w-4 text-primary" />
+                  Доступ
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex flex-wrap gap-2">
+                  {(script.allowed_roles ?? ['user']).map((role) => (
+                    <Badge key={role} variant="outline">
+                      <Shield className="mr-1 h-3 w-3" />
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+                <Separator />
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Download className="h-3 w-3" />
+                    {script.downloads ?? 0} загрузок
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Star className="h-3 w-3" />
+                    {(script.rating ?? 0).toFixed(1)} ({script.rating_count ?? 0})
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    обновлён {new Date(script.updated_at).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="editor" className="h-full overflow-hidden p-4">
+          <CodeEditor
+            value={formState.code}
+            onChange={(value) => handleChange('code', value)}
+            language="javascript"
+            height="calc(100vh - 280px)"
+            onSave={handleSave}
+          />
+        </TabsContent>
+
+        <TabsContent value="docs" className="h-full overflow-hidden p-4">
+          <MarkdownEditor
+            value={formState.full_description}
+            onChange={(value) => handleChange('full_description', value)}
+            height="calc(100vh - 280px)"
+          />
+        </TabsContent>
+
+        <TabsContent value="settings" className="h-full overflow-y-auto p-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-muted-foreground">Название</label>
+                <Input
+                  value={formState.title}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Статус</label>
+                <Select
+                  value={formState.status}
+                  onValueChange={(value) =>
+                    handleChange('status', value as ScriptStatus)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(statusLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground">Короткое описание</label>
+              <Textarea
+                value={formState.short_description}
+                onChange={(e) => handleChange('short_description', e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground">Полное описание</label>
+              <Textarea
+                value={formState.full_description}
+                onChange={(e) => handleChange('full_description', e.target.value)}
+                rows={6}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-muted-foreground">Теги</label>
+                <Input
+                  value={formState.tagsText}
+                  onChange={(e) => handleChange('tagsText', e.target.value)}
+                  placeholder="automation, youtube, parser"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Вводите теги через запятую
+                </p>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Роли с доступом</label>
+                <Input
+                  value={formState.allowedRolesText}
+                  onChange={(e) => handleChange('allowedRolesText', e.target.value)}
+                  placeholder="user, pro, premium"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-muted-foreground">Видимость</label>
+                <Select
+                  value={formState.visibility}
+                  onValueChange={(value) =>
+                    handleChange('visibility', value as ScriptVisibility)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(visibilityLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">План</label>
+                <Select
+                  value={formState.pricing_plan}
+                  onValueChange={(value) =>
+                    handleChange('pricing_plan', value as ScriptPricingPlan)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(pricingLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="text-xs text-muted-foreground">
+                Последнее обновление: {new Date(script.updated_at).toLocaleString('ru-RU')}
+              </div>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохраняю...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" /> Сохранить
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="versions" className="h-full overflow-y-auto p-4">
+          <ScriptVersionManager
+            scriptId={script.id}
+            currentVersion={script.version ?? '1.0.0'}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {showAudit && <ScriptAuditPanel scriptId={script.id} />}
+      {showChecks && <ScriptChecksPanel scriptId={script.id} />}
+      {showAccess && <ScriptAccessPanel scriptId={script.id} />}
+    </div>
+  );
+};
+
+interface CreateScriptModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreate: (payload: CreateScriptPayload) => void;
+  isSubmitting: boolean;
+}
+
+const CreateScriptModal: React.FC<CreateScriptModalProps> = ({ open, onOpenChange, onCreate, isSubmitting }) => {
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('general');
+  const [code, setCode] = useState('');
+  const [shortDescription, setShortDescription] = useState('');
+
+  useEffect(() => {
+    if (!open) {
+      setTitle('');
+      setCategory('general');
+      setCode('');
+      setShortDescription('');
+    }
+  }, [open]);
+
+  const handleCreate = () => {
+    if (!title.trim() || !code.trim()) {
+      return;
+    }
+    const payload: CreateScriptPayload = {
+      title: title.trim(),
+      category,
+      code,
+      short_description: shortDescription,
+      visibility: 'public',
+      pricing_plan: 'free',
+      allowed_roles: ['user']
+    };
+    onCreate(payload);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium">Название</label>
-          <Input
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Название скрипта"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Категория</label>
-          <select 
-            className="w-full p-2 border rounded-md bg-background"
-            value={formData.category || 'general'} 
-            onChange={(e) => {
-              console.log('Category changed from', formData.category, 'to:', e.target.value);
-              setFormData({ ...formData, category: e.target.value });
-            }}
-          >
-            <option value="general">General</option>
-            <option value="ui">UI</option>
-            <option value="privacy">Privacy</option>
-            <option value="productivity">Productivity</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Описание</label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Описание скрипта"
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Код скрипта</label>
-        <Textarea
-          value={formData.code}
-          onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-          placeholder="// Ваш JavaScript код здесь..."
-          rows={10}
-          className="font-mono"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium">Теги</label>
-          <div className="flex gap-2 mt-1">
-            <Input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              placeholder="Добавить тег"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Создать новый скрипт</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-muted-foreground">Название</label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Парсер лидов" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Категория</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="general">Общее</SelectItem>
+                <SelectItem value="automation">Автоматизация</SelectItem>
+                <SelectItem value="analytics">Аналитика</SelectItem>
+                <SelectItem value="security">Безопасность</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Короткое описание</label>
+            <Textarea
+              value={shortDescription}
+              onChange={(e) => setShortDescription(e.target.value)}
+              rows={3}
             />
-            <Button type="button" onClick={addTag} size="sm">
-              Добавить
-            </Button>
           </div>
-          <div className="flex flex-wrap gap-1 mt-2">
-            {formData.tags.map((tag: string, index: number) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="ml-1 hover:text-red-600"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))}
+          <div>
+            <label className="text-xs text-muted-foreground">Код</label>
+            <Textarea
+              className="font-mono text-xs"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              rows={10}
+            />
           </div>
         </div>
-        <div>
-          <label className="text-sm font-medium">Статус</label>
-          <select 
-            className="w-full p-2 border rounded-md bg-background"
-            value={formData.status || 'draft'} 
-            onChange={(e) => {
-              console.log('Status changed from', formData.status, 'to:', e.target.value);
-              setFormData({ ...formData, status: e.target.value });
-            }}
-          >
-            <option value="draft">Черновик</option>
-            <option value="published">Опубликовано</option>
-            <option value="archived">Архив</option>
-            <option value="banned">Забанено</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="is_featured"
-            checked={formData.is_featured}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_featured: !!checked })}
-          />
-          <label
-            htmlFor="is_featured"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Рекомендуемый
-          </label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="is_premium"
-            checked={formData.is_premium}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_premium: !!checked })}
-          />
-          <label
-            htmlFor="is_premium"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Premium
-          </label>
-        </div>
-      </div>
-
-      {/* Выбор ролей для доступа */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">Доступ для ролей</label>
-        <p className="text-xs text-muted-foreground mb-3">
-          Выберите роли, которым будет доступен этот скрипт для скачивания
-        </p>
-        <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/20">
-          {availableRoles.map((role) => {
-            const isChecked = roleInList(formData.allowed_roles, role.name);
-            return (
-              <div key={role.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`role_${role.id}`}
-                  checked={isChecked}
-                  onCheckedChange={(checked) => {
-                    setFormData({
-                      ...formData,
-                      allowed_roles: checked
-                        ? addRoleToList(formData.allowed_roles, role.name)
-                        : removeRoleFromList(formData.allowed_roles, role.name)
-                    });
-                  }}
-                />
-                <label
-                  htmlFor={`role_${role.id}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  {role.display_name}
-                </label>
-              </div>
-            );
-          })}
-        </div>
-        {formData.allowed_roles.length === 0 && (
-          <p className="text-xs text-destructive mt-2">
-            ⚠️ Выберите хотя бы одну роль
-          </p>
-        )}
-      </div>
-
-      <div className="flex justify-end gap-2 pt-4">
-        <Button variant="outline" type="button" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button 
-          onClick={onSubmit} 
-          type="button" 
-          className="min-w-[120px]"
-          disabled={!isFormValid}
-        >
-          {submitText}
-        </Button>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Отмена
+          </Button>
+          <Button onClick={handleCreate} disabled={isSubmitting || !title.trim() || !code.trim()}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохраняю...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Создать
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
