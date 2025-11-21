@@ -316,7 +316,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
                     className={cn(
                       "w-full flex items-center gap-4 px-4 py-3 text-left transition-colors border-b border-border/20 last:border-0",
                       index === selectedIndex 
-                        ? "bg-accent/50" 
+                        ? "bg-primary/10 border-primary/40 shadow-inner text-primary"
                         : "hover:bg-accent/30"
                     )}
                   >
