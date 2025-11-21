@@ -4,6 +4,7 @@ import {
   getUserReferralCode,
   getUserReferralStats,
   getUserReferrals,
+  getUserReferralPayouts,
   applyReferralCode,
   getAllReferralCodes,
   updateReferralCode,
@@ -19,6 +20,7 @@ const router = Router();
 router.get('/user/:userId/code', authenticateUser, getUserReferralCode);
 router.get('/user/:userId/stats', authenticateUser, getUserReferralStats);
 router.get('/user/:userId/referrals', authenticateUser, getUserReferrals);
+router.get('/user/:userId/payouts', authenticateUser, getUserReferralPayouts);
 router.post('/apply', authenticateUser, applyReferralCode);
 
 // Админские роуты

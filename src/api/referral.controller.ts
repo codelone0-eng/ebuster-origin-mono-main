@@ -214,10 +214,22 @@ export const getUserReferralStats = async (req: Request, res: Response) => {
 
     const totalReferrals = uses?.length || 0;
     const activeReferrals = uses?.filter(u => u.subscription_id).length || 0;
-    const paidEarnings = uses?.filter(u => u.reward_paid).reduce((sum, u) => sum + (u.reward_value || 0), 0) || 0;
-    const pendingEarnings = uses?.filter(u => !u.reward_paid && u.reward_status === 'pending').reduce((sum, u) => sum + (u.reward_value || 0), 0) || 0;
-    const totalEarnings = paidEarnings + pendingEarnings;
     const conversionRate = totalReferrals > 0 ? (activeReferrals / totalReferrals) * 100 : 0;
+
+    // Получаем выплаты
+    const { data: transactions } = await supabase
+      .from('referral_transactions')
+      .select('reward_amount, status')
+      .eq('referrer_id', userId);
+
+    const transactionsList = transactions || [];
+    const paidEarnings = transactionsList
+      .filter(tx => tx.status === 'paid')
+      .reduce((sum, tx) => sum + (tx.reward_amount || 0), 0);
+    const pendingEarnings = transactionsList
+      .filter(tx => ['pending', 'processing'].includes((tx.status || '').toLowerCase()))
+      .reduce((sum, tx) => sum + (tx.reward_amount || 0), 0);
+    const totalEarnings = paidEarnings + pendingEarnings;
 
     res.json({ 
       success: true, 
@@ -272,6 +284,63 @@ export const getUserReferrals = async (req: Request, res: Response) => {
       reward_value: use.reward_value,
       reward_status: use.reward_status
     })) || [];
+
+    res.json({ success: true, data: normalized });
+  } catch (error) {
+    console.error('Ошибка:', error);
+    res.status(500).json({ success: false, error: 'Ошибка сервера' });
+  }
+};
+
+// Получить историю выплат реферальной программы
+export const getUserReferralPayouts = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const supabase = getSupabaseAdmin();
+
+    if (!supabase) {
+      return res.status(500).json({ success: false, error: 'Database not configured' });
+    }
+
+    const { data, error } = await supabase
+      .from('referral_transactions')
+      .select(`
+        id,
+        referrer_id,
+        referred_id,
+        referral_use_id,
+        subscription_id,
+        purchase_amount,
+        reward_amount,
+        currency,
+        status,
+        reward_paid_at,
+        metadata,
+        created_at,
+        updated_at,
+        referred:users!referral_transactions_referred_id_fkey(id, email, full_name),
+        subscription:subscriptions!referral_transactions_subscription_id_fkey(id, plan, status)
+      `)
+      .eq('referrer_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Ошибка получения выплат:', error);
+      return res.status(500).json({ success: false, error: 'Ошибка получения истории выплат' });
+    }
+
+    const normalized = (data || []).map(tx => ({
+      id: tx.id,
+      created_at: tx.created_at,
+      status: tx.status,
+      reward_amount: tx.reward_amount,
+      purchase_amount: tx.purchase_amount,
+      currency: tx.currency,
+      reward_paid_at: tx.reward_paid_at,
+      metadata: tx.metadata,
+      referred_user: tx.referred,
+      subscription: tx.subscription
+    }));
 
     res.json({ success: true, data: normalized });
   } catch (error) {

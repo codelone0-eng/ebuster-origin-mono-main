@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import {
@@ -52,17 +53,94 @@ interface Referral {
   reward_status: string;
 }
 
+interface ReferralPayout {
+  id: string;
+  created_at: string;
+  status: string;
+  purchase_amount: number | null;
+  reward_amount: number | null;
+  currency: string | null;
+  referred_user: {
+    id: string;
+    email: string;
+    full_name: string | null;
+  } | null;
+}
+
 export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   const { toast } = useToast();
   const [referralCode, setReferralCode] = useState<ReferralCode | null>(null);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [payouts, setPayouts] = useState<ReferralPayout[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'referrals' | 'payouts'>('referrals');
 
-  const referralLink = referralCode 
-    ? `https://ebuster.ru/register?ref=${referralCode.code}`
-    : '';
+  const referralLink = `${window.location.origin}/register?ref=${referralCode?.code ?? ''}`;
+
+  const maskEmail = (email?: string | null) => {
+    if (!email) return 'Неизвестно';
+    const [userPart, domainPart] = email.split('@');
+    if (!domainPart) return email;
+    if (userPart.length <= 2) {
+      return `${userPart.charAt(0)}***@${domainPart}`;
+    }
+    return `${userPart.charAt(0)}***${userPart.charAt(userPart.length - 1)}@${domainPart}`;
+  };
+
+  const getRewardAmountLabel = (value?: number | null) => {
+    if (!value || value <= 0) return '—';
+    return `+$${value.toFixed(2)}`;
+  };
+
+  const normalizeStatus = (status?: string | null) => (status || '').toLowerCase();
+
+  const getRewardStatusLabel = (status?: string | null) => {
+    switch (normalizeStatus(status)) {
+      case 'paid':
+        return 'Выплачено';
+      case 'pending':
+      case 'processing':
+      case null:
+      case undefined:
+        return 'В обработке';
+      case 'cancelled':
+        return 'Отменено';
+      default:
+        return 'В обработке';
+    }
+  };
+
+  const getRewardStatusVariant = (status?: string | null) => {
+    switch (normalizeStatus(status)) {
+      case 'paid':
+        return 'default' as const;
+      case 'pending':
+      case 'processing':
+      case null:
+      case undefined:
+        return 'secondary' as const;
+      case 'cancelled':
+        return 'outline' as const;
+      default:
+        return 'secondary' as const;
+    }
+  };
+
+  const formatAmount = (amount?: number | null, currency?: string | null) => {
+    if (!amount || amount <= 0) return '—';
+    const currencyCode = (currency || 'USD').toUpperCase();
+    try {
+      return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: 2
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(2)} ${currencyCode}`;
+    }
+  };
 
   useEffect(() => {
     loadReferralData();
@@ -79,19 +157,22 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const [codeRes, statsRes, referralsRes] = await Promise.all([
+      const [codeRes, statsRes, referralsRes, payoutsRes] = await Promise.all([
         fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/code`, { headers }),
         fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/stats`, { headers }),
-        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/referrals`, { headers })
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/referrals`, { headers }),
+        fetch(`${API_CONFIG.BASE_URL}/api/referral/user/${userId}/payouts`, { headers })
       ]);
 
       const codeData = await codeRes.json();
       const statsData = await statsRes.json();
       const referralsData = await referralsRes.json();
+      const payoutsData = await payoutsRes.json();
 
       if (codeData.success) setReferralCode(codeData.data);
       if (statsData.success) setStats(statsData.data);
       if (referralsData.success) setReferrals(referralsData.data);
+      if (payoutsData.success) setPayouts(payoutsData.data);
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
       toast({
@@ -134,7 +215,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
         console.error('Ошибка при шаринге:', error);
       }
     } else {
-      copyToClipboard(referralLink, 'link');
+      await copyToClipboard(referralLink, 'link');
     }
   };
 
@@ -216,119 +297,150 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
         <CardHeader>
           <CardTitle>Ваш реферальный код</CardTitle>
           <CardDescription>
-            Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}%, 
-            а вы — {referralCode?.discount_value}% от их платежей
+            Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
-              value={referralCode?.code || ''}
+              value={referralCode?.code ?? '—'}
               readOnly
-              className="font-mono text-lg"
             />
-            <Button
-              onClick={() => copyToClipboard(referralCode?.code || '', 'code')}
-              variant="outline"
-            >
+            <Button onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              value={referralLink}
-              readOnly
-              className="text-sm"
-            />
-            <Button
-              onClick={() => copyToClipboard(referralLink, 'link')}
-              variant="outline"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-            <Button onClick={shareLink} variant="default">
-              <Share2 className="h-4 w-4 mr-2" />
-              Поделиться
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Gift className="h-4 w-4" />
-            <span>Использований: {referralCode?.uses_count || 0}</span>
-            {referralCode?.max_uses && (
-              <span>/ {referralCode.max_uses}</span>
-            )}
+          <div>
+            <p className="text-sm text-muted-foreground">Ваша реферальная ссылка</p>
+            <div className="flex gap-2 mt-2">
+              <Input value={referralLink} readOnly />
+              <Button onClick={() => { void copyToClipboard(referralLink, 'link'); }}>
+                Скопировать ссылку
+              </Button>
+              <Button onClick={shareLink}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Поделиться
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Список рефералов */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ваши рефералы</CardTitle>
-          <CardDescription>
-            Список пользователей, зарегистрировавшихся по вашей ссылке
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {referrals.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Пока нет рефералов</p>
-              <p className="text-sm mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {referrals.map((referral) => (
-                <div
-                  key={referral.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{referral.referred_user.email}</p>
-                      {referral.referred_user.full_name && (
-                        <span className="text-sm text-muted-foreground">
-                          ({referral.referred_user.full_name})
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(referral.created_at).toLocaleDateString('ru-RU')}
-                      </span>
-                      {referral.subscription && (
-                        <Badge variant={referral.subscription.status === 'active' ? 'default' : 'secondary'}>
-                          {referral.subscription.plan}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-green-600">
-                      +${(referral.reward_value ?? 0).toFixed(2)}
-                    </div>
-                    <Badge
-                      variant={
-                        referral.reward_status === 'paid' ? 'default' :
-                        referral.reward_status === 'pending' ? 'secondary' :
-                        'outline'
-                      }
-                      className="mt-1"
-                    >
-                      {referral.reward_status === 'paid' ? 'Выплачено' :
-                       referral.reward_status === 'pending' ? 'Ожидает' :
-                       'Отменено'}
-                    </Badge>
-                  </div>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="referrals">Рефералы</TabsTrigger>
+          <TabsTrigger value="payouts">История выплат</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="referrals">
+          <Card>
+            <CardHeader>
+              <CardTitle>Список рефералов</CardTitle>
+              <CardDescription>
+                Пользователи, зарегистрировавшиеся по вашей ссылке
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {referrals.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Пока нет рефералов</p>
+                  <p className="text-sm mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              ) : (
+                <div className="space-y-4">
+                  {referrals.map((referral) => (
+                    <div
+                      key={referral.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{maskEmail(referral.referred_user?.email)}</p>
+                          {referral.referred_user?.full_name && (
+                            <span className="text-sm text-muted-foreground">
+                              ({referral.referred_user.full_name})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+                          </span>
+                          {referral.subscription && (
+                            <Badge variant={referral.subscription.status === 'active' ? 'default' : 'secondary'}>
+                              {referral.subscription.plan}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium text-green-600">
+                          {getRewardAmountLabel(referral.reward_value)}
+                        </div>
+                        <Badge
+                          variant={getRewardStatusVariant(referral.reward_status)}
+                          className="mt-1"
+                        >
+                          {getRewardStatusLabel(referral.reward_status)}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payouts">
+          <Card>
+            <CardHeader>
+              <CardTitle>История выплат</CardTitle>
+              <CardDescription>
+                Когда ваши рефералы оплачивают подписку, здесь появится начисление
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {payouts.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                  <p>Пока нет начислений</p>
+                  <p className="text-sm mt-2">Как только ваш реферал оплатит подписку, информация появится здесь.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {payouts.map((item) => (
+                    <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium">
+                          {item.referred_user?.full_name || maskEmail(item.referred_user?.email)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {item.created_at ? new Date(item.created_at).toLocaleString('ru-RU') : '—'}
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground flex flex-col gap-1">
+                        <span>
+                          Оформил подписку на сумму <span className="text-foreground font-medium">{formatAmount(item.purchase_amount, item.currency)}</span>
+                        </span>
+                        <span>
+                          Ваш процент: <span className="text-foreground font-medium">{formatAmount(item.reward_amount, item.currency)}</span>
+                        </span>
+                      </div>
+                      <Badge variant={getRewardStatusVariant(item.status)}>
+                        {getRewardStatusLabel(item.status)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Как это работает */}
       <Card>
