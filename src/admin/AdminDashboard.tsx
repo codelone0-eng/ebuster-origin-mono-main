@@ -562,8 +562,8 @@ const AdminDashboard = () => {
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* Main content */}
-        <main className="flex-1 ml-64">
-          <div className="container mx-auto max-w-7xl px-6 lg:px-8 py-12">
+        <main className="flex-1 ml-64 flex flex-col">
+          <div className="container mx-auto max-w-7xl px-6 lg:px-8 py-12 flex-1">
           {/* Заголовок */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -1003,9 +1003,11 @@ const AdminDashboard = () => {
             </Button>
           </div>
           </div>
+
+          <div className="mt-12 border-t border-border/50">
+            <Footer />
+          </div>
         </main>
-        
-        <Footer />
       </div>
 
       {/* Модальное окно редактирования пользователя */}

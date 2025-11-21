@@ -1,8 +1,18 @@
 -- Создание дефолтных ролей: user и admin
+-- Добавляем поле permissions если его нет
+
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'roles' AND column_name = 'permissions'
+  ) THEN
+    ALTER TABLE roles ADD COLUMN permissions JSONB DEFAULT '[]'::jsonb;
+  END IF;
+END $$;
 
 -- Роль: user (базовая роль по умолчанию)
 INSERT INTO roles (
-  id,
   name,
   display_name,
   description,
@@ -14,7 +24,6 @@ INSERT INTO roles (
   is_subscription,
   display_order
 ) VALUES (
-  gen_random_uuid(),
   'user',
   'Пользователь',
   'Базовая роль для всех зарегистрированных пользователей',
@@ -35,7 +44,6 @@ INSERT INTO roles (
 
 -- Роль: admin (администратор с полными правами)
 INSERT INTO roles (
-  id,
   name,
   display_name,
   description,
@@ -47,7 +55,6 @@ INSERT INTO roles (
   is_subscription,
   display_order
 ) VALUES (
-  gen_random_uuid(),
   'admin',
   'Администратор',
   'Полный доступ ко всем функциям системы',
@@ -67,10 +74,18 @@ INSERT INTO roles (
   display_order = EXCLUDED.display_order;
 
 -- Установить роль 'user' по умолчанию для всех пользователей без роли
-UPDATE users 
-SET role_id = (SELECT id FROM roles WHERE name = 'user' LIMIT 1)
-WHERE role_id IS NULL;
-
--- Добавить constraint для автоматического назначения роли 'user' новым пользователям
-ALTER TABLE users 
-ALTER COLUMN role_id SET DEFAULT (SELECT id FROM roles WHERE name = 'user' LIMIT 1);
+-- Проверяем какая таблица используется: users или auth_users
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') THEN
+    UPDATE users 
+    SET role_id = (SELECT id FROM roles WHERE name = 'user' LIMIT 1)
+    WHERE role_id IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'auth_users') THEN
+    UPDATE auth_users 
+    SET role_id = (SELECT id FROM roles WHERE name = 'user' LIMIT 1)
+    WHERE role_id IS NULL;
+  END IF;
+END $$;
