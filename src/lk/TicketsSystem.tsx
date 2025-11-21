@@ -3,10 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Search, 
-  Filter, 
   Plus,
   Ticket,
   Clock,
@@ -16,7 +14,8 @@ import {
   Users,
   TrendingUp,
   MessageSquare,
-  Eye
+  Eye,
+  X
 } from 'lucide-react';
 import { API_CONFIG } from '@/config/api';
 import { useToast } from '@/hooks/use-toast';
@@ -92,26 +91,17 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    status: initialFilter,
-    priority: '',
-    search: ''
-  });
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = (user?.role ?? '').toLowerCase() === 'admin';
-
-  // Синхронизируем фильтр с initialFilter при изменении вкладки
-  useEffect(() => {
-    setFilters(prev => ({ ...prev, status: initialFilter }));
-  }, [initialFilter]);
 
   useEffect(() => {
     loadTickets();
     if (isAdmin) {
       loadStats();
     }
-  }, [filters, isAdmin]);
+  }, [initialFilter, searchQuery, isAdmin]);
 
   const formatTicketNumber = (value: string | number | undefined) => {
     if (!value) return '—';
@@ -136,9 +126,8 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
       const token = localStorage.getItem('ebuster_token');
       
       const params = new URLSearchParams();
-      if (filters.status !== 'all') params.append('status', filters.status);
-      if (filters.priority) params.append('priority', filters.priority);
-      if (filters.search) params.append('search', filters.search);
+      if (initialFilter !== 'all') params.append('status', initialFilter);
+      if (searchQuery) params.append('search', searchQuery);
 
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets?${params}`, {
         headers: {
@@ -318,49 +307,27 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
+          <div className="mb-6">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity duration-500" />
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors duration-200" />
                 <Input
                   placeholder="Поиск по номеру, теме или описанию..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 h-12 bg-card/50 border-border/60 rounded-xl focus:border-primary/60 focus:bg-card/80 transition-all duration-200 text-base placeholder:text-muted-foreground/60"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-accent rounded-md transition-colors"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )}
               </div>
             </div>
-            <Select
-              value={filters.status}
-              onValueChange={(value) => setFilters({ ...filters, status: value })}
-            >
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Все статусы" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="new">Новые</SelectItem>
-                <SelectItem value="open">Открытые</SelectItem>
-                <SelectItem value="pending_customer">Ожидание клиента</SelectItem>
-                <SelectItem value="resolved">Решенные</SelectItem>
-                <SelectItem value="closed">Закрытые</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.priority || 'all'}
-              onValueChange={(value) => setFilters({ ...filters, priority: value === 'all' ? '' : value })}
-            >
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Все приоритеты" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все приоритеты</SelectItem>
-                <SelectItem value="low">Низкий</SelectItem>
-                <SelectItem value="medium">Средний</SelectItem>
-                <SelectItem value="high">Высокий</SelectItem>
-                <SelectItem value="critical">Критический</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Список тикетов */}
@@ -374,11 +341,11 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
               <Ticket className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Тикетов не найдено</h3>
               <p className="text-muted-foreground mb-4">
-                {filters.status !== 'all' || filters.priority || filters.search
-                  ? 'Попробуйте изменить фильтры'
+                {searchQuery
+                  ? 'Попробуйте изменить запрос'
                   : 'Создайте первый тикет для обращения в поддержку'}
               </p>
-              {filters.status === 'all' && !filters.priority && !filters.search && (
+              {!searchQuery && (
                 <Button onClick={handleCreateTicket}>
                   <Plus className="h-4 w-4 mr-2" />
                   Создать тикет

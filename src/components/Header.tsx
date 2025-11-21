@@ -1,9 +1,10 @@
-import { User, ChevronDown, LogIn, Shield, LogOut } from "lucide-react"
+import { User, ChevronDown, LogIn, Shield, LogOut, Search } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 import { ThemeToggle } from "./ThemeToggle"
 import { CursorSelector } from "./CursorSelector"
+import { GlobalSearch } from "./GlobalSearch"
 import { useCursor } from "@/contexts/CursorContext"
 import { useLanguage } from "@/hooks/useLanguage"
 import { useAuth } from "@/contexts/CustomAuthContext"
@@ -27,6 +28,7 @@ export const Header = () => {
   const { language, changeLanguage, t } = useLanguage();
   const { cursorType, setCursorType } = useCursor();
   const { user, signOut, loading } = useAuth();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Get navigation links from translations
   const navigationLinks = t('header.navigation') as unknown as any[];
@@ -46,6 +48,19 @@ export const Header = () => {
   const toggleLanguage = () => {
     changeLanguage(language === 'ru' ? 'eng' : 'ru');
   };
+
+  // Горячая клавиша Ctrl+K для поиска
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Авто-открытие модалки входа по URL: /signin или ?open=login
   useEffect(() => {
@@ -198,6 +213,16 @@ export const Header = () => {
 
         {/* Middle - Controls */}
         <div className="hidden md:flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground px-3 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+            onClick={() => setIsSearchOpen(true)}
+          >
+            <Search className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+            <span className="text-sm font-medium">Поиск</span>
+            <kbd className="ml-2 px-1.5 py-0.5 text-[10px] bg-muted border border-border rounded">⌘K</kbd>
+          </Button>
           <ThemeToggle />
           <CursorSelector 
             currentCursor={cursorType}
@@ -401,6 +426,9 @@ export const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Глобальный поиск */}
+      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
   )
 }
