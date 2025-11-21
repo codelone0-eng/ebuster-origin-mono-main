@@ -190,7 +190,7 @@ interface GlobalSearchProps {
   onClose: () => void;
 }
 
-export const GlobalSearchComponent: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
+export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
