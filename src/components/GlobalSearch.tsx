@@ -305,6 +305,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
             <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden">
               {results.map((result, index) => {
                 const categoryInfo = categoryConfig[result.category];
+                const isSelected = index === selectedIndex;
                 
                 return (
                   <button
@@ -314,28 +315,29 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
                     }}
                     onClick={() => handleSelect(result)}
                     className={cn(
-                      "w-full flex items-center gap-4 px-4 py-3 text-left transition-colors border-b border-border/20 last:border-0",
-                      index === selectedIndex 
-                        ? "bg-primary/10 border-primary/40 shadow-inner text-primary"
+                      "relative w-full flex items-center gap-4 px-4 py-3 text-left transition-all border-b border-border/20 last:border-0 focus:outline-none",
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 ring-2 ring-primary/40 shadow-lg scale-[1.01] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-primary"
                         : "hover:bg-accent/30"
                     )}
+                    aria-selected={index === selectedIndex}
                   >
                     <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                       {result.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-sm text-foreground truncate">
+                        <h4 className={cn("font-medium text-sm truncate", isSelected ? "text-primary" : "text-foreground") }>
                           {result.title}
                         </h4>
                         <Badge 
                           variant="outline" 
-                          className={cn("text-xs px-2 py-0", categoryInfo.color)}
+                          className={cn("text-xs px-2 py-0", categoryInfo.color, isSelected && "border-primary bg-primary/20 text-primary")}
                         >
                           {categoryInfo.label}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className={cn("text-xs truncate", isSelected ? "text-primary/80" : "text-muted-foreground") }>
                         {result.description}
                       </p>
                     </div>
