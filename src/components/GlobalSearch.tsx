@@ -272,7 +272,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
     >
       <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4">
         <div 
-          className="bg-card border border-border/60 rounded-xl shadow-2xl overflow-hidden"
+          className="bg-card border border-border/60 rounded-xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Поле поиска */}
@@ -296,7 +296,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
           {/* Результаты */}
           {results.length > 0 ? (
-            <div className="max-h-[400px] overflow-y-auto">
+            <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden">
               {results.map((result, index) => {
                 const categoryInfo = categoryConfig[result.category];
                 
@@ -361,7 +361,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
           )}
 
           {/* Подсказки */}
-          <div className="px-4 py-2 bg-muted/30 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="px-4 py-2 bg-muted/30 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground rounded-b-xl">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">↑</kbd>
