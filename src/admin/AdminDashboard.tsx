@@ -6,7 +6,6 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -558,10 +557,12 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background relative">
       <ParticleBackground />
       
-      <div className="relative z-content min-h-screen flex flex-col">
-        <Header />
+      <div className="relative z-content min-h-screen flex">
+        {/* Sidebar */}
+        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
-        <main className="flex-1">
+        {/* Main content */}
+        <main className="flex-1 ml-64">
           <div className="container mx-auto max-w-7xl px-6 lg:px-8 py-12">
           {/* Заголовок */}
           <div className="mb-8">
@@ -579,7 +580,7 @@ const AdminDashboard = () => {
                   <Shield className="h-4 w-4 mr-2" />
                   Администратор
                 </Badge>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Обновить
                 </Button>
@@ -588,10 +589,11 @@ const AdminDashboard = () => {
           </div>
 
           {/* Контент табов */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="space-y-6">
 
             {/* Обзор */}
-            <TabsContent value="overview" className="space-y-6">
+            {activeTab === 'overview' && (
+            <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Статистика по браузерам */}
                 <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
@@ -775,10 +777,12 @@ const AdminDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+            )}
 
             {/* Пользователи */}
-            <TabsContent value="users" className="space-y-6">
+            {activeTab === 'users' && (
+            <div className="space-y-6">
               <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -862,45 +866,61 @@ const AdminDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+            )}
 
             {/* Скрипты */}
-            <TabsContent value="scripts" className="space-y-6">
+            {activeTab === 'scripts' && (
+            <div className="space-y-6">
               <ScriptsManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Категории */}
-            <TabsContent value="categories" className="space-y-6">
+            {activeTab === 'categories' && (
+            <div className="space-y-6">
               <CategoriesManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Подписки */}
-            <TabsContent value="subscriptions" className="space-y-6">
+            {activeTab === 'subscriptions' && (
+            <div className="space-y-6">
               <SubscriptionsManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Роли */}
-            <TabsContent value="roles" className="space-y-6">
+            {activeTab === 'roles' && (
+            <div className="space-y-6">
               <RolesManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Рефералы */}
-            <TabsContent value="referrals" className="space-y-6">
+            {activeTab === 'referrals' && (
+            <div className="space-y-6">
               <ReferralManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Мониторинг */}
-            <TabsContent value="monitoring" className="space-y-6">
+            {activeTab === 'monitoring' && (
+            <div className="space-y-6">
               <MonitoringDashboard systemStats={systemStats} systemStatus={systemStatus} />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Тикеты */}
-            <TabsContent value="tickets" className="space-y-6">
+            {activeTab === 'tickets' && (
+            <div className="space-y-6">
               <TicketsManagement />
-            </TabsContent>
+            </div>
+            )}
 
             {/* Логи */}
-            <TabsContent value="logs" className="space-y-6">
+            {activeTab === 'logs' && (
+            <div className="space-y-6">
               <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -950,10 +970,12 @@ const AdminDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+            )}
 
             {/* Графики */}
-            <TabsContent value="charts" className="space-y-6">
+            {activeTab === 'charts' && (
+            <div className="space-y-6">
               <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -968,8 +990,9 @@ const AdminDashboard = () => {
                   <SystemMonitorChart />
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+            </div>
+            )}
+          </div>
 
           {/* Кнопка назад */}
           <div className="text-center mt-12">

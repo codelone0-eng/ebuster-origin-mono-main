@@ -439,24 +439,77 @@ export const VisualScriptBuilder: React.FC = () => {
         {/* Панель блоков */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Блоки</CardTitle>
-            <CardDescription>Перетащите блок в рабочую область</CardDescription>
+            <CardTitle className="text-lg">Библиотека блоков</CardTitle>
+            <CardDescription>Нажмите на блок, чтобы добавить</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <ScrollArea className="h-[600px]">
-              {BLOCK_TYPES.map((blockType) => (
-                <Button
-                  key={blockType.type}
-                  variant="outline"
-                  className="w-full justify-start mb-2"
-                  onClick={() => addBlock(blockType.type)}
-                >
-                  <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white`}>
-                    {blockType.icon}
-                  </div>
-                  <span className="text-sm">{blockType.label}</span>
-                </Button>
-              ))}
+          <CardContent className="space-y-4">
+            <ScrollArea className="h-[600px] pr-4">
+              {/* Категория: Действия */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Действия</h3>
+                <div className="space-y-2">
+                  {BLOCK_TYPES.filter(b => ['click', 'input', 'navigate'].includes(b.type)).map((blockType) => (
+                    <Button
+                      key={blockType.type}
+                      variant="outline"
+                      className="w-full justify-start hover:bg-accent/50 transition-all"
+                      onClick={() => addBlock(blockType.type)}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
+                        {blockType.icon}
+                      </div>
+                      <span className="text-sm truncate">{blockType.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Категория: Ожидание и проверки */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Ожидание</h3>
+                <div className="space-y-2">
+                  {BLOCK_TYPES.filter(b => ['wait', 'condition', 'url-match'].includes(b.type)).map((blockType) => (
+                    <Button
+                      key={blockType.type}
+                      variant="outline"
+                      className="w-full justify-start hover:bg-accent/50 transition-all"
+                      onClick={() => addBlock(blockType.type)}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
+                        {blockType.icon}
+                      </div>
+                      <span className="text-sm truncate">{blockType.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Категория: Данные и циклы */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Данные</h3>
+                <div className="space-y-2">
+                  {BLOCK_TYPES.filter(b => ['extract', 'loop', 'code'].includes(b.type)).map((blockType) => (
+                    <Button
+                      key={blockType.type}
+                      variant="outline"
+                      className="w-full justify-start hover:bg-accent/50 transition-all"
+                      onClick={() => addBlock(blockType.type)}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
+                        {blockType.icon}
+                      </div>
+                      <span className="text-sm truncate">{blockType.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Подсказка */}
+              <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">Совет:</strong> Начните с блока "URL фильтр", чтобы указать, на каких страницах будет работать скрипт.
+                </p>
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
