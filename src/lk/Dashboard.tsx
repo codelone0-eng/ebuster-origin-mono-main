@@ -897,44 +897,43 @@ const DashboardContent = () => {
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="border border-border/40 bg-card/80">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-foreground">
                         <Shield className="h-5 w-5 text-primary" />
                         {t('header.dashboard.settings.security')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        <GradientButton 
+                      <div className="grid gap-3">
+                        <Button
                           variant="outline"
                           className="w-full justify-start"
                           onClick={() => setIsChangePasswordOpen(true)}
                         >
                           <Key className="h-4 w-4 mr-2 text-primary" />
                           {t('header.dashboard.settings.changePassword')}
-                        </GradientButton>
-                        <GradientButton 
+                        </Button>
+                        <Button
                           variant="outline"
                           className="w-full justify-start"
                           onClick={() => setIsChangeEmailOpen(true)}
                         >
                           <Mail className="h-4 w-4 mr-2 text-primary" />
                           {t('header.dashboard.settings.changeEmail')}
-                        </GradientButton>
-                        <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                        </Button>
+                        <div className="flex items-center justify-between rounded-lg border border-border/40 bg-card/60 px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Shield className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium">{t('header.dashboard.settings.twoFactorAuth')}</span>
+                            <span className="text-sm font-medium text-foreground">{t('header.dashboard.settings.twoFactorAuth')}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch 
+                            <Switch
                               checked={is2FAEnabled}
                               onCheckedChange={async (checked) => {
                                 if (checked) {
                                   setIs2FASetupOpen(true);
                                 } else {
-                                  // Отключаем 2FA через API
                                   try {
                                     const token = localStorage.getItem('ebuster_token');
                                     const response = await fetch(`${API_CONFIG.USER_URL}/2fa/disable`, {
@@ -944,7 +943,7 @@ const DashboardContent = () => {
                                         'Content-Type': 'application/json'
                                       }
                                     });
-                                    
+
                                     if (response.ok) {
                                       setIs2FAEnabled(false);
                                       setUser(prev => ({ ...prev, twoFactorEnabled: false }));
@@ -970,6 +969,7 @@ const DashboardContent = () => {
                                   }
                                 }
                               }}
+                              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted"
                             />
                             <span className="text-sm text-muted-foreground">
                               {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
