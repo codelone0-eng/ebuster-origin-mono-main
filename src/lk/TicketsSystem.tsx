@@ -8,12 +8,7 @@ import {
   Plus,
   Ticket,
   Clock,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
   Users,
-  TrendingUp,
-  MessageSquare,
   Eye,
   X
 } from 'lucide-react';
@@ -22,7 +17,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TicketView } from './TicketView';
 import { CreateTicketModal } from './CreateTicketModal';
-import { useAuth } from '@/contexts/CustomAuthContext';
 
 interface Ticket {
   id: string;
@@ -53,17 +47,6 @@ interface Ticket {
   };
 }
 
-interface TicketStats {
-  new: number;
-  open: number;
-  pending_customer: number;
-  pending_internal: number;
-  resolved: number;
-  closed: number;
-  total: number;
-  avgResponseTimeHours: number;
-}
-
 const statusConfig = {
   new: { label: 'Новый', color: 'bg-yellow-500', textColor: 'text-yellow-700', bgLight: 'bg-yellow-50' },
   open: { label: 'Открыт', color: 'bg-blue-500', textColor: 'text-blue-700', bgLight: 'bg-blue-50' },
@@ -87,21 +70,15 @@ interface TicketsSystemProps {
 
 export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'all' }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [stats, setStats] = useState<TicketStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
-  const { user } = useAuth();
-  const isAdmin = (user?.role ?? '').toLowerCase() === 'admin';
 
   useEffect(() => {
     loadTickets();
-    if (isAdmin) {
-      loadStats();
-    }
-  }, [initialFilter, searchQuery, isAdmin]);
+  }, [initialFilter, searchQuery]);
 
   const formatTicketNumber = (value: string | number | undefined) => {
     if (!value) return '—';
@@ -155,27 +132,6 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
     }
   };
 
-  const loadStats = async () => {
-    if (!isAdmin) {
-      return;
-    }
-    try {
-      const token = localStorage.getItem('ebuster_token');
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setStats(result.data);
-      }
-    } catch (error) {
-      console.error('Load stats error:', error);
-    }
-  };
 
   const handleCreateTicket = () => {
     setIsCreateModalOpen(true);
@@ -184,7 +140,6 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   const handleTicketCreated = () => {
     setIsCreateModalOpen(false);
     loadTickets();
-    loadStats();
   };
 
   const formatDate = (dateString: string) => {
@@ -213,9 +168,6 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
         onClose={() => {
           setSelectedTicket(null);
           loadTickets();
-          if (isAdmin) {
-            loadStats();
-          }
         }} 
       />
     );
@@ -223,73 +175,6 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
 
   return (
     <div className="space-y-6">
-      {/* Статистика */}
-      {isAdmin && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Новые тикеты
-              </CardTitle>
-              <AlertCircle className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.new}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Требуют внимания
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                В работе
-              </CardTitle>
-              <Clock className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.open}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Активные тикеты
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Решено
-              </CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.resolved}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Ожидают закрытия
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Среднее время ответа
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {(stats?.avgResponseTimeHours ?? 0).toFixed(1)}ч
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                За последние 30 дней
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Фильтры и поиск */}
       <Card>
         <CardHeader>
