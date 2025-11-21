@@ -12,7 +12,6 @@ import {
   Headphones,
   Download,
   Library,
-  Crown,
   Users,
   Code,
   Palette,
@@ -27,7 +26,7 @@ interface SearchResult {
   id: string;
   title: string;
   description: string;
-  category: 'settings' | 'profile' | 'scripts' | 'support' | 'docs' | 'admin';
+  category: 'settings' | 'profile' | 'scripts' | 'support' | 'docs';
   icon: React.ReactNode;
   path: string;
   keywords: string[];
@@ -143,16 +142,6 @@ const searchData: SearchResult[] = [
     keywords: ['api', 'апи', 'документация', 'docs', 'разработка', 'integration']
   },
   
-  // Админ
-  {
-    id: 'admin',
-    title: 'Админ-панель',
-    description: 'Административная панель управления',
-    category: 'admin',
-    icon: <Crown className="h-4 w-4" />,
-    path: '/admin',
-    keywords: ['админ', 'admin', 'администратор', 'панель', 'управление']
-  }
 ];
 
 const categoryConfig = {
@@ -160,8 +149,7 @@ const categoryConfig = {
   profile: { label: 'Профиль', color: 'bg-primary/10 text-primary border border-primary/20' },
   scripts: { label: 'Скрипты', color: 'bg-primary/10 text-primary border border-primary/20' },
   support: { label: 'Поддержка', color: 'bg-primary/10 text-primary border border-primary/20' },
-  docs: { label: 'Документация', color: 'bg-primary/10 text-primary border border-primary/20' },
-  admin: { label: 'Админ', color: 'bg-primary/10 text-primary border border-primary/20' }
+  docs: { label: 'Документация', color: 'bg-primary/10 text-primary border border-primary/20' }
 } as const;
 
 // Простая fuzzy search функция
