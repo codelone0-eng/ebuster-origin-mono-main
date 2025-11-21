@@ -23,11 +23,15 @@ import {
   AlertCircle,
   CheckCircle,
   Copy,
-  Settings
+  Settings,
+  GitBranch,
+  Repeat,
+  Link,
+  Cloud
 } from 'lucide-react';
 
 // Типы блоков
-type BlockType = 'click' | 'input' | 'navigate' | 'wait' | 'extract' | 'code' | 'condition';
+type BlockType = 'click' | 'input' | 'navigate' | 'wait' | 'extract' | 'code' | 'condition' | 'loop' | 'url-match';
 
 interface ScriptBlock {
   id: string;
@@ -35,6 +39,7 @@ interface ScriptBlock {
   label: string;
   params: Record<string, any>;
   position: { x: number; y: number };
+  children?: ScriptBlock[]; // Для вложенных блоков (условия, циклы)
 }
 
 interface ScriptProject {
@@ -95,6 +100,89 @@ const BLOCK_TYPES = [
     color: 'bg-gray-500',
     params: { code: '', description: '' },
     generateCode: (params: any) => params.code
+  },
+  {
+    type: 'condition' as BlockType,
+    label: 'Условие (if/else)',
+    icon: <GitBranch className="h-4 w-4" />,
+    color: 'bg-pink-500',
+    params: { 
+      conditionType: 'element-exists', // element-exists, element-visible, text-contains, url-contains
+      selector: '', 
+      value: '',
+      description: '' 
+    },
+    generateCode: (params: any, children?: ScriptBlock[]) => {
+      let condition = '';
+      switch (params.conditionType) {
+        case 'element-exists':
+          condition = `await page.$('${params.selector}') !== null`;
+          break;
+        case 'element-visible':
+          condition = `await page.isVisible('${params.selector}')`;
+          break;
+        case 'text-contains':
+          condition = `(await page.textContent('${params.selector}')).includes('${params.value}')`;
+          break;
+        case 'url-contains':
+          condition = `page.url().includes('${params.value}')`;
+          break;
+      }
+      return `if (${condition}) {\n      // Действия при выполнении условия\n    }`;
+    }
+  },
+  {
+    type: 'loop' as BlockType,
+    label: 'Цикл (повторение)',
+    icon: <Repeat className="h-4 w-4" />,
+    color: 'bg-indigo-500',
+    params: { 
+      loopType: 'count', // count, while-exists, for-each
+      count: 5,
+      selector: '',
+      description: '' 
+    },
+    generateCode: (params: any) => {
+      switch (params.loopType) {
+        case 'count':
+          return `for (let i = 0; i < ${params.count}; i++) {\n      // Повторяемые действия\n    }`;
+        case 'while-exists':
+          return `while (await page.$('${params.selector}') !== null) {\n      // Действия пока элемент существует\n    }`;
+        case 'for-each':
+          return `const elements = await page.$$('${params.selector}');\n    for (const element of elements) {\n      // Действия для каждого элемента\n    }`;
+        default:
+          return '';
+      }
+    }
+  },
+  {
+    type: 'url-match' as BlockType,
+    label: 'URL фильтр',
+    icon: <Link className="h-4 w-4" />,
+    color: 'bg-teal-500',
+    params: { 
+      matchType: 'contains', // contains, exact, regex, starts-with
+      pattern: '',
+      description: '' 
+    },
+    generateCode: (params: any) => {
+      let condition = '';
+      switch (params.matchType) {
+        case 'contains':
+          condition = `page.url().includes('${params.pattern}')`;
+          break;
+        case 'exact':
+          condition = `page.url() === '${params.pattern}'`;
+          break;
+        case 'starts-with':
+          condition = `page.url().startsWith('${params.pattern}')`;
+          break;
+        case 'regex':
+          condition = `/${params.pattern}/.test(page.url())`;
+          break;
+      }
+      return `// Выполнять только если: ${condition}\nif (${condition}) {\n      // Действия для этого URL\n    }`;
+    }
   }
 ];
 
@@ -243,6 +331,68 @@ export const VisualScriptBuilder: React.FC = () => {
     });
   }, [generatedCode, toast]);
 
+  // Сохранение напрямую в расширение
+  const handleSaveToExtension = useCallback(async () => {
+    if (!generatedCode) {
+      handleGenerateCode();
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      
+      // Формируем данные скрипта в формате API
+      const scriptData = {
+        name: projectName,
+        description: projectDescription || 'Создано в визуальном конструкторе',
+        code: generatedCode,
+        version: '1.0.0',
+        category_id: 1, // Можно добавить выбор категории
+        is_public: false,
+        metadata: {
+          visual_builder: true,
+          blocks_count: blocks.length,
+          created_with: 'visual-script-builder',
+          blocks: blocks.map(b => ({
+            type: b.type,
+            label: b.label
+          }))
+        }
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/scripts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(scriptData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка сохранения скрипта');
+      }
+
+      const result = await response.json();
+
+      toast({
+        title: 'Скрипт сохранён в расширение',
+        description: `"${projectName}" доступен в вашей библиотеке скриптов`,
+      });
+
+      // Опционально: перенаправить на страницу скриптов
+      // window.location.href = '/dashboard?tab=scripts';
+
+    } catch (error) {
+      console.error('Ошибка сохранения в расширение:', error);
+      toast({
+        title: 'Ошибка сохранения',
+        description: 'Не удалось сохранить скрипт в расширение',
+        variant: 'destructive'
+      });
+    }
+  }, [generatedCode, projectName, projectDescription, blocks, handleGenerateCode, toast]);
+
   return (
     <div className="space-y-6">
       {/* Заголовок и действия */}
@@ -266,15 +416,19 @@ export const VisualScriptBuilder: React.FC = () => {
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleSaveProject}>
                 <Save className="h-4 w-4 mr-2" />
-                Сохранить
+                Сохранить локально
               </Button>
               <Button variant="outline" size="sm" onClick={handleGenerateCode}>
                 <Code className="h-4 w-4 mr-2" />
                 Генерировать
               </Button>
-              <Button size="sm" onClick={handleExportCode}>
+              <Button size="sm" onClick={handleSaveToExtension} className="bg-gradient-to-r from-primary to-accent">
+                <Cloud className="h-4 w-4 mr-2" />
+                В расширение
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportCode}>
                 <Download className="h-4 w-4 mr-2" />
-                Экспорт
+                Экспорт .js
               </Button>
             </div>
           </div>
@@ -500,6 +654,123 @@ export const VisualScriptBuilder: React.FC = () => {
                         className="font-mono text-xs"
                       />
                     </div>
+                  )}
+
+                  {selectedBlock.type === 'condition' && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Тип условия</label>
+                        <select
+                          value={selectedBlock.params.conditionType || 'element-exists'}
+                          onChange={(e) => updateBlockParams(selectedBlock.id, { conditionType: e.target.value })}
+                          className="w-full p-2 border rounded-md bg-background"
+                        >
+                          <option value="element-exists">Элемент существует</option>
+                          <option value="element-visible">Элемент видим</option>
+                          <option value="text-contains">Текст содержит</option>
+                          <option value="url-contains">URL содержит</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          {selectedBlock.params.conditionType === 'url-contains' ? 'Часть URL' : 'CSS Селектор'}
+                        </label>
+                        <Input
+                          value={selectedBlock.params.selector || ''}
+                          onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
+                          placeholder={selectedBlock.params.conditionType === 'url-contains' ? '/products/' : '.success-message'}
+                        />
+                      </div>
+                      {selectedBlock.params.conditionType === 'text-contains' && (
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Искомый текст</label>
+                          <Input
+                            value={selectedBlock.params.value || ''}
+                            onChange={(e) => updateBlockParams(selectedBlock.id, { value: e.target.value })}
+                            placeholder="Успешно"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {selectedBlock.type === 'loop' && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Тип цикла</label>
+                        <select
+                          value={selectedBlock.params.loopType || 'count'}
+                          onChange={(e) => updateBlockParams(selectedBlock.id, { loopType: e.target.value })}
+                          className="w-full p-2 border rounded-md bg-background"
+                        >
+                          <option value="count">Повторить N раз</option>
+                          <option value="while-exists">Пока элемент существует</option>
+                          <option value="for-each">Для каждого элемента</option>
+                        </select>
+                      </div>
+                      {selectedBlock.params.loopType === 'count' && (
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Количество повторений</label>
+                          <Input
+                            type="number"
+                            value={selectedBlock.params.count || 5}
+                            onChange={(e) => updateBlockParams(selectedBlock.id, { count: parseInt(e.target.value) })}
+                            min="1"
+                          />
+                        </div>
+                      )}
+                      {(selectedBlock.params.loopType === 'while-exists' || selectedBlock.params.loopType === 'for-each') && (
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                          <Input
+                            value={selectedBlock.params.selector || ''}
+                            onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
+                            placeholder=".item, .product-card"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {selectedBlock.type === 'url-match' && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Тип совпадения</label>
+                        <select
+                          value={selectedBlock.params.matchType || 'contains'}
+                          onChange={(e) => updateBlockParams(selectedBlock.id, { matchType: e.target.value })}
+                          className="w-full p-2 border rounded-md bg-background"
+                        >
+                          <option value="contains">Содержит</option>
+                          <option value="exact">Точное совпадение</option>
+                          <option value="starts-with">Начинается с</option>
+                          <option value="regex">Регулярное выражение</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Шаблон URL</label>
+                        <Input
+                          value={selectedBlock.params.pattern || ''}
+                          onChange={(e) => updateBlockParams(selectedBlock.id, { pattern: e.target.value })}
+                          placeholder={
+                            selectedBlock.params.matchType === 'regex' 
+                              ? '^https://example\\.com/.*' 
+                              : selectedBlock.params.matchType === 'exact'
+                              ? 'https://example.com/page'
+                              : '/products/'
+                          }
+                        />
+                      </div>
+                      <div className="p-3 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Совет:</strong> URL фильтр определяет, на каких страницах будет выполняться скрипт.
+                          {selectedBlock.params.matchType === 'contains' && ' Скрипт запустится на всех URL, содержащих указанный текст.'}
+                          {selectedBlock.params.matchType === 'exact' && ' Скрипт запустится только на точно указанном URL.'}
+                          {selectedBlock.params.matchType === 'starts-with' && ' Скрипт запустится на всех URL, начинающихся с указанного текста.'}
+                          {selectedBlock.params.matchType === 'regex' && ' Используйте регулярное выражение для сложных паттернов.'}
+                        </p>
+                      </div>
+                    </>
                   )}
 
                   <div className="pt-4 border-t">
