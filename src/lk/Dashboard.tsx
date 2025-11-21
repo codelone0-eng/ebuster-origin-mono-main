@@ -1196,7 +1196,6 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
             onClose={() => setChangelogScript(null)}
           />
         )}
-      </div>
     </div>
   );
 };
