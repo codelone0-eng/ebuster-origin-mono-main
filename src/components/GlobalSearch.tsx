@@ -267,11 +267,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-      style={{ zIndex: 10000 }}
+      className="fixed inset-0 z-global-search bg-background/80 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4" style={{ zIndex: 10001 }}>
+      <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4">
         <div 
           className="bg-card border border-border/60 rounded-xl shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}

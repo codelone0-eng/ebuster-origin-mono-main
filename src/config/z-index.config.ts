@@ -20,6 +20,7 @@ export const Z_INDEX = {
   // Modal layers
   OVERLAY: 1000,        // Dialog overlay (dim background)
   MODAL: 1010,          // Dialog content
+  GLOBAL_SEARCH: 1020,  // Global search (above modals)
   
   // Special layers
   CURSOR: 2147483651,   // Custom cursor (highest priority)
@@ -38,6 +39,7 @@ export const Z_INDEX_CSS = `
   --z-tooltip: ${Z_INDEX.TOOLTIP};
   --z-overlay: ${Z_INDEX.OVERLAY};
   --z-modal: ${Z_INDEX.MODAL};
+  --z-global-search: ${Z_INDEX.GLOBAL_SEARCH};
   --z-cursor: ${Z_INDEX.CURSOR};
   --z-toast: ${Z_INDEX.TOAST};
 }
@@ -54,6 +56,7 @@ export const Z_INDEX_CLASSES = {
   tooltip: `z-[${Z_INDEX.TOOLTIP}]`,
   overlay: `z-[${Z_INDEX.OVERLAY}]`,
   modal: `z-[${Z_INDEX.MODAL}]`,
+  globalSearch: `z-[${Z_INDEX.GLOBAL_SEARCH}]`,
   cursor: `z-[${Z_INDEX.CURSOR}]`,
   toast: `z-[${Z_INDEX.TOAST}]`,
 } as const;
