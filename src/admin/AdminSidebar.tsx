@@ -93,23 +93,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
           );
         })}
       </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="bg-accent/30 rounded-lg p-3 space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Версия</span>
-            <span className="font-mono text-foreground">v1.0.0</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Статус</span>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-green-600 font-medium">Online</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

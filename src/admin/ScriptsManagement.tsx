@@ -39,6 +39,7 @@ interface Script {
   status: 'draft' | 'published' | 'archived' | 'banned';
   is_featured: boolean;
   is_premium: boolean;
+  allowed_roles?: string[]; // Роли, которым доступен скрипт
   downloads_count: number;
   rating: number;
   rating_count: number;
@@ -83,6 +84,7 @@ const ScriptsManagement: React.FC = () => {
     author_name: string;
     is_featured: boolean;
     is_premium: boolean;
+    allowed_roles: string[];
     file_type: string;
     status: 'draft' | 'published' | 'archived' | 'banned';
   }>({
@@ -94,14 +96,25 @@ const ScriptsManagement: React.FC = () => {
     author_name: 'Admin',
     is_featured: false,
     is_premium: false,
+    allowed_roles: ['user'], // По умолчанию доступно всем пользователям
     file_type: 'javascript',
     status: 'draft'
   });
+
+  // Список доступных ролей
+  const [availableRoles, setAvailableRoles] = useState<Array<{ id: string; name: string; display_name: string }>>([]);
 
   // Загрузка данных
   const loadData = async () => {
     try {
       setLoading(true);
+      
+      // Загружаем роли
+      const rolesResponse = await fetch(`${API_CONFIG.BASE_URL}/api/roles`);
+      const rolesData = await rolesResponse.json();
+      if (rolesData.success) {
+        setAvailableRoles(rolesData.data);
+      }
       
       // Загружаем скрипты
       const scriptsResponse = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`);
@@ -217,6 +230,7 @@ const ScriptsManagement: React.FC = () => {
       author_name: 'Admin',
       is_featured: false,
       is_premium: false,
+      allowed_roles: ['user'],
       file_type: 'javascript',
       status: 'draft' as 'draft' | 'published' | 'archived' | 'banned'
     };
@@ -232,10 +246,11 @@ const ScriptsManagement: React.FC = () => {
       description: script.description,
       code: script.code,
       category: script.category,
-      tags: script.tags,
+      tags: script.tags || [],
       author_name: script.author_name,
       is_featured: script.is_featured,
       is_premium: script.is_premium,
+      allowed_roles: script.allowed_roles || ['user'],
       file_type: script.file_type,
       status: script.status
     });
@@ -308,6 +323,7 @@ const ScriptsManagement: React.FC = () => {
                 onSubmit={handleCreateScript}
                 submitText="Создать скрипт"
                 onCancel={() => setIsCreateDialogOpen(false)}
+                availableRoles={availableRoles}
               />
             </div>
           </DialogContent>
@@ -569,6 +585,7 @@ const ScriptsManagement: React.FC = () => {
               onSubmit={handleUpdateScript}
               submitText="Сохранить изменения"
               onCancel={() => setIsEditDialogOpen(false)}
+              availableRoles={availableRoles}
             />
           </div>
         </DialogContent>
@@ -603,6 +620,7 @@ interface ScriptFormProps {
     author_name: string;
     is_featured: boolean;
     is_premium: boolean;
+    allowed_roles: string[];
     file_type: string;
     status: 'draft' | 'published' | 'archived' | 'banned';
   };
@@ -610,9 +628,10 @@ interface ScriptFormProps {
   onSubmit: () => void;
   submitText: string;
   onCancel: () => void;
+  availableRoles: Array<{ id: string; name: string; display_name: string }>;
 }
 
-const ScriptForm: React.FC<ScriptFormProps> = ({ formData, setFormData, onSubmit, submitText, onCancel }) => {
+const ScriptForm: React.FC<ScriptFormProps> = ({ formData, setFormData, onSubmit, submitText, onCancel, availableRoles }) => {
   const [tagInput, setTagInput] = useState('');
 
   // Валидация формы
@@ -763,6 +782,51 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ formData, setFormData, onSubmit
             Premium
           </label>
         </div>
+      </div>
+
+      {/* Выбор ролей для доступа */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">Доступ для ролей</label>
+        <p className="text-xs text-muted-foreground mb-3">
+          Выберите роли, которым будет доступен этот скрипт для скачивания
+        </p>
+        <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/20">
+          {availableRoles.map((role) => {
+            const isChecked = formData.allowed_roles.includes(role.name);
+            return (
+              <div key={role.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`role_${role.id}`}
+                  checked={isChecked}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setFormData({
+                        ...formData,
+                        allowed_roles: [...formData.allowed_roles, role.name]
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        allowed_roles: formData.allowed_roles.filter(r => r !== role.name)
+                      });
+                    }
+                  }}
+                />
+                <label
+                  htmlFor={`role_${role.id}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {role.display_name}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        {formData.allowed_roles.length === 0 && (
+          <p className="text-xs text-destructive mt-2">
+            ⚠️ Выберите хотя бы одну роль
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
