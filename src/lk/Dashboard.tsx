@@ -1153,8 +1153,9 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
               </div>
             )}
           </div>
-          </div>
-        </main>
+        </div>
+      </div>
+    </main>
 
         <Footer />
       </div>
