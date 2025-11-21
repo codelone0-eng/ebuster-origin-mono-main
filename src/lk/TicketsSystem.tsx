@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TicketView } from './TicketView';
 import { CreateTicketModal } from './CreateTicketModal';
+import { useAuth } from '@/contexts/CustomAuthContext';
 
 interface Ticket {
   id: string;
@@ -97,6 +98,8 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
     search: ''
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isAdmin = (user?.role ?? '').toLowerCase() === 'admin';
 
   // Синхронизируем фильтр с initialFilter при изменении вкладки
   useEffect(() => {
@@ -105,8 +108,10 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
 
   useEffect(() => {
     loadTickets();
-    loadStats();
-  }, [filters]);
+    if (isAdmin) {
+      loadStats();
+    }
+  }, [filters, isAdmin]);
 
   const formatTicketNumber = (value: string | number | undefined) => {
     if (!value) return '—';
@@ -162,6 +167,9 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   };
 
   const loadStats = async () => {
+    if (!isAdmin) {
+      return;
+    }
     try {
       const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/tickets/stats`, {
@@ -216,7 +224,9 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
         onClose={() => {
           setSelectedTicket(null);
           loadTickets();
-          loadStats();
+          if (isAdmin) {
+            loadStats();
+          }
         }} 
       />
     );
@@ -225,7 +235,7 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   return (
     <div className="space-y-6">
       {/* Статистика */}
-      {stats && (
+      {isAdmin && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">

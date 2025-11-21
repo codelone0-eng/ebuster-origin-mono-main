@@ -4,6 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import {
@@ -11,7 +19,6 @@ import {
   DollarSign,
   Copy,
   Check,
-  Gift,
   TrendingUp,
   Calendar,
   Award,
@@ -76,6 +83,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'referrals' | 'payouts'>('referrals');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const referralLink = `${window.location.origin}/register?ref=${referralCode?.code ?? ''}`;
 
@@ -203,20 +211,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
     }
   };
 
-  const shareLink = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Присоединяйся к Ebuster!',
-          text: `Используй мой реферальный код ${referralCode?.code} и получи скидку ${referralCode?.discount_value}%!`,
-          url: referralLink
-        });
-      } catch (error) {
-        console.error('Ошибка при шаринге:', error);
-      }
-    } else {
-      await copyToClipboard(referralLink, 'link');
-    }
+  const shareLink = () => {
+    setIsShareModalOpen(true);
   };
 
   if (loading) {
@@ -353,9 +349,9 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                   {referrals.map((referral) => (
                     <div
                       key={referral.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex items-start justify-between gap-4 p-4 border rounded-lg"
                     >
-                      <div className="flex-1">
+                      <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{maskEmail(referral.referred_user?.email)}</p>
                           {referral.referred_user?.full_name && (
@@ -364,7 +360,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
@@ -374,18 +370,10 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                               {referral.subscription.plan}
                             </Badge>
                           )}
+                          <Badge variant={getRewardStatusVariant(referral.reward_status)}>
+                            {getRewardStatusLabel(referral.reward_status)}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-green-600">
-                          {getRewardAmountLabel(referral.reward_value)}
-                        </div>
-                        <Badge
-                          variant={getRewardStatusVariant(referral.reward_status)}
-                          className="mt-1"
-                        >
-                          {getRewardStatusLabel(referral.reward_status)}
-                        </Badge>
                       </div>
                     </div>
                   ))}
@@ -485,6 +473,57 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Поделиться ссылкой</DialogTitle>
+            <DialogDescription>
+              Скопируйте код или отправьте ссылку друзьями — они получат скидку, а вы вознаграждение.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Реферальный код</p>
+              <div className="flex gap-2">
+                <Input value={referralCode?.code ?? '—'} readOnly />
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void copyToClipboard(referralCode?.code ?? '', 'code');
+                  }}
+                >
+                  Скопировать
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Реферальная ссылка</p>
+              <div className="flex gap-2">
+                <Input value={referralLink} readOnly />
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void copyToClipboard(referralLink, 'link');
+                  }}
+                >
+                  Скопировать
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Поделитесь ссылкой в соцсетях, мессенджерах или по email — каждое оформление подписки принесёт вам бонус.
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setIsShareModalOpen(false)}>Готово</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
