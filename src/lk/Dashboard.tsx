@@ -26,6 +26,7 @@ import { API_CONFIG } from '@/config/api';
 import ScriptsList from '@/components/ScriptsList';
 import { ApiKeysManagement } from '@/components/ApiKeysManagement';
 import { cn } from '@/lib/utils';
+import VisualScriptBuilder from './VisualScriptBuilder';
 import { 
   Library, 
   Download, 
@@ -63,7 +64,8 @@ import {
   LogOut,
   Crown,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Blocks
 } from 'lucide-react';
 
 // Имя/почта берутся из авторизации; мок оставлен как дефолт
@@ -432,6 +434,11 @@ const DashboardContent = () => {
           value: 'installed',
           label: language === 'ru' ? 'Установленные скрипты' : 'Installed Scripts',
           icon: Download
+        },
+        {
+          value: 'visual-builder',
+          label: language === 'ru' ? 'Визуальный конструктор' : 'Visual Builder',
+          icon: Blocks
         }
       ]
     },
@@ -736,6 +743,12 @@ const DashboardContent = () => {
             {activeTab === 'scripts' && (
               <div className="space-y-6">
                 <ScriptsList />
+              </div>
+            )}
+
+            {activeTab === 'visual-builder' && (
+              <div className="space-y-6">
+                <VisualScriptBuilder />
               </div>
             )}
 
