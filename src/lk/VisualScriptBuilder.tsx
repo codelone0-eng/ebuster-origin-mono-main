@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { useDetailedPermissions } from '@/hooks/useDetailedPermissions';
 import {
   Play,
   Save,
@@ -27,7 +28,8 @@ import {
   GitBranch,
   Repeat,
   Link,
-  Cloud
+  Cloud,
+  Lock
 } from 'lucide-react';
 
 // Типы блоков
@@ -225,11 +227,49 @@ export default ${projectName.replace(/[^a-zA-Z0-9]/g, '_')};`;
 
 export const VisualScriptBuilder: React.FC = () => {
   const { toast } = useToast();
+  const permissions = useDetailedPermissions();
   const [projectName, setProjectName] = useState('Мой скрипт');
   const [projectDescription, setProjectDescription] = useState('');
   const [blocks, setBlocks] = useState<ScriptBlock[]>([]);
   const [selectedBlock, setSelectedBlock] = useState<ScriptBlock | null>(null);
   const [generatedCode, setGeneratedCode] = useState('');
+
+  // Проверка доступа
+  if (!permissions.canAccessVisualBuilder()) {
+    return (
+      <Card className="max-w-2xl mx-auto mt-12">
+        <CardHeader>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Визуальный конструктор недоступен</CardTitle>
+              <CardDescription>Требуется подписка Pro или выше</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
+          </p>
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <h4 className="font-semibold">Что вы получите:</h4>
+            <ul className="space-y-1 text-sm text-muted-foreground">
+              <li>✓ Создание скриптов без кода</li>
+              <li>✓ Drag & Drop интерфейс</li>
+              <li>✓ Автоматическая генерация кода</li>
+              <li>✓ Сохранение в расширение</li>
+              <li>✓ Экспорт готового кода</li>
+            </ul>
+          </div>
+          <Button className="w-full" onClick={() => window.location.href = '/pricing'}>
+            Посмотреть тарифы
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Добавление нового блока
   const addBlock = useCallback((type: BlockType) => {
@@ -422,9 +462,15 @@ export const VisualScriptBuilder: React.FC = () => {
                 <Code className="h-4 w-4 mr-2" />
                 Генерировать
               </Button>
-              <Button size="sm" onClick={handleSaveToExtension} className="bg-gradient-to-r from-primary to-accent">
+              <Button 
+                size="sm" 
+                onClick={handleSaveToExtension} 
+                className="bg-gradient-to-r from-primary to-accent"
+                disabled={!permissions.canSaveToExtension()}
+              >
                 <Cloud className="h-4 w-4 mr-2" />
                 В расширение
+                {!permissions.canSaveToExtension() && <Lock className="h-3 w-3 ml-2" />}
               </Button>
               <Button variant="outline" size="sm" onClick={handleExportCode}>
                 <Download className="h-4 w-4 mr-2" />
@@ -468,19 +514,31 @@ export const VisualScriptBuilder: React.FC = () => {
               <div className="mb-6">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Ожидание</h3>
                 <div className="space-y-2">
-                  {BLOCK_TYPES.filter(b => ['wait', 'condition', 'url-match'].includes(b.type)).map((blockType) => (
-                    <Button
-                      key={blockType.type}
-                      variant="outline"
-                      className="w-full justify-start hover:bg-accent/50 transition-all"
-                      onClick={() => addBlock(blockType.type)}
-                    >
-                      <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
-                        {blockType.icon}
-                      </div>
-                      <span className="text-sm truncate">{blockType.label}</span>
-                    </Button>
-                  ))}
+                  {BLOCK_TYPES.filter(b => ['wait', 'condition', 'url-match'].includes(b.type)).map((blockType) => {
+                    const isAdvanced = ['condition', 'url-match'].includes(blockType.type);
+                    const hasAccess = !isAdvanced || permissions.canUseAdvancedBlocks();
+                    
+                    return (
+                      <Button
+                        key={blockType.type}
+                        variant="outline"
+                        className="w-full justify-start hover:bg-accent/50 transition-all relative"
+                        onClick={() => hasAccess && addBlock(blockType.type)}
+                        disabled={!hasAccess}
+                      >
+                        <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
+                          {blockType.icon}
+                        </div>
+                        <span className="text-sm truncate">{blockType.label}</span>
+                        {!hasAccess && (
+                          <Badge variant="secondary" className="ml-auto">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -488,19 +546,31 @@ export const VisualScriptBuilder: React.FC = () => {
               <div className="mb-6">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Данные</h3>
                 <div className="space-y-2">
-                  {BLOCK_TYPES.filter(b => ['extract', 'loop', 'code'].includes(b.type)).map((blockType) => (
-                    <Button
-                      key={blockType.type}
-                      variant="outline"
-                      className="w-full justify-start hover:bg-accent/50 transition-all"
-                      onClick={() => addBlock(blockType.type)}
-                    >
-                      <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
-                        {blockType.icon}
-                      </div>
-                      <span className="text-sm truncate">{blockType.label}</span>
-                    </Button>
-                  ))}
+                  {BLOCK_TYPES.filter(b => ['extract', 'loop', 'code'].includes(b.type)).map((blockType) => {
+                    const isAdvanced = ['loop', 'code'].includes(blockType.type);
+                    const hasAccess = !isAdvanced || permissions.canUseAdvancedBlocks();
+                    
+                    return (
+                      <Button
+                        key={blockType.type}
+                        variant="outline"
+                        className="w-full justify-start hover:bg-accent/50 transition-all"
+                        onClick={() => hasAccess && addBlock(blockType.type)}
+                        disabled={!hasAccess}
+                      >
+                        <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
+                          {blockType.icon}
+                        </div>
+                        <span className="text-sm truncate">{blockType.label}</span>
+                        {!hasAccess && (
+                          <Badge variant="secondary" className="ml-auto">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
 

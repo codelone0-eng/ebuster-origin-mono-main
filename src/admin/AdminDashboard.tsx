@@ -25,7 +25,7 @@ import { AdminSidebar } from './AdminSidebar';
 import CategoriesManagement from './CategoriesManagement';
 import MonitoringDashboard from './MonitoringDashboard';
 import TicketsManagement from './TicketsManagement';
-import { RolesManagement } from './RolesManagement';
+import { RolesManagementV2 as RolesManagement } from './RolesManagementV2';
 import { 
   Users, 
   Settings, 
