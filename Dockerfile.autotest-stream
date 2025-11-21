@@ -6,8 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем системные пакеты и зависимости
-RUN apk add --no-cache docker-cli docker-cli-compose bash \
-  && npm install express cors ws
+# Обновляем индекс пакетов и используем правильные имена для Alpine
+RUN apk update && \
+    apk add --no-cache bash && \
+    npm install express cors ws
 
 # Копируем сервер для live-стрима
 COPY tests/stream-server ./stream-server
