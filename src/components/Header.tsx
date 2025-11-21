@@ -149,7 +149,7 @@ export const Header = () => {
   }, [location, navigate]);
 
   return (
-    <header className="relative z-header bg-gradient-to-r from-card/90 via-card/80 to-card/90 backdrop-blur-xl border-b border-border/30 px-6 py-4 rounded-t-3xl overflow-hidden group">
+    <header className="relative z-header bg-gradient-to-r from-card/90 via-card/80 to-card/90 backdrop-blur-xl border-b border-border/30 px-6 py-4 rounded-t-3xl group">
       {/* Animated background effects */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
