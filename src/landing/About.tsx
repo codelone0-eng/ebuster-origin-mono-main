@@ -6,10 +6,11 @@ import { Users, Target, Award, Heart } from 'lucide-react';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+      <main className="flex-1">
+        <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
@@ -90,7 +91,8 @@ const About = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </main>
       
       <Footer />
     </div>

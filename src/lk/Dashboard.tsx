@@ -610,10 +610,11 @@ const DashboardContent = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <ParticleBackground />
-      <div className="relative z-content">
+      <div className="relative z-content min-h-screen flex flex-col">
         <Header />
 
-        <div className="container mx-auto max-w-[1400px] px-6 lg:px-8 py-8">
+        <main className="flex-1">
+          <div className="container mx-auto max-w-[1400px] px-6 lg:px-8 py-8">
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -1139,7 +1140,8 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </main>
 
         <Footer />
       </div>

@@ -14,6 +14,14 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+interface ContactMethod {
+  icon: string;
+  title: string;
+  description: string;
+  contact: string;
+  responseTime: string;
+}
+
 const Contacts = () => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
@@ -44,12 +52,12 @@ const Contacts = () => {
     }));
   };
 
-  const contactMethods = t('contacts.contactMethods');
+  const contactMethods = t('contacts.contactMethods') as ContactMethod[];
 
   const faqItems = t('contacts.faq.items');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <SEO
         title="Контакты EBUSTER"
         description="Свяжитесь с командой EBUSTER: email поддержка, Discord сообщество и система тикетов."
@@ -57,7 +65,8 @@ const Contacts = () => {
       />
       <Header />
       
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+      <main className="flex-1">
+        <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border content-border-50 mb-8">
@@ -110,7 +119,8 @@ const Contacts = () => {
             );
           })}
         </div>
-      </div>
+        </div>
+      </main>
       
       <Footer />
     </div>

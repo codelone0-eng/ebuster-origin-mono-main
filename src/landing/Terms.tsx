@@ -6,10 +6,11 @@ import { FileText, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 const Terms = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <div className="container mx-auto max-w-4xl px-4 py-16">
+      <main className="flex-1">
+        <div className="container mx-auto max-w-4xl px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
             Условия <span className="gradient-text">использования</span>
@@ -119,7 +120,8 @@ const Terms = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </main>
       
       <Footer />
     </div>
