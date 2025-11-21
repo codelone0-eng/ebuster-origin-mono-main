@@ -27,6 +27,110 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { API_CONFIG } from '@/config/api';
 import { ScriptVersionManager } from './ScriptVersionManager';
 
+const sanitizeRoleNames = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    value.forEach((entry) => {
+      const str = typeof entry === 'string' ? entry : typeof entry === 'number' ? String(entry) : '';
+      const cleaned = str.trim();
+      if (!cleaned) return;
+      const key = cleaned.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      result.push(cleaned);
+    });
+    return result;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return sanitizeRoleNames(parsed);
+      }
+    } catch (_) {
+      // Игнорируем ошибки парсинга, пойдём дальше и разделим строку вручную
+    }
+
+    return sanitizeRoleNames(trimmed.split(/[,;\s]+/g));
+  }
+
+  return [];
+};
+
+const normalizeAllowedRolesValue = (value: unknown, fallback: string[] = ['user']): string[] => {
+  const normalized = sanitizeRoleNames(value);
+  if (normalized.length > 0) {
+    return normalized;
+  }
+  return sanitizeRoleNames(fallback);
+};
+
+const dedupeRolesByName = <T extends { id?: string; name?: string; display_name?: string }>(roles: T[]): T[] => {
+  const seen = new Set<string>();
+  return roles.filter((role) => {
+    const key = (role.name || role.display_name || '').trim().toLowerCase();
+    if (!key) {
+      return false;
+    }
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
+
+const roleInList = (roles: string[], roleName: string): boolean => {
+  const target = roleName.trim().toLowerCase();
+  return roles.some((role) => role.trim().toLowerCase() === target);
+};
+
+const addRoleToList = (roles: string[], roleName: string): string[] => {
+  return sanitizeRoleNames([...roles, roleName]);
+};
+
+const removeRoleFromList = (roles: string[], roleName: string): string[] => {
+  const target = roleName.trim().toLowerCase();
+  return sanitizeRoleNames(roles.filter((role) => role.trim().toLowerCase() !== target));
+};
+
+const DEFAULT_ALLOWED_ROLES = ['user'];
+
+type RoleOption = {
+  id: string;
+  name: string;
+  display_name: string;
+};
+
+const normalizeRolesResponse = (roles: unknown): RoleOption[] => {
+  if (!Array.isArray(roles)) return [];
+
+  const deduped = dedupeRolesByName(roles);
+
+  return deduped.map((role, index) => {
+    const name = typeof role.name === 'string' && role.name.trim().length > 0
+      ? role.name.trim()
+      : typeof role.display_name === 'string' && role.display_name.trim().length > 0
+        ? role.display_name.trim().toLowerCase().replace(/\s+/g, '_')
+        : `role_${index + 1}`;
+
+    const display_name = typeof role.display_name === 'string' && role.display_name.trim().length > 0
+      ? role.display_name.trim()
+      : name;
+
+    return {
+      id: typeof role.id === 'string' && role.id.trim().length > 0 ? role.id : `role-${index}-${name}`,
+      name,
+      display_name,
+    } satisfies RoleOption;
+  });
+};
+
 interface Script {
   id: string;
   title: string;
@@ -39,7 +143,7 @@ interface Script {
   status: 'draft' | 'published' | 'archived' | 'banned';
   is_featured: boolean;
   is_premium: boolean;
-  allowed_roles?: string[]; // Роли, которым доступен скрипт
+  allowed_roles: string[]; // Роли, которым доступен скрипт
   downloads_count: number;
   rating: number;
   rating_count: number;
@@ -96,13 +200,13 @@ const ScriptsManagement: React.FC = () => {
     author_name: 'Admin',
     is_featured: false,
     is_premium: false,
-    allowed_roles: ['user'], // По умолчанию доступно всем пользователям
+    allowed_roles: sanitizeRoleNames(DEFAULT_ALLOWED_ROLES), // По умолчанию доступно всем пользователям
     file_type: 'javascript',
     status: 'draft'
   });
 
   // Список доступных ролей
-  const [availableRoles, setAvailableRoles] = useState<Array<{ id: string; name: string; display_name: string }>>([]);
+  const [availableRoles, setAvailableRoles] = useState<RoleOption[]>([]);
 
   // Загрузка данных
   const loadData = async () => {
@@ -113,7 +217,8 @@ const ScriptsManagement: React.FC = () => {
       const rolesResponse = await fetch(`${API_CONFIG.BASE_URL}/api/roles`);
       const rolesData = await rolesResponse.json();
       if (rolesData.success) {
-        setAvailableRoles(rolesData.data);
+        const normalizedRoles = normalizeRolesResponse(rolesData.data);
+        setAvailableRoles(normalizedRoles);
       }
       
       // Загружаем скрипты
@@ -121,7 +226,11 @@ const ScriptsManagement: React.FC = () => {
       const scriptsData = await scriptsResponse.json();
       
       if (scriptsData.success) {
-        setScripts(scriptsData.data.scripts || []);
+        const normalizedScripts: Script[] = (scriptsData.data.scripts || []).map((script: any) => ({
+          ...script,
+          allowed_roles: normalizeAllowedRolesValue(script?.allowed_roles, DEFAULT_ALLOWED_ROLES)
+        }));
+        setScripts(normalizedScripts);
       }
 
       // Загружаем статистику
@@ -147,12 +256,17 @@ const ScriptsManagement: React.FC = () => {
     try {
       console.log('Creating script with data:', formData);
       
+      const payload = {
+        ...formData,
+        allowed_roles: normalizeAllowedRolesValue(formData.allowed_roles, DEFAULT_ALLOWED_ROLES)
+      };
+
       const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -175,12 +289,17 @@ const ScriptsManagement: React.FC = () => {
     if (!selectedScript) return;
 
     try {
+      const payload = {
+        ...formData,
+        allowed_roles: normalizeAllowedRolesValue(formData.allowed_roles, DEFAULT_ALLOWED_ROLES)
+      };
+
       const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin/${selectedScript.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -230,7 +349,7 @@ const ScriptsManagement: React.FC = () => {
       author_name: 'Admin',
       is_featured: false,
       is_premium: false,
-      allowed_roles: ['user'],
+      allowed_roles: sanitizeRoleNames(DEFAULT_ALLOWED_ROLES),
       file_type: 'javascript',
       status: 'draft' as 'draft' | 'published' | 'archived' | 'banned'
     };
@@ -250,7 +369,7 @@ const ScriptsManagement: React.FC = () => {
       author_name: script.author_name,
       is_featured: script.is_featured,
       is_premium: script.is_premium,
-      allowed_roles: script.allowed_roles || ['user'],
+      allowed_roles: normalizeAllowedRolesValue(script.allowed_roles, DEFAULT_ALLOWED_ROLES),
       file_type: script.file_type,
       status: script.status
     });
