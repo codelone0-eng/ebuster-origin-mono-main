@@ -156,13 +156,13 @@ const searchData: SearchResult[] = [
 ];
 
 const categoryConfig = {
-  settings: { label: 'Настройки', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  profile: { label: 'Профиль', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
-  scripts: { label: 'Скрипты', color: 'bg-green-500/10 text-green-600 border-green-500/20' },
-  support: { label: 'Поддержка', color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
-  docs: { label: 'Документация', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' },
-  admin: { label: 'Админ', color: 'bg-red-500/10 text-red-600 border-red-500/20' }
-};
+  settings: { label: 'Настройки', color: 'bg-primary/10 text-primary border border-primary/20' },
+  profile: { label: 'Профиль', color: 'bg-primary/10 text-primary border border-primary/20' },
+  scripts: { label: 'Скрипты', color: 'bg-primary/10 text-primary border border-primary/20' },
+  support: { label: 'Поддержка', color: 'bg-primary/10 text-primary border border-primary/20' },
+  docs: { label: 'Документация', color: 'bg-primary/10 text-primary border border-primary/20' },
+  admin: { label: 'Админ', color: 'bg-primary/10 text-primary border border-primary/20' }
+} as const;
 
 // Простая fuzzy search функция
 const fuzzyMatch = (str: string, pattern: string): number => {

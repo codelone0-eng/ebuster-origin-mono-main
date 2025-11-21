@@ -237,10 +237,7 @@ export const LoginHistory: React.FC = () => {
                 <div
                   key={record.id}
                   className={cn(
-                    "flex items-start gap-4 p-4 rounded-lg border",
-                    record.success 
-                      ? "bg-card border-border/50" 
-                      : "bg-destructive/5 border-destructive/20"
+                    "flex items-start gap-4 p-4 rounded-lg border bg-card/70 border-border/50"
                   )}
                 >
                   <div className="mt-1">
@@ -252,15 +249,9 @@ export const LoginHistory: React.FC = () => {
                       <span className="font-medium text-sm">
                         {browser} на {os}{device ? ` • ${device}` : ''}
                       </span>
-                      {record.success ? (
-                        <Badge variant="outline" className="text-xs">
-                          Успешно
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="text-xs">
-                          Неудачно
-                        </Badge>
-                      )}
+                      <Badge variant="outline" className="text-xs">
+                        {record.success ? 'Успешно' : 'Неудачно'}
+                      </Badge>
                     </div>
                     
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
