@@ -8,10 +8,20 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 let supabase: ReturnType<typeof createClient> | null = null;
 
 if (supabaseUrl && supabaseServiceKey) {
-  supabase = createClient(supabaseUrl, supabaseServiceKey);
+  supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
   console.log('✅ Supabase logging middleware initialized');
+  console.log('🔑 Using SUPABASE_URL:', supabaseUrl);
+  console.log('🔑 SUPABASE_SERVICE_KEY length:', supabaseServiceKey.length);
+  console.log('🔑 Service key starts with:', supabaseServiceKey.substring(0, 20) + '...');
 } else {
-  console.warn('⚠️ Supabase logging disabled: missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
+  console.warn('⚠️ Supabase logging disabled: missing credentials');
+  console.warn('   SUPABASE_URL:', supabaseUrl ? '✅ set' : '❌ missing');
+  console.warn('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ set' : '❌ missing');
 }
 
 export const logRequestToClickHouse = (req: Request, res: Response, next: NextFunction) => {

@@ -19,14 +19,9 @@ CREATE INDEX IF NOT EXISTS idx_access_logs_user_id ON access_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_access_logs_status ON access_logs(status_code);
 CREATE INDEX IF NOT EXISTS idx_access_logs_path ON access_logs(path);
 
--- RLS: только админы могут читать логи
-ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
-
--- Политика: только сервис-роль может писать и читать
-CREATE POLICY "Service role can manage access_logs" 
-  ON access_logs 
-  FOR ALL 
-  USING (auth.role() = 'service_role');
+-- Отключаем RLS для системной таблицы логирования
+-- Service key имеет полные права без RLS
+ALTER TABLE access_logs DISABLE ROW LEVEL SECURITY;
 
 -- Автоматическая очистка старых логов (старше 30 дней)
 -- Можно настроить через pg_cron или вручную запускать

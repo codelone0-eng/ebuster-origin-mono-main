@@ -26,44 +26,6 @@ if ! docker network ls | grep -q ebuster-network; then
   docker network create ebuster-network || true
 fi
 
-# Запустить / обновить ClickHouse (отдельный compose-файл)
-# ПОЛНЫЙ ПЕРЕСОЗДАНИЕ для гарантии правильной схемы
-log "🗄  ПЕРЕСОЗДАНИЕ ClickHouse контейнера..."
-cd clickhouse
-docker compose down -v  # -v удаляет volumes (все данные)
-docker compose up -d
-cd ..
-
-# Ждем пока ClickHouse стартует и проверяем доступность
-log "⏳ Ожидаю запуска ClickHouse..."
-for i in {1..60}; do
-  if docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --query "SELECT 1" >/dev/null 2>&1; then
-    log "✅ ClickHouse доступен!"
-    break
-  fi
-  if [ $i -eq 60 ]; then
-    log "⚠️  ClickHouse не отвечает после 60 попыток, продолжаю..."
-  else
-    log "   Попытка $i/60..."
-    sleep 2
-  fi
-done
-
-# Применить схему ClickHouse (schema.sql содержит DROP TABLE IF EXISTS для access_logs)
-log "📋 Применяю схему ClickHouse..."
-docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || log "⚠️  Ошибка применения схемы (проверьте логи)"
-
-# Проверяем, что контейнер в правильной сети
-log "🌐 Проверяю сеть ClickHouse контейнера..."
-if docker inspect ebuster-clickhouse | grep -q "ebuster-network"; then
-  log "✅ ClickHouse контейнер в сети ebuster-network"
-else
-  log "⚠️  ClickHouse контейнер не в сети ebuster-network, перезапускаю..."
-  docker compose -f clickhouse/docker-compose.yml down
-  docker compose -f clickhouse/docker-compose.yml up -d
-  sleep 5
-fi
-
 # Сохранить текущий коммит для отката
 CURRENT_COMMIT=$(git rev-parse HEAD)
 log "📌 Текущий коммит: $CURRENT_COMMIT"
@@ -117,10 +79,6 @@ sleep 10
 # Проверить статус
 log "✅ Проверка статуса контейнеров..."
 docker compose ps || docker-compose ps
-
-# Проверка сети (отладка)
-log "🌐 Проверка подключенных контейнеров к сети ebuster-network..."
-docker network inspect ebuster-network
 
 # Проверить API
 log "🔍 Проверка API health..."
