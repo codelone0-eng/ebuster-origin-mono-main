@@ -19,9 +19,18 @@ fi
 
 cd /srv/ebuster
 
+# Создать сеть если её нет
+log "🌐 Проверяю сеть ebuster-network..."
+if ! docker network ls | grep -q ebuster-network; then
+  log "📡 Создаю сеть ebuster-network..."
+  docker network create ebuster-network || true
+fi
+
 # Запустить / обновить ClickHouse (отдельный compose-файл)
 log "🗄  Обновление ClickHouse..."
-docker compose -f clickhouse/docker-compose.yml up -d || docker-compose -f clickhouse/docker-compose.yml up -d
+cd clickhouse
+docker compose up -d
+cd ..
 
 # Сохранить текущий коммит для отката
 CURRENT_COMMIT=$(git rev-parse HEAD)

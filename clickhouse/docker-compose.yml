@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:24.3
@@ -9,8 +7,8 @@ services:
       - ../.env
     environment:
       CLICKHOUSE_DB: ebuster
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-ebuster}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-Q9p!Z7mR3xV2sK8dF5gL1tN}
     volumes:
       - ./data:/var/lib/clickhouse
     ports:
