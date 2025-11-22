@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { ParticleBackground } from '@/components/ParticleBackground';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +86,9 @@ import {
   Chrome,
   Save,
   Copy,
-  Code
+  Code,
+  ExternalLink,
+  Sliders
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -98,6 +97,7 @@ const AdminDashboard = () => {
   
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [timeRange, setTimeRange] = useState('1H');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
@@ -553,237 +553,270 @@ const AdminDashboard = () => {
     return password;
   };
 
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+  };
+
+  const getCurrentTimestamp = () => {
+    return formatDate(new Date());
+  };
+
   return (
-    <div className="min-h-screen bg-background relative">
-      <ParticleBackground />
-      
-      <div className="relative z-content min-h-screen flex">
+    <div className="min-h-screen bg-[#1a1a1a] relative">
+      <div className="min-h-screen flex">
         {/* Sidebar */}
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* Main content */}
-        <main className="flex-1 ml-64 flex flex-col">
-          <div className="container mx-auto max-w-7xl px-6 lg:px-8 py-12 flex-1">
-          {/* Заголовок */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Админ панель
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  Управление системой и мониторинг
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className="px-4 py-2 text-sm">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Администратор
-                </Badge>
-                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Обновить
-                </Button>
+        <main className="flex-1 ml-64 flex flex-col bg-[#1a1a1a]">
+          {/* Top Header Bar */}
+          <div className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1f1f1f]">
+            <div className="text-white text-sm font-medium">Ebuster Production</div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTimeRange('1H')}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  timeRange === '1H' 
+                    ? 'bg-[#3d3d3d] text-white' 
+                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                }`}
+              >
+                1H
+              </button>
+              <button
+                onClick={() => setTimeRange('24H')}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  timeRange === '24H' 
+                    ? 'bg-[#3d3d3d] text-white' 
+                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                }`}
+              >
+                24H
+              </button>
+              <button
+                onClick={() => setTimeRange('7D')}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  timeRange === '7D' 
+                    ? 'bg-[#3d3d3d] text-white' 
+                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                }`}
+              >
+                7D
+              </button>
+              <button
+                onClick={() => setTimeRange('14D')}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  timeRange === '14D' 
+                    ? 'bg-[#3d3d3d] text-white' 
+                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                }`}
+              >
+                14D
+              </button>
+              <button
+                onClick={() => setTimeRange('30D')}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  timeRange === '30D' 
+                    ? 'bg-[#3d3d3d] text-white' 
+                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                }`}
+              >
+                30D
+              </button>
+              <button className="px-2 py-1.5 text-[#808080] hover:text-white">
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#404040] flex items-center justify-center cursor-pointer hover:bg-[#4d4d4d]">
+                <MoreHorizontal className="h-4 w-4 text-[#d9d9d9]" />
               </div>
             </div>
           </div>
 
-          {/* Контент табов */}
-          <div className="space-y-6">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              {/* Контент табов */}
 
             {/* Обзор */}
             {activeTab === 'overview' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Статистика по браузерам */}
-                <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="h-5 w-5" />
-                      Браузеры пользователей
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Chrome className="h-4 w-4 text-primary" />
-                          <span className="text-sm">Chrome</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={65} className="w-20 h-2" />
-                          <span className="text-sm font-medium">65%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-primary" />
-                          <span className="text-sm">Firefox</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={20} className="w-20 h-2" />
-                          <span className="text-sm font-medium">20%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-primary" />
-                          <span className="text-sm">Safari</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={10} className="w-20 h-2" />
-                          <span className="text-sm font-medium">10%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-primary" />
-                          <span className="text-sm">Edge</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={5} className="w-20 h-2" />
-                          <span className="text-sm font-medium">5%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                              {/* Статистика по тикетам */}
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    Статистика тикетов
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {ticketStats ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                      <div>
-                        <p className="text-2xl font-bold">{ticketStats.new}</p>
-                        <p className="text-xs text-muted-foreground">Новые</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{ticketStats.open}</p>
-                        <p className="text-xs text-muted-foreground">Открытые</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{ticketStats.resolved}</p>
-                        <p className="text-xs text-muted-foreground">Решенные</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{ticketStats.total}</p>
-                        <p className="text-xs text-muted-foreground">Всего</p>
-                      </div>
-                    </div>
-                  ) : <p>Загрузка...</p>}
-                </CardContent>
-              </Card>
-
-              {/* Последние тикеты */}
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Последние тикеты
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentTickets && recentTickets.map((ticket) => (
-                      <div key={ticket.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                        <div>
-                          <p className="font-medium">{ticket.subject}</p>
-                          <p className="text-sm text-muted-foreground">{ticket.user_email}</p>
-                        </div>
-                        <Badge className={`${getStatusColor(ticket.status)}`}>{ticket.status}</Badge>
-                      </div>
-                    ))}
+              {/* Activity Widget */}
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <LayoutDashboard className="h-5 w-5 text-[#d9d9d9]" />
+                    <h2 className="text-lg font-semibold text-white">Activity</h2>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Активность по времени */}
-                <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Активность по времени
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">00:00 - 06:00</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={15} className="w-20 h-2" />
-                          <span className="text-sm font-medium">15%</span>
-                        </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Requests */}
+                  <div>
+                    <div className="text-xs font-medium text-[#808080] mb-2">REQUESTS</div>
+                    <div className="text-3xl font-bold text-white mb-2">0</div>
+                    <div className="text-xs text-[#808080]">{getCurrentTimestamp()}</div>
+                  </div>
+                  
+                  {/* HTTP Status Codes */}
+                  <div>
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-xs text-[#808080]">1/2/3XX</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">06:00 - 12:00</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={35} className="w-20 h-2" />
-                          <span className="text-sm font-medium">35%</span>
-                        </div>
+                      <div className="text-sm font-medium text-white">0</div>
+                    </div>
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <span className="text-xs text-[#808080]">4XX</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">12:00 - 18:00</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={45} className="w-20 h-2" />
-                          <span className="text-sm font-medium">45%</span>
-                        </div>
+                      <div className="text-sm font-medium text-white">0</div>
+                    </div>
+                    <div className="flex items-center gap-4 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span className="text-xs text-[#808080]">5XX</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">18:00 - 24:00</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={25} className="w-20 h-2" />
-                          <span className="text-sm font-medium">25%</span>
-                        </div>
+                      <div className="text-sm font-medium text-white">0</div>
+                    </div>
+                    <div className="text-xs text-[#808080] mt-2">{getCurrentTimestamp()}</div>
+                  </div>
+                  
+                  {/* Duration */}
+                  <div>
+                    <div className="text-xs font-medium text-[#808080] mb-2">DURATION</div>
+                    <div className="text-3xl font-bold text-white mb-2">-</div>
+                    <div className="text-xs text-[#808080]">{getCurrentTimestamp()}</div>
+                  </div>
+                  
+                  {/* Requests Right */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-medium text-white">Requests</span>
+                      <ExternalLink className="h-4 w-4 text-[#808080]" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-xs text-[#808080]">AVG</span>
+                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <span className="text-xs text-[#808080]">P95</span>
+                        <span className="text-sm font-medium text-white ml-auto">-</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="text-xs text-[#808080] mt-3">{getCurrentTimestamp()}</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Последние активности */}
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Последние активности
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {systemLogs && systemLogs.slice(0, 5).map((log) => (
-                      <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                        <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                          {log.level}
-                        </Badge>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground">{log.message}</p>
-                          <div className="flex items-center gap-4 mt-1">
-                            <span className="text-xs text-muted-foreground">{log.timestamp}</span>
-                            <span className="text-xs text-muted-foreground">IP: {log.ip}</span>
-                            {log.user !== 'System' && (
-                              <span className="text-xs text-muted-foreground">Пользователь: {log.user}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+              {/* Application Widget */}
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-[#d9d9d9]" />
+                    <h2 className="text-lg font-semibold text-white">Application</h2>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Exceptions */}
+                  <div>
+                    <div className="text-xs font-medium text-[#808080] mb-4">EXCEPTIONS</div>
+                    <div className="text-sm font-semibold text-white mb-4">
+                      No exceptions reported in the last hour.
+                    </div>
+                    <div className="flex justify-center mb-4">
+                      <div className="w-24 h-24 rounded-full border-2 border-dashed border-green-500 flex items-center justify-center">
+                        <CheckCircle className="h-12 w-12 text-green-500" />
+                      </div>
+                    </div>
+                    <div className="text-sm text-green-500 font-medium text-center">✔ NO ACTIONS</div>
+                  </div>
+                  
+                  {/* Setup Thresholds */}
+                  <div className="flex flex-col items-center justify-center">
+                    <Sliders className="h-8 w-8 text-[#808080] mb-3" />
+                    <div className="text-sm font-semibold text-white mb-2">Setup thresholds</div>
+                    <div className="text-xs text-[#808080] text-center mb-4">
+                      Configure your performance thresholds to start monitoring.
+                    </div>
+                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add Threshold
+                    </button>
+                  </div>
+                  
+                  {/* Jobs */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-medium text-white">Jobs</span>
+                      <ExternalLink className="h-4 w-4 text-[#808080]" />
+                    </div>
+                    <div className="text-xs font-medium text-[#808080] mb-2">JOBS</div>
+                    <div className="text-3xl font-bold text-white mb-4">0</div>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span className="text-xs text-[#808080]">FAILED</span>
+                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <span className="text-xs text-[#808080]">PROCESSED</span>
+                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-xs text-[#808080]">RELEASED</span>
+                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                      </div>
+                    </div>
+                    <div className="text-xs font-medium text-[#808080] mb-2">JOB DURATION</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-xs text-[#808080]">AVG</span>
+                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <span className="text-xs text-[#808080]">P95</span>
+                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Users Widget */}
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-[#d9d9d9]" />
+                    <h2 className="text-lg font-semibold text-white">Users</h2>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-[#808080]" />
+                </div>
+                {/* Users content will be added here */}
+              </div>
             </div>
             )}
 
             {/* Пользователи */}
             {activeTab === 'users' && (
             <div className="space-y-6">
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -994,18 +1027,7 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Кнопка назад */}
-          <div className="text-center mt-12">
-            <Button asChild variant="outline">
-              <a href="https://lk.ebuster.ru/dashboard">
-                Вернуться в личный кабинет
-              </a>
-            </Button>
-          </div>
-          </div>
-
-          <div className="mt-12 border-t border-border/50">
-            <Footer />
+            </div>
           </div>
         </main>
       </div>

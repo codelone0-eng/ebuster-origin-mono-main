@@ -11,7 +11,10 @@ import {
   Settings,
   FolderTree,
   Ticket,
-  Shield
+  Shield,
+  ChevronRight,
+  HelpCircle,
+  MoreHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,50 +24,28 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: 'overview', label: 'Обзор', icon: LayoutDashboard },
-  { id: 'users', label: 'Пользователи', icon: Users },
-  { id: 'scripts', label: 'Скрипты', icon: FileText },
-  { id: 'categories', label: 'Категории', icon: FolderTree },
-  { id: 'subscriptions', label: 'Подписки', icon: CreditCard },
-  { id: 'roles', label: 'Роли', icon: Shield },
-  { id: 'referrals', label: 'Рефералы', icon: Star },
-  { id: 'tickets', label: 'Тикеты', icon: Ticket },
-  { id: 'monitoring', label: 'Мониторинг', icon: Activity },
-  { id: 'logs', label: 'Логи', icon: MessageSquare },
-  { id: 'charts', label: 'Графики', icon: BarChart3 },
-  { id: 'settings', label: 'Настройки', icon: Settings },
+  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'tickets', label: 'Issues', icon: FileText },
+  { id: 'monitoring', label: 'Activity', icon: Activity, hasSubmenu: true },
+  { id: 'users', label: 'Users', icon: Users },
+  { id: 'logs', label: 'Logs', icon: MessageSquare },
+  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'support', label: 'Support', icon: HelpCircle },
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChange }) => {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#1f1f1f] border-r border-[#2d2d2d] flex flex-col z-50">
       {/* Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <svg 
-              className="w-6 h-6 text-primary-foreground" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M13 10V3L4 14h7v7l9-11h-7z" 
-              />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">Ebuster</h1>
-            <p className="text-xs text-muted-foreground">Админ-панель</p>
-          </div>
+      <div className="p-4 border-b border-[#2d2d2d]">
+        <div className="flex items-center gap-2">
+          <div className="text-white font-semibold text-sm">Ebuster Production</div>
+          <ChevronRight className="h-4 w-4 text-[#808080]" />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -74,25 +55,41 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                "hover:bg-accent/50 group",
-                isActive && "bg-primary text-primary-foreground hover:bg-primary/90"
+                "w-full flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors",
+                "hover:bg-[#2d2d2d] group",
+                isActive && "bg-[#2d2d2d] text-white"
               )}
             >
               <Icon className={cn(
-                "h-5 w-5 transition-colors",
-                isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
+                "h-4 w-4 transition-colors",
+                isActive ? "text-white" : "text-[#808080] group-hover:text-[#d9d9d9]"
               )} />
               <span className={cn(
-                "text-sm font-medium transition-colors",
-                isActive ? "text-primary-foreground" : "text-foreground"
+                "text-sm transition-colors flex-1 text-left",
+                isActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
               )}>
                 {item.label}
               </span>
+              {item.hasSubmenu && (
+                <ChevronRight className="h-4 w-4 text-[#808080]" />
+              )}
             </button>
           );
         })}
       </nav>
+
+      {/* Bottom Profile */}
+      <div className="p-3 border-t border-[#2d2d2d]">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-[#404040] flex items-center justify-center text-xs text-white font-medium">
+            B
+          </div>
+          <span className="text-sm text-[#d9d9d9]">bespredel</span>
+          <div className="ml-auto">
+            <MoreHorizontal className="h-4 w-4 text-[#808080]" />
+          </div>
+        </div>
+      </div>
     </aside>
   );
 };
