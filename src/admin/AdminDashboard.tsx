@@ -170,7 +170,7 @@ const AdminDashboard = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [systemLogs, setSystemLogs] = useState([]);
   const [browserStats, setBrowserStats] = useState([]);
-  const [activityStats, setActivityStats] = useState([]);
+  const [activityStats, setActivityStats] = useState<any>(null);
   const [scriptStats, setScriptStats] = useState([]);
   const [ticketStats, setTicketStats] = useState(null);
   const [recentTickets, setRecentTickets] = useState([]);
@@ -183,6 +183,61 @@ const AdminDashboard = () => {
     network: { usage: 0, speed: '0Gbps' },
     uptime: 'Loading...'
   });
+
+  const metricLabelClass =
+    "font-mono text-[11px] leading-none text-neutral-500 uppercase tracking-[0.08em] dark:text-neutral-400";
+
+  const formatDurationValue = (ms: number | null | undefined) => {
+    if (ms === null || ms === undefined) return '-';
+    if (ms >= 1000) {
+      return `${(ms / 1000).toFixed(2)}s`;
+    }
+    return `${ms.toFixed(0)}ms`;
+  };
+
+  const renderActivityChart = (points: any[] | undefined, color: string) => {
+    const dataPoints = points || [];
+
+    if (!dataPoints.length) {
+      return (
+        <div className="w-full h-64 bg-[#111214] border border-[#262626] rounded mb-2 flex items-center justify-center">
+          <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            Нет данных за выбранный период
+          </span>
+        </div>
+      );
+    }
+
+    const maxCount = Math.max(
+      ...dataPoints.map((p: any) => (typeof p.count === 'number' ? p.count : 0)),
+      1
+    );
+
+    const pointsAttr = dataPoints
+      .map((p: any, idx: number) => {
+        const x =
+          (idx / Math.max(dataPoints.length - 1, 1)) * 100;
+        const count = typeof p.count === 'number' ? p.count : 0;
+        const y = 90 - (count / maxCount) * 80; // 10px top/bottom padding
+        return `${x},${y}`;
+      })
+      .join(' ');
+
+    return (
+      <div className="w-full h-64 bg-[#111214] border border-[#262626] rounded mb-2 overflow-hidden">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <polyline
+            points={pointsAttr}
+            fill="none"
+            stroke={color}
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+    );
+  };
 
   // Функция для обновления мониторинга
   const updateMonitoring = async () => {
@@ -590,13 +645,22 @@ const AdminDashboard = () => {
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* Main content */}
-        <main className="flex-1 ml-64 flex flex-col bg-[#1a1a1a]">
+        <main className="flex-1 ml-64 flex flex-col bg-[#0b0c0f]">
           {/* Top Header Bar */}
-          <div className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1f1f1f]" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+          <div
+            className="h-16 border-b border-[#262626] flex items-center justify-between px-6 bg-[#111214]"
+            style={{
+              fontFamily:
+                'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+            }}
+          >
             <div className="flex items-center gap-3">
-              <div className="text-white text-sm font-semibold" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>Ebuster Production</div>
-              <div className="text-white text-lg font-semibold" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Dashboard</div>
-            </div>
+              <div
+                className="text-white text-lg font-semibold"
+                style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}
+              >
+                Dashboard
+              </div>
             <div className="flex items-center gap-0" style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}>
               <button
                 onClick={() => setTimeRange('1H')}
@@ -704,7 +768,7 @@ const AdminDashboard = () => {
             {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Activity Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
@@ -721,31 +785,39 @@ const AdminDashboard = () => {
                   <div>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
-                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>0</div>
+                        <div className={`${metricLabelClass} mb-2`}>REQUESTS</div>
+                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>
+                          {activityStats?.summary?.totalRequests ?? 0}
+                        </div>
                       </div>
                       <div className="flex flex-col gap-2 ml-4">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
                           <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>1/2/3XX</span>
-                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
+                            {activityStats?.summary?.status1xx3xx ?? 0}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
                           <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>4XX</span>
-                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
+                            {activityStats?.summary?.status4xx ?? 0}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
                           <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>5XX</span>
-                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
+                            {activityStats?.summary?.status5xx ?? 0}
+                          </span>
                         </div>
                       </div>
                     </div>
                     {/* Graph Area */}
-                    <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2" style={{ minHeight: '256px' }}></div>
+                    {renderActivityChart(activityStats?.points, '#22c55e')}
                     {/* Time Range */}
-                    <div className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400" style={{ fontSize: '12px', lineHeight: '1.5' }}>
                       {(() => {
                         const formatTimeRange = (date: Date) => {
                           const months = ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
@@ -770,26 +842,32 @@ const AdminDashboard = () => {
                   <div>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>DURATION</div>
-                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>-</div>
+                        <div className={`${metricLabelClass} mb-2`}>DURATION</div>
+                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>
+                          {formatDurationValue(activityStats?.summary?.durationAvgMs ?? null)}
+                        </div>
                       </div>
                       <div className="flex flex-col gap-2 ml-4">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
-                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
-                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                          <span className="text-xs text-neutral-500 dark:text-neutral-400" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
+                            {formatDurationValue(activityStats?.summary?.durationAvgMs ?? null)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
-                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
-                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                          <span className="text-xs text-neutral-500 dark:text-neutral-400" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
+                            {formatDurationValue(activityStats?.summary?.durationP95Ms ?? null)}
+                          </span>
                         </div>
                       </div>
                     </div>
                     {/* Graph Area */}
-                    <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2" style={{ minHeight: '256px' }}></div>
+                    {renderActivityChart(activityStats?.points, '#fb923c')}
                     {/* Time Range */}
-                    <div className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400" style={{ fontSize: '12px', lineHeight: '1.5' }}>
                       {(() => {
                         const formatTimeRange = (date: Date) => {
                           const months = ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
@@ -813,7 +891,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Application Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
@@ -822,8 +900,8 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4">
-                    <div className="text-xs font-medium text-[#808080] mb-4 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>EXCEPTIONS</div>
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                    <div className={`${metricLabelClass} mb-4`}>EXCEPTIONS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No exceptions reported in the last hour.
                     </div>
@@ -839,7 +917,7 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Setup Thresholds Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4 flex flex-col items-center justify-center">
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4 flex flex-col items-center justify-center">
                     <Sliders className="h-8 w-8 text-[#808080] mb-3" style={{ color: '#808080' }} />
                     <div className="text-sm font-semibold text-white mb-2" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>Setup thresholds</div>
                     <div className="text-xs text-[#808080] text-center mb-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>
@@ -852,12 +930,12 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Jobs Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4">
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium text-white" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>Jobs</span>
                       <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
                     </div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>JOBS</div>
+                    <div className={`${metricLabelClass} mb-2`}>JOBS</div>
                     <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>{applicationStats?.jobs?.total || 0}</div>
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
@@ -876,7 +954,7 @@ const AdminDashboard = () => {
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{applicationStats?.jobs?.released || 0}</span>
                       </div>
                     </div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>JOB DURATION</div>
+                    <div className={`${metricLabelClass} mb-2`}>JOB DURATION</div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
@@ -894,7 +972,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Users Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-[#d9d9d9]" />
@@ -903,8 +981,8 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4">
-                    <div className="text-xs font-medium text-[#808080] mb-4 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>EXCEPTIONS</div>
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                    <div className={`${metricLabelClass} mb-4`}>EXCEPTIONS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No users impacted by exceptions in the last hour.
                     </div>
@@ -920,8 +998,8 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Requests Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4">
-                    <div className="text-xs font-medium text-[#808080] mb-4 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                    <div className={`${metricLabelClass} mb-4`}>REQUESTS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No active users in the last hour.
                     </div>
@@ -937,14 +1015,14 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Users Panel */}
-                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded p-4">
+                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium text-white" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>Users</span>
                       <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
                     </div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>AUTHENTICATED USERS</div>
+                    <div className={`${metricLabelClass} mb-2`}>AUTHENTICATED USERS</div>
                     <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>{usersStats?.authenticated || 0}</div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
+                    <div className={`${metricLabelClass} mb-2`}>REQUESTS</div>
                     <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>{usersStats?.requests?.total || 0}</div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">

@@ -47,12 +47,6 @@ interface BrowserStat {
   count: number;
 }
 
-interface ActivityStat {
-  timeRange: string;
-  percentage: number;
-  count: number;
-}
-
 export const useAdminApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,7 +173,7 @@ export const useAdminApi = () => {
   };
 
   // Получение статистики активности
-  const getActivityStats = async (): Promise<ActivityStat[]> => {
+  const getActivityStats = async (): Promise<any> => {
     const response = await fetchWithAuth('/api/admin/activity-stats');
     return response.data;
   };

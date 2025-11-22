@@ -50,23 +50,22 @@ export const getSystemStats = async (req: Request, res: Response) => {
     const supabase = getSupabaseClient();
     
     if (!supabase) {
-      // Mock-данные с реальной структурой
-      console.log('📊 Используем mock-данные для статистики (Supabase недоступен)');
+      console.log('📊 Supabase недоступен, возвращаем пустую статистику системы без mock-данных');
       systemStats = {
-        totalUsers: 1247,
-        activeUsers: 892,
-        bannedUsers: 23,
-        newUsersToday: 15,
-        totalScripts: 156,
-        activeScripts: 89,
-        downloadsToday: 1247,
-        downloadsThisWeek: 8934,
-        totalTickets: 234,
-        openTickets: 12,
-        resolvedTickets: 198,
-        systemUptime: '99.9%',
-        avgResponseTime: '1.2s',
-        errorRate: '0.1%'
+        totalUsers: 0,
+        activeUsers: 0,
+        bannedUsers: 0,
+        newUsersToday: 0,
+        totalScripts: 0,
+        activeScripts: 0,
+        downloadsToday: 0,
+        downloadsThisWeek: 0,
+        totalTickets: 0,
+        openTickets: 0,
+        resolvedTickets: 0,
+        systemUptime: '0%',
+        avgResponseTime: '0ms',
+        errorRate: '0%'
       };
     } else {
       // Реальные данные из Supabase
@@ -576,17 +575,89 @@ export const getBrowserStats = async (req: Request, res: Response) => {
 // Получение статистики активности по времени
 export const getActivityStats = async (req: Request, res: Response) => {
   try {
-    // Пока используем заглушку
-    const activityStats = [
-      { timeRange: '00:00 - 06:00', percentage: 15, count: 187 },
-      { timeRange: '06:00 - 12:00', percentage: 35, count: 436 },
-      { timeRange: '12:00 - 18:00', percentage: 45, count: 561 },
-      { timeRange: '18:00 - 24:00', percentage: 25, count: 312 }
-    ];
+    const supabase = getSupabaseClient();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    const summary = {
+      totalRequests: 0,
+      status1xx3xx: 0,
+      status4xx: 0,
+      status5xx: 0,
+      durationAvgMs: null as number | null,
+      durationP95Ms: null as number | null
+    };
+
+    let points: { timestamp: string; count: number }[] = [];
+
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('access_logs')
+          .select('status_code, duration_ms, duration, created_at')
+          .gte('created_at', oneHourAgo.toISOString());
+
+        if (!error && data) {
+          const durations: number[] = [];
+          const bucketMap = new Map<string, number>();
+
+          data.forEach((row: any) => {
+            const status = Number(row.status_code) || 0;
+            const durationValue =
+              typeof row.duration_ms === 'number'
+                ? row.duration_ms
+                : typeof row.duration === 'number'
+                ? row.duration
+                : null;
+
+            summary.totalRequests += 1;
+
+            if (status >= 100 && status < 400) summary.status1xx3xx += 1;
+            else if (status >= 400 && status < 500) summary.status4xx += 1;
+            else if (status >= 500 && status < 600) summary.status5xx += 1;
+
+            if (durationValue !== null) {
+              durations.push(durationValue);
+            }
+
+            if (row.created_at) {
+              const createdAt = new Date(row.created_at);
+              const bucket = new Date(createdAt);
+              bucket.setSeconds(0, 0);
+              const key = bucket.toISOString();
+              bucketMap.set(key, (bucketMap.get(key) || 0) + 1);
+            }
+          });
+
+          if (durations.length > 0) {
+            const avg =
+              durations.reduce((acc, val) => acc + val, 0) / durations.length;
+            const sorted = [...durations].sort((a, b) => a - b);
+            const p95Index = Math.floor(sorted.length * 0.95);
+
+            summary.durationAvgMs = avg;
+            summary.durationP95Ms = sorted[p95Index] ?? null;
+          }
+
+          points = Array.from(bucketMap.entries())
+            .sort(
+              ([a], [b]) =>
+                new Date(a).getTime() - new Date(b).getTime()
+            )
+            .map(([timestamp, count]) => ({ timestamp, count }));
+        }
+      } catch (error) {
+        console.log(
+          '⚠️ Таблица access_logs недоступна, возвращаем пустую статистику активности'
+        );
+      }
+    }
 
     res.json({
       success: true,
-      data: activityStats
+      data: {
+        summary,
+        points
+      }
     });
   } catch (error) {
     console.error('Ошибка получения статистики активности:', error);
