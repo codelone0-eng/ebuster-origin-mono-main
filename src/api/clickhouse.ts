@@ -90,6 +90,13 @@ export async function queryClickHouse<T = ClickHouseRow>(sql: string): Promise<T
           const raw = Buffer.concat(chunks).toString('utf-8');
 
           if (res.statusCode && res.statusCode >= 400) {
+            console.error(`❌ ClickHouse HTTP ${res.statusCode} error:`);
+            console.error(`   URL: ${CLICKHOUSE_URL}`);
+            console.error(`   Response: ${raw.slice(0, 500)}`);
+            if (res.statusCode === 502) {
+              console.error(`   ⚠️  502 Bad Gateway - nginx cannot reach ClickHouse container.`);
+              console.error(`   ⚠️  Check if ebuster-clickhouse container is running and in ebuster-network.`);
+            }
             return reject(
               new Error(`ClickHouse HTTP ${res.statusCode}: ${raw.slice(0, 500)}`)
             );
@@ -115,10 +122,16 @@ export async function queryClickHouse<T = ClickHouseRow>(sql: string): Promise<T
     req.on('error', (err: NodeJS.ErrnoException) => {
       // Логируем ошибку для отладки
       console.error(`❌ ClickHouse connection error: ${err.message}`);
+      console.error(`   Code: ${err.code}`);
       console.error(`   URL: ${CLICKHOUSE_URL}`);
       console.error(`   Hostname: ${url.hostname}`);
+      console.error(`   Port: ${url.port || (isHttps ? 443 : 80)}`);
       if (err.code === 'ENOTFOUND') {
-        console.error(`   ⚠️  Hostname '${url.hostname}' not found. Check if ClickHouse container is running and in the same network.`);
+        console.error(`   ⚠️  Hostname '${url.hostname}' not found. Check DNS resolution.`);
+      } else if (err.code === 'ECONNREFUSED') {
+        console.error(`   ⚠️  Connection refused. Check if ClickHouse is running and accessible.`);
+      } else if (err.code === 'ETIMEDOUT') {
+        console.error(`   ⚠️  Connection timeout. Check network connectivity.`);
       }
       reject(err);
     });
