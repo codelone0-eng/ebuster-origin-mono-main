@@ -14,6 +14,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { notificationTranslations } from '@/lib/notification-translations';
 import { useAdminApi } from '@/hooks/useAdminApi';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 import ScriptsManagement from './ScriptsManagement';
 import SubscriptionsManagement from './SubscriptionsManagement';
 import SystemMonitorChart from './SystemMonitorChart';
@@ -196,7 +208,16 @@ const AdminDashboard = () => {
   };
 
   const renderActivityChart = (points: any[] | undefined, color: string) => {
-    const dataPoints = points || [];
+    const dataPoints = (points || []).map((p: any) => {
+      const date = new Date(p.timestamp);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return {
+        time: `${hours}:${minutes}`,
+        value: typeof p.count === 'number' ? p.count : 0,
+      };
+    });
 
     if (!dataPoints.length) {
       return (
@@ -208,108 +229,61 @@ const AdminDashboard = () => {
       );
     }
 
-    const width = 100;
-    const height = 100;
-    const padding = { top: 10, right: 5, bottom: 20, left: 10 };
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
+    const maxValue = Math.max(...dataPoints.map((p) => p.value), 1);
 
-    const maxCount = Math.max(
-      ...dataPoints.map((p: any) => (typeof p.count === 'number' ? p.count : 0)),
-      1
-    );
-
-    // Создаем координаты точек для линии
-    const linePoints = dataPoints.map((p: any, idx: number) => {
-      const x = padding.left + (idx / Math.max(dataPoints.length - 1, 1)) * chartWidth;
-      const count = typeof p.count === 'number' ? p.count : 0;
-      const y = padding.top + chartHeight - (count / maxCount) * chartHeight;
-      return { x, y, count };
-    });
-
-    // Создаем path для линии
-    const linePath = linePoints
-      .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`)
-      .join(' ');
-
-    // Создаем path для градиентной заливки (area)
-    const areaPath = 
-      linePath + 
-      ` L ${linePoints[linePoints.length - 1].x},${padding.top + chartHeight}` +
-      ` L ${linePoints[0].x},${padding.top + chartHeight} Z`;
-
-    // Генерируем горизонтальные линии сетки (5 линий)
-    const gridLines = Array.from({ length: 5 }, (_, i) => {
-      const y = padding.top + (chartHeight / 4) * i;
-      return (
-        <line
-          key={`grid-${i}`}
-          x1={padding.left}
-          y1={y}
-          x2={padding.left + chartWidth}
-          y2={y}
-          stroke="#2d2d2d"
-          strokeWidth="0.3"
-          opacity="0.5"
-        />
-      );
-    });
-
-    // Gradient ID для каждого цвета
-    const gradientId = `gradient-${color.replace('#', '')}`;
+    const chartConfig = {
+      series: {
+        label: 'Requests',
+        color,
+      },
+    } as const;
 
     return (
-      <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2 overflow-hidden relative">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
-          <defs>
-            {/* Градиент для заливки */}
-            <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-              <stop offset="100%" stopColor={color} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Горизонтальная сетка */}
-          {gridLines}
-
-          {/* Градиентная заливка под линией */}
-          <path
-            d={areaPath}
-            fill={`url(#${gradientId})`}
-            opacity="0.8"
-          />
-
-          {/* Основная линия графика */}
-          <path
-            d={linePath}
-            fill="none"
-            stroke={color}
-            strokeWidth="0.8"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-
-          {/* Точки на графике */}
-          {linePoints.map((p, i) => (
-            <circle
-              key={`point-${i}`}
-              cx={p.x}
-              cy={p.y}
-              r="0.8"
-              fill={color}
-              opacity="0.8"
+      <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2 px-2 pt-2 pb-4">
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <LineChart
+            data={dataPoints}
+            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid
+              stroke="#2d2d2d"
+              strokeDasharray="3 3"
+              vertical={false}
             />
-          ))}
-        </svg>
-
-        {/* Метки оси Y */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between py-3 pl-1 text-[10px] text-neutral-500">
-          <span>{maxCount}</span>
-          <span>{Math.round(maxCount * 0.75)}</span>
-          <span>{Math.round(maxCount * 0.5)}</span>
-          <span>{Math.round(maxCount * 0.25)}</span>
-          <span className="pb-3">0</span>
-        </div>
+            <XAxis
+              dataKey="time"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={16}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              allowDecimals={false}
+              domain={[0, maxValue]}
+            />
+            <ChartTooltip
+              cursor={{ stroke: 'rgba(148,163,184,0.35)', strokeWidth: 1 }}
+              content={
+                <ChartTooltipContent
+                  labelKey="time"
+                  nameKey="series"
+                  indicator="line"
+                />
+              }
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="var(--color-series)"
+              strokeWidth={2}
+              dot={{ r: 0 }}
+              activeDot={{ r: 3 }}
+            />
+          </LineChart>
+        </ChartContainer>
       </div>
     );
   };
