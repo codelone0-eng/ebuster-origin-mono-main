@@ -16,5 +16,12 @@ services:
     ports:
       - "8123:8123"  # HTTP API (используется backend'ом)
       # - "9000:9000"  # native-протокол, включи при необходимости
+    networks:
+      - ebuster-network
+
+networks:
+  ebuster-network:
+    name: ebuster-network
+    external: true
 
 

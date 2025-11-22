@@ -200,7 +200,7 @@ const AdminDashboard = () => {
 
     if (!dataPoints.length) {
       return (
-        <div className="w-full h-64 bg-[#111214] border border-[#262626] rounded mb-2 flex items-center justify-center">
+        <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2 flex items-center justify-center">
           <span className="text-xs text-neutral-500 dark:text-neutral-400">
             Нет данных за выбранный период
           </span>
@@ -224,7 +224,7 @@ const AdminDashboard = () => {
       .join(' ');
 
     return (
-      <div className="w-full h-64 bg-[#111214] border border-[#262626] rounded mb-2 overflow-hidden">
+      <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2 overflow-hidden">
         <svg viewBox="0 0 100 100" className="w-full h-full">
           <polyline
             points={pointsAttr}
@@ -639,16 +639,16 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] relative">
+    <div className="min-h-screen bg-[#0f0f0f] relative">
       <div className="min-h-screen flex">
         {/* Sidebar */}
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* Main content */}
-        <main className="flex-1 ml-64 flex flex-col bg-[#0b0c0f]">
+        <main className="flex-1 ml-64 flex flex-col bg-[#0f0f0f]">
           {/* Top Header Bar */}
           <div
-            className="h-16 border-b border-[#262626] flex items-center justify-between px-6 bg-[#111214]"
+            className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1a1a1a]"
             style={{
               fontFamily:
                 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
@@ -778,7 +778,7 @@ const AdminDashboard = () => {
             {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Activity Widget */}
-              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
@@ -901,7 +901,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Application Widget */}
-              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
@@ -910,7 +910,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className={`${metricLabelClass} mb-4`}>EXCEPTIONS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No exceptions reported in the last hour.
@@ -940,7 +940,7 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Jobs Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium text-white" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>Jobs</span>
                       <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
@@ -982,7 +982,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Users Widget */}
-              <div className="bg-[#111214] border border-[#262626] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-[#d9d9d9]" />
@@ -991,7 +991,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className={`${metricLabelClass} mb-4`}>EXCEPTIONS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No users impacted by exceptions in the last hour.
@@ -1008,7 +1008,7 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Requests Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className={`${metricLabelClass} mb-4`}>REQUESTS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No active users in the last hour.
@@ -1025,7 +1025,7 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Users Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium text-white" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>Users</span>
                       <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
@@ -1055,7 +1055,7 @@ const AdminDashboard = () => {
             {/* Пользователи */}
             {activeTab === 'users' && (
             <div className="space-y-6">
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
                 <div className="mb-6">
                   <div className="flex items-center justify-between">
                     <div>
