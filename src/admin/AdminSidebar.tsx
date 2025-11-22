@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard,
   Users, 
@@ -13,8 +13,18 @@ import {
   Ticket,
   Shield,
   ChevronRight,
+  ChevronDown,
   HelpCircle,
-  MoreHorizontal
+  MoreHorizontal,
+  Zap,
+  Terminal,
+  Clock,
+  AlertCircle,
+  Database,
+  Bell,
+  Mail,
+  HardDrive,
+  Send
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,11 +33,24 @@ interface AdminSidebarProps {
   onTabChange: (tab: string) => void;
 }
 
+const activitySubmenu = [
+  { id: 'requests', label: 'Requests', icon: null },
+  { id: 'jobs', label: 'Jobs', icon: null },
+  { id: 'commands', label: 'Commands', icon: null },
+  { id: 'scheduled-tasks', label: 'Scheduled Tasks', icon: null },
+  { id: 'exceptions', label: 'Exceptions', icon: null },
+  { id: 'queries', label: 'Queries', icon: null },
+  { id: 'notifications', label: 'Notifications', icon: null },
+  { id: 'mail', label: 'Mail', icon: null },
+  { id: 'cache', label: 'Cache', icon: null },
+  { id: 'outgoing-requests', label: 'Outgoing Requests', icon: null },
+];
+
 const menuItems = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'tickets', label: 'Issues', icon: FileText },
-  { id: 'monitoring', label: 'Activity', icon: Activity, hasSubmenu: true },
-  { id: 'monitoring2', label: 'Monitoring', icon: BarChart3, isSubmenu: true },
+  { id: 'activity', label: 'Activity', icon: Activity, hasSubmenu: true, submenu: activitySubmenu },
+  { id: 'monitoring-separator', label: 'Monitoring', icon: null, isSeparator: true },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'logs', label: 'Logs', icon: MessageSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -35,6 +58,8 @@ const menuItems = [
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChange }) => {
+  const [activityExpanded, setActivityExpanded] = useState(true);
+  
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-[#1f1f1f] border-r border-[#2d2d2d] flex flex-col z-50" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       {/* Header */}
@@ -51,38 +76,91 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-2">
         {menuItems.map((item) => {
+          if (item.isSeparator) {
+            return (
+              <div key={item.id} className="px-3 py-2 text-xs text-[#808080] font-medium uppercase" style={{ fontSize: '12px', letterSpacing: '0.5px' }}>
+                {item.label}
+              </div>
+            );
+          }
+          
           const Icon = item.icon;
           const isActive = activeTab === item.id;
+          const isActivity = item.id === 'activity';
+          const isExpanded = isActivity && activityExpanded;
           
           return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={cn(
-                "w-full flex items-center gap-2.5 py-2 text-sm transition-colors relative",
-                "hover:bg-[#2d2d2d] group",
-                isActive && "bg-[#2d2d2d] text-white",
-                item.isSubmenu ? "pl-8" : "px-3"
+            <div key={item.id}>
+              <button
+                onClick={() => {
+                  if (isActivity) {
+                    setActivityExpanded(!activityExpanded);
+                  } else {
+                    onTabChange(item.id);
+                  }
+                }}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors relative",
+                  "hover:bg-[#2d2d2d] group",
+                  isActive && "bg-[#2d2d2d] text-white"
+                )}
+                style={{
+                  borderLeft: isActive ? '2px solid white' : 'none',
+                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                }}
+              >
+                {Icon && (
+                  <Icon className={cn(
+                    "h-4 w-4 transition-colors flex-shrink-0",
+                    isActivity ? "text-green-500" : isActive ? "text-white" : "text-[#808080] group-hover:text-[#d9d9d9]"
+                  )} />
+                )}
+                <span className={cn(
+                  "text-sm transition-colors flex-1 text-left",
+                  isActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
+                )} style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                  {item.label}
+                </span>
+                {item.hasSubmenu && (
+                  <ChevronDown className={cn(
+                    "h-3.5 w-3.5 flex-shrink-0 transition-transform",
+                    isExpanded ? "transform rotate-180" : "",
+                    isActivity ? "text-green-500" : "text-[#808080]"
+                  )} />
+                )}
+              </button>
+              
+              {/* Activity Submenu */}
+              {isActivity && isExpanded && item.submenu && (
+                <div className="pl-8">
+                  {item.submenu.map((subItem) => {
+                    const isSubActive = activeTab === subItem.id;
+                    return (
+                      <button
+                        key={subItem.id}
+                        onClick={() => onTabChange(subItem.id)}
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors relative",
+                          "hover:bg-[#2d2d2d] group",
+                          isSubActive && "bg-[#2d2d2d] text-white"
+                        )}
+                        style={{
+                          borderLeft: isSubActive ? '2px solid white' : 'none',
+                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                        }}
+                      >
+                        <span className={cn(
+                          "text-sm transition-colors flex-1 text-left",
+                          isSubActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
+                        )} style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                          {subItem.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-              style={{
-                borderLeft: isActive ? '2px solid white' : 'none',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-              }}
-            >
-              <Icon className={cn(
-                "h-4 w-4 transition-colors flex-shrink-0",
-                isActive ? "text-white" : "text-[#808080] group-hover:text-[#d9d9d9]"
-              )} />
-              <span className={cn(
-                "text-sm transition-colors flex-1 text-left",
-                isActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
-              )} style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                {item.label}
-              </span>
-              {item.hasSubmenu && (
-                <ChevronRight className="h-3.5 w-3.5 text-[#808080] flex-shrink-0" />
-              )}
-            </button>
+            </div>
           );
         })}
       </nav>

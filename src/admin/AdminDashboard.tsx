@@ -697,62 +697,107 @@ const AdminDashboard = () => {
               <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-[#d9d9d9]" />
+                    <FileText className="h-5 w-5 text-[#d9d9d9]" />
                     <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Activity</h2>
                   </div>
+                  <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d2d] rounded transition-colors" style={{ fontSize: '14px', fontWeight: 500 }}>
+                    Requests
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  {/* Requests */}
+                
+                <div className="space-y-8">
+                  {/* REQUESTS Section */}
                   <div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
-                    <div className="text-3xl font-bold text-white mb-2" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>0</div>
-                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
-                  </div>
-                  
-                  {/* HTTP Status Codes */}
-                  <div>
-                    <div className="space-y-3 mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px' }}></div>
-                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>1/2/3XX</span>
-                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
+                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>0</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px' }}></div>
-                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>4XX</span>
-                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500" style={{ width: '8px', height: '8px' }}></div>
-                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>5XX</span>
-                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                      <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
+                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>1/2/3XX</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
+                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>4XX</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
+                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>5XX</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
+                    {/* Graph Area */}
+                    <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2" style={{ minHeight: '256px' }}></div>
+                    {/* Time Range */}
+                    <div className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                      {(() => {
+                        const formatTimeRange = (date: Date) => {
+                          const months = ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+                          const day = date.getDate();
+                          const month = months[date.getMonth()];
+                          const year = date.getFullYear();
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          const timezoneOffset = -date.getTimezoneOffset() / 60;
+                          const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
+                          const timezoneHours = String(Math.abs(timezoneOffset)).padStart(2, '0');
+                          return `${day} ${month} ${year} г., ${hours}:${minutes}:00 ${timezoneSign}${timezoneHours}:00`;
+                        };
+                        const now = new Date();
+                        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+                        return `${formatTimeRange(oneHourAgo)} до ${formatTimeRange(now)}`;
+                      })()}
+                    </div>
                   </div>
                   
-                  {/* Duration */}
+                  {/* DURATION Section */}
                   <div>
-                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>DURATION</div>
-                    <div className="text-3xl font-bold text-white mb-2" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>-</div>
-                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
-                  </div>
-                  
-                  {/* Performance Metrics */}
-                  <div>
-                    <div className="space-y-3 mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px' }}></div>
-                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
-                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>DURATION</div>
+                        <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>-</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px' }}></div>
-                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
-                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                      <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
+                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
+                          <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
+                          <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
+                    {/* Graph Area */}
+                    <div className="w-full h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded mb-2" style={{ minHeight: '256px' }}></div>
+                    {/* Time Range */}
+                    <div className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                      {(() => {
+                        const formatTimeRange = (date: Date) => {
+                          const months = ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+                          const day = date.getDate();
+                          const month = months[date.getMonth()];
+                          const year = date.getFullYear();
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          const timezoneOffset = -date.getTimezoneOffset() / 60;
+                          const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
+                          const timezoneHours = String(Math.abs(timezoneOffset)).padStart(2, '0');
+                          return `${day} ${month} ${year} г., ${hours}:${minutes}:00 ${timezoneSign}${timezoneHours}:00`;
+                        };
+                        const now = new Date();
+                        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+                        return `${formatTimeRange(oneHourAgo)} до ${formatTimeRange(now)}`;
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
