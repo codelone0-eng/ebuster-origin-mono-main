@@ -5,10 +5,12 @@ services:
     image: clickhouse/clickhouse-server:24.3
     container_name: ebuster-clickhouse
     restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
       CLICKHOUSE_DB: ebuster
-      CLICKHOUSE_USER: ebuster
-      CLICKHOUSE_PASSWORD: super-secret-password
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
     volumes:
       - ./data:/var/lib/clickhouse
     ports:

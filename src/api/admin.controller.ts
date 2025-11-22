@@ -975,6 +975,8 @@ export const getUsersStats = async (req: Request, res: Response) => {
         console.log('⚠️ Ошибка получения статистики Users, используем значения по умолчанию');
       }
     }
+    // end Supabase fallback
+    }
 
     res.json({
       success: true,
