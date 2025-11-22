@@ -579,66 +579,100 @@ const AdminDashboard = () => {
         {/* Main content */}
         <main className="flex-1 ml-64 flex flex-col bg-[#1a1a1a]">
           {/* Top Header Bar */}
-          <div className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1f1f1f]">
-            <div className="text-white text-sm font-medium">Ebuster Production</div>
-            <div className="flex items-center gap-2">
+          <div className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1f1f1f]" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            <div className="text-white text-lg font-semibold" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Dashboard</div>
+            <div className="flex items-center gap-0" style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}>
               <button
                 onClick={() => setTimeRange('1H')}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   timeRange === '1H' 
-                    ? 'bg-[#3d3d3d] text-white' 
+                    ? 'text-white' 
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
+                style={{
+                  backgroundColor: timeRange === '1H' ? '#2563eb' : 'transparent',
+                  borderRight: '1px solid #404040',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '1.5'
+                }}
               >
                 1H
               </button>
               <button
                 onClick={() => setTimeRange('24H')}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   timeRange === '24H' 
-                    ? 'bg-[#3d3d3d] text-white' 
+                    ? 'text-white' 
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
+                style={{
+                  backgroundColor: timeRange === '24H' ? '#2563eb' : 'transparent',
+                  borderRight: '1px solid #404040',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '1.5'
+                }}
               >
                 24H
               </button>
               <button
                 onClick={() => setTimeRange('7D')}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   timeRange === '7D' 
-                    ? 'bg-[#3d3d3d] text-white' 
+                    ? 'text-white' 
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
+                style={{
+                  backgroundColor: timeRange === '7D' ? '#2563eb' : 'transparent',
+                  borderRight: '1px solid #404040',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '1.5'
+                }}
               >
                 7D
               </button>
               <button
                 onClick={() => setTimeRange('14D')}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   timeRange === '14D' 
-                    ? 'bg-[#3d3d3d] text-white' 
+                    ? 'text-white' 
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
+                style={{
+                  backgroundColor: timeRange === '14D' ? '#2563eb' : 'transparent',
+                  borderRight: '1px solid #404040',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '1.5'
+                }}
               >
                 14D
               </button>
               <button
                 onClick={() => setTimeRange('30D')}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   timeRange === '30D' 
-                    ? 'bg-[#3d3d3d] text-white' 
+                    ? 'text-white' 
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
+                style={{
+                  backgroundColor: timeRange === '30D' ? '#2563eb' : 'transparent',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '1.5'
+                }}
               >
                 30D
               </button>
-              <button className="px-2 py-1.5 text-[#808080] hover:text-white">
+              <button className="px-2 py-1.5 text-[#808080] hover:text-white" style={{ borderLeft: '1px solid #404040' }}>
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#404040] flex items-center justify-center cursor-pointer hover:bg-[#4d4d4d]">
-                <MoreHorizontal className="h-4 w-4 text-[#d9d9d9]" />
+                <Users className="h-4 w-4 text-[#d9d9d9]" />
               </div>
             </div>
           </div>
@@ -651,108 +685,103 @@ const AdminDashboard = () => {
             {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Activity Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <LayoutDashboard className="h-5 w-5 text-[#d9d9d9]" />
-                    <h2 className="text-lg font-semibold text-white">Activity</h2>
+                    <BarChart3 className="h-5 w-5 text-[#d9d9d9]" />
+                    <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Activity</h2>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {/* Requests */}
                   <div>
-                    <div className="text-xs font-medium text-[#808080] mb-2">REQUESTS</div>
-                    <div className="text-3xl font-bold text-white mb-2">0</div>
-                    <div className="text-xs text-[#808080]">{getCurrentTimestamp()}</div>
+                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>REQUESTS</div>
+                    <div className="text-3xl font-bold text-white mb-2" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>0</div>
+                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
                   </div>
                   
                   {/* HTTP Status Codes */}
                   <div>
-                    <div className="flex items-center gap-4 mb-3">
+                    <div className="space-y-3 mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-xs text-[#808080]">1/2/3XX</span>
+                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>1/2/3XX</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
-                      <div className="text-sm font-medium text-white">0</div>
-                    </div>
-                    <div className="flex items-center gap-4 mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                        <span className="text-xs text-[#808080]">4XX</span>
+                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>4XX</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
-                      <div className="text-sm font-medium text-white">0</div>
-                    </div>
-                    <div className="flex items-center gap-4 mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span className="text-xs text-[#808080]">5XX</span>
+                        <div className="w-2 h-2 rounded-full bg-red-500" style={{ width: '8px', height: '8px' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>5XX</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
-                      <div className="text-sm font-medium text-white">0</div>
                     </div>
-                    <div className="text-xs text-[#808080] mt-2">{getCurrentTimestamp()}</div>
+                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
                   </div>
                   
                   {/* Duration */}
                   <div>
-                    <div className="text-xs font-medium text-[#808080] mb-2">DURATION</div>
-                    <div className="text-3xl font-bold text-white mb-2">-</div>
-                    <div className="text-xs text-[#808080]">{getCurrentTimestamp()}</div>
+                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>DURATION</div>
+                    <div className="text-3xl font-bold text-white mb-2" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>-</div>
+                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
                   </div>
                   
-                  {/* Requests Right */}
+                  {/* Performance Metrics */}
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium text-white">Requests</span>
-                      <ExternalLink className="h-4 w-4 text-[#808080]" />
-                    </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-xs text-[#808080]">AVG</span>
-                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                        <span className="text-xs text-[#808080]">P95</span>
-                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
                       </div>
                     </div>
-                    <div className="text-xs text-[#808080] mt-3">{getCurrentTimestamp()}</div>
+                    <div className="text-xs text-[#808080] mt-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>{getCurrentTimestamp()}</div>
                   </div>
                 </div>
               </div>
 
               {/* Application Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
-                    <h2 className="text-lg font-semibold text-white">Application</h2>
+                    <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Application</h2>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions */}
                   <div>
-                    <div className="text-xs font-medium text-[#808080] mb-4">EXCEPTIONS</div>
-                    <div className="text-sm font-semibold text-white mb-4">
+                    <div className="text-xs font-medium text-[#808080] mb-4 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>EXCEPTIONS</div>
+                    <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No exceptions reported in the last hour.
                     </div>
                     <div className="flex justify-center mb-4">
-                      <div className="w-24 h-24 rounded-full border-2 border-dashed border-green-500 flex items-center justify-center">
-                        <CheckCircle className="h-12 w-12 text-green-500" />
+                      <div className="w-24 h-24 rounded-full border-2 border-dashed border-green-500 flex items-center justify-center" style={{ width: '96px', height: '96px', borderColor: '#10b981', borderStyle: 'dashed' }}>
+                        <CheckCircle className="h-12 w-12 text-green-500" style={{ color: '#10b981' }} />
                       </div>
                     </div>
-                    <div className="text-sm text-green-500 font-medium text-center">✔ NO ACTIONS</div>
+                    <div className="flex items-center gap-2 justify-start">
+                      <CheckCircle className="h-4 w-4 text-green-500" style={{ color: '#10b981' }} />
+                      <div className="text-sm text-green-500 font-medium" style={{ fontSize: '14px', fontWeight: 500, color: '#10b981' }}>NO ACTIONS</div>
+                    </div>
                   </div>
                   
                   {/* Setup Thresholds */}
                   <div className="flex flex-col items-center justify-center">
-                    <Sliders className="h-8 w-8 text-[#808080] mb-3" />
-                    <div className="text-sm font-semibold text-white mb-2">Setup thresholds</div>
-                    <div className="text-xs text-[#808080] text-center mb-4">
+                    <Sliders className="h-8 w-8 text-[#808080] mb-3" style={{ color: '#808080' }} />
+                    <div className="text-sm font-semibold text-white mb-2" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>Setup thresholds</div>
+                    <div className="text-xs text-[#808080] text-center mb-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>
                       Configure your performance thresholds to start monitoring.
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded flex items-center gap-2">
+                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded flex items-center gap-2" style={{ backgroundColor: '#2563eb', fontSize: '14px', fontWeight: 500, borderRadius: '4px' }}>
                       <Plus className="h-4 w-4" />
                       Add Threshold
                     </button>
@@ -761,39 +790,39 @@ const AdminDashboard = () => {
                   {/* Jobs */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium text-white">Jobs</span>
-                      <ExternalLink className="h-4 w-4 text-[#808080]" />
+                      <span className="text-sm font-medium text-white" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>Jobs</span>
+                      <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
                     </div>
-                    <div className="text-xs font-medium text-[#808080] mb-2">JOBS</div>
-                    <div className="text-3xl font-bold text-white mb-4">0</div>
+                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>JOBS</div>
+                    <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>0</div>
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span className="text-xs text-[#808080]">FAILED</span>
-                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                        <div className="w-2 h-2 rounded-full bg-red-500" style={{ width: '8px', height: '8px', backgroundColor: '#ef4444' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>FAILED</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                        <span className="text-xs text-[#808080]">PROCESSED</span>
-                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                        <div className="w-2 h-2 rounded-full bg-[#808080]" style={{ width: '8px', height: '8px', backgroundColor: '#808080' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>PROCESSED</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-xs text-[#808080]">RELEASED</span>
-                        <span className="text-sm font-medium text-white ml-auto">0</span>
+                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px', backgroundColor: '#f97316' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>RELEASED</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
                     </div>
-                    <div className="text-xs font-medium text-[#808080] mb-2">JOB DURATION</div>
+                    <div className="text-xs font-medium text-[#808080] mb-2 uppercase" style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', lineHeight: '1.5' }}>JOB DURATION</div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-xs text-[#808080]">AVG</span>
-                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px', backgroundColor: '#10b981' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                        <span className="text-xs text-[#808080]">P95</span>
-                        <span className="text-sm font-medium text-white ml-auto">-</span>
+                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px', backgroundColor: '#f97316' }}></div>
+                        <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
+                        <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>-</span>
                       </div>
                     </div>
                   </div>
@@ -801,15 +830,14 @@ const AdminDashboard = () => {
               </div>
 
               {/* Users Widget */}
-              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
+              <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-[#d9d9d9]" />
-                    <h2 className="text-lg font-semibold text-white">Users</h2>
+                    <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Users</h2>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-[#808080]" />
+                  <ExternalLink className="h-4 w-4 text-[#808080]" style={{ color: '#808080' }} />
                 </div>
-                {/* Users content will be added here */}
               </div>
             </div>
             )}
