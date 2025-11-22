@@ -654,19 +654,24 @@ const AdminDashboard = () => {
                 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
             }}
           >
-            <div className="flex items-center gap-3">
-              <div
-                className="text-white text-lg font-semibold"
-                style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}
-              >
-                Dashboard
-              </div>
-            <div className="flex items-center gap-0" style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}>
+            {/* Left: title */}
+            <div
+              className="text-white text-lg font-semibold"
+              style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}
+            >
+              Dashboard
+            </div>
+
+            {/* Center: time range selector */}
+            <div
+              className="flex items-center gap-0"
+              style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}
+            >
               <button
                 onClick={() => setTimeRange('1H')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === '1H' 
-                    ? 'text-white' 
+                  timeRange === '1H'
+                    ? 'text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
                 style={{
@@ -682,8 +687,8 @@ const AdminDashboard = () => {
               <button
                 onClick={() => setTimeRange('24H')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === '24H' 
-                    ? 'text-white' 
+                  timeRange === '24H'
+                    ? 'text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
                 style={{
@@ -699,8 +704,8 @@ const AdminDashboard = () => {
               <button
                 onClick={() => setTimeRange('7D')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === '7D' 
-                    ? 'text-white' 
+                  timeRange === '7D'
+                    ? 'text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
                 style={{
@@ -716,8 +721,8 @@ const AdminDashboard = () => {
               <button
                 onClick={() => setTimeRange('14D')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === '14D' 
-                    ? 'text-white' 
+                  timeRange === '14D'
+                    ? 'text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
                 style={{
@@ -733,8 +738,8 @@ const AdminDashboard = () => {
               <button
                 onClick={() => setTimeRange('30D')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === '30D' 
-                    ? 'text-white' 
+                  timeRange === '30D'
+                    ? 'text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 }`}
                 style={{
@@ -746,10 +751,15 @@ const AdminDashboard = () => {
               >
                 30D
               </button>
-              <button className="px-2 py-1.5 text-[#808080] hover:text-white" style={{ borderLeft: '1px solid #404040' }}>
+              <button
+                className="px-2 py-1.5 text-[#808080] hover:text-white"
+                style={{ borderLeft: '1px solid #404040' }}
+              >
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
+
+            {/* Right: user / notifications */}
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#404040] flex items-center justify-center cursor-pointer hover:bg-[#4d4d4d]">
                 <Bell className="h-4 w-4 text-[#d9d9d9]" />
