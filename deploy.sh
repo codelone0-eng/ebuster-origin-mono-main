@@ -47,14 +47,9 @@ for i in {1..60}; do
   fi
 done
 
-# ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ СХЕМЫ (так как ALTER не срабатывает)
-# ВНИМАНИЕ: Это удалит старые логи, но гарантирует правильную структуру
-log "🗑️ Сброс таблицы access_logs для обновления схемы..."
-docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --query "DROP TABLE IF EXISTS ebuster.access_logs" 2>/dev/null || true
-
-# Применить схему ClickHouse
+# Применить схему ClickHouse (schema.sql содержит DROP TABLE IF EXISTS для access_logs)
 log "📋 Применяю схему ClickHouse..."
-docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || log "⚠️  Ошибка применения схемы (возможно уже существует)"
+docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || log "⚠️  Ошибка применения схемы (проверьте логи)"
 
 # Проверяем, что контейнер в правильной сети
 log "🌐 Проверяю сеть ClickHouse контейнера..."

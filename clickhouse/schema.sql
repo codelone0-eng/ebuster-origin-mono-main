@@ -3,6 +3,9 @@
 CREATE DATABASE IF NOT EXISTS ebuster;
 USE ebuster;
 
+-- Удаляем старую таблицу, чтобы гарантировать правильную схему (ВРЕМЕННОЕ РЕШЕНИЕ)
+DROP TABLE IF EXISTS access_logs;
+
 -- HTTP access logs for Activity & Users widgets
 CREATE TABLE IF NOT EXISTS access_logs
 (
@@ -19,9 +22,6 @@ CREATE TABLE IF NOT EXISTS access_logs
 ENGINE = MergeTree
 PARTITION BY toYYYYMMDD(timestamp)
 ORDER BY (timestamp, path, status_code);
-
--- Обеспечиваем наличие колонки referer для существующих таблиц
-ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS referer String AFTER user_agent;
 
 -- Background jobs for Application widget
 CREATE TABLE IF NOT EXISTS jobs
