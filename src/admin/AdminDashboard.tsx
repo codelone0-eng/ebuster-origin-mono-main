@@ -88,7 +88,8 @@ import {
   Copy,
   Code,
   ExternalLink,
-  Sliders
+  Sliders,
+  LayoutDashboard
 } from 'lucide-react';
 
 const AdminDashboard = () => {
