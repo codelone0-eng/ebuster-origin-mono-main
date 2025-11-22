@@ -32,13 +32,35 @@ cd clickhouse
 docker compose up -d
 cd ..
 
-# Ждем пока ClickHouse стартует
-log "⏳ Ожидаю запуска ClickHouse (10 секунд)..."
-sleep 10
+# Ждем пока ClickHouse стартует и проверяем доступность
+log "⏳ Ожидаю запуска ClickHouse..."
+for i in {1..30}; do
+  if docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --query "SELECT 1" >/dev/null 2>&1; then
+    log "✅ ClickHouse доступен!"
+    break
+  fi
+  if [ $i -eq 30 ]; then
+    log "⚠️  ClickHouse не отвечает после 30 попыток, продолжаю..."
+  else
+    log "   Попытка $i/30..."
+    sleep 2
+  fi
+done
 
 # Применить схему ClickHouse если нужно
 log "📋 Проверяю схему ClickHouse..."
 docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || log "⚠️  Схема уже применена или ClickHouse ещё не готов"
+
+# Проверяем, что контейнер в правильной сети
+log "🌐 Проверяю сеть ClickHouse контейнера..."
+if docker inspect ebuster-clickhouse | grep -q "ebuster-network"; then
+  log "✅ ClickHouse контейнер в сети ebuster-network"
+else
+  log "⚠️  ClickHouse контейнер не в сети ebuster-network, перезапускаю..."
+  docker compose -f clickhouse/docker-compose.yml down
+  docker compose -f clickhouse/docker-compose.yml up -d
+  sleep 5
+fi
 
 # Сохранить текущий коммит для отката
 CURRENT_COMMIT=$(git rev-parse HEAD)
