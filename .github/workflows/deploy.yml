@@ -207,9 +207,10 @@ jobs:
               docker network create ebuster-network || true
             fi
             
-            # Запустить ClickHouse
-            echo "🗄  Обновляю ClickHouse..."
+            # Запустить ClickHouse (полное пересоздание)
+            echo "🗄  ПЕРЕСОЗДАНИЕ ClickHouse..."
             cd clickhouse
+            docker compose down -v  # Удаляем старые данные
             docker compose up -d
             cd ..
             

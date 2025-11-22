@@ -27,8 +27,10 @@ if ! docker network ls | grep -q ebuster-network; then
 fi
 
 # Запустить / обновить ClickHouse (отдельный compose-файл)
-log "🗄  Обновление ClickHouse..."
+# ПОЛНЫЙ ПЕРЕСОЗДАНИЕ для гарантии правильной схемы
+log "🗄  ПЕРЕСОЗДАНИЕ ClickHouse контейнера..."
 cd clickhouse
+docker compose down -v  # -v удаляет volumes (все данные)
 docker compose up -d
 cd ..
 
