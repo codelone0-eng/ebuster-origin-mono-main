@@ -8,17 +8,26 @@ interface ClickHouseJsonResponse {
 }
 
 const DEFAULT_DB = process.env.CLICKHOUSE_DATABASE || 'ebuster';
-// Используем имя контейнера ebuster-clickhouse или localhost
-// Если CLICKHOUSE_URL не задан, пробуем разные варианты
+
+// Нормализуем CLICKHOUSE_URL - заменяем возможные варианты на правильное имя контейнера
 let CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
-if (!CLICKHOUSE_URL) {
-  // В production используем имя контейнера, иначе localhost
+if (CLICKHOUSE_URL) {
+  // Если в URL указано 'clickhouse', заменяем на имя контейнера 'ebuster-clickhouse'
+  CLICKHOUSE_URL = CLICKHOUSE_URL.replace('clickhouse:', 'ebuster-clickhouse:');
+} else {
+  // Если CLICKHOUSE_URL не задан, используем имя контейнера в production
   CLICKHOUSE_URL = process.env.NODE_ENV === 'production' 
     ? 'http://ebuster-clickhouse:8123' 
     : 'http://localhost:8123';
 }
+
 const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
 const CLICKHOUSE_PASSWORD = process.env.CLICKHOUSE_PASSWORD || '';
+
+// Логируем для отладки (только в dev или если есть ошибка)
+if (process.env.NODE_ENV !== 'production') {
+  console.log(`🔍 ClickHouse URL: ${CLICKHOUSE_URL}`);
+}
 
 export async function queryClickHouse<T = ClickHouseRow>(sql: string): Promise<T[]> {
   const url = new URL(CLICKHOUSE_URL);
@@ -74,7 +83,14 @@ export async function queryClickHouse<T = ClickHouseRow>(sql: string): Promise<T
       }
     );
 
-    req.on('error', (err) => {
+    req.on('error', (err: NodeJS.ErrnoException) => {
+      // Логируем ошибку для отладки
+      console.error(`❌ ClickHouse connection error: ${err.message}`);
+      console.error(`   URL: ${CLICKHOUSE_URL}`);
+      console.error(`   Hostname: ${url.hostname}`);
+      if (err.code === 'ENOTFOUND') {
+        console.error(`   ⚠️  Hostname '${url.hostname}' not found. Check if ClickHouse container is running and in the same network.`);
+      }
       reject(err);
     });
 

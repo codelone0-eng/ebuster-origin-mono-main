@@ -580,60 +580,65 @@ export const getActivityStats = async (req: Request, res: Response) => {
 
     // Основной источник — ClickHouse, если настроен
     if (process.env.CLICKHOUSE_URL) {
-      const fromIso = oneHourAgo.toISOString();
+      try {
+        const fromIso = oneHourAgo.toISOString();
 
-      type SummaryRow = {
-        totalRequests: number;
-        status1xx3xx: number;
-        status4xx: number;
-        status5xx: number;
-        durationAvgMs: number | null;
-        durationP95Ms: number | null;
-      };
+        type SummaryRow = {
+          totalRequests: number;
+          status1xx3xx: number;
+          status4xx: number;
+          status5xx: number;
+          durationAvgMs: number | null;
+          durationP95Ms: number | null;
+        };
 
-      const [summaryRow] = await queryClickHouse<SummaryRow>(`
-        SELECT
-          count()                                                AS totalRequests,
-          sum(status_code >= 100 AND status_code < 400)          AS status1xx3xx,
-          sum(status_code >= 400 AND status_code < 500)          AS status4xx,
-          sum(status_code >= 500 AND status_code < 600)          AS status5xx,
-          avgOrNull(duration_ms)                                 AS durationAvgMs,
-          quantileExact(0.95)(duration_ms)                       AS durationP95Ms
-        FROM access_logs
-        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-      `);
+        const [summaryRow] = await queryClickHouse<SummaryRow>(`
+          SELECT
+            count()                                                AS totalRequests,
+            sum(status_code >= 100 AND status_code < 400)          AS status1xx3xx,
+            sum(status_code >= 400 AND status_code < 500)          AS status4xx,
+            sum(status_code >= 500 AND status_code < 600)          AS status5xx,
+            avgOrNull(duration_ms)                                 AS durationAvgMs,
+            quantileExact(0.95)(duration_ms)                       AS durationP95Ms
+          FROM access_logs
+          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+        `);
 
-      type PointRow = { bucket: string; count: number };
+        type PointRow = { bucket: string; count: number };
 
-      const pointRows = await queryClickHouse<PointRow>(`
-        SELECT
-          toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS bucket,
-          count()                                         AS count
-        FROM access_logs
-        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-        GROUP BY bucket
-        ORDER BY bucket
-      `);
+        const pointRows = await queryClickHouse<PointRow>(`
+          SELECT
+            toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS bucket,
+            count()                                         AS count
+          FROM access_logs
+          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+          GROUP BY bucket
+          ORDER BY bucket
+        `);
 
-      const defaultSummary: SummaryRow = {
-        totalRequests: 0,
-        status1xx3xx: 0,
-        status4xx: 0,
-        status5xx: 0,
-        durationAvgMs: null,
-        durationP95Ms: null
-      };
+        const defaultSummary: SummaryRow = {
+          totalRequests: 0,
+          status1xx3xx: 0,
+          status4xx: 0,
+          status5xx: 0,
+          durationAvgMs: null,
+          durationP95Ms: null
+        };
 
-      return res.json({
-        success: true,
-        data: {
-          summary: summaryRow || defaultSummary,
-          points: pointRows.map((p) => ({
-            timestamp: p.bucket,
-            count: Number(p.count) || 0
-          }))
-        }
-      });
+        return res.json({
+          success: true,
+          data: {
+            summary: summaryRow || defaultSummary,
+            points: pointRows.map((p) => ({
+              timestamp: p.bucket,
+              count: Number(p.count) || 0
+            }))
+          }
+        });
+      } catch (clickhouseError) {
+        console.log('⚠️ ClickHouse недоступен, переключаюсь на Supabase fallback:', (clickhouseError as Error).message);
+        // Продолжаем выполнение - упадём в fallback на Supabase ниже
+      }
     }
 
     // Fallback — Supabase access_logs (без мок-данных)
@@ -750,59 +755,77 @@ export const getApplicationStats = async (req: Request, res: Response) => {
     };
 
     if (process.env.CLICKHOUSE_URL) {
-      // ClickHouse — основной источник, если настроен
-      const fromIso = oneHourAgo.toISOString();
+      try {
+        // ClickHouse — основной источник, если настроен
+        const fromIso = oneHourAgo.toISOString();
 
-      type JobsRow = {
-        total: number;
-        failed: number;
-        processed: number;
-        released: number;
-        avg: number | null;
-        p95: number | null;
-      };
+        type JobsRow = {
+          total: number;
+          failed: number;
+          processed: number;
+          released: number;
+          avg: number | null;
+          p95: number | null;
+        };
 
-      const [jobsRow] = await queryClickHouse<JobsRow>(`
-        SELECT
-          count()                                     AS total,
-          sum(status = 'failed')                      AS failed,
-          sum(status = 'processed')                   AS processed,
-          sum(status = 'released')                    AS released,
-          avgOrNull(duration_ms)                      AS avg,
-          quantileExact(0.95)(duration_ms)            AS p95
-        FROM jobs
-        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-      `);
+        const [jobsRow] = await queryClickHouse<JobsRow>(`
+          SELECT
+            count()                                     AS total,
+            sum(status = 'failed')                      AS failed,
+            sum(status = 'processed')                   AS processed,
+            sum(status = 'released')                    AS released,
+            avgOrNull(duration_ms)                      AS avg,
+            quantileExact(0.95)(duration_ms)            AS p95
+          FROM jobs
+          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+        `);
 
-      type ExceptionsRow = { count: number };
+        type ExceptionsRow = { count: number };
 
-      const [exceptionsRow] = await queryClickHouse<ExceptionsRow>(`
-        SELECT
-          count() AS count
-        FROM system_logs
-        WHERE level = 'ERROR'
-          AND timestamp >= parseDateTimeBestEffort('${fromIso}')
-      `);
+        const [exceptionsRow] = await queryClickHouse<ExceptionsRow>(`
+          SELECT
+            count() AS count
+          FROM system_logs
+          WHERE level = 'ERROR'
+            AND timestamp >= parseDateTimeBestEffort('${fromIso}')
+        `);
 
-      if (jobsRow) {
-        jobs.total = jobsRow.total || 0;
-        jobs.failed = jobsRow.failed || 0;
-        jobs.processed = jobsRow.processed || 0;
-        jobs.released = jobsRow.released || 0;
+        if (jobsRow) {
+          jobs.total = jobsRow.total || 0;
+          jobs.failed = jobsRow.failed || 0;
+          jobs.processed = jobsRow.processed || 0;
+          jobs.released = jobsRow.released || 0;
 
-        if (jobsRow.avg != null) {
-          jobs.duration.avg = `${jobsRow.avg.toFixed(2)}ms`;
+          if (jobsRow.avg != null) {
+            jobs.duration.avg = `${jobsRow.avg.toFixed(2)}ms`;
+          }
+          if (jobsRow.p95 != null) {
+            jobs.duration.p95 = `${jobsRow.p95.toFixed(2)}ms`;
+          }
         }
-        if (jobsRow.p95 != null) {
-          jobs.duration.p95 = `${jobsRow.p95.toFixed(2)}ms`;
-        }
-      }
 
-      if (exceptionsRow) {
-        exceptions.count = exceptionsRow.count || 0;
-        exceptions.hasExceptions = exceptions.count > 0;
+        if (exceptionsRow) {
+          exceptions.count = exceptionsRow.count || 0;
+          exceptions.hasExceptions = exceptions.count > 0;
+        }
+        
+        // Если успешно получили данные из ClickHouse, возвращаем их
+        res.json({
+          success: true,
+          data: {
+            jobs,
+            exceptions
+          }
+        });
+        return;
+      } catch (clickhouseError) {
+        console.log('⚠️ ClickHouse недоступен для Application stats, переключаюсь на Supabase fallback:', (clickhouseError as Error).message);
+        // Продолжаем выполнение - упадём в fallback на Supabase ниже
       }
-    } else {
+    }
+    
+    // Fallback — Supabase
+    {
       // Fallback — Supabase (без вложенного try/catch)
       const supabase = getSupabaseClient();
 
@@ -885,45 +908,60 @@ export const getUsersStats = async (req: Request, res: Response) => {
     };
 
     if (process.env.CLICKHOUSE_URL) {
-      const fromIso = oneHourAgo.toISOString();
+      try {
+        const fromIso = oneHourAgo.toISOString();
 
-      type RequestsRow = {
-        total: number;
-        authenticated: number;
-        guest: number;
-      };
+        type RequestsRow = {
+          total: number;
+          authenticated: number;
+          guest: number;
+        };
 
-      const [reqRow] = await queryClickHouse<RequestsRow>(`
-        SELECT
-          count()                                  AS total,
-          sum(user_id != '' AND user_id IS NOT NULL) AS authenticated,
-          sum(user_id = '' OR user_id IS NULL)    AS guest
-        FROM access_logs
-        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-      `);
+        const [reqRow] = await queryClickHouse<RequestsRow>(`
+          SELECT
+            count()                                  AS total,
+            sum(user_id != '' AND user_id IS NOT NULL) AS authenticated,
+            sum(user_id = '' OR user_id IS NULL)    AS guest
+          FROM access_logs
+          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+        `);
 
-      type ImpactedRow = { impacted: number };
+        type ImpactedRow = { impacted: number };
 
-      const [impactedRow] = await queryClickHouse<ImpactedRow>(`
-        SELECT
-          countDistinct(user_id) AS impacted
-        FROM system_logs
-        WHERE level = 'ERROR'
-          AND user_id IS NOT NULL
-          AND timestamp >= parseDateTimeBestEffort('${fromIso}')
-      `);
+        const [impactedRow] = await queryClickHouse<ImpactedRow>(`
+          SELECT
+            countDistinct(user_id) AS impacted
+          FROM system_logs
+          WHERE level = 'ERROR'
+            AND user_id IS NOT NULL
+            AND timestamp >= parseDateTimeBestEffort('${fromIso}')
+        `);
 
-      if (reqRow) {
-        stats.requests.total = reqRow.total || 0;
-        stats.requests.authenticated = reqRow.authenticated || 0;
-        stats.requests.guest = reqRow.guest || 0;
+        if (reqRow) {
+          stats.requests.total = reqRow.total || 0;
+          stats.requests.authenticated = reqRow.authenticated || 0;
+          stats.requests.guest = reqRow.guest || 0;
+        }
+
+        if (impactedRow) {
+          stats.exceptions.impacted = impactedRow.impacted || 0;
+          stats.exceptions.hasExceptions = stats.exceptions.impacted > 0;
+        }
+        
+        // Если успешно получили данные из ClickHouse, возвращаем их
+        res.json({
+          success: true,
+          data: stats
+        });
+        return;
+      } catch (clickhouseError) {
+        console.log('⚠️ ClickHouse недоступен для Users stats, переключаюсь на Supabase fallback:', (clickhouseError as Error).message);
+        // Продолжаем выполнение - упадём в fallback на Supabase ниже
       }
-
-      if (impactedRow) {
-        stats.exceptions.impacted = impactedRow.impacted || 0;
-        stats.exceptions.hasExceptions = stats.exceptions.impacted > 0;
-      }
-    } else {
+    }
+    
+    // Fallback — Supabase
+    {
       const supabase = getSupabaseClient();
 
       if (supabase) {
