@@ -19,6 +19,10 @@ fi
 
 cd /srv/ebuster
 
+# Запустить / обновить ClickHouse (отдельный compose-файл)
+log "🗄  Обновление ClickHouse..."
+docker compose -f clickhouse/docker-compose.yml up -d || docker-compose -f clickhouse/docker-compose.yml up -d
+
 # Сохранить текущий коммит для отката
 CURRENT_COMMIT=$(git rev-parse HEAD)
 log "📌 Текущий коммит: $CURRENT_COMMIT"

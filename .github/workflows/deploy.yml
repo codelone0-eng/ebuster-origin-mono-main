@@ -199,12 +199,15 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
             cd /srv/ebuster
+            echo "🗄  Обновляю ClickHouse..."
+            docker compose -f clickhouse/docker-compose.yml up -d || docker-compose -f clickhouse/docker-compose.yml up -d
             echo "▶️  Запускаю все сервисы..."
             echo "📋 Порядок запуска:"
-            echo "   1. autotest-stream (WebSocket сервер)"
-            echo "   2. autotest-dashboard-init (генерация placeholder)"
-            echo "   3. api (Backend API)"
-            echo "   4. frontend (Nginx + все UI приложения)"
+            echo "   1. ClickHouse (clickhouse)"
+            echo "   2. autotest-stream (WebSocket сервер)"
+            echo "   3. autotest-dashboard-init (генерация placeholder)"
+            echo "   4. api (Backend API)"
+            echo "   5. frontend (Nginx + все UI приложения)"
             docker compose up -d
             echo "✅ Все сервисы запущены"
           ENDSSH
