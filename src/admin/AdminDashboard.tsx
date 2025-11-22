@@ -555,15 +555,18 @@ const AdminDashboard = () => {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ru-RU', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZoneName: 'short'
-    });
+    const months = ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const timezoneOffset = -date.getTimezoneOffset() / 60;
+    const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
+    const timezoneHours = String(Math.abs(timezoneOffset)).padStart(2, '0');
+    
+    return `${day} ${month} ${year} г., ${hours}:${minutes}:${seconds} ${timezoneSign}${timezoneHours}:00`;
   };
 
   const getCurrentTimestamp = () => {
@@ -580,7 +583,10 @@ const AdminDashboard = () => {
         <main className="flex-1 ml-64 flex flex-col bg-[#1a1a1a]">
           {/* Top Header Bar */}
           <div className="h-16 border-b border-[#2d2d2d] flex items-center justify-between px-6 bg-[#1f1f1f]" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-            <div className="text-white text-lg font-semibold" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Dashboard</div>
+            <div className="flex items-center gap-3">
+              <div className="text-white text-sm font-semibold" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>Ebuster Production</div>
+              <div className="text-white text-lg font-semibold" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Dashboard</div>
+            </div>
             <div className="flex items-center gap-0" style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}>
               <button
                 onClick={() => setTimeRange('1H')}
@@ -671,6 +677,9 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#404040] flex items-center justify-center cursor-pointer hover:bg-[#4d4d4d]">
+                <Bell className="h-4 w-4 text-[#d9d9d9]" />
+              </div>
               <div className="w-8 h-8 rounded-full bg-[#404040] flex items-center justify-center cursor-pointer hover:bg-[#4d4d4d]">
                 <Users className="h-4 w-4 text-[#d9d9d9]" />
               </div>
@@ -802,12 +811,12 @@ const AdminDashboard = () => {
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#808080]" style={{ width: '8px', height: '8px', backgroundColor: '#808080' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ width: '8px', height: '8px', backgroundColor: '#10b981' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>PROCESSED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500" style={{ width: '8px', height: '8px', backgroundColor: '#f97316' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500" style={{ width: '8px', height: '8px', backgroundColor: '#3b82f6' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>RELEASED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>0</span>
                       </div>

@@ -27,7 +27,7 @@ const menuItems = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'tickets', label: 'Issues', icon: FileText },
   { id: 'monitoring', label: 'Activity', icon: Activity, hasSubmenu: true },
-  { id: 'monitoring2', label: 'Monitoring', icon: BarChart3 },
+  { id: 'monitoring2', label: 'Monitoring', icon: BarChart3, isSubmenu: true },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'logs', label: 'Logs', icon: MessageSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -59,9 +59,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors relative",
+                "w-full flex items-center gap-2.5 py-2 text-sm transition-colors relative",
                 "hover:bg-[#2d2d2d] group",
-                isActive && "bg-[#2d2d2d] text-white"
+                isActive && "bg-[#2d2d2d] text-white",
+                item.isSubmenu ? "pl-8" : "px-3"
               )}
               style={{
                 borderLeft: isActive ? '2px solid white' : 'none',
