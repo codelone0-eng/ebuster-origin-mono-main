@@ -9,18 +9,31 @@ interface ClickHouseJsonResponse {
 
 const DEFAULT_DB = process.env.CLICKHOUSE_DATABASE || 'ebuster';
 
-// Нормализуем CLICKHOUSE_URL
-// В Docker Compose контейнеры могут обращаться друг к другу по имени сервиса или контейнера
-// Но если они в разных compose-файлах, лучше использовать localhost (порт проброшен на хост)
+// Используем поддомен clickhouse.ebuster.ru для доступа к ClickHouse
+// Это решает проблемы с Docker сетями и позволяет использовать HTTPS
 let CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
-if (CLICKHOUSE_URL) {
-  // Заменяем возможные варианты имён на localhost (порт проброшен на хост)
-  CLICKHOUSE_URL = CLICKHOUSE_URL
-    .replace(/clickhouse:\d+/, 'localhost:8123')
-    .replace(/ebuster-clickhouse:\d+/, 'localhost:8123');
+if (!CLICKHOUSE_URL) {
+  // По умолчанию используем поддомен
+  CLICKHOUSE_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://clickhouse.ebuster.ru'
+    : 'http://localhost:8123';
 } else {
-  // По умолчанию используем localhost (порт 8123 проброшен на хост)
-  CLICKHOUSE_URL = 'http://localhost:8123';
+  // Нормализуем URL: если указан старый формат, заменяем на поддомен
+  if (CLICKHOUSE_URL.includes('localhost:') || CLICKHOUSE_URL.includes('127.0.0.1:')) {
+    CLICKHOUSE_URL = process.env.NODE_ENV === 'production'
+      ? 'https://clickhouse.ebuster.ru'
+      : CLICKHOUSE_URL;
+  } else if (CLICKHOUSE_URL.includes('clickhouse:') || CLICKHOUSE_URL.includes('ebuster-clickhouse:')) {
+    // Заменяем имя контейнера на поддомен
+    CLICKHOUSE_URL = process.env.NODE_ENV === 'production'
+      ? 'https://clickhouse.ebuster.ru'
+      : 'http://localhost:8123';
+  } else if (CLICKHOUSE_URL.includes('host.docker.internal:')) {
+    // Заменяем host.docker.internal на поддомен
+    CLICKHOUSE_URL = process.env.NODE_ENV === 'production'
+      ? 'https://clickhouse.ebuster.ru'
+      : CLICKHOUSE_URL;
+  }
 }
 
 const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
