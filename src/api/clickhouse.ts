@@ -39,32 +39,46 @@ if (!CLICKHOUSE_URL) {
 const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
 const CLICKHOUSE_PASSWORD = process.env.CLICKHOUSE_PASSWORD || '';
 
-// Логируем для отладки (только в dev или если есть ошибка)
-if (process.env.NODE_ENV !== 'production') {
-  console.log(`🔍 ClickHouse URL: ${CLICKHOUSE_URL}`);
-}
+// Логируем конфигурацию при старте
+console.log(`🔍 ClickHouse Configuration:`);
+console.log(`   URL: ${CLICKHOUSE_URL}`);
+console.log(`   Database: ${DEFAULT_DB}`);
+console.log(`   User: ${CLICKHOUSE_USER}`);
+console.log(`   Password: ${CLICKHOUSE_PASSWORD ? '***' : '(not set)'}`);
 
 export async function queryClickHouse<T = ClickHouseRow>(sql: string): Promise<T[]> {
   const url = new URL(CLICKHOUSE_URL);
   const isHttps = url.protocol === 'https:';
   const client = isHttps ? https : http;
 
+  // Для HTTPS в Node.js нужно отключить проверку сертификата для внутренних доменов
+  // или использовать правильные сертификаты
+  const httpsAgent = isHttps ? new https.Agent({
+    rejectUnauthorized: false // Отключаем проверку SSL для внутренних доменов
+  }) : undefined;
+
   const body = `${sql} FORMAT JSON`;
 
   return new Promise<T[]>((resolve, reject) => {
-    const req = client.request(
-      {
-        hostname: url.hostname,
-        port: url.port || (isHttps ? 443 : 80),
-        path: `/?database=${encodeURIComponent(DEFAULT_DB)}`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
-          'Content-Length': Buffer.byteLength(body),
-          'X-ClickHouse-User': CLICKHOUSE_USER,
-          'X-ClickHouse-Key': CLICKHOUSE_PASSWORD
-        }
-      },
+    const requestOptions: any = {
+      hostname: url.hostname,
+      port: url.port || (isHttps ? 443 : 80),
+      path: `/?database=${encodeURIComponent(DEFAULT_DB)}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+        'Content-Length': Buffer.byteLength(body),
+        'X-ClickHouse-User': CLICKHOUSE_USER,
+        'X-ClickHouse-Key': CLICKHOUSE_PASSWORD
+      }
+    };
+
+    // Добавляем agent для HTTPS если нужно
+    if (isHttps && httpsAgent) {
+      requestOptions.agent = httpsAgent;
+    }
+
+    const req = client.request(requestOptions,
       (res) => {
         const chunks: Buffer[] = [];
 
