@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { notificationTranslations } from '@/lib/notification-translations';
 import { useAdminApi } from '@/hooks/useAdminApi';
