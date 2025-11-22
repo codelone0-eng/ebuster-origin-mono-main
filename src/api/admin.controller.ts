@@ -586,7 +586,7 @@ export const getActivityStats = async (req: Request, res: Response) => {
       status4xx: 0,
       status5xx: 0,
       durationAvgMs: null as number | null,
-      durationP95Ms: null as number | null
+      durationP95Ms: null as number | null,
     };
 
     let points: { timestamp: string; count: number }[] = [];
@@ -653,14 +653,205 @@ export const getActivityStats = async (req: Request, res: Response) => {
       success: true,
       data: {
         summary,
-        points
-      }
+        points,
+      },
     });
   } catch (error) {
     console.error('Ошибка получения статистики активности:', error);
     res.status(500).json({
       success: false,
-      error: 'Ошибка получения статистики активности'
+      error: 'Ошибка получения статистики активности',
+    });
+  }
+};
+
+// Детальная статистика по HTTP-запросам (по роутам)
+export const getRequestsStats = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      console.warn('⚠️ Supabase недоступен, возвращаем пустую статистику запросов');
+      return res.json({
+        success: true,
+        data: {
+          range: '1h',
+          summary: {
+            totalRequests: 0,
+            uniqueRoutes: 0,
+            error4xx: 0,
+            error5xx: 0,
+          },
+          routes: [],
+        },
+      });
+    }
+
+    const range = (req.query.range as string) || '1h';
+    const now = new Date();
+    const from = new Date(now);
+
+    switch (range) {
+      case '24h':
+        from.setHours(now.getHours() - 24);
+        break;
+      case '7d':
+        from.setDate(now.getDate() - 7);
+        break;
+      default:
+        from.setHours(now.getHours() - 1);
+        break;
+    }
+
+    const { data, error } = await supabase
+      .from('access_logs')
+      .select('method, path, status_code, duration_ms, created_at')
+      .gte('created_at', from.toISOString());
+
+    if (error || !data) {
+      console.error('Ошибка получения access_logs для requests-stats:', error);
+      return res.json({
+        success: true,
+        data: {
+          range,
+          summary: {
+            totalRequests: 0,
+            uniqueRoutes: 0,
+            error4xx: 0,
+            error5xx: 0,
+          },
+          routes: [],
+        },
+      });
+    }
+
+    type RouteAgg = {
+      method: string;
+      path: string;
+      totalRequests: number;
+      error4xx: number;
+      error5xx: number;
+      durations: number[];
+      lastStatusCode: number | null;
+      lastSeen: string | null;
+    };
+
+    const routeMap = new Map<string, RouteAgg>();
+
+    let totalRequests = 0;
+    let total4xx = 0;
+    let total5xx = 0;
+
+    data.forEach((row: any) => {
+      const method = (row.method || 'GET').toUpperCase();
+      const path = row.path || '/';
+      const status = Number(row.status_code) || 0;
+      const duration = typeof row.duration_ms === 'number'
+        ? row.duration_ms
+        : row.duration_ms != null
+        ? Number(row.duration_ms)
+        : null;
+      const createdAt = row.created_at || null;
+
+      const key = `${method} ${path}`;
+
+      if (!routeMap.has(key)) {
+        routeMap.set(key, {
+          method,
+          path,
+          totalRequests: 0,
+          error4xx: 0,
+          error5xx: 0,
+          durations: [],
+          lastStatusCode: null,
+          lastSeen: null,
+        });
+      }
+
+      const agg = routeMap.get(key)!;
+
+      agg.totalRequests += 1;
+      totalRequests += 1;
+
+      if (status >= 400 && status < 500) {
+        agg.error4xx += 1;
+        total4xx += 1;
+      } else if (status >= 500 && status < 600) {
+        agg.error5xx += 1;
+        total5xx += 1;
+      }
+
+      if (duration != null && !Number.isNaN(duration)) {
+        agg.durations.push(duration);
+      }
+
+      if (createdAt) {
+        const currentTs = agg.lastSeen ? new Date(agg.lastSeen).getTime() : 0;
+        const rowTs = new Date(createdAt).getTime();
+
+        if (!agg.lastSeen || rowTs > currentTs) {
+          agg.lastSeen = createdAt;
+          agg.lastStatusCode = status || null;
+        }
+      }
+    });
+
+    const routes = Array.from(routeMap.values())
+      .map((agg) => {
+        let avg: number | null = null;
+        let p95: number | null = null;
+
+        if (agg.durations.length > 0) {
+          const sum = agg.durations.reduce((acc, v) => acc + v, 0);
+          avg = sum / agg.durations.length;
+
+          const sorted = [...agg.durations].sort((a, b) => a - b);
+          const p95Index = Math.floor(sorted.length * 0.95);
+          p95 = sorted[p95Index] ?? null;
+        }
+
+        const errorTotal = agg.error4xx + agg.error5xx;
+        const errorRate = agg.totalRequests > 0 ? errorTotal / agg.totalRequests : 0;
+
+        return {
+          method: agg.method,
+          path: agg.path,
+          totalRequests: agg.totalRequests,
+          error4xx: agg.error4xx,
+          error5xx: agg.error5xx,
+          lastStatusCode: agg.lastStatusCode,
+          lastSeen: agg.lastSeen,
+          avgDurationMs: avg,
+          p95DurationMs: p95,
+          errorRate,
+        };
+      })
+      .sort((a, b) => {
+        // Сначала критичные (5xx), потом 4xx, потом по количеству запросов
+        const aErrors = a.error5xx * 2 + a.error4xx;
+        const bErrors = b.error5xx * 2 + b.error4xx;
+        if (bErrors !== aErrors) return bErrors - aErrors;
+        return b.totalRequests - a.totalRequests;
+      });
+
+    res.json({
+      success: true,
+      data: {
+        range,
+        summary: {
+          totalRequests,
+          uniqueRoutes: routes.length,
+          error4xx: total4xx,
+          error5xx: total5xx,
+        },
+        routes,
+      },
+    });
+  } catch (error) {
+    console.error('Ошибка получения статистики запросов:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения статистики запросов',
     });
   }
 };

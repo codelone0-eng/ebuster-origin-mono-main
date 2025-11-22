@@ -188,6 +188,17 @@ const AdminDashboard = () => {
   const [recentTickets, setRecentTickets] = useState([]);
   const [applicationStats, setApplicationStats] = useState<any>(null);
   const [usersStats, setUsersStats] = useState<any>(null);
+  const [requestsStats, setRequestsStats] = useState<any>(null);
+  const [selectedRouteKey, setSelectedRouteKey] = useState<string | null>(null);
+  const [requestsFilter, setRequestsFilter] = useState<{
+    search: string;
+    status: 'all' | 'ok' | '4xx' | '5xx';
+    method: 'ALL' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  }>({
+    search: '',
+    status: 'all',
+    method: 'ALL',
+  });
   const [systemStatus, setSystemStatus] = useState({
     cpu: { usage: 0, model: 'Loading...' },
     memory: { usage: 0, total: '0GB', used: '0GB' },
@@ -321,6 +332,10 @@ const AdminDashboard = () => {
         // Загружаем статистику активности
         const activityData = await adminApi.getActivityStats();
         setActivityStats(activityData);
+
+        // Загружаем статистику запросов по роутам
+        const requestsData = await adminApi.getRequestsStats({ range: '1h' });
+        setRequestsStats(requestsData);
 
         // Загружаем статистику по тикетам
         const ticketData = await adminApi.getTicketStats();
@@ -1099,6 +1114,412 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Requests – детальная вкладка по HTTP маршрутам */}
+            {activeTab === 'requests' && (
+              <div className="space-y-6">
+                <div
+                  className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6"
+                  style={{
+                    fontFamily:
+                      'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="h-5 w-5 text-[#d9d9d9]" />
+                        <h2
+                          className="text-lg font-semibold text-white"
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 600,
+                            lineHeight: '1.5',
+                          }}
+                        >
+                          Requests
+                        </h2>
+                      </div>
+                      <div
+                        className="text-xs text-neutral-500 dark:text-neutral-400"
+                        style={{ fontSize: '12px', lineHeight: '1.5' }}
+                      >
+                        Детальная статистика по HTTP-маршрутам: нагрузка, ошибки, латентность.
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 px-2 py-1 rounded bg-[#111111] border border-[#2d2d2d]">
+                        <span
+                          className="text-xs text-neutral-500 uppercase"
+                          style={{
+                            fontSize: '11px',
+                            letterSpacing: '0.08em',
+                          }}
+                        >
+                          Range
+                        </span>
+                        <span className="text-xs text-white">
+                          {requestsStats?.range === '24h'
+                            ? 'Last 24 hours'
+                            : requestsStats?.range === '7d'
+                            ? 'Last 7 days'
+                            : 'Last hour'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      <div className={`${metricLabelClass} mb-2`}>TOTAL REQUESTS</div>
+                      <div
+                        className="text-2xl font-bold text-white"
+                        style={{ fontSize: '24px', fontWeight: 700, lineHeight: '1.2' }}
+                      >
+                        {requestsStats?.summary?.totalRequests ?? 0}
+                      </div>
+                    </div>
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      <div className={`${metricLabelClass} mb-2`}>UNIQUE ROUTES</div>
+                      <div
+                        className="text-2xl font-bold text-white"
+                        style={{ fontSize: '24px', fontWeight: 700, lineHeight: '1.2' }}
+                      >
+                        {requestsStats?.summary?.uniqueRoutes ?? 0}
+                      </div>
+                    </div>
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      <div className={`${metricLabelClass} mb-2`}>4XX</div>
+                      <div
+                        className="text-2xl font-bold text-[#f97316]"
+                        style={{ fontSize: '24px', fontWeight: 700, lineHeight: '1.2' }}
+                      >
+                        {requestsStats?.summary?.error4xx ?? 0}
+                      </div>
+                    </div>
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      <div className={`${metricLabelClass} mb-2`}>5XX</div>
+                      <div
+                        className="text-2xl font-bold text-[#ef4444]"
+                        style={{ fontSize: '24px', fontWeight: 700, lineHeight: '1.2' }}
+                      >
+                        {requestsStats?.summary?.error5xx ?? 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1.3fr)] gap-6">
+                    {/* Routes table */}
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      <div className="flex items-center justify-between mb-4 gap-3">
+                        <div className={`${metricLabelClass}`}>ROUTES</div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder="Filter by path…"
+                            className="h-8 w-44 bg-[#111111] border-[#333333] text-xs"
+                            value={requestsFilter.search}
+                            onChange={(e) =>
+                              setRequestsFilter((prev) => ({
+                                ...prev,
+                                search: e.target.value,
+                              }))
+                            }
+                          />
+                          <Select
+                            value={requestsFilter.method}
+                            onValueChange={(value) =>
+                              setRequestsFilter((prev) => ({
+                                ...prev,
+                                method: value as any,
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="h-8 w-24 bg-[#111111] border-[#333333] text-xs">
+                              <SelectValue placeholder="Method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ALL">ALL</SelectItem>
+                              <SelectItem value="GET">GET</SelectItem>
+                              <SelectItem value="POST">POST</SelectItem>
+                              <SelectItem value="PUT">PUT</SelectItem>
+                              <SelectItem value="PATCH">PATCH</SelectItem>
+                              <SelectItem value="DELETE">DELETE</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mb-3">
+                        {[
+                          { id: 'all', label: 'All' },
+                          { id: 'ok', label: 'OK' },
+                          { id: '4xx', label: '4XX' },
+                          { id: '5xx', label: '5XX' },
+                        ].map((f) => {
+                          const isActive = requestsFilter.status === f.id;
+                          return (
+                            <button
+                              key={f.id}
+                              onClick={() =>
+                                setRequestsFilter((prev) => ({
+                                  ...prev,
+                                  status: f.id as any,
+                                }))
+                              }
+                              className={cn(
+                                'px-2.5 py-1 rounded text-xs border',
+                                isActive
+                                  ? 'bg-[#e5e5e5] text-black border-[#e5e5e5]'
+                                  : 'bg-[#111111] text-[#a3a3a3] border-[#333333] hover:bg-[#262626]'
+                              )}
+                            >
+                              {f.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="border border-[#2d2d2d] rounded overflow-hidden">
+                        <div className="grid grid-cols-[70px_minmax(0,1.8fr)_80px_80px_80px_90px_90px] px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-neutral-500 bg-[#111111]">
+                          <div>Method</div>
+                          <div>Route</div>
+                          <div className="text-right">Req</div>
+                          <div className="text-right">4XX</div>
+                          <div className="text-right">5XX</div>
+                          <div className="text-right">Avg</div>
+                          <div className="text-right">P95</div>
+                        </div>
+
+                        <div className="max-h-[420px] overflow-y-auto divide-y divide-[#2d2d2d]">
+                          {(requestsStats?.routes || [])
+                            .filter((r: any) => {
+                              if (requestsFilter.method !== 'ALL' && r.method !== requestsFilter.method) {
+                                return false;
+                              }
+
+                              if (requestsFilter.search) {
+                                const s = requestsFilter.search.toLowerCase();
+                                if (!r.path.toLowerCase().includes(s)) {
+                                  return false;
+                                }
+                              }
+
+                              if (requestsFilter.status === '4xx' && r.error4xx === 0) return false;
+                              if (requestsFilter.status === '5xx' && r.error5xx === 0) return false;
+                              if (requestsFilter.status === 'ok' && (r.error4xx > 0 || r.error5xx > 0)) {
+                                return false;
+                              }
+
+                              return true;
+                            })
+                            .map((route: any) => {
+                              const key = `${route.method} ${route.path}`;
+                              const isSelected = selectedRouteKey === key;
+                              const errorTotal = (route.error4xx || 0) + (route.error5xx || 0);
+                              const severity =
+                                route.error5xx > 0
+                                  ? 'critical'
+                                  : route.error4xx > 0
+                                  ? 'warning'
+                                  : 'ok';
+
+                              return (
+                                <button
+                                  key={key}
+                                  onClick={() =>
+                                    setSelectedRouteKey((prev) => (prev === key ? null : key))
+                                  }
+                                  className={cn(
+                                    'w-full grid grid-cols-[70px_minmax(0,1.8fr)_80px_80px_80px_90px_90px] px-3 py-2 text-xs text-left hover:bg-[#272727]',
+                                    isSelected && 'bg-[#272727]'
+                                  )}
+                                >
+                                  <div className="font-mono text-[11px] text-[#a3a3a3]">
+                                    {route.method}
+                                  </div>
+                                  <div className="truncate text-[#e5e5e5]">{route.path}</div>
+                                  <div className="text-right tabular-nums text-[#e5e5e5]">
+                                    {route.totalRequests}
+                                  </div>
+                                  <div className="text-right tabular-nums text-[#f97316]">
+                                    {route.error4xx || 0}
+                                  </div>
+                                  <div className="text-right tabular-nums text-[#ef4444]">
+                                    {route.error5xx || 0}
+                                  </div>
+                                  <div className="text-right tabular-nums text-[#e5e5e5]">
+                                    {route.avgDurationMs != null
+                                      ? `${Math.round(route.avgDurationMs)}ms`
+                                      : '-'}
+                                  </div>
+                                  <div className="text-right tabular-nums text-[#e5e5e5]">
+                                    {route.p95DurationMs != null
+                                      ? `${Math.round(route.p95DurationMs)}ms`
+                                      : '-'}
+                                  </div>
+                                  {errorTotal > 0 && (
+                                    <div className="col-span-7 mt-1 flex items-center gap-1">
+                                      <div
+                                        className={cn(
+                                          'h-1.5 rounded-full',
+                                          severity === 'critical'
+                                            ? 'bg-[#ef4444] w-2/3'
+                                            : severity === 'warning'
+                                            ? 'bg-[#f97316] w-1/3'
+                                            : 'bg-[#22c55e] w-1/6'
+                                        )}
+                                      />
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Route details */}
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                      {(() => {
+                        const routes = requestsStats?.routes || [];
+                        const current =
+                          routes.find(
+                            (r: any) => `${r.method} ${r.path}` === selectedRouteKey
+                          ) || routes[0];
+
+                        if (!current) {
+                          return (
+                            <div className="h-full flex items-center justify-center text-xs text-neutral-500">
+                              Выберите маршрут слева, чтобы увидеть детали.
+                            </div>
+                          );
+                        }
+
+                        const errorTotal =
+                          (current.error4xx || 0) + (current.error5xx || 0);
+                        const errorRate =
+                          current.totalRequests > 0
+                            ? errorTotal / current.totalRequests
+                            : 0;
+                        const severity =
+                          current.error5xx > 0
+                            ? 'critical'
+                            : current.error4xx > 0
+                            ? 'warning'
+                            : 'ok';
+
+                        const severityLabel =
+                          severity === 'critical'
+                            ? 'CRITICAL'
+                            : severity === 'warning'
+                            ? 'WARNING'
+                            : 'HEALTHY';
+
+                        const severityColor =
+                          severity === 'critical'
+                            ? '#ef4444'
+                            : severity === 'warning'
+                            ? '#f97316'
+                            : '#22c55e';
+
+                        return (
+                          <div className="flex flex-col h-full">
+                            <div className="mb-4">
+                              <div className={`${metricLabelClass} mb-2`}>
+                                SELECTED ROUTE
+                              </div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="px-1.5 py-0.5 rounded bg-[#111111] border border-[#333333] text-[11px] font-mono text-[#e5e5e5]">
+                                  {current.method}
+                                </span>
+                                <span className="text-sm text-white break-all">
+                                  {current.path}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span
+                                  className="px-2 py-0.5 rounded-full text-[11px] font-medium uppercase"
+                                  style={{
+                                    backgroundColor: `${severityColor}22`,
+                                    color: severityColor,
+                                    letterSpacing: '0.08em',
+                                  }}
+                                >
+                                  {severityLabel}
+                                </span>
+                                <span className="text-xs text-neutral-500">
+                                  Error rate:{' '}
+                                  {(errorRate * 100).toFixed(1).replace('.0', '')}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div>
+                                <div className={`${metricLabelClass} mb-1`}>
+                                  REQUESTS
+                                </div>
+                                <div className="text-xl font-semibold text-white">
+                                  {current.totalRequests}
+                                </div>
+                              </div>
+                              <div>
+                                <div className={`${metricLabelClass} mb-1`}>
+                                  LAST STATUS
+                                </div>
+                                <div className="text-xl font-semibold text-white">
+                                  {current.lastStatusCode ?? '-'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className={`${metricLabelClass} mb-1`}>
+                                  AVG DURATION
+                                </div>
+                                <div className="text-xl font-semibold text-white">
+                                  {current.avgDurationMs != null
+                                    ? `${Math.round(current.avgDurationMs)}ms`
+                                    : '-'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className={`${metricLabelClass} mb-1`}>
+                                  P95 DURATION
+                                </div>
+                                <div className="text-xl font-semibold text-white">
+                                  {current.p95DurationMs != null
+                                    ? `${Math.round(current.p95DurationMs)}ms`
+                                    : '-'}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-auto text-[11px] text-neutral-500">
+                              {current.lastSeen && (
+                                <div>
+                                  Last seen:{' '}
+                                  {new Date(current.lastSeen).toLocaleString('ru-RU')}
+                                </div>
+                              )}
+                              <div>
+                                Errors:{' '}
+                                <span className="text-[#f97316]">
+                                  {current.error4xx || 0} 4xx
+                                </span>
+                                {', '}
+                                <span className="text-[#ef4444]">
+                                  {current.error5xx || 0} 5xx
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             )}
 
             {/* Пользователи */}

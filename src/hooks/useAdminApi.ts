@@ -199,6 +199,17 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  const getRequestsStats = async (params: { range?: string } = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.range) queryParams.append('range', params.range);
+
+    const query = queryParams.toString();
+    const url = `/api/admin/requests-stats${query ? `?${query}` : ''}`;
+
+    const response = await fetchWithAuth(url);
+    return response.data;
+  };
+
   return {
     loading,
     error,
@@ -213,6 +224,7 @@ export const useAdminApi = () => {
     getSystemMonitor,
     getTicketStats,
     getApplicationStats,
-    getUsersStats
+    getUsersStats,
+    getRequestsStats,
   };
 };

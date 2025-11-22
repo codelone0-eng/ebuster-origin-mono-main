@@ -10,10 +10,11 @@ import {
   getSystemLogs,
   getBrowserStats,
   getActivityStats,
+  getRequestsStats,
+  getApplicationStats,
+  getUsersStats,
   searchUsers,
   getAdminTicketStats,
-  getApplicationStats,
-  getUsersStats
 } from './admin.controller';
 import { getSystemMonitor } from './system-monitor.controller';
 import {
@@ -56,6 +57,9 @@ router.get('/ticket-stats', getAdminTicketStats);
 
 // Статистика активности
 router.get('/activity-stats', getActivityStats);
+
+// Статистика запросов по роутам
+router.get('/requests-stats', getRequestsStats);
 
 // Мониторинг системы
 router.get('/system-monitor', getSystemMonitor);
