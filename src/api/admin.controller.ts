@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
+import { queryClickHouse } from './clickhouse';
 
 // Ленивая инициализация Supabase клиента
 let supabaseClient: any = null;
@@ -575,9 +576,68 @@ export const getBrowserStats = async (req: Request, res: Response) => {
 // Получение статистики активности по времени
 export const getActivityStats = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
+    // Основной источник — ClickHouse, если настроен
+    if (process.env.CLICKHOUSE_URL) {
+      const fromIso = oneHourAgo.toISOString();
+
+      type SummaryRow = {
+        totalRequests: number;
+        status1xx3xx: number;
+        status4xx: number;
+        status5xx: number;
+        durationAvgMs: number | null;
+        durationP95Ms: number | null;
+      };
+
+      const [summaryRow] = await queryClickHouse<SummaryRow>(`
+        SELECT
+          count()                                                AS totalRequests,
+          sum(status_code >= 100 AND status_code < 400)          AS status1xx3xx,
+          sum(status_code >= 400 AND status_code < 500)          AS status4xx,
+          sum(status_code >= 500 AND status_code < 600)          AS status5xx,
+          avgOrNull(duration_ms)                                 AS durationAvgMs,
+          quantileExact(0.95)(duration_ms)                       AS durationP95Ms
+        FROM access_logs
+        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+      `);
+
+      type PointRow = { bucket: string; count: number };
+
+      const pointRows = await queryClickHouse<PointRow>(`
+        SELECT
+          toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS bucket,
+          count()                                         AS count
+        FROM access_logs
+        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+        GROUP BY bucket
+        ORDER BY bucket
+      `);
+
+      const defaultSummary: SummaryRow = {
+        totalRequests: 0,
+        status1xx3xx: 0,
+        status4xx: 0,
+        status5xx: 0,
+        durationAvgMs: null,
+        durationP95Ms: null
+      };
+
+      return res.json({
+        success: true,
+        data: {
+          summary: summaryRow || defaultSummary,
+          points: pointRows.map((p) => ({
+            timestamp: p.bucket,
+            count: Number(p.count) || 0
+          }))
+        }
+      });
+    }
+
+    // Fallback — Supabase access_logs (без мок-данных)
+    const supabase = getSupabaseClient();
     const summary = {
       totalRequests: 0,
       status1xx3xx: 0,
@@ -671,7 +731,6 @@ export const getActivityStats = async (req: Request, res: Response) => {
 // Получение статистики Application
 export const getApplicationStats = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
     let jobs = {
@@ -690,7 +749,64 @@ export const getApplicationStats = async (req: Request, res: Response) => {
       hasExceptions: false
     };
 
-    if (supabase) {
+    // ClickHouse — основной источник, если настроен
+    if (process.env.CLICKHOUSE_URL) {
+      const fromIso = oneHourAgo.toISOString();
+
+      type JobsRow = {
+        total: number;
+        failed: number;
+        processed: number;
+        released: number;
+        avg: number | null;
+        p95: number | null;
+      };
+
+      const [jobsRow] = await queryClickHouse<JobsRow>(`
+        SELECT
+          count()                                     AS total,
+          sum(status = 'failed')                      AS failed,
+          sum(status = 'processed')                   AS processed,
+          sum(status = 'released')                    AS released,
+          avgOrNull(duration_ms)                      AS avg,
+          quantileExact(0.95)(duration_ms)            AS p95
+        FROM jobs
+        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+      `);
+
+      type ExceptionsRow = { count: number };
+
+      const [exceptionsRow] = await queryClickHouse<ExceptionsRow>(`
+        SELECT
+          count() AS count
+        FROM system_logs
+        WHERE level = 'ERROR'
+          AND timestamp >= parseDateTimeBestEffort('${fromIso}')
+      `);
+
+      if (jobsRow) {
+        jobs.total = jobsRow.total || 0;
+        jobs.failed = jobsRow.failed || 0;
+        jobs.processed = jobsRow.processed || 0;
+        jobs.released = jobsRow.released || 0;
+
+        if (jobsRow.avg != null) {
+          jobs.duration.avg = `${jobsRow.avg.toFixed(2)}ms`;
+        }
+        if (jobsRow.p95 != null) {
+          jobs.duration.p95 = `${jobsRow.p95.toFixed(2)}ms`;
+        }
+      }
+
+      if (exceptionsRow) {
+        exceptions.count = exceptionsRow.count || 0;
+        exceptions.hasExceptions = exceptions.count > 0;
+      }
+    } else {
+      // Fallback — Supabase
+      const supabase = getSupabaseClient();
+
+      if (supabase) {
       try {
         // Получаем статистику по jobs (если есть таблица jobs)
         const { data: jobsData, error: jobsError } = await supabase
@@ -753,7 +869,6 @@ export const getApplicationStats = async (req: Request, res: Response) => {
 // Получение статистики Users
 export const getUsersStats = async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
     let stats = {
@@ -769,7 +884,49 @@ export const getUsersStats = async (req: Request, res: Response) => {
       }
     };
 
-    if (supabase) {
+    if (process.env.CLICKHOUSE_URL) {
+      const fromIso = oneHourAgo.toISOString();
+
+      type RequestsRow = {
+        total: number;
+        authenticated: number;
+        guest: number;
+      };
+
+      const [reqRow] = await queryClickHouse<RequestsRow>(`
+        SELECT
+          count()                                  AS total,
+          sum(user_id != '' AND user_id IS NOT NULL) AS authenticated,
+          sum(user_id = '' OR user_id IS NULL)    AS guest
+        FROM access_logs
+        WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
+      `);
+
+      type ImpactedRow = { impacted: number };
+
+      const [impactedRow] = await queryClickHouse<ImpactedRow>(`
+        SELECT
+          countDistinct(user_id) AS impacted
+        FROM system_logs
+        WHERE level = 'ERROR'
+          AND user_id IS NOT NULL
+          AND timestamp >= parseDateTimeBestEffort('${fromIso}')
+      `);
+
+      if (reqRow) {
+        stats.requests.total = reqRow.total || 0;
+        stats.requests.authenticated = reqRow.authenticated || 0;
+        stats.requests.guest = reqRow.guest || 0;
+      }
+
+      if (impactedRow) {
+        stats.exceptions.impacted = impactedRow.impacted || 0;
+        stats.exceptions.hasExceptions = stats.exceptions.impacted > 0;
+      }
+    } else {
+      const supabase = getSupabaseClient();
+
+      if (supabase) {
       try {
         // Получаем количество аутентифицированных пользователей
         const { count: authCount, error: authError } = await supabase
