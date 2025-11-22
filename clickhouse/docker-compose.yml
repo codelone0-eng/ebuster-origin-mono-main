@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: ebuster-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ebuster
+      CLICKHOUSE_USER: ebuster
+      CLICKHOUSE_PASSWORD: super-secret-password
+    volumes:
+      - ./data:/var/lib/clickhouse
+    ports:
+      - "8123:8123"  # HTTP API (используется backend'ом)
+      # - "9000:9000"  # native-протокол, включи при необходимости
+
+
