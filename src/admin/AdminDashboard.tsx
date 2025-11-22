@@ -1521,7 +1521,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-            )}
 
             {/* Пользователи */}
             {activeTab === 'users' && (
