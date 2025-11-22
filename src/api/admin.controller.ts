@@ -597,6 +597,170 @@ export const getActivityStats = async (req: Request, res: Response) => {
   }
 };
 
+// Получение статистики Application
+export const getApplicationStats = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    let jobs = {
+      total: 0,
+      failed: 0,
+      processed: 0,
+      released: 0,
+      duration: {
+        avg: '-',
+        p95: '-'
+      }
+    };
+
+    let exceptions = {
+      count: 0,
+      hasExceptions: false
+    };
+
+    if (supabase) {
+      try {
+        // Получаем статистику по jobs (если есть таблица jobs)
+        const { data: jobsData, error: jobsError } = await supabase
+          .from('jobs')
+          .select('*')
+          .gte('created_at', oneHourAgo.toISOString());
+
+        if (!jobsError && jobsData) {
+          jobs.total = jobsData.length;
+          jobs.failed = jobsData.filter((j: any) => j.status === 'failed').length;
+          jobs.processed = jobsData.filter((j: any) => j.status === 'processed').length;
+          jobs.released = jobsData.filter((j: any) => j.status === 'released').length;
+
+          // Вычисляем среднюю длительность и P95
+          const durations = jobsData
+            .filter((j: any) => j.duration)
+            .map((j: any) => j.duration);
+          
+          if (durations.length > 0) {
+            const avg = durations.reduce((a: number, b: number) => a + b, 0) / durations.length;
+            const sorted = durations.sort((a: number, b: number) => a - b);
+            const p95Index = Math.floor(sorted.length * 0.95);
+            jobs.duration.avg = `${avg.toFixed(2)}ms`;
+            jobs.duration.p95 = `${sorted[p95Index]?.toFixed(2) || '-'}ms`;
+          }
+        }
+
+        // Получаем статистику по exceptions (если есть таблица exceptions или logs)
+        const { data: exceptionsData, error: exceptionsError } = await supabase
+          .from('system_logs')
+          .select('*')
+          .eq('level', 'ERROR')
+          .gte('timestamp', oneHourAgo.toISOString());
+
+        if (!exceptionsError && exceptionsData) {
+          exceptions.count = exceptionsData.length;
+          exceptions.hasExceptions = exceptions.count > 0;
+        }
+      } catch (error) {
+        console.log('⚠️ Таблицы jobs/exceptions не найдены, используем значения по умолчанию');
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        jobs,
+        exceptions
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка получения статистики Application:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения статистики Application'
+    });
+  }
+};
+
+// Получение статистики Users
+export const getUsersStats = async (req: Request, res: Response) => {
+  try {
+    const supabase = getSupabaseClient();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    let stats = {
+      authenticated: 0,
+      requests: {
+        total: 0,
+        authenticated: 0,
+        guest: 0
+      },
+      exceptions: {
+        impacted: 0,
+        hasExceptions: false
+      }
+    };
+
+    if (supabase) {
+      try {
+        // Получаем количество аутентифицированных пользователей
+        const { count: authCount, error: authError } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .not('email', 'is', null);
+
+        if (!authError) {
+          stats.authenticated = authCount || 0;
+        }
+
+        // Получаем статистику по запросам (если есть таблица requests или access_logs)
+        try {
+          const { data: requestsData, error: requestsError } = await supabase
+            .from('access_logs')
+            .select('*')
+            .gte('created_at', oneHourAgo.toISOString());
+
+          if (!requestsError && requestsData) {
+            stats.requests.total = requestsData.length;
+            stats.requests.authenticated = requestsData.filter((r: any) => r.user_id).length;
+            stats.requests.guest = requestsData.filter((r: any) => !r.user_id).length;
+          }
+        } catch (error) {
+          // Если таблицы нет, используем значения по умолчанию
+        }
+
+        // Получаем количество пользователей, затронутых исключениями
+        try {
+          const { data: exceptionsData, error: exceptionsError } = await supabase
+            .from('system_logs')
+            .select('user_id')
+            .eq('level', 'ERROR')
+            .gte('timestamp', oneHourAgo.toISOString())
+            .not('user_id', 'is', null);
+
+          if (!exceptionsError && exceptionsData) {
+            const uniqueUsers = new Set(exceptionsData.map((e: any) => e.user_id).filter(Boolean));
+            stats.exceptions.impacted = uniqueUsers.size;
+            stats.exceptions.hasExceptions = uniqueUsers.size > 0;
+          }
+        } catch (error) {
+          // Если таблицы нет, используем значения по умолчанию
+        }
+      } catch (error) {
+        console.log('⚠️ Ошибка получения статистики Users, используем значения по умолчанию');
+      }
+    }
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Ошибка получения статистики Users:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения статистики Users'
+    });
+  }
+};
+
 // Поиск пользователей по email
 export const searchUsers = async (req: Request, res: Response) => {
   try {

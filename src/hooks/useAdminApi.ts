@@ -195,6 +195,16 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  const getApplicationStats = async () => {
+    const response = await fetchWithAuth('/api/admin/application-stats');
+    return response.data;
+  };
+
+  const getUsersStats = async () => {
+    const response = await fetchWithAuth('/api/admin/users-stats');
+    return response.data;
+  };
+
   return {
     loading,
     error,
@@ -207,6 +217,8 @@ export const useAdminApi = () => {
     getBrowserStats,
     getActivityStats,
     getSystemMonitor,
-    getTicketStats
+    getTicketStats,
+    getApplicationStats,
+    getUsersStats
   };
 };

@@ -11,7 +11,9 @@ import {
   getBrowserStats,
   getActivityStats,
   searchUsers,
-  getAdminTicketStats
+  getAdminTicketStats,
+  getApplicationStats,
+  getUsersStats
 } from './admin.controller';
 import { getSystemMonitor } from './system-monitor.controller';
 import {
@@ -57,6 +59,10 @@ router.get('/activity-stats', getActivityStats);
 
 // Мониторинг системы
 router.get('/system-monitor', getSystemMonitor);
+
+// Статистика Application и Users
+router.get('/application-stats', getApplicationStats);
+router.get('/users-stats', getUsersStats);
 
 // Управление подписками
 router.get('/subscriptions', getSubscriptions);
