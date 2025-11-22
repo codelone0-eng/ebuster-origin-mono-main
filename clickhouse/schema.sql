@@ -13,11 +13,15 @@ CREATE TABLE IF NOT EXISTS access_logs
   `duration_ms` Float64,
   `user_id`     Nullable(String),
   `ip`          String,
-  `user_agent`  String
+  `user_agent`  String,
+  `referer`     String
 )
 ENGINE = MergeTree
 PARTITION BY toYYYYMMDD(timestamp)
 ORDER BY (timestamp, path, status_code);
+
+-- Обеспечиваем наличие колонки referer для существующих таблиц
+ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS referer String AFTER user_agent;
 
 -- Background jobs for Application widget
 CREATE TABLE IF NOT EXISTS jobs

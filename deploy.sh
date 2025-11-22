@@ -34,15 +34,15 @@ cd ..
 
 # Ждем пока ClickHouse стартует и проверяем доступность
 log "⏳ Ожидаю запуска ClickHouse..."
-for i in {1..30}; do
+for i in {1..60}; do
   if docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --query "SELECT 1" >/dev/null 2>&1; then
     log "✅ ClickHouse доступен!"
     break
   fi
-  if [ $i -eq 30 ]; then
-    log "⚠️  ClickHouse не отвечает после 30 попыток, продолжаю..."
+  if [ $i -eq 60 ]; then
+    log "⚠️  ClickHouse не отвечает после 60 попыток, продолжаю..."
   else
-    log "   Попытка $i/30..."
+    log "   Попытка $i/60..."
     sleep 2
   fi
 done

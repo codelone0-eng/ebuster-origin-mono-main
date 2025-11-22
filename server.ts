@@ -19,6 +19,7 @@ import subscriptionsRoutes from './src/api/subscriptions.routes';
 import * as apiKeysController from './src/api/apikeys.controller';
 import { authenticateUser } from './src/api/auth.middleware';
 import { startAllCronJobs } from './src/api/cron-jobs';
+import { logRequestToClickHouse } from './src/api/clickhouse.middleware';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,6 +42,9 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// ClickHouse Logger (должен быть после парсеров тела и перед роутами)
+app.use(logRequestToClickHouse);
 
 // Логирование запросов
 app.use((req, res, next) => {
