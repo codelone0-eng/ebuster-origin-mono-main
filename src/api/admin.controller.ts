@@ -733,7 +733,7 @@ export const getApplicationStats = async (req: Request, res: Response) => {
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    let jobs = {
+    const jobs = {
       total: 0,
       failed: 0,
       processed: 0,
@@ -744,13 +744,13 @@ export const getApplicationStats = async (req: Request, res: Response) => {
       }
     };
 
-    let exceptions = {
+    const exceptions = {
       count: 0,
       hasExceptions: false
     };
 
-    // ClickHouse — основной источник, если настроен
     if (process.env.CLICKHOUSE_URL) {
+      // ClickHouse — основной источник, если настроен
       const fromIso = oneHourAgo.toISOString();
 
       type JobsRow = {
@@ -803,12 +803,11 @@ export const getApplicationStats = async (req: Request, res: Response) => {
         exceptions.hasExceptions = exceptions.count > 0;
       }
     } else {
-      // Fallback — Supabase
+      // Fallback — Supabase (без вложенного try/catch)
       const supabase = getSupabaseClient();
 
       if (supabase) {
-      try {
-        // Получаем статистику по jobs (если есть таблица jobs)
+        // jobs
         const { data: jobsData, error: jobsError } = await supabase
           .from('jobs')
           .select('*')
@@ -820,11 +819,10 @@ export const getApplicationStats = async (req: Request, res: Response) => {
           jobs.processed = jobsData.filter((j: any) => j.status === 'processed').length;
           jobs.released = jobsData.filter((j: any) => j.status === 'released').length;
 
-          // Вычисляем среднюю длительность и P95
           const durations = jobsData
             .filter((j: any) => j.duration)
             .map((j: any) => j.duration);
-          
+
           if (durations.length > 0) {
             const avg = durations.reduce((a: number, b: number) => a + b, 0) / durations.length;
             const sorted = durations.sort((a: number, b: number) => a - b);
@@ -834,19 +832,21 @@ export const getApplicationStats = async (req: Request, res: Response) => {
           }
         }
 
-        // Получаем статистику по exceptions (если есть таблица exceptions или logs)
-        const { data: exceptionsData, error: exceptionsError } = await supabase
-          .from('system_logs')
-          .select('*')
-          .eq('level', 'ERROR')
-          .gte('timestamp', oneHourAgo.toISOString());
+        // exceptions
+        try {
+          const { data: exceptionsData, error: exceptionsError } = await supabase
+            .from('system_logs')
+            .select('*')
+            .eq('level', 'ERROR')
+            .gte('timestamp', oneHourAgo.toISOString());
 
-        if (!exceptionsError && exceptionsData) {
-          exceptions.count = exceptionsData.length;
-          exceptions.hasExceptions = exceptions.count > 0;
+          if (!exceptionsError && exceptionsData) {
+            exceptions.count = exceptionsData.length;
+            exceptions.hasExceptions = exceptions.count > 0;
+          }
+        } catch (error) {
+          console.log('⚠️ Таблица system_logs недоступна, используем значения по умолчанию');
         }
-      } catch (error) {
-        console.log('⚠️ Таблицы jobs/exceptions не найдены, используем значения по умолчанию');
       }
     }
 
