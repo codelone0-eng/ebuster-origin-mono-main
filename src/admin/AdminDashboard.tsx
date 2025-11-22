@@ -927,13 +927,13 @@ const AdminDashboard = () => {
                   </div>
                   
                   {/* Setup Thresholds Panel */}
-                  <div className="bg-[#18181b] border border-[#262626] rounded p-4 flex flex-col items-center justify-center">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4 flex flex-col items-center justify-center">
                     <Sliders className="h-8 w-8 text-[#808080] mb-3" style={{ color: '#808080' }} />
                     <div className="text-sm font-semibold text-white mb-2" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>Setup thresholds</div>
                     <div className="text-xs text-[#808080] text-center mb-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>
                       Configure your performance thresholds to start monitoring.
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded flex items-center gap-2" style={{ backgroundColor: '#2563eb', fontSize: '14px', fontWeight: 500, borderRadius: '4px' }}>
+                    <button className="px-4 py-2 bg-[#404040] hover:bg-[#4d4d4d] text-white text-sm font-medium rounded flex items-center gap-2" style={{ backgroundColor: '#404040', fontSize: '14px', fontWeight: 500, borderRadius: '4px' }}>
                       <Plus className="h-4 w-4" />
                       Add Threshold
                     </button>

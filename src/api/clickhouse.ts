@@ -8,7 +8,15 @@ interface ClickHouseJsonResponse {
 }
 
 const DEFAULT_DB = process.env.CLICKHOUSE_DATABASE || 'ebuster';
-const CLICKHOUSE_URL = process.env.CLICKHOUSE_URL || 'http://localhost:8123';
+// Используем имя контейнера ebuster-clickhouse или localhost
+// Если CLICKHOUSE_URL не задан, пробуем разные варианты
+let CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
+if (!CLICKHOUSE_URL) {
+  // В production используем имя контейнера, иначе localhost
+  CLICKHOUSE_URL = process.env.NODE_ENV === 'production' 
+    ? 'http://ebuster-clickhouse:8123' 
+    : 'http://localhost:8123';
+}
 const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
 const CLICKHOUSE_PASSWORD = process.env.CLICKHOUSE_PASSWORD || '';
 
