@@ -578,70 +578,7 @@ export const getActivityStats = async (req: Request, res: Response) => {
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    // Основной источник — ClickHouse, если настроен
-    if (process.env.CLICKHOUSE_URL) {
-      try {
-        const fromIso = oneHourAgo.toISOString();
-
-        type SummaryRow = {
-          totalRequests: number;
-          status1xx3xx: number;
-          status4xx: number;
-          status5xx: number;
-          durationAvgMs: number | null;
-          durationP95Ms: number | null;
-        };
-
-        const [summaryRow] = await queryClickHouse<SummaryRow>(`
-          SELECT
-            count()                                                AS totalRequests,
-            sum(status_code >= 100 AND status_code < 400)          AS status1xx3xx,
-            sum(status_code >= 400 AND status_code < 500)          AS status4xx,
-            sum(status_code >= 500 AND status_code < 600)          AS status5xx,
-            avgOrNull(duration_ms)                                 AS durationAvgMs,
-            quantileExact(0.95)(duration_ms)                       AS durationP95Ms
-          FROM access_logs
-          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-        `);
-
-        type PointRow = { bucket: string; count: number };
-
-        const pointRows = await queryClickHouse<PointRow>(`
-          SELECT
-            toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS bucket,
-            count()                                         AS count
-          FROM access_logs
-          WHERE timestamp >= parseDateTimeBestEffort('${fromIso}')
-          GROUP BY bucket
-          ORDER BY bucket
-        `);
-
-        const defaultSummary: SummaryRow = {
-          totalRequests: 0,
-          status1xx3xx: 0,
-          status4xx: 0,
-          status5xx: 0,
-          durationAvgMs: null,
-          durationP95Ms: null
-        };
-
-        return res.json({
-          success: true,
-          data: {
-            summary: summaryRow || defaultSummary,
-            points: pointRows.map((p) => ({
-              timestamp: p.bucket,
-              count: Number(p.count) || 0
-            }))
-          }
-        });
-      } catch (clickhouseError) {
-        console.log('⚠️ ClickHouse недоступен, переключаюсь на Supabase fallback:', (clickhouseError as Error).message);
-        // Продолжаем выполнение - упадём в fallback на Supabase ниже
-      }
-    }
-
-    // Fallback — Supabase access_logs (без мок-данных)
+    // Используем Supabase для логов
     const supabase = getSupabaseClient();
     const summary = {
       totalRequests: 0,
@@ -658,8 +595,8 @@ export const getActivityStats = async (req: Request, res: Response) => {
       try {
         const { data, error } = await supabase
           .from('access_logs')
-          .select('status_code, duration_ms, duration, created_at')
-          .gte('created_at', oneHourAgo.toISOString());
+          .select('status_code, duration_ms, timestamp')
+          .gte('timestamp', oneHourAgo.toISOString());
 
         if (!error && data) {
           const durations: number[] = [];
@@ -667,12 +604,7 @@ export const getActivityStats = async (req: Request, res: Response) => {
 
           data.forEach((row: any) => {
             const status = Number(row.status_code) || 0;
-            const durationValue =
-              typeof row.duration_ms === 'number'
-                ? row.duration_ms
-                : typeof row.duration === 'number'
-                ? row.duration
-                : null;
+            const durationValue = Number(row.duration_ms) || null;
 
             summary.totalRequests += 1;
 
@@ -684,9 +616,9 @@ export const getActivityStats = async (req: Request, res: Response) => {
               durations.push(durationValue);
             }
 
-            if (row.created_at) {
-              const createdAt = new Date(row.created_at);
-              const bucket = new Date(createdAt);
+            if (row.timestamp) {
+              const timestamp = new Date(row.timestamp);
+              const bucket = new Date(timestamp);
               bucket.setSeconds(0, 0);
               const key = bucket.toISOString();
               bucketMap.set(key, (bucketMap.get(key) || 0) + 1);

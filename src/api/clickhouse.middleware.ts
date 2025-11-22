@@ -1,16 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
-import { queryClickHouse } from './clickhouse';
+import { createClient } from '@supabase/supabase-js';
+
+// Инициализируем Supabase клиент для логирования
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseServiceKey) {
+  supabase = createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export const logRequestToClickHouse = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   
   // Перехватываем окончание запроса
   res.on('finish', () => {
+    // Если Supabase не настроен, пропускаем логирование
+    if (!supabase) {
+      return;
+    }
+
     try {
       const duration = Date.now() - startTime;
       const statusCode = res.statusCode;
       const method = req.method;
-      const path = req.path; // Используем path без query params
+      const path = req.path;
       const userAgent = req.get('user-agent') || '';
       const ip = req.ip || req.socket.remoteAddress || '';
       const referer = req.get('referer') || '';
@@ -19,7 +34,7 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
       // @ts-ignore
       const userId = req.user?.userId || null;
       
-      // Не логируем health check, preflight запросы и статику, чтобы не засорять базу
+      // Не логируем health check, preflight запросы и статику
       if (
         path.includes('/health') || 
         method === 'OPTIONS' || 
@@ -28,45 +43,30 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
         return;
       }
 
-      // Асинхронная запись в ClickHouse (fire and forget)
-      // Форматируем timestamp в формате 'YYYY-MM-DD HH:mm:ss'
-      const now = new Date();
-      const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
-      
-      // Экранирование строк для SQL
-      const escape = (str: string) => str.replace(/'/g, "\\'");
-      
-      const query = `
-        INSERT INTO access_logs (
-          timestamp, 
-          method, 
-          path, 
-          status_code, 
-          duration_ms, 
-          ip, 
-          user_agent,
-          user_id
-        ) VALUES (
-          '${timestamp}',
-          '${escape(method)}',
-          '${escape(path)}',
-          ${statusCode},
-          ${duration},
-          '${escape(ip)}',
-          '${escape(userAgent)}',
-          ${userId ? `'${escape(userId)}'` : 'NULL'}
-        )
-      `;
-
-      queryClickHouse(query).catch(err => {
-        // Логируем ошибку только в dev режиме или если это не 502 (чтобы не спамить при старте)
-        if (process.env.NODE_ENV !== 'production' || !err.message.includes('502')) {
-          console.error('⚠️ ClickHouse log error:', err.message);
-        }
-      });
+      // Асинхронная запись в Supabase (fire and forget)
+      supabase
+        .from('access_logs')
+        .insert({
+          timestamp: new Date().toISOString(),
+          method,
+          path,
+          status_code: statusCode,
+          duration_ms: duration,
+          ip,
+          user_agent: userAgent,
+          referer,
+          user_id: userId
+        })
+        .then(({ error }) => {
+          if (error && process.env.NODE_ENV !== 'production') {
+            console.error('⚠️ Supabase log error:', error.message);
+          }
+        });
       
     } catch (error) {
-      console.error('Error in ClickHouse middleware:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in logging middleware:', error);
+      }
     }
   });
 
