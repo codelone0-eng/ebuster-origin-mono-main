@@ -599,8 +599,6 @@ export const getActivityStats = async (req: Request, res: Response) => {
           .gte('created_at', oneHourAgo.toISOString());
 
         if (!error && data) {
-          console.log(`📊 Activity stats: найдено ${data.length} записей за последний час`);
-          
           const durations: number[] = [];
           const bucketMap = new Map<string, number>();
 
@@ -643,9 +641,6 @@ export const getActivityStats = async (req: Request, res: Response) => {
                 new Date(a).getTime() - new Date(b).getTime()
             )
             .map(([timestamp, count]) => ({ timestamp, count }));
-          
-          console.log(`📈 Activity points: ${points.length} точек для графика`);
-          console.log(`📈 Sample points:`, points.slice(0, 3));
         }
       } catch (error) {
         console.log(

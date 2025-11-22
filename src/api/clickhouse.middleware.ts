@@ -15,13 +15,8 @@ if (supabaseUrl && supabaseServiceKey) {
     }
   });
   console.log('✅ Supabase logging middleware initialized');
-  console.log('🔑 Using SUPABASE_URL:', supabaseUrl);
-  console.log('🔑 SUPABASE_SERVICE_KEY length:', supabaseServiceKey.length);
-  console.log('🔑 Service key starts with:', supabaseServiceKey.substring(0, 20) + '...');
 } else {
-  console.warn('⚠️ Supabase logging disabled: missing credentials');
-  console.warn('   SUPABASE_URL:', supabaseUrl ? '✅ set' : '❌ missing');
-  console.warn('   SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✅ set' : '❌ missing');
+  console.warn('⚠️ Supabase logging disabled: missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
 }
 
 export const logRequestToClickHouse = (req: Request, res: Response, next: NextFunction) => {
@@ -69,16 +64,12 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
         user_id: userId
       };
 
-      console.log('📝 Logging request to Supabase:', { method, path, statusCode, duration });
-
       supabase
         .from('access_logs')
         .insert(logData)
-        .then(({ error, data }) => {
+        .then(({ error }) => {
           if (error) {
-            console.error('❌ Supabase log error:', error.message, error);
-          } else {
-            console.log('✅ Request logged successfully');
+            console.error('❌ Supabase log error:', error.message);
           }
         });
       
