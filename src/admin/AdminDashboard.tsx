@@ -1114,6 +1114,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Requests – детальная вкладка по HTTP маршрутам */}
             {activeTab === 'requests' && (
