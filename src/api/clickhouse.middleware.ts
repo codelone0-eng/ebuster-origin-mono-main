@@ -44,8 +44,7 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
           status_code, 
           duration_ms, 
           ip, 
-          user_agent, 
-          referer,
+          user_agent,
           user_id
         ) VALUES (
           '${timestamp}',
@@ -55,7 +54,6 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
           ${duration},
           '${escape(ip)}',
           '${escape(userAgent)}',
-          '${escape(referer)}',
           ${userId ? `'${escape(userId)}'` : 'NULL'}
         )
       `;
