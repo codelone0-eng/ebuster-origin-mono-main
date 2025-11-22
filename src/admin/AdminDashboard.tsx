@@ -197,6 +197,7 @@ const AdminDashboard = () => {
 
   const renderActivityChart = (points: any[] | undefined, color: string) => {
     const dataPoints = points || [];
+    console.log('📈 renderActivityChart called with:', dataPoints.length, 'points', dataPoints.slice(0, 3));
 
     if (!dataPoints.length) {
       return (
@@ -271,6 +272,8 @@ const AdminDashboard = () => {
 
         // Загружаем статистику активности
         const activityData = await adminApi.getActivityStats();
+        console.log('📊 Activity Data received:', activityData);
+        console.log('📊 Activity points:', activityData?.points?.length, 'points');
         setActivityStats(activityData);
 
         // Загружаем статистику по тикетам

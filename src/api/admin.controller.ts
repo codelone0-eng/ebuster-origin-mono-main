@@ -595,10 +595,12 @@ export const getActivityStats = async (req: Request, res: Response) => {
       try {
         const { data, error } = await supabase
           .from('access_logs')
-          .select('status_code, duration_ms, timestamp')
-          .gte('timestamp', oneHourAgo.toISOString());
+          .select('status_code, duration_ms, created_at')
+          .gte('created_at', oneHourAgo.toISOString());
 
         if (!error && data) {
+          console.log(`📊 Activity stats: найдено ${data.length} записей за последний час`);
+          
           const durations: number[] = [];
           const bucketMap = new Map<string, number>();
 
@@ -616,8 +618,8 @@ export const getActivityStats = async (req: Request, res: Response) => {
               durations.push(durationValue);
             }
 
-            if (row.timestamp) {
-              const timestamp = new Date(row.timestamp);
+            if (row.created_at) {
+              const timestamp = new Date(row.created_at);
               const bucket = new Date(timestamp);
               bucket.setSeconds(0, 0);
               const key = bucket.toISOString();
@@ -641,6 +643,9 @@ export const getActivityStats = async (req: Request, res: Response) => {
                 new Date(a).getTime() - new Date(b).getTime()
             )
             .map(([timestamp, count]) => ({ timestamp, count }));
+          
+          console.log(`📈 Activity points: ${points.length} точек для графика`);
+          console.log(`📈 Sample points:`, points.slice(0, 3));
         }
       } catch (error) {
         console.log(
