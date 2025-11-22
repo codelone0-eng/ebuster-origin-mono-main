@@ -9,16 +9,18 @@ interface ClickHouseJsonResponse {
 
 const DEFAULT_DB = process.env.CLICKHOUSE_DATABASE || 'ebuster';
 
-// Нормализуем CLICKHOUSE_URL - заменяем возможные варианты на правильное имя контейнера
+// Нормализуем CLICKHOUSE_URL
+// В Docker Compose контейнеры могут обращаться друг к другу по имени сервиса или контейнера
+// Но если они в разных compose-файлах, лучше использовать localhost (порт проброшен на хост)
 let CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
 if (CLICKHOUSE_URL) {
-  // Если в URL указано 'clickhouse', заменяем на имя контейнера 'ebuster-clickhouse'
-  CLICKHOUSE_URL = CLICKHOUSE_URL.replace('clickhouse:', 'ebuster-clickhouse:');
+  // Заменяем возможные варианты имён на localhost (порт проброшен на хост)
+  CLICKHOUSE_URL = CLICKHOUSE_URL
+    .replace(/clickhouse:\d+/, 'localhost:8123')
+    .replace(/ebuster-clickhouse:\d+/, 'localhost:8123');
 } else {
-  // Если CLICKHOUSE_URL не задан, используем имя контейнера в production
-  CLICKHOUSE_URL = process.env.NODE_ENV === 'production' 
-    ? 'http://ebuster-clickhouse:8123' 
-    : 'http://localhost:8123';
+  // По умолчанию используем localhost (порт 8123 проброшен на хост)
+  CLICKHOUSE_URL = 'http://localhost:8123';
 }
 
 const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
