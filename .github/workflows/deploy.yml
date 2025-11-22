@@ -213,9 +213,13 @@ jobs:
             docker compose up -d
             cd ..
             
+            # Ждем пока ClickHouse стартует
+            echo "⏳ Ожидаю запуска ClickHouse (10 секунд)..."
+            sleep 10
+            
             # Применить схему ClickHouse если нужно
             echo "📋 Проверяю схему ClickHouse..."
-            docker compose -f clickhouse/docker-compose.yml exec -T clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || echo "⚠️  Схема уже применена или ClickHouse ещё не готов"
+            docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || echo "⚠️  Схема уже применена или ClickHouse ещё не готов"
             
             echo "▶️  Запускаю все сервисы..."
             echo "📋 Порядок запуска:"

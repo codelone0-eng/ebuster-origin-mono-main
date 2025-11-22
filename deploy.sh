@@ -32,6 +32,14 @@ cd clickhouse
 docker compose up -d
 cd ..
 
+# Ждем пока ClickHouse стартует
+log "⏳ Ожидаю запуска ClickHouse (10 секунд)..."
+sleep 10
+
+# Применить схему ClickHouse если нужно
+log "📋 Проверяю схему ClickHouse..."
+docker compose -f clickhouse/docker-compose.yml exec -T ebuster-clickhouse clickhouse-client --multiquery < clickhouse/schema.sql 2>/dev/null || log "⚠️  Схема уже применена или ClickHouse ещё не готов"
+
 # Сохранить текущий коммит для отката
 CURRENT_COMMIT=$(git rev-parse HEAD)
 log "📌 Текущий коммит: $CURRENT_COMMIT"
