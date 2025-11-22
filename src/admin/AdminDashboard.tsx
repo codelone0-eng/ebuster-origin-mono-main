@@ -817,60 +817,60 @@ const AdminDashboard = () => {
             {activeTab === 'users' && (
             <div className="space-y-6">
               <div className="bg-[#202020] border border-[#2d2d2d] rounded-lg p-6">
-                <CardHeader>
+                <div className="mb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-2">
                         <Users className="h-5 w-5" />
                         Управление пользователями
-                      </CardTitle>
-                      <CardDescription>
+                      </h3>
+                      <p className="text-sm text-[#808080]">
                         Всего пользователей: {systemStats?.totalUsers || '0'} | Активных: {systemStats?.activeUsers || '0'} | Забаненных: {systemStats?.bannedUsers || '0'}
-                      </CardDescription>
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
                         <Input
                           placeholder="Поиск пользователей..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 w-64"
+                          className="pl-10 w-64 bg-[#2d2d2d] border-[#404040] text-white"
                         />
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
                         <Filter className="h-4 w-4 mr-2" />
                         Фильтры
                       </Button>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div>
                   <div className="space-y-4">
                     {recentUsers && recentUsers.map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg bg-[#2d2d2d] hover:bg-[#3d3d3d] transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                            <span className="text-sm font-medium text-primary">
+                          <div className="w-10 h-10 rounded-full bg-[#404040] flex items-center justify-center">
+                            <span className="text-sm font-medium text-white">
                               {(user?.full_name || user?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
                             </span>
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-foreground">{user.full_name || user.name || 'Неизвестный пользователь'}</span>
+                              <span className="font-medium text-white">{user.full_name || user.name || 'Неизвестный пользователь'}</span>
                               <Badge className={`text-xs ${getStatusColor(user.status)}`}>
                                 {user.status === 'active' ? 'Активен' : 
                                  user.status === 'banned' ? 'Забанен' : 'Неактивен'}
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-4 text-sm text-[#808080]">
                               <span>{user.email || 'Не указан'}</span>
                               <span>•</span>
                               <span>{user.location || 'Местоположение не указано'}</span>
                               <span>•</span>
                               <span>{user.browser || 'Браузер не указан'}</span>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                            <div className="flex items-center gap-4 text-xs text-[#808080] mt-1">
                               <span>Загрузок: {user.downloads || 0}</span>
                               <span>Скриптов: {user.scripts || 0}</span>
                               <span>Последняя активность: {user.last_active ? new Date(user.last_active).toLocaleString('ru-RU') : user.last_login_at ? new Date(user.last_login_at).toLocaleString('ru-RU') : 'Никогда'}</span>
@@ -878,27 +878,27 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
+                          <Button variant="outline" size="sm" onClick={() => handleEditUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
                             <Edit className="h-4 w-4" />
                           </Button>
                           {user.status === 'banned' ? (
-                            <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user.id)}>
+                            <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user.id)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
                               <Unlock className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleBanUser(user)}>
+                            <Button variant="outline" size="sm" onClick={() => handleBanUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
                               <Ban className="h-4 w-4" />
                             </Button>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteUser(user)}>
+                          <Button variant="outline" size="sm" onClick={() => handleDeleteUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
             )}
 
@@ -1025,8 +1025,6 @@ const AdminDashboard = () => {
               </Card>
             </div>
             )}
-          </div>
-
             </div>
           </div>
         </main>
