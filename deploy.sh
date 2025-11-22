@@ -116,6 +116,10 @@ sleep 10
 log "✅ Проверка статуса контейнеров..."
 docker compose ps || docker-compose ps
 
+# Проверка сети (отладка)
+log "🌐 Проверка подключенных контейнеров к сети ebuster-network..."
+docker network inspect ebuster-network
+
 # Проверить API
 log "🔍 Проверка API health..."
 API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.ebuster.ru/api/health)

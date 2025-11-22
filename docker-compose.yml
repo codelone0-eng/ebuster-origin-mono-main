@@ -121,7 +121,8 @@ services:
 
 networks:
   ebuster-network:
-    driver: bridge
+    name: ebuster-network
+    external: true
 
 volumes:
   autotest_reports:
