@@ -9,6 +9,9 @@ let supabase: ReturnType<typeof createClient> | null = null;
 
 if (supabaseUrl && supabaseServiceKey) {
   supabase = createClient(supabaseUrl, supabaseServiceKey);
+  console.log('✅ Supabase logging middleware initialized');
+} else {
+  console.warn('⚠️ Supabase logging disabled: missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
 }
 
 export const logRequestToClickHouse = (req: Request, res: Response, next: NextFunction) => {
@@ -44,22 +47,28 @@ export const logRequestToClickHouse = (req: Request, res: Response, next: NextFu
       }
 
       // Асинхронная запись в Supabase (fire and forget)
+      const logData = {
+        created_at: new Date().toISOString(),
+        method,
+        path,
+        status_code: statusCode,
+        duration_ms: duration,
+        ip,
+        user_agent: userAgent,
+        referer,
+        user_id: userId
+      };
+
+      console.log('📝 Logging request to Supabase:', { method, path, statusCode, duration });
+
       supabase
         .from('access_logs')
-        .insert({
-          timestamp: new Date().toISOString(),
-          method,
-          path,
-          status_code: statusCode,
-          duration_ms: duration,
-          ip,
-          user_agent: userAgent,
-          referer,
-          user_id: userId
-        })
-        .then(({ error }) => {
-          if (error && process.env.NODE_ENV !== 'production') {
-            console.error('⚠️ Supabase log error:', error.message);
+        .insert(logData)
+        .then(({ error, data }) => {
+          if (error) {
+            console.error('❌ Supabase log error:', error.message, error);
+          } else {
+            console.log('✅ Request logged successfully');
           }
         });
       
