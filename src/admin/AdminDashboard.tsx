@@ -202,12 +202,22 @@ const AdminDashboard = () => {
     status: 'all',
     method: 'ALL',
   });
-    const [systemStatus, setSystemStatus] = useState({
+  const [systemStatus, setSystemStatus] = useState({
     cpu: { usage: 0, model: 'Loading...' },
     memory: { usage: 0, total: '0GB', used: '0GB' },
     disk: { usage: 0, total: '0GB' },
     network: { usage: 0, speed: '0Gbps' },
     uptime: 'Loading...'
+  });
+  const [supportTeams, setSupportTeams] = useState<any[]>([]);
+  const [settingsState, setSettingsState] = useState<{
+    defaultTimeRange: string;
+    compactTables: boolean;
+    highlightErrors: boolean;
+  }>({
+    defaultTimeRange: '1H',
+    compactTables: false,
+    highlightErrors: true,
   });
 
   const metricLabelClass =
@@ -225,6 +235,36 @@ const AdminDashboard = () => {
 
       if (initialTab && initialTab !== activeTab) {
         setActiveTabState(initialTab);
+      }
+
+      const storedTimeRange = window.localStorage.getItem('adminDashboardTimeRange');
+      if (storedTimeRange) {
+        setTimeRange(storedTimeRange);
+      } else {
+        const rawSettings = window.localStorage.getItem('adminSettings');
+        if (rawSettings) {
+          try {
+            const parsed = JSON.parse(rawSettings);
+            if (parsed.defaultTimeRange) {
+              setTimeRange(parsed.defaultTimeRange);
+            }
+          } catch {
+            // ignore invalid json
+          }
+        }
+      }
+
+      const rawSettings = window.localStorage.getItem('adminSettings');
+      if (rawSettings) {
+        try {
+          const parsed = JSON.parse(rawSettings);
+          setSettingsState((prev) => ({
+            ...prev,
+            ...parsed,
+          }));
+        } catch {
+          // ignore
+        }
       }
     } catch {
       // игнорируем ошибки парсинга URL / localStorage
@@ -246,6 +286,16 @@ const AdminDashboard = () => {
       }
     }
   };
+
+  // Сохраняем последний выбранный диапазон
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem('adminDashboardTimeRange', timeRange);
+    } catch {
+      // ignore
+    }
+  }, [timeRange]);
 
   const mapTimeRangeToQuery = (value: string): string => {
     switch (value) {
@@ -394,9 +444,9 @@ const AdminDashboard = () => {
         setRequestsStats(requestsData);
 
         // Загружаем статистику по тикетам
-        const ticketData = await adminApi.getTicketStats();
-        setTicketStats(ticketData?.stats || null);
-        setRecentTickets(ticketData?.recentTickets || []);
+        const ticketStatsData = await adminApi.getTicketStats();
+        setTicketStats(ticketStatsData || null);
+        setRecentTickets([]);
 
         // Загружаем мониторинг системы
         await updateMonitoring();
@@ -408,6 +458,14 @@ const AdminDashboard = () => {
         // Загружаем статистику Users
         const usrStats = await adminApi.getUsersStats();
         setUsersStats(usrStats);
+
+        // Команды поддержки
+        try {
+          const teams = await adminApi.getSupportTeams();
+          setSupportTeams(teams || []);
+        } catch (e) {
+          console.error('Ошибка загрузки команд поддержки:', e);
+        }
 
         setScriptStats([
           { name: 'Dark Mode Enforcer', downloads: 1247, rating: 4.8, users: 892, size: '1.2MB', category: 'UI/UX', status: 'active' },
@@ -2001,6 +2059,248 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <SystemMonitorChart />
+              </div>
+            </div>
+            )}
+
+            {/* Settings */}
+            {activeTab === 'settings' && (
+            <div className="space-y-6">
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
+                      <Settings className="h-5 w-5" />
+                      Admin Settings
+                    </h3>
+                    <p className="text-sm text-[#808080]">
+                      Локальные настройки панели администратора — без влияния на прод.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <div className={`${metricLabelClass} mb-2`}>DEFAULT TIME RANGE</div>
+                      <p className="text-xs text-[#808080] mb-2">
+                        Какой диапазон времени использовать по умолчанию для дашборда и Requests.
+                      </p>
+                      <Select
+                        value={settingsState.defaultTimeRange}
+                        onValueChange={(value) =>
+                          setSettingsState((prev) => ({ ...prev, defaultTimeRange: value }))
+                        }
+                      >
+                        <SelectTrigger className="w-40 bg-[#2d2d2d] border-[#404040] text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                          <SelectItem value="1H">Last hour</SelectItem>
+                          <SelectItem value="24H">Last 24 hours</SelectItem>
+                          <SelectItem value="7D">Last 7 days</SelectItem>
+                          <SelectItem value="14D">Last 14 days</SelectItem>
+                          <SelectItem value="30D">Last 30 days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className={`${metricLabelClass}`}>TABLE DENSITY</div>
+                      <div className="flex items-center justify-between rounded-lg bg-[#2d2d2d] px-3 py-2">
+                        <div>
+                          <div className="text-sm text-white">Compact rows</div>
+                          <div className="text-xs text-[#a3a3a3]">
+                            Использовать более плотные строки в таблицах (Requests, Users и т.д.)
+                          </div>
+                        </div>
+                        <Switch
+                          checked={settingsState.compactTables}
+                          onCheckedChange={(value) =>
+                            setSettingsState((prev) => ({ ...prev, compactTables: value }))
+                          }
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between rounded-lg bg-[#2d2d2d] px-3 py-2">
+                        <div>
+                          <div className="text-sm text-white">Highlight errors</div>
+                          <div className="text-xs text-[#a3a3a3]">
+                            Подсвечивать маршруты и карточки с ошибками более агрессивно.
+                          </div>
+                        </div>
+                        <Switch
+                          checked={settingsState.highlightErrors}
+                          onCheckedChange={(value) =>
+                            setSettingsState((prev) => ({ ...prev, highlightErrors: value }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <div className={`${metricLabelClass} mb-2`}>BAN CONTACT EMAIL</div>
+                      <p className="text-xs text-[#808080] mb-2">
+                        Email поддержки, который подставляется в форму блокировки по умолчанию.
+                      </p>
+                      <Input
+                        className="bg-[#2d2d2d] border-[#404040] text-white"
+                        value={banContactEmail}
+                        onChange={(e) => setBanContactEmail(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="rounded-lg border border-[#2d2d2d] bg-[#111111] p-4 space-y-2">
+                      <div className={`${metricLabelClass} mb-1`}>SUMMARY</div>
+                      <div className="text-xs text-[#a3a3a3] space-y-1">
+                        <div>
+                          Default time range:{' '}
+                          <span className="text-white">{settingsState.defaultTimeRange}</span>
+                        </div>
+                        <div>
+                          Compact tables:{' '}
+                          <span className="text-white">
+                            {settingsState.compactTables ? 'enabled' : 'disabled'}
+                          </span>
+                        </div>
+                        <div>
+                          Highlight errors:{' '}
+                          <span className="text-white">
+                            {settingsState.highlightErrors ? 'enabled' : 'disabled'}
+                          </span>
+                        </div>
+                        <div>
+                          Ban contact email:{' '}
+                          <span className="text-white">{banContactEmail || 'not set'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <Button
+                        variant="outline"
+                        className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                        onClick={() => {
+                          setSettingsState({
+                            defaultTimeRange: '1H',
+                            compactTables: false,
+                            highlightErrors: true,
+                          });
+                          setBanContactEmail('support@ebuster.ru');
+                        }}
+                      >
+                        Сбросить
+                      </Button>
+                      <Button
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => {
+                          try {
+                            const payload = {
+                              ...settingsState,
+                            };
+                            if (typeof window !== 'undefined') {
+                              window.localStorage.setItem(
+                                'adminSettings',
+                                JSON.stringify(payload),
+                              );
+                            }
+                            setTimeRange(settingsState.defaultTimeRange);
+                            toast({
+                              title: 'Настройки сохранены',
+                              description: 'Локальные настройки админки обновлены.',
+                            });
+                          } catch (e) {
+                            console.error('Ошибка сохранения настроек админки:', e);
+                            toast({
+                              title: 'Ошибка',
+                              description: 'Не удалось сохранить настройки.',
+                              variant: 'destructive',
+                            });
+                          }
+                        }}
+                      >
+                        Сохранить
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* Support */}
+            {activeTab === 'support' && (
+            <div className="space-y-6">
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
+                      <HelpCircle className="h-5 w-5" />
+                      Support
+                    </h3>
+                    <p className="text-sm text-[#808080]">
+                      Статистика тикетов и команды поддержки.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                    <div className={`${metricLabelClass} mb-1`}>TOTAL TICKETS</div>
+                    <div className="text-2xl font-bold text-white">
+                      {ticketStats?.total ?? 0}
+                    </div>
+                  </div>
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                    <div className={`${metricLabelClass} mb-1`}>OPEN</div>
+                    <div className="text-2xl font-bold text-white">
+                      {ticketStats?.open ?? 0}
+                    </div>
+                  </div>
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                    <div className={`${metricLabelClass} mb-1`}>PENDING</div>
+                    <div className="text-2xl font-bold text-[#f97316]">
+                      {ticketStats?.pending ?? 0}
+                    </div>
+                  </div>
+                  <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
+                    <div className={`${metricLabelClass} mb-1`}>RESOLVED</div>
+                    <div className="text-2xl font-bold text-[#22c55e]">
+                      {ticketStats?.resolved ?? 0}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`${metricLabelClass}`}>SUPPORT TEAMS</div>
+                  </div>
+                  {supportTeams.length === 0 ? (
+                    <div className="text-sm text-[#808080] py-6 text-center">
+                      Нет команд поддержки. Создай таблицу <code className="text-xs bg-[#111111] px-1.5 py-0.5 rounded border border-[#333333]">support_teams</code> в Supabase и наполни её — UI уже готов.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {supportTeams.map((team) => (
+                        <div
+                          key={team.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-[#2d2d2d] hover:bg-[#3d3d3d] transition-colors"
+                        >
+                          <div>
+                            <div className="text-sm text-white font-medium">{team.name}</div>
+                            {team.description && (
+                              <div className="text-xs text-[#a3a3a3] mt-1">
+                                {team.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             )}

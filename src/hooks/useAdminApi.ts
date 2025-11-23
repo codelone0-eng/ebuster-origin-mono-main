@@ -47,6 +47,12 @@ interface BrowserStat {
   count: number;
 }
 
+interface SupportTeam {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export const useAdminApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +178,12 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  // Команды поддержки
+  const getSupportTeams = async (): Promise<SupportTeam[]> => {
+    const response = await fetchWithAuth('/api/tickets/teams');
+    return response.data;
+  };
+
   // Получение статистики активности
   const getActivityStats = async (params: { range?: string } = {}): Promise<any> => {
     const queryParams = new URLSearchParams();
@@ -223,6 +235,7 @@ export const useAdminApi = () => {
     banUser,
     getSystemLogs,
     getBrowserStats,
+    getSupportTeams,
     getActivityStats,
     getSystemMonitor,
     getTicketStats,
