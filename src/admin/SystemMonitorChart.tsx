@@ -49,34 +49,34 @@ const SystemMonitorChart: React.FC<SystemMonitorChartProps> = ({ onRefresh }) =>
   }, [timeRange]);
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-      <CardHeader>
+    <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
+      <CardHeader className="border-b border-[#2d2d2d] pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              История мониторинга
-              <span className="text-xs text-muted-foreground ml-2">({chartData.length} точек)</span>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Activity className="h-5 w-5 text-[#d9d9d9]" />
+              <span className="text-lg font-semibold">История мониторинга</span>
+              <span className="text-xs text-[#808080] ml-2">({chartData.length} точек)</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs text-[#808080] mt-1">
               Отслеживание производительности системы в реальном времени
             </CardDescription>
           </div>
           <Tabs value={timeRange} onValueChange={setTimeRange}>
-            <TabsList>
-              <TabsTrigger value="1h">1ч</TabsTrigger>
-              <TabsTrigger value="6h">6ч</TabsTrigger>
-              <TabsTrigger value="24h">24ч</TabsTrigger>
-              <TabsTrigger value="7d">7д</TabsTrigger>
+            <TabsList className="bg-[#111111] border border-[#2d2d2d]">
+              <TabsTrigger value="1h" className="text-xs">1ч</TabsTrigger>
+              <TabsTrigger value="6h" className="text-xs">6ч</TabsTrigger>
+              <TabsTrigger value="24h" className="text-xs">24ч</TabsTrigger>
+              <TabsTrigger value="7d" className="text-xs">7д</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <div className="space-y-8">
           {/* CPU График */}
           <div>
-            <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
+            <h4 className="text-sm font-medium mb-4 flex items-center gap-2 text-white">
               <Clock className="h-4 w-4" />
               Загрузка CPU
             </h4>

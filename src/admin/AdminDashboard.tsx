@@ -111,7 +111,7 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const adminApi = useAdminApi();
   
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTabState] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [timeRange, setTimeRange] = useState('1H');
   const [selectedUser, setSelectedUser] = useState(null);
@@ -212,6 +212,40 @@ const AdminDashboard = () => {
 
   const metricLabelClass =
     "font-mono text-[11px] leading-none text-neutral-500 uppercase tracking-[0.08em] dark:text-neutral-400";
+
+  // Инициализация активного таба из URL / localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const url = new URL(window.location.href);
+      const tabFromQuery = url.searchParams.get('tab');
+      const tabFromStorage = window.localStorage.getItem('adminActiveTab');
+      const initialTab = (tabFromQuery || tabFromStorage) ?? 'overview';
+
+      if (initialTab && initialTab !== activeTab) {
+        setActiveTabState(initialTab);
+      }
+    } catch {
+      // игнорируем ошибки парсинга URL / localStorage
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+
+    if (typeof window !== 'undefined') {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState({}, '', url.toString());
+        window.localStorage.setItem('adminActiveTab', tab);
+      } catch {
+        // безопасно молчим, если что-то пошло не так
+      }
+    }
+  };
 
   const mapTimeRangeToQuery = (value: string): string => {
     switch (value) {
@@ -1903,75 +1937,71 @@ const AdminDashboard = () => {
             {/* Логи */}
             {activeTab === 'logs' && (
             <div className="space-y-6">
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="h-5 w-5" />
-                        Системные логи
-                      </CardTitle>
-                      <CardDescription>
-                        Мониторинг активности системы и пользователей
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Экспорт логов
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Обновить
-                      </Button>
-                    </div>
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
+                      <Database className="h-5 w-5" />
+                      Системные логи
+                    </h3>
+                    <p className="text-sm text-[#808080]">
+                      Мониторинг активности системы и пользователей
+                    </p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {(systemLogs || []).map((log) => (
-                      <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                        <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                          {log.level}
-                        </Badge>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground">{log.message}</p>
-                          <div className="flex items-center gap-4 mt-1">
-                            <span className="text-xs text-muted-foreground">{log.timestamp}</span>
-                            <span className="text-xs text-muted-foreground">IP: {log.ip}</span>
-                            {log.user !== 'System' && (
-                              <span className="text-xs text-muted-foreground">Пользователь: {log.user}</span>
-                            )}
-                          </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
+                      <Download className="h-4 w-4 mr-2" />
+                      Экспорт логов
+                    </Button>
+                    <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Обновить
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {(systemLogs || []).map((log) => (
+                    <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-[#2d2d2d] hover:bg-[#3d3d3d] transition-colors">
+                      <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
+                        {log.level}
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white">{log.message}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-[#a3a3a3]">
+                          <span>{log.timestamp}</span>
+                          <span>IP: {log.ip}</span>
+                          {log.user !== 'System' && (
+                            <span>Пользователь: {log.user}</span>
+                          )}
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => handleViewLog(log)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]" onClick={() => handleViewLog(log)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             )}
 
             {/* Графики */}
             {activeTab === 'charts' && (
             <div className="space-y-6">
-              <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Графики и история мониторинга
-                  </CardTitle>
-                  <CardDescription>
-                    Детальная статистика и графики работы системы
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <SystemMonitorChart />
-                </CardContent>
-              </Card>
+              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
+                      <BarChart3 className="h-5 w-5" />
+                      Графики и история мониторинга
+                    </h3>
+                    <p className="text-sm text-[#808080]">
+                      Детальная статистика и графики работы системы
+                    </p>
+                  </div>
+                </div>
+                <SystemMonitorChart />
+              </div>
             </div>
             )}
           </div>
