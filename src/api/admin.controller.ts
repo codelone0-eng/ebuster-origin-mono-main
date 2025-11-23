@@ -475,76 +475,109 @@ export const updateUserStatus = async (req: Request, res: Response) => {
   }
 };
 
-// Получение логов системы
+// Получение логов системы (на основе access_logs в Supabase)
 export const getSystemLogs = async (req: Request, res: Response) => {
   try {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      console.warn('⚠️ Supabase недоступен для getSystemLogs, возвращаем пустой список');
+      return res.json({
+        success: true,
+        data: {
+          logs: [],
+          pagination: {
+            page: 1,
+            limit: 50,
+            total: 0,
+            pages: 0,
+          },
+        },
+      });
+    }
+
     const { page = 1, limit = 50, level = '', search = '' } = req.query;
-    const offset = (Number(page) - 1) * Number(limit);
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 50;
+    const offset = (pageNumber - 1) * limitNumber;
 
-    // Пока используем заглушку, так как таблица логов может не существовать
-    const mockLogs = [
-      {
-        id: 1,
-        level: 'INFO',
-        message: 'Пользователь Александр Петров установил скрипт Dark Mode Enforcer',
-        timestamp: new Date().toISOString(),
-        ip: '192.168.1.100',
-        user_id: 1,
-        user_name: 'Александр Петров'
-      },
-      {
-        id: 2,
-        level: 'WARNING',
-        message: 'Высокая нагрузка на сервер - CPU 85%',
-        timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-        ip: '127.0.0.1',
-        user_id: null,
-        user_name: null
-      },
-      {
-        id: 3,
-        level: 'ERROR',
-        message: 'Ошибка подключения к базе данных',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        ip: '127.0.0.1',
-        user_id: null,
-        user_name: null
+    let query = supabase
+      .from('access_logs')
+      .select('*', { count: 'exact' });
+
+    // Фильтр по уровню (на основе статус-кода)
+    if (typeof level === 'string' && level) {
+      if (level === 'ERROR') {
+        query = query.gte('status_code', 500).lt('status_code', 600);
+      } else if (level === 'WARNING') {
+        query = query.gte('status_code', 400).lt('status_code', 500);
+      } else if (level === 'INFO') {
+        query = query.gte('status_code', 100).lt('status_code', 400);
       }
-    ];
-
-    // Фильтрация по уровню
-    let filteredLogs = mockLogs;
-    if (level) {
-      filteredLogs = filteredLogs.filter(log => log.level === level);
     }
 
-    // Поиск по сообщению
-    if (search) {
-      filteredLogs = filteredLogs.filter(log => 
-        log.message.toLowerCase().includes(search.toString().toLowerCase())
-      );
+    // Поиск по пути
+    if (typeof search === 'string' && search.trim()) {
+      query = query.ilike('path', `%${search.trim()}%`);
     }
 
-    // Пагинация
-    const paginatedLogs = filteredLogs.slice(offset, offset + Number(limit));
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limitNumber - 1);
+
+    if (error) {
+      console.error('Ошибка получения access_logs для getSystemLogs:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Ошибка получения логов системы',
+      });
+    }
+
+    const rows = data || [];
+
+    const logs = rows.map((row: any) => {
+      const status = Number(row.status_code) || 0;
+      let level: 'INFO' | 'WARNING' | 'ERROR' = 'INFO';
+      if (status >= 500 && status < 600) {
+        level = 'ERROR';
+      } else if (status >= 400 && status < 500) {
+        level = 'WARNING';
+      }
+
+      const message = `HTTP ${row.method || 'GET'} ${row.path || '/'} → ${
+        row.status_code ?? '-'
+      } (${row.duration_ms != null ? `${row.duration_ms}ms` : '—'})`;
+
+      return {
+        id: row.id,
+        level,
+        message,
+        timestamp: row.created_at,
+        ip: row.ip || '',
+        user: row.user_id ? `user:${row.user_id}` : 'System',
+      };
+    });
+
+    const total = count ?? logs.length;
+    const pages = Math.ceil(total / limitNumber);
 
     res.json({
       success: true,
       data: {
-        logs: paginatedLogs,
+        logs,
         pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total: filteredLogs.length,
-          pages: Math.ceil(filteredLogs.length / Number(limit))
-        }
-      }
+          page: pageNumber,
+          limit: limitNumber,
+          total,
+          pages,
+        },
+      },
     });
   } catch (error) {
     console.error('Ошибка получения логов системы:', error);
     res.status(500).json({
       success: false,
-      error: 'Ошибка получения логов системы'
+      error: 'Ошибка получения логов системы',
     });
   }
 };
