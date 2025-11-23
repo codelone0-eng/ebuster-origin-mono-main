@@ -24,7 +24,8 @@ import {
   Bell,
   Mail,
   HardDrive,
-  Send
+  Send,
+  Code
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
