@@ -393,25 +393,35 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 
     // Дополнительная статистика пользователя
-    const { count: userTickets } = await supabase
-      .from('tickets')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', id)
-      .catch(() => ({ count: 0 }));
+    let userTickets = 0;
+    try {
+      const { count } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', id);
+      userTickets = count || 0;
+    } catch (e) {
+      // Игнорируем ошибки при получении статистики
+    }
 
-    const { count: userScripts } = await supabase
-      .from('scripts')
-      .select('*', { count: 'exact', head: true })
-      .eq('author_id', id)
-      .catch(() => ({ count: 0 }));
+    let userScripts = 0;
+    try {
+      const { count } = await supabase
+        .from('scripts')
+        .select('*', { count: 'exact', head: true })
+        .eq('author_id', id);
+      userScripts = count || 0;
+    } catch (e) {
+      // Игнорируем ошибки при получении статистики
+    }
 
     res.json({
       success: true,
       data: {
         ...user,
         stats: {
-          tickets: userTickets || 0,
-          scripts: userScripts || 0
+          tickets: userTickets,
+          scripts: userScripts
         }
       }
     });

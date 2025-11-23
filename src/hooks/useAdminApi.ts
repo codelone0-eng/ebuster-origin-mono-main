@@ -79,7 +79,15 @@ export const useAdminApi = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response error:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
         
         // Проверка на бан
         if (response.status === 403 && errorData.banned) {
