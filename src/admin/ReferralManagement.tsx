@@ -190,7 +190,7 @@ export const ReferralManagement: React.FC = () => {
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Всего кодов</CardTitle>
             <LinkIcon className="h-4 w-4 text-muted-foreground" />
@@ -203,7 +203,7 @@ export const ReferralManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Использований</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -216,7 +216,7 @@ export const ReferralManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Конверсия</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -233,7 +233,7 @@ export const ReferralManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Топ реферер</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />

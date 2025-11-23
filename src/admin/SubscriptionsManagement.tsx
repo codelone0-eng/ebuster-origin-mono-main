@@ -443,7 +443,7 @@ const SubscriptionsManagement: React.FC = () => {
       {/* Статистика */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Всего подписок</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -456,7 +456,7 @@ const SubscriptionsManagement: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Месячный доход</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -469,7 +469,7 @@ const SubscriptionsManagement: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Premium подписки</CardTitle>
               <Crown className="h-4 w-4 text-muted-foreground" />
@@ -482,7 +482,7 @@ const SubscriptionsManagement: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Пробные периоды</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -498,7 +498,7 @@ const SubscriptionsManagement: React.FC = () => {
       )}
 
       {/* Фильтры и поиск */}
-      <Card>
+      <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

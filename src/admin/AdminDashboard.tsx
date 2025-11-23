@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from 'recharts';
 import ScriptsManagement from './ScriptsManagement';
 import SubscriptionsManagement from './SubscriptionsManagement';
@@ -200,7 +202,7 @@ const AdminDashboard = () => {
     status: 'all',
     method: 'ALL',
   });
-  const [systemStatus, setSystemStatus] = useState({
+    const [systemStatus, setSystemStatus] = useState({
     cpu: { usage: 0, model: 'Loading...' },
     memory: { usage: 0, total: '0GB', used: '0GB' },
     disk: { usage: 0, total: '0GB' },
@@ -210,6 +212,21 @@ const AdminDashboard = () => {
 
   const metricLabelClass =
     "font-mono text-[11px] leading-none text-neutral-500 uppercase tracking-[0.08em] dark:text-neutral-400";
+
+  const mapTimeRangeToQuery = (value: string): string => {
+    switch (value) {
+      case '24H':
+        return '24h';
+      case '7D':
+        return '7d';
+      case '14D':
+        return '14d';
+      case '30D':
+        return '30d';
+      default:
+        return '1h';
+    }
+  };
 
   const formatDurationValue = (ms: number | null | undefined) => {
     if (ms === null || ms === undefined) return '-';
@@ -310,7 +327,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Загрузка данных при монтировании компонента
+  // Загрузка данных при монтировании компонента и при смене диапазона
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -330,12 +347,16 @@ const AdminDashboard = () => {
         const browserData = await adminApi.getBrowserStats();
         setBrowserStats(browserData);
 
-        // Загружаем статистику активности
-        const activityData = await adminApi.getActivityStats();
+        // Загружаем статистику активности (используем тот же диапазон, что и в шапке)
+        const activityData = await adminApi.getActivityStats({
+          range: mapTimeRangeToQuery(timeRange),
+        });
         setActivityStats(activityData);
 
         // Загружаем статистику запросов по роутам
-        const requestsData = await adminApi.getRequestsStats({ range: '1h' });
+        const requestsData = await adminApi.getRequestsStats({
+          range: mapTimeRangeToQuery(timeRange),
+        });
         setRequestsStats(requestsData);
 
         // Загружаем статистику по тикетам
@@ -379,7 +400,37 @@ const AdminDashboard = () => {
     return () => {
       clearInterval(monitorInterval);
     };
-  }, []);
+  }, [timeRange]);
+
+  const requestsTimeline = useMemo(() => {
+    const timeline = requestsStats?.timeline || [];
+    if (!Array.isArray(timeline) || timeline.length === 0) return [];
+
+    return timeline.map((point: any) => {
+      const ts = new Date(point.timestamp);
+      const hours = String(ts.getHours()).padStart(2, '0');
+      const minutes = String(ts.getMinutes()).padStart(2, '0');
+
+      // Для длинных диапазонов показываем только дату и час
+      let label = `${hours}:${minutes}`;
+      if (requestsStats?.range === '7d' || requestsStats?.range === '14d' || requestsStats?.range === '30d') {
+        label = ts.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
+      } else if (requestsStats?.range === '24h') {
+        label = `${hours}:00`;
+      }
+
+      return {
+        time: label,
+        timestamp: point.timestamp,
+        total: point.total ?? 0,
+        ok: point.status1xx3xx ?? point.ok ?? 0,
+        error4xx: point.error4xx ?? 0,
+        error5xx: point.error5xx ?? 0,
+        avgDurationMs: point.avgDurationMs ?? null,
+        p95DurationMs: point.p95DurationMs ?? null,
+      };
+    });
+  }, [requestsStats]);
 
   // Функции для работы с данными
 
@@ -725,7 +776,7 @@ const AdminDashboard = () => {
               style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}
             >
               Dashboard
-            </div>
+              </div>
 
             {/* Center: time range selector */}
             <div
@@ -822,7 +873,7 @@ const AdminDashboard = () => {
               >
                 <ChevronDown className="h-4 w-4" />
               </button>
-            </div>
+              </div>
 
             {/* Right: user / notifications */}
             <div className="flex items-center gap-3">
@@ -837,7 +888,7 @@ const AdminDashboard = () => {
 
           <div className="flex-1 overflow-y-auto">
             <div className="p-6 space-y-6">
-              {/* Контент табов */}
+          {/* Контент табов */}
 
             {/* Обзор */}
             {activeTab === 'overview' && (
@@ -845,10 +896,10 @@ const AdminDashboard = () => {
               {/* Activity Widget */}
               <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
                     <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Activity</h2>
-                  </div>
+                        </div>
                   <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d2d] rounded transition-colors" style={{ fontSize: '14px', fontWeight: 500 }}>
                     Requests
                     <ExternalLink className="h-4 w-4" />
@@ -879,7 +930,7 @@ const AdminDashboard = () => {
                           <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
                             {activityStats?.summary?.status4xx ?? 0}
                           </span>
-                        </div>
+                      </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
                           <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>5XX</span>
@@ -936,7 +987,7 @@ const AdminDashboard = () => {
                           <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>
                             {formatDurationValue(activityStats?.summary?.durationP95Ms ?? null)}
                           </span>
-                        </div>
+                      </div>
                       </div>
                     </div>
                     {/* Graph Area */}
@@ -968,10 +1019,10 @@ const AdminDashboard = () => {
               {/* Application Widget */}
               <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-[#d9d9d9]" />
                     <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Application</h2>
-                  </div>
+                        </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
@@ -1013,29 +1064,29 @@ const AdminDashboard = () => {
                     <div className={`${metricLabelClass} mb-2`}>JOBS</div>
                     <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>{applicationStats?.jobs?.total || 0}</div>
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>FAILED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{applicationStats?.jobs?.failed || 0}</span>
-                      </div>
+                        </div>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>PROCESSED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{applicationStats?.jobs?.processed || 0}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>RELEASED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{applicationStats?.jobs?.released || 0}</span>
-                      </div>
+                        </div>
                     </div>
                     <div className={`${metricLabelClass} mb-2`}>JOB DURATION</div>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#808080', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AVG</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{applicationStats?.jobs?.duration?.avg || '-'}</span>
-                      </div>
+                        </div>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>P95</span>
@@ -1052,15 +1103,15 @@ const AdminDashboard = () => {
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-[#d9d9d9]" />
                     <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1.5' }}>Users</h2>
-                  </div>
-                </div>
+                      </div>
+                      </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Exceptions Panel */}
                   <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className={`${metricLabelClass} mb-4`}>EXCEPTIONS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No users impacted by exceptions in the last hour.
-                    </div>
+                      </div>
                     <div className="flex justify-center mb-4">
                       <div className="w-24 h-24 rounded-full border-2 border-dashed border-green-500 flex items-center justify-center" style={{ width: '96px', height: '96px', borderColor: '#10b981', borderStyle: 'dashed' }}>
                         <CheckCircle className="h-12 w-12 text-green-500" style={{ color: '#10b981' }} />
@@ -1077,18 +1128,18 @@ const AdminDashboard = () => {
                     <div className={`${metricLabelClass} mb-4`}>REQUESTS</div>
                     <div className="text-sm font-semibold text-white mb-4" style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.5' }}>
                       No active users in the last hour.
-                    </div>
+                        </div>
                     <div className="flex justify-center mb-4">
                       <div className="w-24 h-24 rounded-full border-2 border-dashed border-green-500 flex items-center justify-center" style={{ width: '96px', height: '96px', borderColor: '#10b981', borderStyle: 'dashed' }}>
                         <CheckCircle className="h-12 w-12 text-green-500" style={{ color: '#10b981' }} />
                       </div>
-                    </div>
+                  </div>
                     <div className="flex items-center gap-2 justify-start">
                       <CheckCircle className="h-4 w-4 text-green-500" style={{ color: '#10b981' }} />
                       <div className="text-sm text-green-500 font-medium" style={{ fontSize: '14px', fontWeight: 500, color: '#10b981' }}>✔ NO ACTIONS</div>
                     </div>
                   </div>
-                  
+
                   {/* Users Panel */}
                   <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4">
                     <div className="flex items-center justify-between mb-4">
@@ -1100,19 +1151,19 @@ const AdminDashboard = () => {
                     <div className={`${metricLabelClass} mb-2`}>REQUESTS</div>
                     <div className="text-3xl font-bold text-white mb-4" style={{ fontSize: '30px', fontWeight: 700, lineHeight: '1.2' }}>{usersStats?.requests?.total || 0}</div>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#10b981', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>AUTHENTICATED</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{usersStats?.requests?.authenticated || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
+                        </div>
+                        <div className="flex items-center gap-2">
                         <div className="w-2 h-2" style={{ width: '8px', height: '8px', backgroundColor: '#f97316', borderRadius: '2px' }}></div>
                         <span className="text-xs text-[#808080]" style={{ fontSize: '12px', lineHeight: '1.5' }}>GUEST</span>
                         <span className="text-sm font-medium text-white ml-auto" style={{ fontSize: '14px', fontWeight: 500, lineHeight: '1.5' }}>{usersStats?.requests?.guest || 0}</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                        </div>
+                      </div>
               </div>
             </div>
             )}
@@ -1165,9 +1216,197 @@ const AdminDashboard = () => {
                             ? 'Last 24 hours'
                             : requestsStats?.range === '7d'
                             ? 'Last 7 days'
+                            : requestsStats?.range === '14d'
+                            ? 'Last 14 days'
+                            : requestsStats?.range === '30d'
+                            ? 'Last 30 days'
                             : 'Last hour'}
                         </span>
                       </div>
+                      <div
+                        className="flex items-center gap-0"
+                        style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}
+                      >
+                        {['1H', '24H', '7D'].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => setTimeRange(value)}
+                            className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                              timeRange === value
+                                ? 'text-white'
+                                : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                            }`}
+                            style={{
+                              backgroundColor: timeRange === value ? '#2563eb' : 'transparent',
+                              borderRight: value !== '7D' ? '1px solid #404040' : undefined,
+                              letterSpacing: '0.08em',
+                            }}
+                          >
+                            {value}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Charts row: histogram + duration */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4 flex flex-col">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={metricLabelClass}>REQUESTS</div>
+                        <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-[2px] bg-[#3f3f46]" />
+                            1/2/3XX
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-[2px] bg-[#f97316]" />
+                            4XX
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-[2px] bg-[#ef4444]" />
+                            5XX
+                          </span>
+                        </div>
+                      </div>
+                      {requestsTimeline.length === 0 ? (
+                        <div className="flex-1 flex items-center justify-center text-xs text-neutral-500">
+                          Нет данных за выбранный период
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            ok: { label: '1/2/3XX', color: '#3f3f46' },
+                            error4xx: { label: '4XX', color: '#f97316' },
+                            error5xx: { label: '5XX', color: '#ef4444' },
+                          }}
+                          className="h-40 w-full"
+                        >
+                          <BarChart
+                            data={requestsTimeline}
+                            margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
+                          >
+                            <CartesianGrid stroke="#27272a" vertical={false} strokeDasharray="3 3" />
+                            <XAxis
+                              dataKey="time"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={16}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              allowDecimals={false}
+                            />
+                            <ChartTooltip
+                              cursor={{ fill: 'rgba(24,24,27,0.6)' }}
+                              content={
+                                <ChartTooltipContent
+                                  labelKey="time"
+                                  indicator="dot"
+                                />
+                              }
+                            />
+                            <Bar dataKey="ok" stackId="status" fill="var(--color-ok)" radius={[2, 2, 0, 0]} />
+                            <Bar
+                              dataKey="error4xx"
+                              stackId="status"
+                              fill="var(--color-error4xx)"
+                              radius={[2, 2, 0, 0]}
+                            />
+                            <Bar
+                              dataKey="error5xx"
+                              stackId="status"
+                              fill="var(--color-error5xx)"
+                              radius={[2, 2, 0, 0]}
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded p-4 flex flex-col">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={metricLabelClass}>DURATION</div>
+                        <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-[2px] bg-[#e5e7eb]" />
+                            AVG
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-[2px] bg-[#f97316]" />
+                            P95
+                          </span>
+                        </div>
+                      </div>
+                      {requestsTimeline.length === 0 ? (
+                        <div className="flex-1 flex items-center justify-center text-xs text-neutral-500">
+                          Нет данных за выбранный период
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            avg: { label: 'AVG', color: '#e5e7eb' },
+                            p95: { label: 'P95', color: '#f97316' },
+                          }}
+                          className="h-40 w-full"
+                        >
+                          <LineChart
+                            data={requestsTimeline}
+                            margin={{ top: 4, right: 8, left: -8, bottom: 0 }}
+                          >
+                            <CartesianGrid stroke="#27272a" vertical={false} strokeDasharray="3 3" />
+                            <XAxis
+                              dataKey="time"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={16}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              tickFormatter={(v) => formatDurationValue(Number(v))}
+                            />
+                            <ChartTooltip
+                              cursor={{ stroke: 'rgba(148,163,184,0.35)', strokeWidth: 1 }}
+                              content={
+                                <ChartTooltipContent
+                                  labelKey="time"
+                                  indicator="line"
+                                  formatter={(value, name) => {
+                                    if (typeof value !== 'number') return null;
+                                    const label = name === 'avgDurationMs' ? 'AVG' : 'P95';
+                                    return [
+                                      formatDurationValue(value),
+                                      label,
+                                    ];
+                                  }}
+                                />
+                              }
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="avgDurationMs"
+                              stroke="var(--color-avg)"
+                              strokeWidth={2}
+                              dot={false}
+                              activeDot={{ r: 3 }}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="p95DurationMs"
+                              stroke="var(--color-p95)"
+                              strokeWidth={2}
+                              dot={false}
+                              activeDot={{ r: 3 }}
+                            />
+                          </LineChart>
+                        </ChartContainer>
+                      )}
                     </div>
                   </div>
 
@@ -1280,7 +1519,7 @@ const AdminDashboard = () => {
                             </button>
                           );
                         })}
-                      </div>
+                    </div>
 
                       <div className="border border-[#2d2d2d] rounded overflow-hidden">
                         <div className="grid grid-cols-[70px_minmax(0,1.8fr)_80px_80px_80px_90px_90px] px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-neutral-500 bg-[#111111]">
@@ -1291,7 +1530,7 @@ const AdminDashboard = () => {
                           <div className="text-right">5XX</div>
                           <div className="text-right">Avg</div>
                           <div className="text-right">P95</div>
-                        </div>
+              </div>
 
                         <div className="max-h-[420px] overflow-y-auto divide-y divide-[#2d2d2d]">
                           {(requestsStats?.routes || [])
@@ -1339,22 +1578,22 @@ const AdminDashboard = () => {
                                 >
                                   <div className="font-mono text-[11px] text-[#a3a3a3]">
                                     {route.method}
-                                  </div>
+                          </div>
                                   <div className="truncate text-[#e5e5e5]">{route.path}</div>
                                   <div className="text-right tabular-nums text-[#e5e5e5]">
                                     {route.totalRequests}
-                                  </div>
+                        </div>
                                   <div className="text-right tabular-nums text-[#f97316]">
                                     {route.error4xx || 0}
-                                  </div>
+                      </div>
                                   <div className="text-right tabular-nums text-[#ef4444]">
                                     {route.error5xx || 0}
-                                  </div>
+                  </div>
                                   <div className="text-right tabular-nums text-[#e5e5e5]">
                                     {route.avgDurationMs != null
                                       ? `${Math.round(route.avgDurationMs)}ms`
                                       : '-'}
-                                  </div>
+            </div>
                                   <div className="text-right tabular-nums text-[#e5e5e5]">
                                     {route.p95DurationMs != null
                                       ? `${Math.round(route.p95DurationMs)}ms`
@@ -1735,7 +1974,7 @@ const AdminDashboard = () => {
               </Card>
             </div>
             )}
-            </div>
+          </div>
           </div>
         </main>
       </div>

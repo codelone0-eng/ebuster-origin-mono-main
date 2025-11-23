@@ -272,7 +272,10 @@ const CategoriesManagement: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
-          <Card key={category.id}>
+          <Card
+            key={category.id}
+            className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors"
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">

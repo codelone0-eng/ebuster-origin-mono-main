@@ -484,7 +484,11 @@ const TicketsManagement: React.FC = () => {
 
       <div className="space-y-3">
         {tickets && tickets.map((ticket) => (
-          <Card key={ticket.id} className="hover:shadow-lg transition-all cursor-pointer" onClick={() => openTicket(ticket)}>
+          <Card
+            key={ticket.id}
+            className="cursor-pointer bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg transition-colors hover:bg-[#1f1f1f]"
+            onClick={() => openTicket(ticket)}
+          >
             <CardContent className="p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -543,7 +547,7 @@ const TicketsManagement: React.FC = () => {
       </div>
 
       {tickets && tickets.length === 0 && (
-        <Card>
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
           <CardContent className="p-12 text-center">
             <Ticket className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">Нет тикетов</h3>

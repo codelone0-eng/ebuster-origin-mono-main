@@ -173,8 +173,11 @@ export const useAdminApi = () => {
   };
 
   // Получение статистики активности
-  const getActivityStats = async (): Promise<any> => {
-    const response = await fetchWithAuth('/api/admin/activity-stats');
+  const getActivityStats = async (params: { range?: string } = {}): Promise<any> => {
+    const queryParams = new URLSearchParams();
+    if (params.range) queryParams.append('range', params.range);
+    const query = queryParams.toString();
+    const response = await fetchWithAuth(`/api/admin/activity-stats${query ? `?${query}` : ''}`);
     return response.data;
   };
 

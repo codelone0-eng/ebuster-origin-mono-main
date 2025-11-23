@@ -561,7 +561,9 @@ interface ScriptListItemProps {
 
 const ScriptListItem: React.FC<ScriptListItemProps> = ({ script, isActive, onSelect, onDuplicate, onDelete }) => (
   <Card
-    className={`cursor-pointer transition-shadow ${isActive ? 'border-primary shadow-md' : 'hover:shadow'} `}
+    className={`cursor-pointer bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg transition-colors ${
+      isActive ? 'border-[#ffffff] bg-[#1f1f1f]' : 'hover:bg-[#1f1f1f]'
+    }`}
     onClick={onSelect}
   >
     <CardContent className="space-y-3 p-4">

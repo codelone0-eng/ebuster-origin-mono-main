@@ -576,7 +576,27 @@ export const getBrowserStats = async (req: Request, res: Response) => {
 // Получение статистики активности по времени
 export const getActivityStats = async (req: Request, res: Response) => {
   try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const range = (req.query.range as string) || '1h';
+    const now = new Date();
+    const from = new Date(now);
+
+    switch (range) {
+      case '24h':
+        from.setHours(now.getHours() - 24);
+        break;
+      case '7d':
+        from.setDate(now.getDate() - 7);
+        break;
+      case '14d':
+        from.setDate(now.getDate() - 14);
+        break;
+      case '30d':
+        from.setDate(now.getDate() - 30);
+        break;
+      default:
+        from.setHours(now.getHours() - 1);
+        break;
+    }
 
     // Используем Supabase для логов
     const supabase = getSupabaseClient();
@@ -596,7 +616,7 @@ export const getActivityStats = async (req: Request, res: Response) => {
         const { data, error } = await supabase
           .from('access_logs')
           .select('status_code, duration_ms, created_at')
-          .gte('created_at', oneHourAgo.toISOString());
+          .gte('created_at', from.toISOString());
 
         if (!error && data) {
           const durations: number[] = [];
@@ -683,6 +703,7 @@ export const getRequestsStats = async (req: Request, res: Response) => {
             error5xx: 0,
           },
           routes: [],
+          timeline: [],
         },
       });
     }
@@ -697,6 +718,12 @@ export const getRequestsStats = async (req: Request, res: Response) => {
         break;
       case '7d':
         from.setDate(now.getDate() - 7);
+        break;
+      case '14d':
+        from.setDate(now.getDate() - 14);
+        break;
+      case '30d':
+        from.setDate(now.getDate() - 30);
         break;
       default:
         from.setHours(now.getHours() - 1);
@@ -721,6 +748,7 @@ export const getRequestsStats = async (req: Request, res: Response) => {
             error5xx: 0,
           },
           routes: [],
+          timeline: [],
         },
       });
     }
@@ -737,6 +765,16 @@ export const getRequestsStats = async (req: Request, res: Response) => {
     };
 
     const routeMap = new Map<string, RouteAgg>();
+
+    type BucketAgg = {
+      total: number;
+      status1xx3xx: number;
+      error4xx: number;
+      error5xx: number;
+      durations: number[];
+    };
+
+    const bucketMap = new Map<string, BucketAgg>();
 
     let totalRequests = 0;
     let total4xx = 0;
@@ -794,6 +832,40 @@ export const getRequestsStats = async (req: Request, res: Response) => {
           agg.lastStatusCode = status || null;
         }
       }
+
+      // Агрегация по временным бакетам для таймлайна (гистограмма и длительности)
+      if (createdAt) {
+        const ts = new Date(createdAt);
+        const bucket = new Date(ts);
+        // Округляем до минуты, чтобы не плодить лишние точки
+        bucket.setSeconds(0, 0);
+        const bucketKey = bucket.toISOString();
+
+        if (!bucketMap.has(bucketKey)) {
+          bucketMap.set(bucketKey, {
+            total: 0,
+            status1xx3xx: 0,
+            error4xx: 0,
+            error5xx: 0,
+            durations: [],
+          });
+        }
+
+        const bucketAgg = bucketMap.get(bucketKey)!;
+        bucketAgg.total += 1;
+
+        if (status >= 100 && status < 400) {
+          bucketAgg.status1xx3xx += 1;
+        } else if (status >= 400 && status < 500) {
+          bucketAgg.error4xx += 1;
+        } else if (status >= 500 && status < 600) {
+          bucketAgg.error5xx += 1;
+        }
+
+        if (duration != null && !Number.isNaN(duration)) {
+          bucketAgg.durations.push(duration);
+        }
+      }
     });
 
     const routes = Array.from(routeMap.values())
@@ -834,6 +906,34 @@ export const getRequestsStats = async (req: Request, res: Response) => {
         return b.totalRequests - a.totalRequests;
       });
 
+    const timeline = Array.from(bucketMap.entries())
+      .sort(
+        ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
+      )
+      .map(([timestamp, agg]) => {
+        let avg: number | null = null;
+        let p95: number | null = null;
+
+        if (agg.durations.length > 0) {
+          const sum = agg.durations.reduce((acc, v) => acc + v, 0);
+          avg = sum / agg.durations.length;
+
+          const sorted = [...agg.durations].sort((a, b) => a - b);
+          const p95Index = Math.floor(sorted.length * 0.95);
+          p95 = sorted[p95Index] ?? null;
+        }
+
+        return {
+          timestamp,
+          total: agg.total,
+          status1xx3xx: agg.status1xx3xx,
+          error4xx: agg.error4xx,
+          error5xx: agg.error5xx,
+          avgDurationMs: avg,
+          p95DurationMs: p95,
+        };
+      });
+
     res.json({
       success: true,
       data: {
@@ -845,6 +945,7 @@ export const getRequestsStats = async (req: Request, res: Response) => {
           error5xx: total5xx,
         },
         routes,
+        timeline,
       },
     });
   } catch (error) {

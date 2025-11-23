@@ -35,22 +35,22 @@ interface AdminSidebarProps {
 
 const activitySubmenu = [
   { id: 'requests', label: 'Requests', icon: null },
-  { id: 'jobs', label: 'Jobs', icon: null },
-  { id: 'commands', label: 'Commands', icon: null },
-  { id: 'scheduled-tasks', label: 'Scheduled Tasks', icon: null },
-  { id: 'exceptions', label: 'Exceptions', icon: null },
-  { id: 'queries', label: 'Queries', icon: null },
-  { id: 'notifications', label: 'Notifications', icon: null },
-  { id: 'mail', label: 'Mail', icon: null },
-  { id: 'cache', label: 'Cache', icon: null },
-  { id: 'outgoing-requests', label: 'Outgoing Requests', icon: null },
 ];
 
 const menuItems = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'tickets', label: 'Issues', icon: FileText },
   { id: 'activity', label: 'Activity', icon: Activity, hasSubmenu: true, submenu: activitySubmenu },
+
+  // Основной функционал админки
+  { id: 'scripts', label: 'Scripts', icon: Code },
+  { id: 'categories', label: 'Categories', icon: FolderTree },
+  { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
+  { id: 'roles', label: 'Roles', icon: Shield },
+  { id: 'referrals', label: 'Referrals', icon: Send },
+
   { id: 'monitoring-separator', label: 'Monitoring', icon: null, isSeparator: true },
+  { id: 'monitoring', label: 'System', icon: BarChart3 },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'logs', label: 'Logs', icon: MessageSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -91,7 +91,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
           
           return (
             <div key={item.id}>
-              <button
+            <button
                 onClick={() => {
                   if (isActivity) {
                     setActivityExpanded(!activityExpanded);
@@ -99,7 +99,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                     onTabChange(item.id);
                   }
                 }}
-                className={cn(
+              className={cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors relative",
                   "hover:bg-[#2d2d2d] group",
                   isActive && "bg-[#2d2d2d] text-white"
@@ -108,18 +108,18 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                   borderLeft: isActive ? '2px solid white' : 'none',
                   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
                 }}
-              >
+            >
                 {Icon && (
-                  <Icon className={cn(
+              <Icon className={cn(
                     "h-4 w-4 transition-colors flex-shrink-0",
                     isActivity ? "text-green-500" : isActive ? "text-white" : "text-[#808080] group-hover:text-[#d9d9d9]"
-                  )} />
+              )} />
                 )}
-                <span className={cn(
+              <span className={cn(
                   "text-sm transition-colors flex-1 text-left",
                   isActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
                 )} style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                  {item.label}
+                {item.label}
                 </span>
                 {item.hasSubmenu && (
                   <ChevronDown className={cn(
@@ -154,8 +154,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                           isSubActive ? "text-white font-medium" : "text-[#d9d9d9] group-hover:text-white"
                         )} style={{ fontSize: '14px', lineHeight: '1.5' }}>
                           {subItem.label}
-                        </span>
-                      </button>
+              </span>
+            </button>
                     );
                   })}
                 </div>

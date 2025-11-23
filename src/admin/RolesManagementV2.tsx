@@ -558,7 +558,12 @@ export const RolesManagementV2: React.FC = () => {
       {/* Roles Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {roles.map((role) => (
-          <Card key={role.id} className={!role.is_active ? 'opacity-50' : ''}>
+          <Card
+            key={role.id}
+            className={`bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors ${
+              !role.is_active ? 'opacity-50' : ''
+            }`}
+          >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

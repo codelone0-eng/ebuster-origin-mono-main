@@ -29,7 +29,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
     <div className="space-y-6">
       {/* Основные метрики */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -42,7 +42,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
           </CardContent>
         </Card>
 
-        <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -55,7 +55,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
           </CardContent>
         </Card>
 
-        <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -68,7 +68,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
           </CardContent>
         </Card>
 
-        <Card className="bg-card/50 backdrop-blur-sm border border-border/30 hover:shadow-lg transition-all duration-300">
+        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg hover:bg-[#1f1f1f] transition-colors duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -84,16 +84,24 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
 
       {/* Подвкладки мониторинга */}
       <Tabs defaultValue="system" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="system">Система</TabsTrigger>
-          <TabsTrigger value="users">Пользователи</TabsTrigger>
-          <TabsTrigger value="scripts">Скрипты</TabsTrigger>
-          <TabsTrigger value="performance">Производительность</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-[#111111] border border-[#2d2d2d] rounded-md">
+          <TabsTrigger value="system" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white">
+            Система
+          </TabsTrigger>
+          <TabsTrigger value="users" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white">
+            Пользователи
+          </TabsTrigger>
+          <TabsTrigger value="scripts" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white">
+            Скрипты
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="data-[state=active]:bg-[#1f1f1f] data-[state=active]:text-white">
+            Производительность
+          </TabsTrigger>
         </TabsList>
 
         {/* Система */}
         <TabsContent value="system" className="space-y-6">
-          <Card className="bg-card/50 backdrop-blur-sm border border-border/30">
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Monitor className="h-5 w-5" />
@@ -153,7 +161,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <CardHeader>
               <CardTitle>Графики системы</CardTitle>
             </CardHeader>
@@ -166,7 +174,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
         {/* Пользователи */}
         <TabsContent value="users" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
+            <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
@@ -191,7 +199,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
@@ -216,7 +224,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5" />
@@ -246,7 +254,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ systemStats, 
         {/* Скрипты */}
         <TabsContent value="scripts" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
+            <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
