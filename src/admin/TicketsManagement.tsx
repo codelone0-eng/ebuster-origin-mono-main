@@ -7,8 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StatusProgress } from '@/components/ui/status-progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { 
-  Ticket, 
+  Ticket as TicketIcon, 
   MessageSquare, 
   Clock, 
   AlertCircle, 
@@ -25,7 +27,11 @@ import {
   Filter,
   Upload,
   Paperclip,
-  XCircle
+  XCircle,
+  Search,
+  MoreVertical,
+  Send,
+  ChevronLeft
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -122,16 +128,16 @@ const TicketsManagement: React.FC = () => {
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [realtimeMessages, setRealtimeMessages] = useState<TicketMessage[]>([]);
   const messagesChannelRef = useRef<RealtimeChannel | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const statusColors = {
-    new: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-    open: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    new: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    open: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
     pending_customer: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
     pending_internal: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
     resolved: 'bg-green-500/10 text-green-500 border-green-500/20',
@@ -139,56 +145,35 @@ const TicketsManagement: React.FC = () => {
   };
 
   const priorityColors = {
-    low: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
-    medium: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    high: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    critical: 'bg-red-500/10 text-red-500 border-red-500/20'
+    low: 'text-gray-400',
+    medium: 'text-blue-400',
+    high: 'text-orange-400',
+    critical: 'text-red-500'
   };
 
-  const statusLabels = {
-    new: 'Новое',
-    open: 'В работе',
-    pending_customer: 'Ожидает клиента',
-    pending_internal: 'Ожидает внутреннее',
-    resolved: 'Решено',
-    closed: 'Закрыто'
-  };
-
-  const priorityLabels = {
-    low: 'Низкий',
-    medium: 'Средний',
-    high: 'Высокий',
-    critical: 'Критический'
-  };
-
-  // Логотип молнии
-  const LightningIcon = ({ size = 32 }: { size?: number }) => (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth={2}
-      className="text-yellow-500"
-    >
-      <path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  // Scroll to bottom of messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   useEffect(() => {
     loadTickets();
   }, [statusFilter, priorityFilter]);
 
-  // Realtime обновления сообщений
+  // Realtime updates
   useEffect(() => {
-    if (!selectedTicket || !isTicketDialogOpen) {
+    if (!selectedTicket) {
       if (messagesChannelRef.current) {
         supabase.removeChannel(messagesChannelRef.current);
         messagesChannelRef.current = null;
       }
       return;
     }
+
+    // Load messages initially
+    loadMessages(selectedTicket.id);
 
     const ticketId = selectedTicket.id;
     const normalizedTicketId = String(ticketId);
@@ -200,43 +185,16 @@ const TicketsManagement: React.FC = () => {
       schema: 'public',
       table: 'ticket_messages',
       filter: `ticket_id=eq.${normalizedTicketId}`
-    }, async (payload) => {
-      console.log('[Admin Realtime] New message received:', payload);
-      const payloadTicketId = payload.new?.ticket_id;
-      console.log('[Admin Realtime] Comparing ticket IDs:', { payloadTicketId, ticketId });
-      if (String(payloadTicketId) !== normalizedTicketId) {
-        console.log('[Admin Realtime] Ticket ID mismatch, ignoring');
-        return;
-      }
-
-      console.log('[Admin Realtime] Loading messages for ticket:', ticketId);
+    }, async () => {
       await loadMessages(ticketId);
-
-      const detailedTicket = await fetchTicketDetails(ticketId);
-      if (detailedTicket) {
-        setSelectedTicket(detailedTicket);
-      }
     });
 
-    const subscription = channel.subscribe((status) => {
-      console.log('[Admin Realtime] Subscription status:', status);
-      if (status === 'SUBSCRIBED') {
-        console.log('[Admin Realtime] Successfully subscribed to admin-ticket-messages-' + normalizedTicketId);
-      }
-    });
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
-      if (subscription) {
-        subscription.unsubscribe?.().catch((err: unknown) => {
-          console.warn('[Admin Realtime] Failed to unsubscribe cleanly', err);
-        });
-      }
-      if (messagesChannelRef.current === channel) {
-        messagesChannelRef.current = null;
-      }
     };
-  }, [selectedTicket?.id, isTicketDialogOpen]);
+  }, [selectedTicket?.id]);
 
   const loadTickets = async () => {
     try {
@@ -251,9 +209,7 @@ const TicketsManagement: React.FC = () => {
       url += params.toString();
       
       const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       const data = await response.json();
@@ -261,22 +217,10 @@ const TicketsManagement: React.FC = () => {
       if (data.success) {
         const normalized = (data.data || []).map((ticket: any) => normalizeTicket(ticket));
         setTickets(normalized);
-      } else {
-        setTickets([]);
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось загрузить тикеты',
-          variant: 'destructive'
-        });
       }
     } catch (error) {
       console.error('Load tickets error:', error);
-      setTickets([]);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить тикеты',
-        variant: 'destructive'
-      });
+      toast({ title: 'Error', description: 'Failed to load tickets', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -285,93 +229,15 @@ const TicketsManagement: React.FC = () => {
   const loadMessages = async (ticketId: string) => {
     try {
       const token = localStorage.getItem('ebuster_token');
-      
       const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}/messages`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
       const data = await response.json();
-      
       if (data.success) {
         setMessages(data.data || []);
-      } else {
-        setMessages([]);
       }
     } catch (error) {
       console.error('Load messages error:', error);
-      setMessages([]);
-    }
-  };
-
-  const fetchTicketDetails = async (ticketId: string) => {
-    try {
-      const token = localStorage.getItem('ebuster_token');
-
-      const response = await fetch(`https://api.ebuster.ru/api/tickets/${ticketId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        return data.data as Ticket;
-      }
-    } catch (error) {
-      console.error('Fetch ticket details error:', error);
-    }
-
-    return null;
-  };
-
-  const openTicket = async (ticket: Ticket) => {
-    setSelectedTicket(normalizeTicket(ticket));
-    setMessages([]);
-    setIsTicketDialogOpen(true);
-    await loadMessages(ticket.id);
-
-    const detailedTicket = await fetchTicketDetails(ticket.id);
-    if (detailedTicket) {
-      setSelectedTicket(normalizeTicket(detailedTicket));
-    }
-  };
-
-  const updateTicketStatus = async (status: string) => {
-    if (!selectedTicket) return;
-
-    try {
-      const token = localStorage.getItem('ebuster_token');
-      
-      const response = await fetch(`https://api.ebuster.ru/api/tickets/${selectedTicket.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setSelectedTicket({ ...selectedTicket, status: status as any });
-        toast({
-          title: 'Успешно',
-          description: 'Статус тикета обновлен',
-          variant: 'success'
-        });
-        loadTickets();
-      }
-    } catch (error) {
-      console.error('Update ticket error:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить статус',
-        variant: 'destructive'
-      });
     }
   };
 
@@ -398,19 +264,15 @@ const TicketsManagement: React.FC = () => {
       
       if (data.success) {
         setNewMessage('');
+        setSelectedFiles([]);
         loadMessages(selectedTicket.id);
-        toast({
-          title: 'Сообщение отправлено',
-          variant: 'success'
-        });
       } else {
-        throw new Error(data.error || 'Failed to send message');
+        throw new Error(data.error);
       }
     } catch (error: any) {
-      console.error('Send message error:', error);
       toast({
-        title: 'Ошибка отправки',
-        description: error.message || 'Не удалось отправить сообщение',
+        title: 'Error',
+        description: error.message || 'Failed to send message',
         variant: 'destructive'
       });
     } finally {
@@ -418,361 +280,283 @@ const TicketsManagement: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const updateTicketStatus = async (status: string) => {
+    if (!selectedTicket) return;
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`https://api.ebuster.ru/api/tickets/${selectedTicket.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSelectedTicket(prev => prev ? { ...prev, status: status as any } : null);
+        loadTickets(); // Refresh list
+        toast({ title: 'Status updated', variant: 'success' });
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' });
+    }
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Загрузка...</div>;
-  }
+  const filteredTickets = tickets.filter(t => 
+    t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.client?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.id.includes(searchQuery)
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Управление тикетами</h2>
-          <p className="text-muted-foreground">Обработка запросов поддержки</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Статус" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все статусы</SelectItem>
-              <SelectItem value="new">Новые</SelectItem>
-              <SelectItem value="open">В работе</SelectItem>
-              <SelectItem value="pending_customer">Ожидают клиента</SelectItem>
-              <SelectItem value="resolved">Решенные</SelectItem>
-              <SelectItem value="closed">Закрытые</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Приоритет" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все приоритеты</SelectItem>
-              <SelectItem value="low">Низкий</SelectItem>
-              <SelectItem value="medium">Средний</SelectItem>
-              <SelectItem value="high">Высокий</SelectItem>
-              <SelectItem value="critical">Критический</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={loadTickets} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Обновить
-          </Button>
-        </div>
-      </div>
+    <div className="flex h-[calc(100vh-100px)] flex-col bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg overflow-hidden">
+      <div className="grid h-full grid-cols-[350px_1fr] divide-x divide-[#2d2d2d]">
+        
+        {/* Left Sidebar - Ticket List */}
+        <aside className="flex h-full flex-col bg-[#1a1a1a]">
+          <div className="p-4 border-b border-[#2d2d2d] space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                <TicketIcon className="h-4 w-4" /> Tickets
+              </h2>
+              <Button variant="ghost" size="icon" onClick={loadTickets} className="h-7 w-7">
+                <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              </Button>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search tickets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 bg-[#111111] border-[#2d2d2d] text-xs"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-7 text-xs bg-[#111111] border-[#2d2d2d] flex-1">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="pending_customer">Pending Client</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger className="h-7 text-xs bg-[#111111] border-[#2d2d2d] w-[100px]">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-      <div className="space-y-3">
-        {tickets && tickets.map((ticket) => (
-          <Card
-            key={ticket.id}
-            className="cursor-pointer bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg transition-colors hover:bg-[#1f1f1f]"
-            onClick={() => openTicket(ticket)}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <h3 className="text-lg font-semibold text-foreground truncate">{ticket.subject}</h3>
-                    <Badge className={cn(statusColors[ticket.status], 'border')}>
-                      {statusLabels[ticket.status]}
-                    </Badge>
-                    <Badge className={cn(priorityColors[ticket.priority], 'border')}>
-                      {priorityLabels[ticket.priority]}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{ticket.message}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={ticket.client?.avatar_url} />
-                        <AvatarFallback className="text-xs">{ticket.client?.full_name?.[0] || '?'}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{ticket.client?.full_name || 'Unknown'}</span>
-                      <span className="text-muted-foreground/70">({ticket.client?.email})</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>Создан {formatDate(ticket.created_at)}</span>
-                    </div>
-                    {ticket.updated_at !== ticket.created_at && (
-                      <div className="flex items-center gap-1.5">
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        <span>Обновлен {formatDate(ticket.updated_at)}</span>
-                      </div>
-                    )}
-                    {ticket.agent && (
-                      <div className="flex items-center gap-1.5">
-                        <User className="h-3.5 w-3.5" />
-                        <span>Назначен: {ticket.agent.full_name}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openTicket(ticket);
-                  }}
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col">
+              {filteredTickets.map((ticket) => (
+                <button
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  className={cn(
+                    "flex flex-col items-start p-3 text-left border-b border-[#2d2d2d] hover:bg-[#2d2d2d]/50 transition-colors",
+                    selectedTicket?.id === ticket.id && "bg-[#2d2d2d] border-l-2 border-l-blue-500 pl-[10px]"
+                  )}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Открыть
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <div className="flex items-center gap-2 max-w-[70%]">
+                       <span className={cn("w-2 h-2 rounded-full flex-shrink-0", priorityColors[ticket.priority].replace('text-', 'bg-'))} />
+                       <span className="font-medium text-sm text-white truncate">{ticket.subject}</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {new Date(ticket.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2 w-full line-clamp-1">
+                    {ticket.client?.email}
+                  </div>
+                  <div className="flex items-center justify-between w-full">
+                    <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-4 border-0 font-normal", statusColors[ticket.status])}>
+                      {ticket.status.replace('_', ' ')}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                       #{ticket.id.slice(0, 6)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+              {filteredTickets.length === 0 && (
+                <div className="p-4 text-center text-sm text-muted-foreground">No tickets found</div>
+              )}
+            </div>
+          </ScrollArea>
+        </aside>
 
-      {tickets && tickets.length === 0 && (
-        <Card className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
-          <CardContent className="p-12 text-center">
-            <Ticket className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Нет тикетов</h3>
-            <p className="text-muted-foreground">
-              {statusFilter === 'all' ? 'Нет тикетов в системе' : 'Нет тикетов с выбранным статусом'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Модальное окно тикета */}
-      <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-          {selectedTicket && (
+        {/* Right Content - Chat/Details */}
+        <main className="flex h-full flex-col bg-[#1f1f1f] overflow-hidden relative">
+          {selectedTicket ? (
             <>
-              <DialogHeader className="pb-4 border-b">
-                <DialogTitle className="text-2xl">{selectedTicket.subject}</DialogTitle>
-                <div className="mt-3">
-                  <StatusProgress 
-                    currentStatus={selectedTicket.status} 
-                    onStatusChange={updateTicketStatus}
-                    isAdmin={true}
-                  />
+              {/* Ticket Header */}
+              <div className="flex items-center justify-between p-4 border-b border-[#2d2d2d] bg-[#1a1a1a]">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedTicket(null)}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">{selectedTicket.subject}</h2>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{selectedTicket.client?.full_name} ({selectedTicket.client?.email})</span>
+                      <span>•</span>
+                      <span>Created {new Date(selectedTicket.created_at).toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-              </DialogHeader>
-              
-              <div className="flex-1 overflow-y-auto pr-2 space-y-6 py-4">
-                {/* Информация о тикете */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Информация о тикете</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Клиент</p>
-                          <p className="font-medium">{selectedTicket.client?.full_name || 'Unknown'}</p>
-                          <p className="text-xs text-muted-foreground">{selectedTicket.client?.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Создан</p>
-                          <p className="font-medium">{formatDate(selectedTicket.created_at)}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Приоритет</p>
-                          <Badge className={priorityColors[selectedTicket.priority]}>
-                            {priorityLabels[selectedTicket.priority]}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="border-t pt-4">
-                      <p className="text-sm text-muted-foreground mb-2">Описание</p>
-                      <p className="text-foreground whitespace-pre-wrap">{selectedTicket.message}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* История сообщений */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      История сообщений ({messages?.length || 0})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {messages && messages.map((message) => {
-                        const isSupport = message.author_id !== selectedTicket.user_id;
-                        const isSystem = message.is_system;
-
-                        if (isSystem) {
-                          return (
-                            <div key={message.id} className="flex justify-center">
-                              <div className="bg-muted px-4 py-2 rounded-full text-xs text-muted-foreground">
-                                {message.message}
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        return (
-                          <div
-                            key={message.id}
-                            className={cn(
-                              "flex gap-3",
-                              isSupport ? "flex-row-reverse" : "flex-row"
-                            )}
-                          >
-                            <Avatar className="h-10 w-10 flex-shrink-0">
-                              <AvatarImage src={isSupport ? undefined : message.author?.avatar_url} />
-                              <AvatarFallback className={cn(isSupport && 'bg-primary text-primary-foreground')}>
-                                {isSupport ? <LightningIcon size={24} /> : message.author?.full_name?.[0] || '?'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className={cn(
-                              "flex-1 max-w-[75%]",
-                              isSupport ? "items-end" : "items-start"
-                            )}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">
-                                  {isSupport ? 'Техническая поддержка Ebuster' : message.author?.full_name || 'Пользователь'}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatTime(message.created_at)}
-                                </span>
-                                {message.is_internal && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Внутренняя заметка
-                                  </Badge>
-                                )}
-                              </div>
-                              <div
-                                className={cn(
-                                  "rounded-lg p-3 whitespace-pre-wrap",
-                                  isSupport
-                                    ? "bg-primary/5 border border-primary/10"
-                                    : "bg-muted"
-                                )}
-                              >
-                                {message.message}
-                              </div>
-                              {message.attachments && message.attachments.length > 0 && (
-                                <div className="mt-2">
-                                  <AttachmentList 
-                                    attachments={message.attachments} 
-                                    canDelete={false}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {messages.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          Нет сообщений
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex items-center gap-2">
+                  <Select value={selectedTicket.status} onValueChange={updateTicketStatus}>
+                    <SelectTrigger className={cn("h-8 w-[140px] border-0 text-xs", statusColors[selectedTicket.status])}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="pending_customer">Pending Customer</SelectItem>
+                      <SelectItem value="pending_internal">Pending Internal</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Форма отправки сообщения */}
-              <div className="border-t pt-4 space-y-3 bg-background">
-                {selectedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      <Paperclip className="h-4 w-4 text-muted-foreground" />
-                      Прикрепленные файлы ({selectedFiles.length})
+              {/* Chat Area */}
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4 max-w-3xl mx-auto">
+                  {/* Ticket Description */}
+                  <div className="bg-[#2d2d2d]/50 p-4 rounded-lg border border-[#2d2d2d] mb-6">
+                    <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                       <User className="h-3 w-3" /> 
+                       <span className="font-medium text-white">{selectedTicket.client?.full_name}</span>
+                       original request:
                     </div>
+                    <p className="text-sm text-white whitespace-pre-wrap">{selectedTicket.message}</p>
+                  </div>
+
+                  {/* Messages */}
+                  {messages.map((msg) => {
+                    const isAgent = msg.author_id !== selectedTicket.user_id;
+                    return (
+                      <div key={msg.id} className={cn("flex gap-3", isAgent ? "flex-row-reverse" : "flex-row")}>
+                        <Avatar className="h-8 w-8 mt-1">
+                          <AvatarImage src={isAgent ? undefined : msg.author?.avatar_url} />
+                          <AvatarFallback className={isAgent ? "bg-blue-600 text-white" : "bg-[#333] text-white"}>
+                            {isAgent ? "S" : msg.author?.full_name?.[0] || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className={cn(
+                          "flex flex-col max-w-[80%]",
+                          isAgent ? "items-end" : "items-start"
+                        )}>
+                          <div className={cn(
+                            "p-3 rounded-lg text-sm whitespace-pre-wrap",
+                            isAgent 
+                              ? "bg-blue-600 text-white rounded-tr-none" 
+                              : "bg-[#2d2d2d] text-gray-200 rounded-tl-none"
+                          )}>
+                            {msg.message}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground mt-1">
+                            {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </span>
+                          {msg.attachments && msg.attachments.length > 0 && (
+                             <div className="mt-1 w-full">
+                                <AttachmentList attachments={msg.attachments} canDelete={false} />
+                             </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+
+              {/* Input Area */}
+              <div className="p-4 border-t border-[#2d2d2d] bg-[#1a1a1a]">
+                <div className="max-w-3xl mx-auto space-y-3">
+                  {selectedFiles.length > 0 && (
                     <AttachmentList 
-                      attachments={selectedFiles?.map((file, index) => ({
-                        id: `temp-${index}`,
-                        filename: file.name,
-                        original_filename: file.name,
-                        file_path: URL.createObjectURL(file),
-                        file_size: file.size,
-                        mime_type: file.type,
+                      attachments={selectedFiles.map((f, i) => ({
+                        id: `temp-${i}`,
+                        filename: f.name,
+                        original_filename: f.name,
+                        file_path: URL.createObjectURL(f),
+                        file_size: f.size,
                         created_at: new Date().toISOString()
-                      })) || []}
+                      }))}
                       canDelete={true}
                       onDelete={(id) => {
-                        const index = parseInt(id.split('-')[1]);
-                        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+                        const idx = parseInt(id.split('-')[1]);
+                        setSelectedFiles(prev => prev.filter((_, i) => i !== idx));
                       }}
                     />
+                  )}
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 relative">
+                      <Textarea
+                        placeholder="Reply to ticket..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        className="min-h-[80px] bg-[#111111] border-[#2d2d2d] text-white resize-none pr-10"
+                      />
+                      <div className="absolute bottom-2 right-2">
+                        <FileUpload
+                          onFileSelect={setSelectedFiles}
+                          maxFiles={5}
+                          maxSize={10 * 1024 * 1024}
+                          disabled={isSending}
+                        >
+                          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-[#2d2d2d]">
+                            <Paperclip className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </FileUpload>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={sendMessage} 
+                      disabled={(!newMessage.trim() && selectedFiles.length === 0) || isSending}
+                      className="h-[80px] w-[80px] bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isSending ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                    </Button>
                   </div>
-                )}
-                <FileUpload
-                  onFileSelect={setSelectedFiles}
-                  maxFiles={5}
-                  maxSize={10 * 1024 * 1024}
-                  acceptedTypes={['image/*', 'application/pdf', 'text/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                  disabled={isSending}
-                />
-                <Textarea
-                  placeholder="Введите ваш ответ..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  rows={4}
-                  className="resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.ctrlKey) {
-                      sendMessage();
-                    }
-                  }}
-                />
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">
-                    Ctrl + Enter для отправки
-                  </span>
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={(!newMessage.trim() && selectedFiles.length === 0) || isSending}
-                    className="min-w-[140px]"
-                  >
-                    {isSending ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Отправка...
-                      </>
-                    ) : (
-                      <>
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Отправить ответ
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
             </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
+              <p>Select a ticket to view details</p>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </main>
+      </div>
     </div>
   );
 };

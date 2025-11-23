@@ -38,6 +38,8 @@ import CategoriesManagement from './CategoriesManagement';
 import MonitoringDashboard from './MonitoringDashboard';
 import TicketsManagement from './TicketsManagement';
 import { RolesManagementV2 as RolesManagement } from './RolesManagementV2';
+import { UsersManagement } from './UsersManagement';
+import { LogsManagement } from './LogsManagement';
 import { 
   Users, 
   Settings, 
@@ -1858,89 +1860,7 @@ const AdminDashboard = () => {
             {/* Пользователи */}
             {activeTab === 'users' && (
             <div className="space-y-6">
-              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-2">
-                        <Users className="h-5 w-5" />
-                        Управление пользователями
-                      </h3>
-                      <p className="text-sm text-[#808080]">
-                        Всего пользователей: {systemStats?.totalUsers || '0'} | Активных: {systemStats?.activeUsers || '0'} | Забаненных: {systemStats?.bannedUsers || '0'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
-                        <Input
-                          placeholder="Поиск пользователей..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 w-64 bg-[#2d2d2d] border-[#404040] text-white"
-                        />
-                      </div>
-                      <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                        <Filter className="h-4 w-4 mr-2" />
-                        Фильтры
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="space-y-4">
-                    {recentUsers && recentUsers.map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg bg-[#2d2d2d] hover:bg-[#3d3d3d] transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-[#404040] flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">
-                              {(user?.full_name || user?.name || 'U').split(' ').map((n: string) => n[0] || '').join('')}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-white">{user.full_name || user.name || 'Неизвестный пользователь'}</span>
-                              <Badge className={`text-xs ${getStatusColor(user.status)}`}>
-                                {user.status === 'active' ? 'Активен' : 
-                                 user.status === 'banned' ? 'Забанен' : 'Неактивен'}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-[#808080]">
-                              <span>{user.email || 'Не указан'}</span>
-                              <span>•</span>
-                              <span>{user.location || 'Местоположение не указано'}</span>
-                              <span>•</span>
-                              <span>{user.browser || 'Браузер не указан'}</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-[#808080] mt-1">
-                              <span>Загрузок: {user.downloads || 0}</span>
-                              <span>Скриптов: {user.scripts || 0}</span>
-                              <span>Последняя активность: {user.last_active ? new Date(user.last_active).toLocaleString('ru-RU') : user.last_login_at ? new Date(user.last_login_at).toLocaleString('ru-RU') : 'Никогда'}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          {user.status === 'banned' ? (
-                            <Button variant="outline" size="sm" onClick={() => handleUnbanUser(user.id)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                              <Unlock className="h-4 w-4" />
-                            </Button>
-                          ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleBanUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                              <Ban className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteUser(user)} className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <UsersManagement />
             </div>
             )}
 
@@ -1996,51 +1916,7 @@ const AdminDashboard = () => {
             {/* Логи */}
             {activeTab === 'logs' && (
             <div className="space-y-6">
-              <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
-                      <Database className="h-5 w-5" />
-                      Системные логи
-                    </h3>
-                    <p className="text-sm text-[#808080]">
-                      Мониторинг активности системы и пользователей
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                      <Download className="h-4 w-4 mr-2" />
-                      Экспорт логов
-                    </Button>
-                    <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Обновить
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {(systemLogs || []).map((log) => (
-                    <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-[#2d2d2d] hover:bg-[#3d3d3d] transition-colors">
-                      <Badge className={`text-xs ${getLogLevelColor(log.level)}`}>
-                        {log.level}
-                      </Badge>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white">{log.message}</p>
-                        <div className="flex items-center gap-4 mt-1 text-xs text-[#a3a3a3]">
-                          <span>{log.timestamp}</span>
-                          <span>IP: {log.ip}</span>
-                          {log.user !== 'System' && (
-                            <span>Пользователь: {log.user}</span>
-                          )}
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]" onClick={() => handleViewLog(log)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <LogsManagement />
             </div>
             )}
 

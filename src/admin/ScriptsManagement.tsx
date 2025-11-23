@@ -55,8 +55,10 @@ import {
   KeyRound,
   Code2,
   BookOpen,
-  Settings2
+  Settings2,
+  Code
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 import {
   CreateScriptPayload,
@@ -71,9 +73,6 @@ import { ScriptVersionManager } from './ScriptVersionManager';
 import { useDetailedPermissions } from '@/hooks/useDetailedPermissions';
 import { CodeEditor } from '@/components/editors/CodeEditor';
 import { MarkdownEditor } from '@/components/editors/MarkdownEditor';
-import { KeyValueEditor } from '@/components/editors/KeyValueEditor';
-import { QueryState } from '@/components/state/QueryState';
-import { EmptyState } from '@/components/state/EmptyState';
 import { ScriptAuditPanel } from './components/ScriptAuditPanel';
 import { ScriptChecksPanel } from './components/ScriptChecksPanel';
 import { ScriptAccessPanel } from './components/ScriptAccessPanel';
@@ -88,12 +87,12 @@ const statusLabels: Record<ScriptStatus, string> = {
 };
 
 const statusColors: Record<ScriptStatus, string> = {
-  draft: 'bg-yellow-100 text-yellow-900',
-  pending_review: 'bg-blue-100 text-blue-900',
-  rejected: 'bg-red-100 text-red-900',
-  published: 'bg-emerald-100 text-emerald-900',
-  archived: 'bg-muted text-muted-foreground',
-  banned: 'bg-destructive text-destructive-foreground'
+  draft: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+  pending_review: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  rejected: 'bg-red-500/10 text-red-500 border-red-500/20',
+  published: 'bg-green-500/10 text-green-500 border-green-500/20',
+  archived: 'bg-neutral-500/10 text-neutral-500 border-neutral-500/20',
+  banned: 'bg-red-900/20 text-red-500 border-red-500/20'
 };
 
 const visibilityLabels: Record<ScriptVisibility, string> = {
@@ -304,94 +303,126 @@ const ScriptsManagement: React.FC = () => {
   const selectedScript = scriptQuery.data ?? null;
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b p-4">
-        <div>
-          <h1 className="text-2xl font-bold">Управление скриптами</h1>
-          <p className="text-sm text-muted-foreground">
-            Настройка, публикация и контроль доступа для пользовательских скриптов
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => scriptsQuery.refetch()}
-            disabled={scriptsQuery.isLoading}
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" /> Обновить
-          </Button>
-          {permissions.canManageScripts() && (
-            <Button onClick={() => setIsCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Новый скрипт
-            </Button>
-          )}
-        </div>
-      </header>
+    <div className="flex h-[calc(100vh-100px)] flex-col bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg overflow-hidden">
+      {/* Main Layout */}
+      <div className="grid h-full grid-cols-[320px_1fr] divide-x divide-[#2d2d2d]">
+        {/* Sidebar */}
+        <aside className="flex h-full flex-col bg-[#1a1a1a]">
+          <div className="p-4 border-b border-[#2d2d2d]">
+             <div className="flex items-center justify-between mb-4">
+               <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                 <Code className="h-4 w-4" /> Scripts
+               </h2>
+               {permissions.canManageScripts() && (
+                 <Button variant="ghost" size="icon" onClick={() => setIsCreateOpen(true)} className="h-6 w-6 hover:bg-[#2d2d2d]">
+                   <Plus className="h-4 w-4" />
+                 </Button>
+               )}
+             </div>
+             
+             <div className="relative mb-3">
+                <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search..."
+                  className="pl-8 h-8 bg-[#111111] border-[#2d2d2d] text-xs"
+                />
+             </div>
 
-      <div className="grid h-full grid-cols-[320px_1fr] divide-x">
-        <aside className="flex h-full flex-col">
-          <FiltersPanel
-            search={search}
-            onSearchChange={setSearch}
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
+             <div className="flex gap-2">
+                 <Select
+                  value={filters.status}
+                  onValueChange={(value) =>
+                    setFilters({ ...filters, page: 1, status: value as FilterState['status'] })
+                  }
+                >
+                  <SelectTrigger className="h-7 text-xs bg-[#111111] border-[#2d2d2d]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                    <SelectItem value="all">All</SelectItem>
+                    {Object.keys(statusLabels).map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {statusLabels[status as ScriptStatus]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-          <div className="flex-1 overflow-y-auto">
+                 <Button 
+                   variant="ghost" 
+                   size="icon" 
+                   className="h-7 w-7 border border-[#2d2d2d] bg-[#111111]"
+                   onClick={() => scriptsQuery.refetch()}
+                 >
+                    <RefreshCcw className="h-3 w-3" />
+                 </Button>
+             </div>
+          </div>
+
+          <ScrollArea className="flex-1">
             {scriptsQuery.isLoading ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Загрузка...
+              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               </div>
             ) : scriptsQuery.isError ? (
-              <div className="p-6 text-sm text-destructive">
-                Не удалось загрузить список скриптов
+              <div className="p-4 text-xs text-red-500 text-center">
+                Failed to load scripts
               </div>
             ) : scripts.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground">
-                Скрипты не найдены. Попробуйте изменить фильтры или создать новый.
+              <div className="p-4 text-xs text-muted-foreground text-center">
+                No scripts found
               </div>
             ) : (
-              <div className="space-y-3 p-4">
+              <div className="flex flex-col">
                 {scripts.map((script) => (
-                  <ScriptListItem
+                  <button
                     key={script.id}
-                    script={script}
-                    isActive={selectedScriptId === script.id}
-                    onSelect={() => setSelectedScriptId(script.id)}
-                    onDuplicate={() =>
-                      scriptsAdminApi
-                        .duplicate(script.id, { title: `${script.name} (копия)` })
-                        .then((copy) => {
-                          toast({ title: 'Скрипт дублирован' });
-                          queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
-                          setSelectedScriptId(copy.id);
-                        })
-                        .catch(() =>
-                          toast({
-                            title: 'Не удалось дублировать',
-                            variant: 'destructive'
-                          })
-                        )
-                    }
-                    onDelete={() => deleteScript.mutate(script.id)}
-                  />
+                    onClick={() => setSelectedScriptId(script.id)}
+                    className={cn(
+                      "flex flex-col items-start p-3 text-left border-b border-[#2d2d2d] hover:bg-[#2d2d2d]/50 transition-colors",
+                      selectedScriptId === script.id && "bg-[#2d2d2d] border-l-2 border-l-blue-500 pl-[10px]"
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span className="font-medium text-sm text-white truncate max-w-[180px]">{script.name}</span>
+                      <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-4 font-normal border-0", statusColors[script.status ?? 'draft'])}>
+                         {statusLabels[script.status ?? 'draft']}
+                      </Badge>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground line-clamp-2 mb-2 w-full">
+                       {script.short_description || 'No description'}
+                    </div>
+                    <div className="flex items-center justify-between w-full text-[10px] text-muted-foreground">
+                       <div className="flex items-center gap-2">
+                          <span className="flex items-center"><Star className="h-3 w-3 mr-0.5" /> {script.rating?.toFixed(1)}</span>
+                          <span className="flex items-center"><Download className="h-3 w-3 mr-0.5" /> {script.downloads}</span>
+                       </div>
+                       <span>{new Date(script.updated_at).toLocaleDateString()}</span>
+                    </div>
+                  </button>
                 ))}
               </div>
             )}
-          </div>
+          </ScrollArea>
         </aside>
 
-        <main className="flex h-full flex-col overflow-hidden">
+        {/* Main Content */}
+        <main className="flex h-full flex-col overflow-hidden bg-[#1f1f1f]">
           {selectedScript ? (
             <ScriptDetails
               script={selectedScript}
               isSaving={updateScript.isPending}
               onSave={(payload) => updateScript.mutate({ id: selectedScript.id, payload })}
+              onDelete={() => deleteScript.mutate(selectedScript.id)}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Выберите скрипт в списке слева
+              <div className="text-center">
+                 <Code2 className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                 <p>Select a script to view details</p>
+              </div>
             </div>
           )}
         </main>
@@ -407,229 +438,14 @@ const ScriptsManagement: React.FC = () => {
   );
 };
 
-interface FiltersPanelProps {
-  search: string;
-  onSearchChange: (value: string) => void;
-  filters: FilterState;
-  onFiltersChange: (value: FilterState) => void;
-}
-
-const FiltersPanel: React.FC<FiltersPanelProps> = ({ search, onSearchChange, filters, onFiltersChange }) => (
-  <div className="space-y-4 border-b p-4">
-    <div className="flex items-center gap-2">
-      <Search className="h-4 w-4 text-muted-foreground" />
-      <Input
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="Поиск по названию или описанию"
-      />
-    </div>
-
-    <div className="grid grid-cols-2 gap-3 text-sm">
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Статус</span>
-        <Select
-          value={filters.status}
-          onValueChange={(value) =>
-            onFiltersChange({ ...filters, page: 1, status: value as FilterState['status'] })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            {Object.keys(statusLabels).map((status) => (
-              <SelectItem key={status} value={status}>
-                {statusLabels[status as ScriptStatus]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Видимость</span>
-        <Select
-          value={filters.visibility}
-          onValueChange={(value) =>
-            onFiltersChange({ ...filters, page: 1, visibility: value as FilterState['visibility'] })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            {Object.keys(visibilityLabels).map((visibility) => (
-              <SelectItem key={visibility} value={visibility}>
-                {visibilityLabels[visibility as ScriptVisibility]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">План</span>
-        <Select
-          value={filters.pricing_plan}
-          onValueChange={(value) =>
-            onFiltersChange({ ...filters, page: 1, pricing_plan: value as FilterState['pricing_plan'] })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            {Object.keys(pricingLabels).map((plan) => (
-              <SelectItem key={plan} value={plan}>
-                {pricingLabels[plan as ScriptPricingPlan]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Сортировка</span>
-        <Select
-          value={`${filters.sort}.${filters.order}`}
-          onValueChange={(value) => {
-            const [sort, order] = value.split('.') as [FilterState['sort'], FilterState['order']];
-            onFiltersChange({ ...filters, sort, order });
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="created_at.desc">Сначала новые</SelectItem>
-            <SelectItem value="created_at.asc">Сначала старые</SelectItem>
-            <SelectItem value="updated_at.desc">Недавно обновлённые</SelectItem>
-            <SelectItem value="rating.desc">По рейтингу</SelectItem>
-            <SelectItem value="downloads.desc">По скачиваниям</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-3 text-sm">
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">На странице</span>
-        <Select
-          value={String(filters.limit)}
-          onValueChange={(value) =>
-            onFiltersChange({ ...filters, limit: Number(value), page: 1 })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 20, 30, 50].map((limit) => (
-              <SelectItem key={limit} value={String(limit)}>
-                {limit}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Страница</span>
-        <Input
-          type="number"
-          min={1}
-          value={filters.page}
-          onChange={(e) =>
-            onFiltersChange({ ...filters, page: Math.max(1, Number(e.target.value)) })
-          }
-        />
-      </div>
-    </div>
-  </div>
-);
-
-interface ScriptListItemProps {
-  script: ScriptRecord;
-  isActive: boolean;
-  onSelect: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
-}
-
-const ScriptListItem: React.FC<ScriptListItemProps> = ({ script, isActive, onSelect, onDuplicate, onDelete }) => (
-  <Card
-    className={`cursor-pointer bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg transition-colors ${
-      isActive ? 'border-[#ffffff] bg-[#1f1f1f]' : 'hover:bg-[#1f1f1f]'
-    }`}
-    onClick={onSelect}
-  >
-    <CardContent className="space-y-3 p-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Badge className={statusColors[script.status ?? 'draft']}>
-              {statusLabels[script.status ?? 'draft']}
-            </Badge>
-            <Badge variant="outline">{pricingLabels[script.pricing_plan ?? 'free']}</Badge>
-          </div>
-          <h3 className="mt-2 line-clamp-1 text-sm font-semibold">{script.name}</h3>
-          <p className="line-clamp-2 text-xs text-muted-foreground">
-            {script.short_description || 'Описание не задано'}
-          </p>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDuplicate();
-            }}
-          >
-            <ClipboardCopy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Download className="h-3 w-3" />
-          {script.downloads ?? 0}
-        </span>
-        <span className="flex items-center gap-1">
-          <Star className="h-3 w-3" />
-          {(script.rating ?? 0).toFixed(1)}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {new Date(script.updated_at).toLocaleDateString('ru-RU')}
-        </span>
-      </div>
-    </CardContent>
-  </Card>
-);
-
 interface ScriptDetailsProps {
   script: ScriptRecord;
   isSaving: boolean;
   onSave: (payload: Partial<CreateScriptPayload>) => void;
+  onDelete: () => void;
 }
 
-const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave }) => {
+const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave, onDelete }) => {
   const { toast } = useToast();
   const [tab, setTab] = useState('overview');
   const [formState, setFormState] = useState<FormState>(() => buildFormState(script));
@@ -655,275 +471,210 @@ const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave 
   };
 
   const tags = parseList(formState.tagsText);
-  const allowedRoles = parseList(formState.allowedRolesText);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b p-4">
-        <h2 className="text-xl font-semibold">{script.name}</h2>
-        <p className="text-sm text-muted-foreground">
-          {visibilityLabels[script.visibility ?? 'public']} · {pricingLabels[script.pricing_plan ?? 'free']}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 border-b px-4 py-2">
-        <Button
-          variant={showAudit ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setShowAudit(!showAudit)}
-        >
-          <History className="mr-2 h-4 w-4" />
-          Аудит
-        </Button>
-        <Button
-          variant={showChecks ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setShowChecks(!showChecks)}
-        >
-          <ShieldAlert className="mr-2 h-4 w-4" />
-          Проверки
-        </Button>
-        <Button
-          variant={showAccess ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setShowAccess(!showAccess)}
-        >
-          <KeyRound className="mr-2 h-4 w-4" />
-          Доступ
-        </Button>
-      </div>
-
-      <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden">
-        <TabsList className="grid grid-cols-5">
-          <TabsTrigger value="overview">Обзор</TabsTrigger>
-          <TabsTrigger value="editor">
-            <Code2 className="mr-2 h-4 w-4" />
-            Код
-          </TabsTrigger>
-          <TabsTrigger value="docs">
-            <BookOpen className="mr-2 h-4 w-4" />
-            Документация
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings2 className="mr-2 h-4 w-4" />
-            Настройки
-          </TabsTrigger>
-          <TabsTrigger value="versions">Версии</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="h-full overflow-y-auto p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="h-4 w-4 text-primary" />
-                  Краткое описание
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p>{script.short_description || 'Описание не заполнено'}</p>
-                <Separator />
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{script.category}</Badge>
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
-                      <Tag className="mr-1 h-3 w-3" />
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Users className="h-4 w-4 text-primary" />
-                  Доступ
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex flex-wrap gap-2">
-                  {(script.allowed_roles ?? ['user']).map((role) => (
-                    <Badge key={role} variant="outline">
-                      <Shield className="mr-1 h-3 w-3" />
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
-                <Separator />
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Download className="h-3 w-3" />
-                    {script.downloads ?? 0} загрузок
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="h-3 w-3" />
-                    {(script.rating ?? 0).toFixed(1)} ({script.rating_count ?? 0})
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    обновлён {new Date(script.updated_at).toLocaleDateString('ru-RU')}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="border-b border-[#2d2d2d] p-4 bg-[#1a1a1a]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white">{script.name}</h2>
+            <div className="flex items-center gap-2 mt-1">
+               <Badge variant="outline" className="bg-[#2d2d2d] text-xs font-normal text-muted-foreground border-0">
+                 {visibilityLabels[script.visibility ?? 'public']}
+               </Badge>
+               <Badge variant="outline" className="bg-[#2d2d2d] text-xs font-normal text-muted-foreground border-0">
+                 {pricingLabels[script.pricing_plan ?? 'free']}
+               </Badge>
+               <span className="text-xs text-muted-foreground ml-2">ID: {script.id}</span>
+            </div>
           </div>
+          <div className="flex items-center gap-2">
+             <Button 
+               variant="outline" 
+               size="sm" 
+               className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+               onClick={() => setShowAudit(!showAudit)}
+             >
+               <History className="h-4 w-4 mr-2" /> Log
+             </Button>
+             <Button 
+               variant="outline" 
+               size="sm" 
+               className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+               onClick={() => setShowChecks(!showChecks)}
+             >
+               <ShieldAlert className="h-4 w-4 mr-2" /> Checks
+             </Button>
+             <Button 
+               variant="destructive" 
+               size="sm" 
+               className="bg-red-900/20 border border-red-900/50 text-red-500 hover:bg-red-900/40"
+               onClick={onDelete}
+             >
+               <Trash2 className="h-4 w-4" />
+             </Button>
+          </div>
+        </div>
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden flex flex-col">
+        <div className="border-b border-[#2d2d2d] bg-[#1a1a1a] px-4">
+          <TabsList className="bg-transparent h-10 p-0 space-x-4">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Overview</TabsTrigger>
+            <TabsTrigger value="editor" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Code</TabsTrigger>
+            <TabsTrigger value="docs" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Docs</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Settings</TabsTrigger>
+            <TabsTrigger value="versions" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Versions</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6">
+           <Card className="bg-[#1a1a1a] border-[#2d2d2d]">
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-white">Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                 <p className="text-sm text-muted-foreground mb-4">{script.short_description || 'No description provided.'}</p>
+                 <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="bg-[#2d2d2d] text-muted-foreground">{script.category}</Badge>
+                    {tags.map((tag) => (
+                       <Badge key={tag} variant="outline" className="border-[#404040] text-muted-foreground">
+                         <Tag className="mr-1 h-3 w-3" /> {tag}
+                       </Badge>
+                    ))}
+                 </div>
+              </CardContent>
+           </Card>
+
+           <div className="grid grid-cols-3 gap-4">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
+                 <div className="text-xs text-muted-foreground mb-1">Downloads</div>
+                 <div className="text-2xl font-bold text-white">{script.downloads}</div>
+              </Card>
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
+                 <div className="text-xs text-muted-foreground mb-1">Rating</div>
+                 <div className="text-2xl font-bold text-white">{script.rating?.toFixed(1) || '0.0'}</div>
+              </Card>
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
+                 <div className="text-xs text-muted-foreground mb-1">Version</div>
+                 <div className="text-2xl font-bold text-white">{script.version || '1.0.0'}</div>
+              </Card>
+           </div>
         </TabsContent>
 
-        <TabsContent value="editor" className="h-full overflow-hidden p-4">
+        <TabsContent value="editor" className="flex-1 overflow-hidden p-0 h-full">
           <CodeEditor
             value={formState.code}
             onChange={(value) => handleChange('code', value)}
             language="javascript"
-            height="calc(100vh - 280px)"
+            height="100%"
             onSave={handleSave}
           />
         </TabsContent>
 
-        <TabsContent value="docs" className="h-full overflow-hidden p-4">
+        <TabsContent value="docs" className="flex-1 overflow-hidden p-0 h-full bg-[#1e1e1e]">
           <MarkdownEditor
             value={formState.full_description}
             onChange={(value) => handleChange('full_description', value)}
-            height="calc(100vh - 280px)"
+            height="100%"
           />
         </TabsContent>
 
-        <TabsContent value="settings" className="h-full overflow-y-auto p-4">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground">Название</label>
-                <Input
-                  value={formState.title}
-                  onChange={(e) => handleChange('title', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Статус</label>
-                <Select
-                  value={formState.status}
-                  onValueChange={(value) =>
-                    handleChange('status', value as ScriptStatus)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(statusLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <TabsContent value="settings" className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+               <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Name</label>
+                  <Input 
+                     value={formState.title} 
+                     onChange={(e) => handleChange('title', e.target.value)} 
+                     className="bg-[#111111] border-[#2d2d2d] text-white"
+                  />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Status</label>
+                  <Select
+                     value={formState.status}
+                     onValueChange={(value) => handleChange('status', value as ScriptStatus)}
+                  >
+                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                        {Object.entries(statusLabels).map(([value, label]) => (
+                           <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+               </div>
             </div>
 
-            <div>
-              <label className="text-xs text-muted-foreground">Короткое описание</label>
-              <Textarea
-                value={formState.short_description}
-                onChange={(e) => handleChange('short_description', e.target.value)}
-                rows={3}
-              />
+            <div className="space-y-2">
+               <label className="text-xs font-medium text-muted-foreground">Short Description</label>
+               <Textarea 
+                  value={formState.short_description} 
+                  onChange={(e) => handleChange('short_description', e.target.value)} 
+                  className="bg-[#111111] border-[#2d2d2d] text-white min-h-[80px]"
+               />
             </div>
 
-            <div>
-              <label className="text-xs text-muted-foreground">Полное описание</label>
-              <Textarea
-                value={formState.full_description}
-                onChange={(e) => handleChange('full_description', e.target.value)}
-                rows={6}
-              />
+            <div className="grid grid-cols-2 gap-6">
+               <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Pricing Plan</label>
+                  <Select
+                     value={formState.pricing_plan}
+                     onValueChange={(value) => handleChange('pricing_plan', value as ScriptPricingPlan)}
+                  >
+                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                        {Object.entries(pricingLabels).map(([value, label]) => (
+                           <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Visibility</label>
+                  <Select
+                     value={formState.visibility}
+                     onValueChange={(value) => handleChange('visibility', value as ScriptVisibility)}
+                  >
+                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                        {Object.entries(visibilityLabels).map(([value, label]) => (
+                           <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground">Теги</label>
-                <Input
-                  value={formState.tagsText}
-                  onChange={(e) => handleChange('tagsText', e.target.value)}
-                  placeholder="automation, youtube, parser"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Вводите теги через запятую
-                </p>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Роли с доступом</label>
-                <Input
-                  value={formState.allowedRolesText}
-                  onChange={(e) => handleChange('allowedRolesText', e.target.value)}
-                  placeholder="user, pro, premium"
-                />
-              </div>
+            <div className="space-y-2">
+               <label className="text-xs font-medium text-muted-foreground">Tags (comma separated)</label>
+               <Input 
+                  value={formState.tagsText} 
+                  onChange={(e) => handleChange('tagsText', e.target.value)} 
+                  className="bg-[#111111] border-[#2d2d2d] text-white"
+               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground">Видимость</label>
-                <Select
-                  value={formState.visibility}
-                  onValueChange={(value) =>
-                    handleChange('visibility', value as ScriptVisibility)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(visibilityLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">План</label>
-                <Select
-                  value={formState.pricing_plan}
-                  onValueChange={(value) =>
-                    handleChange('pricing_plan', value as ScriptPricingPlan)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(pricingLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-xs text-muted-foreground">
-                Последнее обновление: {new Date(script.updated_at).toLocaleString('ru-RU')}
-              </div>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохраняю...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" /> Сохранить
-                  </>
-                )}
+            <div className="flex justify-end pt-4 border-t border-[#2d2d2d]">
+              <Button onClick={handleSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+                 {isSaving ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+                 ) : (
+                    <><Save className="mr-2 h-4 w-4" /> Save Changes</>
+                 )}
               </Button>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="versions" className="h-full overflow-y-auto p-4">
+        <TabsContent value="versions" className="flex-1 overflow-y-auto p-6">
           <ScriptVersionManager
             scriptId={script.id}
             currentVersion={script.version ?? '1.0.0'}
@@ -931,9 +682,9 @@ const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave 
         </TabsContent>
       </Tabs>
 
-      {showAudit && <ScriptAuditPanel scriptId={script.id} />}
-      {showChecks && <ScriptChecksPanel scriptId={script.id} />}
-      {showAccess && <ScriptAccessPanel scriptId={script.id} />}
+      {showAudit && <ScriptAuditPanel scriptId={script.id} onClose={() => setShowAudit(false)} />}
+      {showChecks && <ScriptChecksPanel scriptId={script.id} onClose={() => setShowChecks(false)} />}
+      {showAccess && <ScriptAccessPanel scriptId={script.id} onClose={() => setShowAccess(false)} />}
     </div>
   );
 };
@@ -978,41 +729,47 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({ open, onOpenChang
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-[#1f1f1f] border-[#2d2d2d] text-white">
         <DialogHeader>
-          <DialogTitle>Создать новый скрипт</DialogTitle>
+          <DialogTitle>Create New Script</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-muted-foreground">Название</label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Парсер лидов" />
+            <label className="text-xs text-muted-foreground">Name</label>
+            <Input 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)} 
+              placeholder="My New Script" 
+              className="bg-[#111111] border-[#2d2d2d] text-white"
+            />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Категория</label>
+            <label className="text-xs text-muted-foreground">Category</label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general">Общее</SelectItem>
-                <SelectItem value="automation">Автоматизация</SelectItem>
-                <SelectItem value="analytics">Аналитика</SelectItem>
-                <SelectItem value="security">Безопасность</SelectItem>
+              <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                <SelectItem value="general">General</SelectItem>
+                <SelectItem value="automation">Automation</SelectItem>
+                <SelectItem value="analytics">Analytics</SelectItem>
+                <SelectItem value="security">Security</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Короткое описание</label>
+            <label className="text-xs text-muted-foreground">Description</label>
             <Textarea
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
               rows={3}
+              className="bg-[#111111] border-[#2d2d2d] text-white"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Код</label>
+            <label className="text-xs text-muted-foreground">Initial Code</label>
             <Textarea
-              className="font-mono text-xs"
+              className="font-mono text-xs bg-[#111111] border-[#2d2d2d] text-white"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               rows={10}
@@ -1020,18 +777,14 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({ open, onOpenChang
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Отмена
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-white">
+            Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={isSubmitting || !title.trim() || !code.trim()}>
+          <Button onClick={handleCreate} disabled={isSubmitting || !title.trim() || !code.trim()} className="bg-blue-600 hover:bg-blue-700 text-white">
             {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохраняю...
-              </>
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
             ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" /> Создать
-              </>
+              <><Save className="mr-2 h-4 w-4" /> Create Script</>
             )}
           </Button>
         </DialogFooter>
