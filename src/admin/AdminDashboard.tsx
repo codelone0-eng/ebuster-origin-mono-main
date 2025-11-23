@@ -104,7 +104,8 @@ import {
   Code,
   ExternalLink,
   Sliders,
-  LayoutDashboard
+  LayoutDashboard,
+  HelpCircle
 } from 'lucide-react';
 
 const AdminDashboard = () => {
