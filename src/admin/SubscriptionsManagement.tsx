@@ -42,7 +42,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
-import { Combobox } from '@/components/ui/combobox';
+import { API_CONFIG } from '@/config/api';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SubscriptionsManagementProps {
   className?: string;
@@ -70,7 +71,8 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
     updateSubscription, 
     cancelSubscription, 
     renewSubscription, 
-    deleteSubscription 
+    deleteSubscription,
+    getUsers
   } = useAdminApi();
   
   // State
@@ -101,6 +103,11 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   
   const [userOptions, setUserOptions] = useState<{ value: string; label: string }[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
+  const [isUserSelectOpen, setIsUserSelectOpen] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [usersPagination, setUsersPagination] = useState({ page: 1, limit: 20, total: 0 });
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -149,14 +156,26 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
     if (!query || query.length < 2) return;
     try {
       setSearchingUsers(true);
-      // Note: Assuming searchUsers exists on API or use a specific endpoint. 
-      // Since useAdminApi exposes searchUsers (imported in AdminDashboard), we might need to add it to useAdminApi return if not present.
-      // For now, let's assume we can search via the users endpoint or similar.
-      // We'll fetch from /api/admin/users/search?email=...
       const token = localStorage.getItem('ebuster_token');
-      const response = await fetch(`/api/admin/users/search?email=${encodeURIComponent(query)}`, {
-         headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/users/search?email=${encodeURIComponent(query)}`, {
+         headers: { 
+           'Authorization': `Bearer ${token}`,
+           'Content-Type': 'application/json'
+         }
       });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Не удалось найти пользователей');
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      }
+
       const data = await response.json();
       
       if (data.success && data.data) {
@@ -166,7 +185,12 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
         })));
       }
     } catch (e) {
-      console.error(e);
+      console.error('Search users error:', e);
+      toast({ 
+        title: 'Error', 
+        description: e instanceof Error ? e.message : 'Failed to search users', 
+        variant: 'destructive' 
+      });
     } finally {
       setSearchingUsers(false);
     }
@@ -267,7 +291,23 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   };
 
   return (
-    <div className={cn("grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 h-[calc(100vh-100px)]", className)}>
+    <div className={cn("space-y-6", className)}>
+      {/* Header with link to plans */}
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-1">
+              <CreditCard className="h-5 w-5" />
+              Subscriptions
+            </h2>
+            <p className="text-xs text-neutral-500">
+              Manage user subscriptions. Configure subscription plans in <span className="text-blue-500">Roles</span> tab.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 h-[calc(100vh-200px)]">
       
       {/* List Column */}
       <div className="flex flex-col bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg overflow-hidden">
@@ -473,6 +513,84 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
          )}
       </div>
 
+      {/* User Select Dialog */}
+      <Dialog open={isUserSelectOpen} onOpenChange={setIsUserSelectOpen}>
+        <DialogContent className="bg-[#1f1f1f] border-[#2d2d2d] text-white sm:max-w-[600px] max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Select User</DialogTitle>
+            <DialogDescription className="text-muted-foreground">Choose a user to grant subscription</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 flex-1 flex flex-col min-h-0">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
+              <Input
+                placeholder="Search by email or name..."
+                value={userSearchQuery}
+                onChange={(e) => setUserSearchQuery(e.target.value)}
+                className="pl-9 bg-[#111111] border-[#2d2d2d] text-white"
+              />
+            </div>
+            <ScrollArea className="flex-1 border border-[#2d2d2d] rounded-lg bg-[#1a1a1a]">
+              {loadingUsers ? (
+                <div className="p-8 text-center text-muted-foreground">Loading users...</div>
+              ) : usersList.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">No users found</div>
+              ) : (
+                <div className="divide-y divide-[#2d2d2d]">
+                  {usersList.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, user_email: user.email }));
+                        setIsUserSelectOpen(false);
+                      }}
+                      className="w-full p-4 text-left hover:bg-[#2d2d2d] transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white">{user.email}</div>
+                          {user.full_name && (
+                            <div className="text-sm text-muted-foreground">{user.full_name}</div>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="border-[#2d2d2d] text-muted-foreground">
+                          {user.role || 'user'}
+                        </Badge>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+            {usersPagination.pages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-[#2d2d2d]">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadUsersForSelect(usersPagination.page - 1, userSearchQuery)}
+                  disabled={usersPagination.page <= 1}
+                  className="bg-[#111111] border-[#2d2d2d] text-white"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {usersPagination.page} of {usersPagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadUsersForSelect(usersPagination.page + 1, userSearchQuery)}
+                  disabled={usersPagination.page >= usersPagination.pages}
+                  className="bg-[#111111] border-[#2d2d2d] text-white"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="bg-[#1f1f1f] border-[#2d2d2d] text-white sm:max-w-[500px]">
@@ -482,14 +600,24 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
           </DialogHeader>
           <div className="space-y-4 py-4">
              <div className="space-y-2">
-                <Label>User Email</Label>
-                <Combobox
-                   options={userOptions}
-                   value={formData.user_email}
-                   onValueChange={(v) => setFormData(prev => ({ ...prev, user_email: v }))}
-                   placeholder="Search user..."
-                   className="bg-[#111111] border-[#2d2d2d] text-white w-full"
-                />
+                <Label>User</Label>
+                <div className="flex gap-2">
+                  <Input
+                     value={formData.user_email}
+                     onChange={(e) => setFormData(prev => ({ ...prev, user_email: e.target.value }))}
+                     placeholder="User email..."
+                     className="bg-[#111111] border-[#2d2d2d] text-white flex-1"
+                  />
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setIsUserSelectOpen(true)}
+                    className="bg-[#111111] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
+                  >
+                    <Users className="h-4 w-4 mr-2" /> Select User
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Enter email or click to browse users</p>
              </div>
              <div className="space-y-2">
                 <Label>Plan</Label>

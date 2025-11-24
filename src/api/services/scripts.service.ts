@@ -175,9 +175,12 @@ const applyFilters = (client: SupabaseClient, params: ScriptListParams) => {
     );
   }
 
+  // Применяем сортировку только если query еще не был изменен на select
   const sortColumn = params.sort || 'created_at';
   const orderDirection = params.order === 'asc';
-  query = query.order(sortColumn, { ascending: orderDirection });
+  if (query && typeof query.order === 'function') {
+    query = query.order(sortColumn, { ascending: orderDirection });
+  }
 
   return query;
 };
@@ -192,7 +195,16 @@ export class ScriptsService {
   public async list(params: ScriptListParams = {}): Promise<ScriptListResult> {
     const { currentPage, perPage, offset } = buildPagination(params.page, params.limit);
 
-    const query = applyFilters(this.client, params).select('*');
+    // Строим базовый query
+    let query: any = applyFilters(this.client, params);
+    
+    // Применяем сортировку перед select
+    const sortColumn = params.sort || 'created_at';
+    const orderDirection = params.order === 'asc';
+    query = query.order(sortColumn, { ascending: orderDirection });
+    
+    // Теперь применяем select и range
+    query = query.select('*');
     const rangedQuery = query.range(offset, offset + perPage - 1);
     const { data: records, error } = await rangedQuery;
 
