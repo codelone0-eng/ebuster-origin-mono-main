@@ -1,18 +1,30 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui/tabs';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription
-} from '@/components/ui/card';
+  Code,
+  Search,
+  Plus,
+  Save,
+  Trash2,
+  FileText,
+  Settings,
+  Box,
+  History,
+  LayoutTemplate,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  MoreVertical,
+  Eye,
+  Terminal,
+  Shield,
+  DollarSign,
+  Tag as TagIcon,
+  Copy,
+  ExternalLink,
+  RefreshCw
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +33,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -29,768 +41,648 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  Plus,
-  RefreshCcw,
-  Save,
-  Loader2,
-  Search,
-  FileText,
-  Tag,
-  Users,
-  Shield,
-  Clock,
-  Download,
-  Star,
-  ClipboardCopy,
-  Trash2,
-  History,
-  ShieldAlert,
-  KeyRound,
-  Code2,
-  BookOpen,
-  Settings2,
-  Code
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-import {
-  CreateScriptPayload,
-  ScriptListParams,
-  ScriptRecord,
-  ScriptStatus,
-  ScriptVisibility,
-  ScriptPricingPlan
-} from '@/api/types/scripts';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { scriptsAdminApi } from './api/scriptsAdminApi';
-import { ScriptVersionManager } from './ScriptVersionManager';
-import { useDetailedPermissions } from '@/hooks/useDetailedPermissions';
-import { CodeEditor } from '@/components/editors/CodeEditor';
-import { MarkdownEditor } from '@/components/editors/MarkdownEditor';
-import { ScriptAuditPanel } from './components/ScriptAuditPanel';
-import { ScriptChecksPanel } from './components/ScriptChecksPanel';
-import { ScriptAccessPanel } from './components/ScriptAccessPanel';
+import { CreateScriptPayload, ScriptStatus, ScriptVisibility, ScriptPricingPlan } from '@/api/types/scripts';
 
-const statusLabels: Record<ScriptStatus, string> = {
-  draft: 'Черновик',
-  pending_review: 'На проверке',
-  rejected: 'Отклонён',
-  published: 'Опубликован',
-  archived: 'Архив',
-  banned: 'Заблокирован'
+// --- Constants & Helpers ---
+
+const STATUS_COLORS: Record<string, string> = {
+  draft: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
+  published: 'text-green-500 bg-green-500/10 border-green-500/20',
+  archived: 'text-neutral-500 bg-neutral-500/10 border-neutral-500/20',
+  banned: 'text-red-500 bg-red-500/10 border-red-500/20',
 };
 
-const statusColors: Record<ScriptStatus, string> = {
-  draft: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-  pending_review: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  rejected: 'bg-red-500/10 text-red-500 border-red-500/20',
-  published: 'bg-green-500/10 text-green-500 border-green-500/20',
-  archived: 'bg-neutral-500/10 text-neutral-500 border-neutral-500/20',
-  banned: 'bg-red-900/20 text-red-500 border-red-500/20'
+const PLAN_COLORS: Record<string, string> = {
+  free: 'text-blue-400',
+  premium: 'text-purple-400',
+  pro: 'text-orange-400',
+  enterprise: 'text-red-400',
 };
 
-const visibilityLabels: Record<ScriptVisibility, string> = {
-  public: 'Публичный',
-  private: 'Приватный',
-  internal: 'Внутренний'
-};
+// --- Main Component ---
 
-const pricingLabels: Record<ScriptPricingPlan, string> = {
-  free: 'Free',
-  pro: 'Pro',
-  premium: 'Premium',
-  enterprise: 'Enterprise',
-  custom: 'Custom'
-};
-
-type FilterState = {
-  status: ScriptStatus | 'all';
-  visibility: ScriptVisibility | 'all';
-  pricing_plan: ScriptPricingPlan | 'all';
-  sort: 'created_at' | 'updated_at' | 'rating' | 'downloads';
-  order: 'asc' | 'desc';
-  limit: number;
-  page: number;
-};
-
-interface FormState {
-  title: string;
-  short_description: string;
-  full_description: string;
-  code: string;
-  tagsText: string;
-  allowedRolesText: string;
-  status: ScriptStatus;
-  visibility: ScriptVisibility;
-  pricing_plan: ScriptPricingPlan;
-}
-
-const buildFormState = (script: ScriptRecord): FormState => ({
-  title: script.name,
-  short_description: script.short_description ?? '',
-  full_description: script.full_description ?? '',
-  code: script.code ?? '',
-  tagsText: (script.tags ?? []).join(', '),
-  allowedRolesText: (script.allowed_roles ?? []).join(', '),
-  status: script.status ?? 'draft',
-  visibility: script.visibility ?? 'public',
-  pricing_plan: script.pricing_plan ?? 'free'
-});
-
-const parseList = (value: string): string[] =>
-  value
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const buildUpdatePayload = (
-  script: ScriptRecord,
-  form: FormState
-): Partial<CreateScriptPayload> => {
-  const payload: Partial<CreateScriptPayload> = {};
-
-  if (form.title !== script.name) {
-    payload.title = form.title;
-  }
-  if (form.short_description !== (script.short_description ?? '')) {
-    payload.short_description = form.short_description;
-  }
-  if (form.full_description !== (script.full_description ?? '')) {
-    payload.full_description = form.full_description;
-  }
-  if (form.code !== (script.code ?? '')) {
-    payload.code = form.code;
-  }
-
-  const tags = parseList(form.tagsText);
-  if (JSON.stringify(tags) !== JSON.stringify(script.tags ?? [])) {
-    payload.tags = tags;
-  }
-
-  const allowedRoles = parseList(form.allowedRolesText);
-  if (JSON.stringify(allowedRoles) !== JSON.stringify(script.allowed_roles ?? [])) {
-    payload.allowed_roles = allowedRoles.length > 0 ? allowedRoles : ['user'];
-  }
-
-  if (form.status !== (script.status ?? 'draft')) {
-    payload.status = form.status;
-  }
-  if (form.visibility !== (script.visibility ?? 'public')) {
-    payload.visibility = form.visibility;
-  }
-  if (form.pricing_plan !== (script.pricing_plan ?? 'free')) {
-    payload.pricing_plan = form.pricing_plan;
-  }
-
-  return payload;
-};
-
-const ScriptsManagement: React.FC = () => {
+export default function ScriptsManagement() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const permissions = useDetailedPermissions();
 
-  const [filters, setFilters] = useState<FilterState>({
-    status: 'all',
-    visibility: 'all',
-    pricing_plan: 'all',
-    sort: 'created_at',
-    order: 'desc',
-    limit: 20,
-    page: 1
-  });
+  // -- State --
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const listParams: ScriptListParams = useMemo(() => ({
-    page: filters.page,
-    limit: filters.limit,
-    sort: filters.sort,
-    order: filters.order,
-    search: search || undefined,
-    status:
-      filters.status !== 'all'
-        ? (filters.status as ScriptStatus)
-        : undefined,
-    visibility:
-      filters.visibility !== 'all'
-        ? (filters.visibility as ScriptVisibility)
-        : undefined,
-    pricing_plan:
-      filters.pricing_plan !== 'all'
-        ? (filters.pricing_plan as ScriptPricingPlan)
-        : undefined
-  }), [filters, search]);
-
-  const scriptsQuery = useQuery({
-    queryKey: ['admin-scripts', listParams],
-    queryFn: () => scriptsAdminApi.list(listParams)
+  // -- Data Fetching --
+  const { data: scriptsData, isLoading: isListLoading } = useQuery({
+    queryKey: ['admin-scripts', search, filterStatus],
+    queryFn: () => scriptsAdminApi.list({ 
+      search, 
+      status: filterStatus !== 'all' ? filterStatus as ScriptStatus : undefined 
+    }),
   });
 
-  const scripts = scriptsQuery.data?.items ?? [];
+  const scripts = scriptsData?.items || [];
 
-  useEffect(() => {
-    if (!selectedScriptId && scripts.length > 0) {
-      setSelectedScriptId(scripts[0].id);
-    }
-  }, [scripts, selectedScriptId]);
-
-  const scriptQuery = useQuery({
-    queryKey: ['admin-script', selectedScriptId],
-    enabled: Boolean(selectedScriptId),
-    queryFn: () => scriptsAdminApi.getById(selectedScriptId as string)
-  });
-
-  const queryClientInvalidations = () => {
-    queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
-    queryClient.invalidateQueries({ queryKey: ['admin-script', selectedScriptId] });
-  };
-
-  const createScript = useMutation({
+  // -- Mutations --
+  const createMutation = useMutation({
     mutationFn: (payload: CreateScriptPayload) => scriptsAdminApi.create(payload),
-    onSuccess: (data) => {
-      toast({ title: 'Скрипт создан', description: 'Черновик сохранён' });
+    onSuccess: (newScript) => {
       queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
-      setSelectedScriptId(data.id);
       setIsCreateOpen(false);
+      setSelectedId(newScript.id);
+      toast({ title: 'Script created', description: 'New script draft initialized.' });
     },
-    onError: (error: unknown) => {
-      toast({
-        title: 'Ошибка',
-        description: error instanceof Error ? error.message : 'Не удалось создать скрипт',
-        variant: 'destructive'
-      });
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
   });
 
-  const updateScript = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateScriptPayload> }) =>
-      scriptsAdminApi.update(id, payload),
-    onSuccess: () => {
-      toast({ title: 'Изменения сохранены' });
-      queryClientInvalidations();
-    },
-    onError: (error: unknown) => {
-      toast({
-        title: 'Ошибка',
-        description: error instanceof Error ? error.message : 'Не удалось сохранить изменения',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const deleteScript = useMutation({
-    mutationFn: (id: string) => scriptsAdminApi.remove(id),
-    onSuccess: (_, id) => {
-      toast({ title: 'Скрипт удалён' });
-      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
-      if (selectedScriptId === id) {
-        setSelectedScriptId(null);
-      }
-    },
-    onError: () => {
-      toast({ title: 'Не удалось удалить скрипт', variant: 'destructive' });
-    }
-  });
-
-  const selectedScript = scriptQuery.data ?? null;
-
+  // -- Render --
   return (
-    <div className="flex h-[calc(100vh-100px)] flex-col bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg overflow-hidden">
-      {/* Main Layout */}
-      <div className="grid h-full grid-cols-[320px_1fr] divide-x divide-[#2d2d2d]">
-        {/* Sidebar */}
-        <aside className="flex h-full flex-col bg-[#1a1a1a]">
-          <div className="p-4 border-b border-[#2d2d2d]">
-             <div className="flex items-center justify-between mb-4">
-               <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                 <Code className="h-4 w-4" /> Scripts
-               </h2>
-               {permissions.canManageScripts() && (
-                 <Button variant="ghost" size="icon" onClick={() => setIsCreateOpen(true)} className="h-6 w-6 hover:bg-[#2d2d2d]">
-                   <Plus className="h-4 w-4" />
-                 </Button>
-               )}
-             </div>
-             
-             <div className="relative mb-3">
-                <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search..."
-                  className="pl-8 h-8 bg-[#111111] border-[#2d2d2d] text-xs"
-                />
-             </div>
-
-             <div className="flex gap-2">
-                 <Select
-                  value={filters.status}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, page: 1, status: value as FilterState['status'] })
-                  }
-                >
-                  <SelectTrigger className="h-7 text-xs bg-[#111111] border-[#2d2d2d]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                    <SelectItem value="all">All</SelectItem>
-                    {Object.keys(statusLabels).map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {statusLabels[status as ScriptStatus]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                 <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   className="h-7 w-7 border border-[#2d2d2d] bg-[#111111]"
-                   onClick={() => scriptsQuery.refetch()}
-                 >
-                    <RefreshCcw className="h-3 w-3" />
-                 </Button>
-             </div>
+    <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-0 h-[calc(100vh-100px)] bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg overflow-hidden">
+      
+      {/* Left Column: List */}
+      <div className="flex flex-col border-r border-[#2d2d2d] bg-[#1a1a1a]">
+        {/* Header & Toolbar */}
+        <div className="p-4 border-b border-[#2d2d2d] space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-5 w-5 text-white" />
+              <h2 className="font-semibold text-white">Scripts Library</h2>
+            </div>
+            <Button 
+              size="sm" 
+              className="h-8 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setIsCreateOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1.5" /> New
+            </Button>
           </div>
 
-          <ScrollArea className="flex-1">
-            {scriptsQuery.isLoading ? (
-              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </div>
-            ) : scriptsQuery.isError ? (
-              <div className="p-4 text-xs text-red-500 text-center">
-                Failed to load scripts
-              </div>
-            ) : scripts.length === 0 ? (
-              <div className="p-4 text-xs text-muted-foreground text-center">
-                No scripts found
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                {scripts.map((script) => (
-                  <button
-                    key={script.id}
-                    onClick={() => setSelectedScriptId(script.id)}
-                    className={cn(
-                      "flex flex-col items-start p-3 text-left border-b border-[#2d2d2d] hover:bg-[#2d2d2d]/50 transition-colors",
-                      selectedScriptId === script.id && "bg-[#2d2d2d] border-l-2 border-l-blue-500 pl-[10px]"
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-500" />
+              <Input 
+                placeholder="Search scripts..." 
+                className="pl-9 bg-[#111111] border-[#2d2d2d] text-white h-9 text-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="h-8 bg-[#111111] border-[#2d2d2d] text-neutral-300 text-xs">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="draft">Drafts</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Scripts List */}
+        <ScrollArea className="flex-1">
+          {isListLoading ? (
+            <div className="flex items-center justify-center py-10 text-neutral-500">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading...
+            </div>
+          ) : scripts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-neutral-500 px-4 text-center">
+              <Box className="h-8 w-8 mb-2 opacity-20" />
+              <p className="text-sm">No scripts found.</p>
+              <p className="text-xs mt-1">Create one to get started.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              {scripts.map((script) => (
+                <button
+                  key={script.id}
+                  onClick={() => setSelectedId(script.id)}
+                  className={cn(
+                    "flex flex-col items-start p-4 border-b border-[#2d2d2d] hover:bg-[#262626] transition-all text-left group relative",
+                    selectedId === script.id ? "bg-[#262626] border-l-[3px] border-l-blue-500 pl-[13px]" : "pl-4"
+                  )}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className={cn(
+                      "font-medium text-sm truncate max-w-[200px]",
+                      selectedId === script.id ? "text-white" : "text-neutral-300 group-hover:text-white"
+                    )}>
+                      {script.name}
+                    </span>
+                    {script.is_verified && (
+                      <CheckCircle2 className="h-3 w-3 text-blue-500" />
                     )}
-                  >
-                    <div className="flex items-center justify-between w-full mb-1">
-                      <span className="font-medium text-sm text-white truncate max-w-[180px]">{script.name}</span>
-                      <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-4 font-normal border-0", statusColors[script.status ?? 'draft'])}>
-                         {statusLabels[script.status ?? 'draft']}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 w-full mb-2">
+                    <Badge variant="outline" className={cn("text-[10px] px-1 py-0 h-4 border-0 font-normal", STATUS_COLORS[script.status || 'draft'])}>
+                      {script.status}
+                    </Badge>
+                    <span className="text-[10px] text-neutral-500 font-mono">v{script.version || '1.0.0'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between w-full mt-auto">
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-[#111111] border-[#333] text-neutral-400 font-normal">
+                        {script.category || 'General'}
                       </Badge>
                     </div>
-                    <div className="text-[10px] text-muted-foreground line-clamp-2 mb-2 w-full">
-                       {script.short_description || 'No description'}
-                    </div>
-                    <div className="flex items-center justify-between w-full text-[10px] text-muted-foreground">
-                       <div className="flex items-center gap-2">
-                          <span className="flex items-center"><Star className="h-3 w-3 mr-0.5" /> {script.rating?.toFixed(1)}</span>
-                          <span className="flex items-center"><Download className="h-3 w-3 mr-0.5" /> {script.downloads}</span>
-                       </div>
-                       <span>{new Date(script.updated_at).toLocaleDateString()}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex h-full flex-col overflow-hidden bg-[#1f1f1f]">
-          {selectedScript ? (
-            <ScriptDetails
-              script={selectedScript}
-              isSaving={updateScript.isPending}
-              onSave={(payload) => updateScript.mutate({ id: selectedScript.id, payload })}
-              onDelete={() => deleteScript.mutate(selectedScript.id)}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              <div className="text-center">
-                 <Code2 className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                 <p>Select a script to view details</p>
-              </div>
+                    <span className="text-[10px] text-neutral-600">
+                      {new Date(script.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
-        </main>
+        </ScrollArea>
       </div>
 
-      <CreateScriptModal
-        open={isCreateOpen}
+      {/* Right Column: Editor & Details */}
+      <div className="flex flex-col bg-[#1f1f1f] min-w-0">
+        {selectedId ? (
+          <ScriptEditor 
+            key={selectedId} 
+            scriptId={selectedId} 
+            onDeleted={() => setSelectedId(null)} 
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-neutral-500">
+            <LayoutTemplate className="h-16 w-16 mb-4 opacity-10" />
+            <h3 className="text-lg font-medium text-neutral-400">No Script Selected</h3>
+            <p className="text-sm max-w-xs text-center mt-2 text-neutral-600">
+              Select a script from the list to view its details, edit code, or manage configurations.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Create Dialog */}
+      <CreateScriptDialog 
+        open={isCreateOpen} 
         onOpenChange={setIsCreateOpen}
-        onCreate={(payload) => createScript.mutate(payload)}
-        isSubmitting={createScript.isPending}
+        onSubmit={(data) => createMutation.mutate(data)}
+        isLoading={createMutation.isPending}
       />
     </div>
   );
-};
-
-interface ScriptDetailsProps {
-  script: ScriptRecord;
-  isSaving: boolean;
-  onSave: (payload: Partial<CreateScriptPayload>) => void;
-  onDelete: () => void;
 }
 
-const ScriptDetails: React.FC<ScriptDetailsProps> = ({ script, isSaving, onSave, onDelete }) => {
+// --- Sub-Components ---
+
+function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: () => void }) {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [tab, setTab] = useState('overview');
-  const [formState, setFormState] = useState<FormState>(() => buildFormState(script));
-  const [showAudit, setShowAudit] = useState(false);
-  const [showChecks, setShowChecks] = useState(false);
-  const [showAccess, setShowAccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
 
-  useEffect(() => {
-    setFormState(buildFormState(script));
-  }, [script]);
+  // Fetch full details
+  const { data: script, isLoading, isError } = useQuery({
+    queryKey: ['admin-script', scriptId],
+    queryFn: () => scriptsAdminApi.getById(scriptId),
+  });
 
-  const handleChange = (field: keyof FormState, value: string) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  };
+  // Mutations
+  const updateMutation = useMutation({
+    mutationFn: (data: any) => scriptsAdminApi.update(scriptId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-script', scriptId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+      toast({ title: 'Saved', description: 'Script updated successfully' });
+    },
+    onError: (err: any) => toast({ title: 'Error', description: err.message, variant: 'destructive' })
+  });
 
-  const handleSave = () => {
-    const payload = buildUpdatePayload(script, formState);
-    if (Object.keys(payload).length === 0) {
-      toast({ title: 'Изменений нет', description: 'Сохранение не требуется' });
-      return;
+  const deleteMutation = useMutation({
+    mutationFn: () => scriptsAdminApi.remove(scriptId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+      onDeleted();
+      toast({ title: 'Deleted', description: 'Script has been removed.' });
     }
-    onSave(payload);
-  };
+  });
 
-  const tags = parseList(formState.tagsText);
+  if (isLoading) return <div className="h-full flex items-center justify-center text-neutral-500"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (isError || !script) return <div className="h-full flex items-center justify-center text-red-500">Failed to load script details.</div>;
+
+  const handleSave = (sectionData: any) => {
+    updateMutation.mutate(sectionData);
+  };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-[#2d2d2d] p-4 bg-[#1a1a1a]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white">{script.name}</h2>
-            <div className="flex items-center gap-2 mt-1">
-               <Badge variant="outline" className="bg-[#2d2d2d] text-xs font-normal text-muted-foreground border-0">
-                 {visibilityLabels[script.visibility ?? 'public']}
-               </Badge>
-               <Badge variant="outline" className="bg-[#2d2d2d] text-xs font-normal text-muted-foreground border-0">
-                 {pricingLabels[script.pricing_plan ?? 'free']}
-               </Badge>
-               <span className="text-xs text-muted-foreground ml-2">ID: {script.id}</span>
-            </div>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold text-white">{script.name}</h1>
+            <Badge className={cn("font-normal capitalize border-0", STATUS_COLORS[script.status || 'draft'])}>
+              {script.status}
+            </Badge>
           </div>
-          <div className="flex items-center gap-2">
-             <Button 
-               variant="outline" 
-               size="sm" 
-               className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
-               onClick={() => setShowAudit(!showAudit)}
-             >
-               <History className="h-4 w-4 mr-2" /> Log
-             </Button>
-             <Button 
-               variant="outline" 
-               size="sm" 
-               className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
-               onClick={() => setShowChecks(!showChecks)}
-             >
-               <ShieldAlert className="h-4 w-4 mr-2" /> Checks
-             </Button>
-             <Button 
-               variant="destructive" 
-               size="sm" 
-               className="bg-red-900/20 border border-red-900/50 text-red-500 hover:bg-red-900/40"
-               onClick={onDelete}
-             >
-               <Trash2 className="h-4 w-4" />
-             </Button>
+          <div className="flex items-center gap-4 text-xs text-neutral-500">
+            <span className="flex items-center gap-1"><Code className="h-3 w-3" /> ID: <span className="font-mono">{script.id}</span></span>
+            <span className="flex items-center gap-1"><History className="h-3 w-3" /> Updated: {new Date(script.updated_at).toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="h-8 text-neutral-400 hover:text-white" onClick={() => window.open(`/scripts/${script.id}`, '_blank')}>
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-400 hover:text-white">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#1f1f1f] border-[#2d2d2d] text-white">
+              <DropdownMenuItem className="hover:bg-[#2d2d2d] text-red-500 focus:text-red-500 focus:bg-red-900/20" onClick={() => deleteMutation.mutate()}>
+                <Trash2 className="h-4 w-4 mr-2" /> Delete Script
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Tabs & Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <div className="px-6 border-b border-[#2d2d2d] bg-[#1a1a1a]">
+          <TabsList className="h-10 bg-transparent p-0 space-x-6">
+            <TabItem value="general" icon={Settings} label="General" active={activeTab} />
+            <TabItem value="code" icon={Code} label="Code" active={activeTab} />
+            <TabItem value="config" icon={Shield} label="Configuration" active={activeTab} />
+            <TabItem value="docs" icon={FileText} label="Documentation" active={activeTab} />
+          </TabsList>
+        </div>
+
+        <div className="flex-1 overflow-auto bg-[#1f1f1f]">
+          <TabsContent value="general" className="p-6 m-0 h-full">
+            <GeneralTab script={script} onSave={handleSave} isSaving={updateMutation.isPending} />
+          </TabsContent>
+          <TabsContent value="code" className="p-0 m-0 h-full flex flex-col">
+            <CodeTab script={script} onSave={handleSave} isSaving={updateMutation.isPending} />
+          </TabsContent>
+          <TabsContent value="config" className="p-6 m-0 h-full">
+            <ConfigTab script={script} onSave={handleSave} isSaving={updateMutation.isPending} />
+          </TabsContent>
+          <TabsContent value="docs" className="p-6 m-0 h-full">
+            <DocsTab script={script} onSave={handleSave} isSaving={updateMutation.isPending} />
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
+  );
+}
+
+// --- Tab Components ---
+
+function GeneralTab({ script, onSave, isSaving }: any) {
+  const [form, setForm] = useState({
+    name: script.name || '',
+    short_description: script.short_description || '',
+    category: script.category || 'general',
+    tags: (script.tags || []).join(', '),
+    status: script.status || 'draft'
+  });
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>Script Name</Label>
+          <Input 
+            value={form.name} 
+            onChange={e => setForm({...form, name: e.target.value})}
+            className="bg-[#111111] border-[#2d2d2d] text-white"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Status</Label>
+          <Select value={form.status} onValueChange={v => setForm({...form, status: v})}>
+            <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+              <SelectItem value="banned">Banned</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Short Description</Label>
+        <Textarea 
+          value={form.short_description}
+          onChange={e => setForm({...form, short_description: e.target.value})}
+          className="bg-[#111111] border-[#2d2d2d] text-white min-h-[100px]"
+          placeholder="Briefly describe what this script does..."
+        />
+        <p className="text-xs text-neutral-500">Shown in the script library card.</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>Category</Label>
+          <Select value={form.category} onValueChange={v => setForm({...form, category: v})}>
+            <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+              <SelectItem value="general">General</SelectItem>
+              <SelectItem value="automation">Automation</SelectItem>
+              <SelectItem value="social">Social Media</SelectItem>
+              <SelectItem value="productivity">Productivity</SelectItem>
+              <SelectItem value="security">Security</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Tags (comma separated)</Label>
+          <div className="relative">
+            <TagIcon className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
+            <Input 
+              value={form.tags} 
+              onChange={e => setForm({...form, tags: e.target.value})}
+              className="pl-9 bg-[#111111] border-[#2d2d2d] text-white"
+              placeholder="instagram, likes, auto..."
+            />
           </div>
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden flex flex-col">
-        <div className="border-b border-[#2d2d2d] bg-[#1a1a1a] px-4">
-          <TabsList className="bg-transparent h-10 p-0 space-x-4">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Overview</TabsTrigger>
-            <TabsTrigger value="editor" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Code</TabsTrigger>
-            <TabsTrigger value="docs" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Docs</TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Settings</TabsTrigger>
-            <TabsTrigger value="versions" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-white text-muted-foreground rounded-none h-10 px-2">Versions</TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6">
-           <Card className="bg-[#1a1a1a] border-[#2d2d2d]">
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-white">Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                 <p className="text-sm text-muted-foreground mb-4">{script.short_description || 'No description provided.'}</p>
-                 <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="bg-[#2d2d2d] text-muted-foreground">{script.category}</Badge>
-                    {tags.map((tag) => (
-                       <Badge key={tag} variant="outline" className="border-[#404040] text-muted-foreground">
-                         <Tag className="mr-1 h-3 w-3" /> {tag}
-                       </Badge>
-                    ))}
-                 </div>
-              </CardContent>
-           </Card>
-
-           <div className="grid grid-cols-3 gap-4">
-              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
-                 <div className="text-xs text-muted-foreground mb-1">Downloads</div>
-                 <div className="text-2xl font-bold text-white">{script.downloads}</div>
-              </Card>
-              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
-                 <div className="text-xs text-muted-foreground mb-1">Rating</div>
-                 <div className="text-2xl font-bold text-white">{script.rating?.toFixed(1) || '0.0'}</div>
-              </Card>
-              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-4 flex flex-col items-center justify-center">
-                 <div className="text-xs text-muted-foreground mb-1">Version</div>
-                 <div className="text-2xl font-bold text-white">{script.version || '1.0.0'}</div>
-              </Card>
-           </div>
-        </TabsContent>
-
-        <TabsContent value="editor" className="flex-1 overflow-hidden p-0 h-full">
-          <CodeEditor
-            value={formState.code}
-            onChange={(value) => handleChange('code', value)}
-            language="javascript"
-            height="100%"
-            onSave={handleSave}
-          />
-        </TabsContent>
-
-        <TabsContent value="docs" className="flex-1 overflow-hidden p-0 h-full bg-[#1e1e1e]">
-          <MarkdownEditor
-            value={formState.full_description}
-            onChange={(value) => handleChange('full_description', value)}
-            height="100%"
-          />
-        </TabsContent>
-
-        <TabsContent value="settings" className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-3xl space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-               <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Name</label>
-                  <Input 
-                     value={formState.title} 
-                     onChange={(e) => handleChange('title', e.target.value)} 
-                     className="bg-[#111111] border-[#2d2d2d] text-white"
-                  />
-               </div>
-               <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Status</label>
-                  <Select
-                     value={formState.status}
-                     onValueChange={(value) => handleChange('status', value as ScriptStatus)}
-                  >
-                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                        <SelectValue />
-                     </SelectTrigger>
-                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                        {Object.entries(statusLabels).map(([value, label]) => (
-                           <SelectItem key={value} value={value}>{label}</SelectItem>
-                        ))}
-                     </SelectContent>
-                  </Select>
-               </div>
-            </div>
-
-            <div className="space-y-2">
-               <label className="text-xs font-medium text-muted-foreground">Short Description</label>
-               <Textarea 
-                  value={formState.short_description} 
-                  onChange={(e) => handleChange('short_description', e.target.value)} 
-                  className="bg-[#111111] border-[#2d2d2d] text-white min-h-[80px]"
-               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-               <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Pricing Plan</label>
-                  <Select
-                     value={formState.pricing_plan}
-                     onValueChange={(value) => handleChange('pricing_plan', value as ScriptPricingPlan)}
-                  >
-                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                        <SelectValue />
-                     </SelectTrigger>
-                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                        {Object.entries(pricingLabels).map(([value, label]) => (
-                           <SelectItem key={value} value={value}>{label}</SelectItem>
-                        ))}
-                     </SelectContent>
-                  </Select>
-               </div>
-               <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Visibility</label>
-                  <Select
-                     value={formState.visibility}
-                     onValueChange={(value) => handleChange('visibility', value as ScriptVisibility)}
-                  >
-                     <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                        <SelectValue />
-                     </SelectTrigger>
-                     <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                        {Object.entries(visibilityLabels).map(([value, label]) => (
-                           <SelectItem key={value} value={value}>{label}</SelectItem>
-                        ))}
-                     </SelectContent>
-                  </Select>
-               </div>
-            </div>
-
-            <div className="space-y-2">
-               <label className="text-xs font-medium text-muted-foreground">Tags (comma separated)</label>
-               <Input 
-                  value={formState.tagsText} 
-                  onChange={(e) => handleChange('tagsText', e.target.value)} 
-                  className="bg-[#111111] border-[#2d2d2d] text-white"
-               />
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-[#2d2d2d]">
-              <Button onClick={handleSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
-                 {isSaving ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
-                 ) : (
-                    <><Save className="mr-2 h-4 w-4" /> Save Changes</>
-                 )}
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="versions" className="flex-1 overflow-y-auto p-6">
-          <ScriptVersionManager
-            scriptId={script.id}
-            currentVersion={script.version ?? '1.0.0'}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {showAudit && <ScriptAuditPanel scriptId={script.id} onClose={() => setShowAudit(false)} />}
-      {showChecks && <ScriptChecksPanel scriptId={script.id} onClose={() => setShowChecks(false)} />}
-      {showAccess && <ScriptAccessPanel scriptId={script.id} onClose={() => setShowAccess(false)} />}
+      <div className="pt-4">
+        <Button 
+          onClick={() => onSave({...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)})} 
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+          Save General Settings
+        </Button>
+      </div>
     </div>
   );
-};
-
-interface CreateScriptModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreate: (payload: CreateScriptPayload) => void;
-  isSubmitting: boolean;
 }
 
-const CreateScriptModal: React.FC<CreateScriptModalProps> = ({ open, onOpenChange, onCreate, isSubmitting }) => {
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('general');
-  const [code, setCode] = useState('');
-  const [shortDescription, setShortDescription] = useState('');
+function CodeTab({ script, onSave, isSaving }: any) {
+  const [code, setCode] = useState(script.code || '// Write your JavaScript code here\n');
 
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#1a1a1a] border-b border-[#2d2d2d]">
+        <div className="flex items-center gap-4 text-xs text-neutral-400">
+          <span>JavaScript (ES6+)</span>
+          <span>{code.split('\n').length} lines</span>
+        </div>
+        <Button 
+          size="sm" 
+          onClick={() => onSave({ code })}
+          disabled={isSaving}
+          className="h-7 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isSaving ? 'Saving...' : 'Save Code'}
+        </Button>
+      </div>
+      <div className="flex-1 relative bg-[#111111]">
+        <Textarea 
+          value={code}
+          onChange={e => setCode(e.target.value)}
+          className="w-full h-full font-mono text-sm p-4 bg-transparent border-0 text-neutral-300 resize-none focus-visible:ring-0 leading-relaxed"
+          spellCheck={false}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ConfigTab({ script, onSave, isSaving }: any) {
+  const [config, setConfig] = useState({
+    version: script.version || '1.0.0',
+    pricing_plan: script.pricing_plan || 'free',
+    visibility: script.visibility || 'public',
+    allowed_roles: (script.allowed_roles || []).join(', ')
+  });
+
+  return (
+    <div className="max-w-2xl space-y-8">
+      
+      {/* Access Control Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Shield className="h-5 w-5 text-blue-500" />
+          <h3 className="text-lg font-medium text-white">Access & Permissions</h3>
+        </div>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-5 space-y-6">
+          
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>Pricing Plan Requirement</Label>
+              <Select value={config.pricing_plan} onValueChange={v => setConfig({...config, pricing_plan: v})}>
+                <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                  <SelectItem value="free">Free (Everyone)</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-neutral-500">Minimum plan required to install this script.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Visibility</Label>
+              <Select value={config.visibility} onValueChange={v => setConfig({...config, visibility: v})}>
+                <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+                  <SelectItem value="public">Public (Library)</SelectItem>
+                  <SelectItem value="private">Private (Link Only)</SelectItem>
+                  <SelectItem value="internal">Internal (Staff Only)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Allowed Roles (Optional override)</Label>
+            <Input 
+              value={config.allowed_roles}
+              onChange={e => setConfig({...config, allowed_roles: e.target.value})}
+              placeholder="admin, moderator"
+              className="bg-[#111111] border-[#2d2d2d] text-white"
+            />
+            <p className="text-xs text-neutral-500">Comma separated list of specific roles that can access this script regardless of plan.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Versioning Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <History className="h-5 w-5 text-purple-500" />
+          <h3 className="text-lg font-medium text-white">Versioning</h3>
+        </div>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-5">
+          <div className="space-y-2 max-w-xs">
+            <Label>Current Version</Label>
+            <div className="flex gap-2">
+              <Input 
+                value={config.version}
+                onChange={e => setConfig({...config, version: e.target.value})}
+                className="bg-[#111111] border-[#2d2d2d] text-white font-mono"
+              />
+            </div>
+            <p className="text-xs text-neutral-500">SemVer format (e.g. 1.0.2). Increasing this will notify users.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4">
+        <Button 
+          onClick={() => onSave({
+            ...config, 
+            allowed_roles: config.allowed_roles.split(',').map(r => r.trim()).filter(Boolean)
+          })} 
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+          Save Configuration
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function DocsTab({ script, onSave, isSaving }: any) {
+  const [docs, setDocs] = useState(script.full_description || '');
+
+  return (
+    <div className="flex flex-col h-full max-w-4xl">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-medium text-white">Documentation</h3>
+          <p className="text-sm text-neutral-500">Markdown supported instructions for the user.</p>
+        </div>
+        <Button 
+          onClick={() => onSave({ full_description: docs })} 
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+          Save Docs
+        </Button>
+      </div>
+      
+      <div className="flex-1 bg-[#111111] rounded-lg border border-[#2d2d2d] overflow-hidden">
+        <Textarea 
+          value={docs}
+          onChange={e => setDocs(e.target.value)}
+          className="w-full h-full border-0 bg-transparent p-6 text-neutral-300 resize-none focus-visible:ring-0 font-mono text-sm"
+          placeholder="# How to use this script..."
+        />
+      </div>
+    </div>
+  );
+}
+
+function TabItem({ value, icon: Icon, label, active }: any) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className={cn(
+        "data-[state=active]:bg-transparent data-[state=active]:text-blue-500 data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-none px-1 pb-3 pt-2 transition-colors",
+        active !== value && "text-neutral-500 hover:text-neutral-300"
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
+      </div>
+    </TabsTrigger>
+  );
+}
+
+function CreateScriptDialog({ open, onOpenChange, onSubmit, isLoading }: any) {
+  const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+
+  // Auto-generate slug from name
   useEffect(() => {
-    if (!open) {
-      setTitle('');
-      setCategory('general');
-      setCode('');
-      setShortDescription('');
-    }
-  }, [open]);
+    const generated = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    setSlug(generated);
+  }, [name]);
 
-  const handleCreate = () => {
-    if (!title.trim() || !code.trim()) {
-      return;
-    }
-    const payload: CreateScriptPayload = {
-      title: title.trim(),
-      category,
-      code,
-      short_description: shortDescription,
-      visibility: 'public',
+  const handleSubmit = () => {
+    if (!name) return;
+    onSubmit({
+      title: name,
+      code: '// New script',
+      status: 'draft',
       pricing_plan: 'free',
-      allowed_roles: ['user']
-    };
-    onCreate(payload);
+      visibility: 'public'
+    });
+    setName('');
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-[#1f1f1f] border-[#2d2d2d] text-white">
+      <DialogContent className="bg-[#1f1f1f] border-[#2d2d2d] text-white sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Script</DialogTitle>
+          <DialogDescription className="text-neutral-400">
+            Start with a name. You can configure everything else later.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-muted-foreground">Name</label>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label>Script Name</Label>
             <Input 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              placeholder="My New Script" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
               className="bg-[#111111] border-[#2d2d2d] text-white"
+              placeholder="e.g. Auto Liker Pro"
+              autoFocus
             />
           </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Category</label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                <SelectItem value="general">General</SelectItem>
-                <SelectItem value="automation">Automation</SelectItem>
-                <SelectItem value="analytics">Analytics</SelectItem>
-                <SelectItem value="security">Security</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Description</label>
-            <Textarea
-              value={shortDescription}
-              onChange={(e) => setShortDescription(e.target.value)}
-              rows={3}
-              className="bg-[#111111] border-[#2d2d2d] text-white"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Initial Code</label>
-            <Textarea
-              className="font-mono text-xs bg-[#111111] border-[#2d2d2d] text-white"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              rows={10}
-            />
+          <div className="space-y-2">
+            <Label className="text-neutral-500">Slug (ID)</Label>
+            <div className="px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2d2d2d] text-neutral-400 text-sm font-mono">
+              {slug || '...'}
+            </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-white">
-            Cancel
-          </Button>
-          <Button onClick={handleCreate} disabled={isSubmitting || !title.trim() || !code.trim()} className="bg-blue-600 hover:bg-blue-700 text-white">
-            {isSubmitting ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
-            ) : (
-              <><Save className="mr-2 h-4 w-4" /> Create Script</>
-            )}
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-[#2d2d2d] text-neutral-400">Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isLoading || !name} className="bg-blue-600 hover:bg-blue-700 text-white">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Draft'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default ScriptsManagement;
+}
