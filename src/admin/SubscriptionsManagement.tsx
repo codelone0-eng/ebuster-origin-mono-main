@@ -512,6 +512,8 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
             </div>
          )}
       </div>
+      </div>
+      </div>
 
       {/* User Select Dialog */}
       <Dialog open={isUserSelectOpen} onOpenChange={setIsUserSelectOpen}>
@@ -720,7 +722,6 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 };
