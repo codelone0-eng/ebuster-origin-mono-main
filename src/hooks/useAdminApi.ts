@@ -233,6 +233,65 @@ export const useAdminApi = () => {
     return response.data;
   };
 
+  // Подписки
+  const getSubscriptions = async (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+  } = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.search) queryParams.append('search', params.search);
+    if (params.status) queryParams.append('status', params.status);
+
+    const response = await fetchWithAuth(`/api/admin/subscriptions${queryParams.toString() ? `?${queryParams}` : ''}`);
+    return response;
+  };
+
+  const getSubscriptionStats = async () => {
+    const response = await fetchWithAuth('/api/admin/subscriptions/stats');
+    return response;
+  };
+
+  const createSubscription = async (payload: any) => {
+    const response = await fetchWithAuth('/api/admin/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return response;
+  };
+
+  const updateSubscription = async (id: string, payload: any) => {
+    const response = await fetchWithAuth(`/api/admin/subscriptions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    return response;
+  };
+
+  const cancelSubscription = async (id: string) => {
+    const response = await fetchWithAuth(`/api/admin/subscriptions/${id}/cancel`, {
+      method: 'POST'
+    });
+    return response;
+  };
+
+  const renewSubscription = async (id: string) => {
+    const response = await fetchWithAuth(`/api/admin/subscriptions/${id}/renew`, {
+      method: 'POST'
+    });
+    return response;
+  };
+
+  const deleteSubscription = async (id: string) => {
+    const response = await fetchWithAuth(`/api/admin/subscriptions/${id}`, {
+      method: 'DELETE'
+    });
+    return response;
+  };
+
   return {
     loading,
     error,
@@ -250,5 +309,12 @@ export const useAdminApi = () => {
     getApplicationStats,
     getUsersStats,
     getRequestsStats,
+    getSubscriptions,
+    getSubscriptionStats,
+    createSubscription,
+    updateSubscription,
+    cancelSubscription,
+    renewSubscription,
+    deleteSubscription,
   };
 };

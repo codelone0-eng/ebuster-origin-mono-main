@@ -48,7 +48,7 @@ const Index = () => {
             </div>
 
             <h1 className="text-6xl md:text-8xl font-bold mb-8 tracking-tight leading-none text-white">
-              <ShimmerTitle text={t('index.hero.title')} className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" intensity={0.55} />
+              <ShimmerTitle text={t('index.hero.title')} className="text-white" intensity={0.55} />
               <br />
               <span className="text-[#808080] text-4xl md:text-6xl font-light">
                 {t('index.hero.subtitle')}
@@ -60,7 +60,7 @@ const Index = () => {
                 <div className="flex items-center justify-center gap-6 flex-wrap mb-20">
                   <Button 
                     size="lg" 
-                    className="shine-effect group h-14 px-8 text-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/20"
+                    className="shine-effect group h-14 px-8 text-lg bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20"
                     onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                   >
                     <Download className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -88,7 +88,7 @@ const Index = () => {
             <div className="text-center mb-12">
               <h2 className="text-5xl md:text-6xl font-bold mb-4 text-white">
                 {t('index.features.title')}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> {t('index.features.subtitle')}</span>
+                <span className="text-blue-500"> {t('index.features.subtitle')}</span>
               </h2>
               <p className="text-xl text-[#808080] max-w-2xl mx-auto">
                 {t('index.features.description')}
@@ -158,7 +158,7 @@ const Index = () => {
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold mb-4 text-white">
               {t('index.extensionFeatures.title')}
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> {t('index.extensionFeatures.subtitle')}</span>
+              <span className="text-blue-500"> {t('index.extensionFeatures.subtitle')}</span>
             </h2>
             <p className="text-xl text-[#808080] max-w-2xl mx-auto">
               {t('index.extensionFeatures.description')}
@@ -227,7 +227,7 @@ const Index = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2 text-lg px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
+            <Button size="lg" className="gap-2 text-lg px-8 bg-blue-600 text-white hover:bg-blue-700">
               <Download className="h-5 w-5" />
               {t('index.extensionFeatures.downloadExtension')}
             </Button>
@@ -250,7 +250,7 @@ const Index = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-5 gap-8 mb-8">
             <div className="md:col-span-2">
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('index.hero.title')}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-white">{t('index.hero.title')}</h3>
               <p className="text-[#808080] leading-relaxed">
                 {t('index.footer.description')}
               </p>

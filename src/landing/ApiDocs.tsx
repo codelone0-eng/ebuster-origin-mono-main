@@ -50,7 +50,7 @@ const ApiDocs = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            {t('api-docs.hero.title')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('api-docs.hero.subtitle')}</span>
+            {t('api-docs.hero.title')} <span className="text-blue-500">{t('api-docs.hero.subtitle')}</span>
           </h1>
           
           <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -58,7 +58,7 @@ const ApiDocs = () => {
           </p>
 
           <div className="flex items-center justify-center gap-4 mb-12">
-            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
+            <Button size="lg" className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700">
               <Key className="h-4 w-4 mr-2" />
               {t('api-docs.cta.getApiKey')}
             </Button>

@@ -204,7 +204,7 @@ const Roadmap = () => {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white">
             {content.hero.title.split(' ').map((word, index) => (
-              <span key={index} className={index % 2 === 1 ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent' : undefined}>
+              <span key={index} className={index % 2 === 1 ? 'text-blue-500' : undefined}>
                 {word}{' '}
               </span>
             ))}

@@ -41,7 +41,7 @@ const Documentation = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            {t('documentation.hero.title')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('documentation.hero.subtitle')}</span>
+            {t('documentation.hero.title')} <span className="text-blue-500">{t('documentation.hero.subtitle')}</span>
           </h1>
           
           <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -51,7 +51,7 @@ const Documentation = () => {
           <div className="flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+              className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -119,7 +119,7 @@ const Documentation = () => {
 
         {/* Download CTA Section */}
         <div className="text-center">
-          <div className="bg-gradient-to-r from-blue-600/10 via-transparent to-purple-600/10 border border-[#2d2d2d] rounded-2xl p-12">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-12">
             <h3 className="text-3xl font-bold mb-4 text-white">{t('documentation.cta.title')}</h3>
             <p className="text-[#808080] text-lg mb-6">
               {t('documentation.cta.description')}
@@ -127,7 +127,7 @@ const Documentation = () => {
             <div className="flex items-center justify-center gap-4">
               <Button 
                 size="lg" 
-                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700"
                 onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
               >
                 <Download className="h-4 w-4 mr-2" />

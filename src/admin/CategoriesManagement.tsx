@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, FolderTree, Search, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { API_CONFIG } from '@/config/api';
 
 interface Category {
   id: string;
@@ -48,17 +49,38 @@ const CategoriesManagement: React.FC = () => {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/categories');
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/categories`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Не удалось загрузить категории');
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      }
+
       const data = await response.json();
       
       if (data.success) {
-        setCategories(data.data);
+        setCategories(data.data || []);
+      } else {
+        throw new Error(data.error || 'Не удалось загрузить категории');
       }
     } catch (error) {
       console.error('Load categories error:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось загрузить категории',
+        description: error instanceof Error ? error.message : 'Не удалось загрузить категории',
         variant: 'destructive'
       });
     } finally {
@@ -68,17 +90,31 @@ const CategoriesManagement: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      const token = localStorage.getItem('ebuster_token');
       const url = editingCategory
-        ? `/api/categories/${editingCategory.id}`
-        : '/api/categories';
+        ? `${API_CONFIG.BASE_URL}/api/categories/${editingCategory.id}`
+        : `${API_CONFIG.BASE_URL}/api/categories`;
       
       const response = await fetch(url, {
         method: editingCategory ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Не удалось сохранить категорию');
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      }
 
       const data = await response.json();
 
@@ -90,12 +126,14 @@ const CategoriesManagement: React.FC = () => {
         setIsDialogOpen(false);
         resetForm();
         loadCategories();
+      } else {
+        throw new Error(data.error || 'Не удалось сохранить категорию');
       }
     } catch (error) {
       console.error('Save category error:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось сохранить категорию',
+        description: error instanceof Error ? error.message : 'Не удалось сохранить категорию',
         variant: 'destructive'
       });
     }
@@ -105,10 +143,26 @@ const CategoriesManagement: React.FC = () => {
     if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
 
     try {
-      const response = await fetch(`/api/categories/${id}`, {
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/categories/${id}`, {
         method: 'DELETE',
-        headers: {}
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Не удалось удалить категорию');
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      }
 
       const data = await response.json();
 
@@ -118,12 +172,14 @@ const CategoriesManagement: React.FC = () => {
           description: 'Категория удалена'
         });
         loadCategories();
+      } else {
+        throw new Error(data.error || 'Не удалось удалить категорию');
       }
     } catch (error) {
       console.error('Delete category error:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось удалить категорию',
+        description: error instanceof Error ? error.message : 'Не удалось удалить категорию',
         variant: 'destructive'
       });
     }

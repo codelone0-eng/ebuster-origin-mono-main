@@ -13,7 +13,7 @@ const Terms = () => {
         <div className="container mx-auto max-w-4xl px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            Условия <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">использования</span>
+            Условия <span className="text-blue-500">использования</span>
           </h1>
           <p className="text-[#808080]">Последнее обновление: {new Date().toLocaleDateString('ru-RU')}</p>
         </div>

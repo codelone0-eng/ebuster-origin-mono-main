@@ -119,24 +119,27 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   const loadData = async () => {
     setLoading(true);
     try {
-      const [subsData, statsData] = await Promise.all([
+      const [subsResponse, statsResponse] = await Promise.all([
         getSubscriptions(),
         getSubscriptionStats()
       ]);
       
-      if (subsData.success) {
-        setSubscriptions(subsData.data.subscriptions || []);
+      // getSubscriptions и getSubscriptionStats возвращают response напрямую из fetchWithAuth
+      // который уже возвращает { success, data }
+      if (subsResponse && subsResponse.success) {
+        const subscriptions = subsResponse.data?.subscriptions || subsResponse.data || [];
+        setSubscriptions(Array.isArray(subscriptions) ? subscriptions : []);
         // Select first item if none selected
-        if (!selectedSubId && subsData.data.subscriptions?.length > 0) {
-           setSelectedSubId(subsData.data.subscriptions[0].id);
+        if (!selectedSubId && Array.isArray(subscriptions) && subscriptions.length > 0) {
+           setSelectedSubId(subscriptions[0].id);
         }
       }
-      if (statsData.success) {
-        setStats(statsData.data);
+      if (statsResponse && statsResponse.success) {
+        setStats(statsResponse.data || statsResponse);
       }
     } catch (error) {
       console.error('Failed to load subscriptions:', error);
-      toast({ title: 'Error', description: 'Failed to load data', variant: 'destructive' });
+      toast({ title: 'Error', description: error instanceof Error ? error.message : 'Failed to load data', variant: 'destructive' });
     } finally {
       setLoading(false);
     }

@@ -16,7 +16,27 @@ import {
   syncUserScripts,
   checkScriptUpdates
 } from './scripts.controller';
-import { optionalAuthenticateUser, authenticateUser } from './auth.middleware';
+import {
+  adminListScripts,
+  adminGetScriptById,
+  adminCreateScript,
+  adminUpdateScript,
+  adminDeleteScript,
+  adminPublishScript,
+  adminSetScriptStatus,
+  adminDuplicateScript,
+  adminCreateVersion,
+  adminListVersions,
+  adminRollbackVersion,
+  adminListAuditLogs,
+  adminListChecks,
+  adminCreateCheck,
+  adminUpdateCheck,
+  adminListAccessOverrides,
+  adminGrantAccess,
+  adminRevokeAccess
+} from './scripts-admin.controller';
+import { optionalAuthenticateUser, authenticateUser, requireAdmin } from './auth.middleware';
 
 const router = express.Router();
 
@@ -35,12 +55,25 @@ router.delete('/user/uninstall/:id', authenticateUser, uninstallScriptForUser); 
 router.post('/user/sync', authenticateUser, syncUserScripts); // Синхронизировать скрипты
 router.get('/user/check-updates', authenticateUser, checkScriptUpdates); // Проверить обновления скриптов
 
-// Админские маршруты (требуют авторизации)
-router.get('/admin/stats', getScriptStats); // Статистика скриптов
-router.get('/admin', getScripts); // Получение всех скриптов (включая черновики)
-router.get('/admin/:id', getScriptById); // Получение скрипта по ID
-router.post('/admin', createScript); // Создание нового скрипта
-router.put('/admin/:id', updateScript); // Обновление скрипта
-router.delete('/admin/:id', deleteScript); // Удаление скрипта
+// Админские маршруты (требуют авторизации и прав администратора)
+router.get('/admin/stats', requireAdmin, getScriptStats); // Статистика скриптов
+router.get('/admin', requireAdmin, adminListScripts); // Получение всех скриптов (включая черновики)
+router.get('/admin/:id', requireAdmin, adminGetScriptById); // Получение скрипта по ID
+router.post('/admin', requireAdmin, adminCreateScript); // Создание нового скрипта
+router.put('/admin/:id', requireAdmin, adminUpdateScript); // Обновление скрипта
+router.delete('/admin/:id', requireAdmin, adminDeleteScript); // Удаление скрипта
+router.post('/admin/:id/publish', requireAdmin, adminPublishScript); // Публикация скрипта
+router.post('/admin/:id/status', requireAdmin, adminSetScriptStatus); // Изменение статуса
+router.post('/admin/:id/duplicate', requireAdmin, adminDuplicateScript); // Дублирование скрипта
+router.post('/admin/:id/versions', requireAdmin, adminCreateVersion); // Создание версии
+router.get('/admin/:id/versions', requireAdmin, adminListVersions); // Список версий
+router.post('/admin/:id/versions/:versionId/rollback', requireAdmin, adminRollbackVersion); // Откат версии
+router.get('/admin/:id/audit', requireAdmin, adminListAuditLogs); // Аудит логи
+router.get('/admin/:id/checks', requireAdmin, adminListChecks); // Список проверок
+router.post('/admin/:id/checks', requireAdmin, adminCreateCheck); // Создание проверки
+router.put('/admin/checks/:checkId', requireAdmin, adminUpdateCheck); // Обновление проверки
+router.get('/admin/:id/access', requireAdmin, adminListAccessOverrides); // Список доступов
+router.post('/admin/:id/access', requireAdmin, adminGrantAccess); // Предоставление доступа
+router.delete('/admin/:id/access/:userId', requireAdmin, adminRevokeAccess); // Отзыв доступа
 
 export default router;

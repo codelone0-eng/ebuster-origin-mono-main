@@ -34,11 +34,49 @@ interface ApiResponse<T> {
 }
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type');
+    let errorMessage = 'Не удалось выполнить запрос';
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // Ignore JSON parse error
+      }
+    } else {
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      errorMessage = `Server returned ${response.status}: ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
+  }
+  
   const json = (await response.json()) as ApiResponse<T>;
-  if (!response.ok || !json.success || !json.data) {
+  if (!json.success) {
     throw new Error(json.error || 'Не удалось выполнить запрос');
   }
-  return json.data;
+  
+  // Если data отсутствует, возвращаем весь json (для случаев когда данные в корне)
+  if (!json.data && json.success) {
+    return json as unknown as T;
+  }
+  
+  // Для ScriptListResult проверяем структуру
+  if (json.data && typeof json.data === 'object' && 'items' in json.data) {
+    return json.data as T;
+  }
+  
+  // Если data содержит scripts вместо items (старый формат), преобразуем
+  if (json.data && typeof json.data === 'object' && 'scripts' in json.data && !('items' in json.data)) {
+    const oldFormat = json.data as any;
+    return {
+      items: oldFormat.scripts || [],
+      pagination: oldFormat.pagination || { page: 1, limit: 20, total: 0, pages: 0 }
+    } as T;
+  }
+  
+  return json.data as T;
 };
 
 const buildQueryString = (params: Record<string, unknown>) => {

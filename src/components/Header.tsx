@@ -151,9 +151,9 @@ export const Header = () => {
   return (
     <header className="relative z-header bg-[#1a1a1a] backdrop-blur-xl border-b border-[#2d2d2d] px-6 py-4 group">
       {/* Animated background effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+      <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <div className="absolute top-0 left-0 w-full h-px bg-blue-500/30" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-blue-500/20" />
       
       <div className="relative max-w-7xl mx-auto flex h-16 items-center justify-between gap-12">
 
@@ -203,7 +203,7 @@ export const Header = () => {
                     className="text-[#808080] hover:text-white px-0 py-0 font-medium text-sm hover:scale-105 transition-all duration-200 relative group"
                   >
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300" />
                   </a>
                 )}
               </div>
@@ -320,7 +320,7 @@ export const Header = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border-blue-500/30 text-blue-500 hover:from-blue-600/20 hover:to-purple-600/20 hover:border-blue-500/50 rounded-xl px-4 py-2 h-auto group"
+                className="bg-blue-600/10 border-blue-500/30 text-blue-500 hover:bg-blue-600/20 hover:border-blue-500/50 rounded-xl px-4 py-2 h-auto group"
                 onClick={handleOpenLogin}
               >
                 <LogIn className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />

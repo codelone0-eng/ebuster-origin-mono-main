@@ -9,7 +9,7 @@ export const Footer = () => {
       <div className="container mx-auto max-w-7xl">
         <div className="grid md:grid-cols-5 gap-8 mb-8">
           <div className="md:col-span-2">
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('index.hero.title')}</h3>
+            <h3 className="text-2xl font-bold mb-4 text-white">{t('index.hero.title')}</h3>
             <p className="text-[#808080] leading-relaxed">
               {t('index.footer.description')}
             </p>
