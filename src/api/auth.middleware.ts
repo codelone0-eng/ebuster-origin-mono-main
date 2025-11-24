@@ -196,3 +196,87 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
     next();
   }
 };
+
+// Middleware для проверки прав администратора
+export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Сначала проверяем токен
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'Токен не предоставлен'
+      });
+    }
+
+    // Проверка JWT токена
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+    } catch (jwtError) {
+      return res.status(401).json({
+        success: false,
+        error: 'Недействительный токен'
+      });
+    }
+
+    // Получаем пользователя из БД
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      return res.status(500).json({
+        success: false,
+        error: 'Supabase не настроен'
+      });
+    }
+
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email, full_name, role, status')
+      .eq('id', decoded.userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Пользователь не найден'
+      });
+    }
+
+    // Проверка бана
+    if (user.status === 'banned') {
+      return res.status(403).json({
+        success: false,
+        error: 'Ваш аккаунт заблокирован',
+        banned: true
+      });
+    }
+
+    // Проверка роли администратора
+    const userRole = user.role || 'user';
+    if (userRole !== 'admin' && userRole !== 'administrator') {
+      console.log('❌ [requireAdmin] Доступ запрещен для роли:', userRole);
+      return res.status(403).json({
+        success: false,
+        error: 'Требуются права администратора'
+      });
+    }
+
+    // Добавляем пользователя в req
+    req.user = {
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role || 'admin'
+    };
+
+    console.log('✅ [requireAdmin] Доступ разрешен для администратора:', user.email);
+    next();
+  } catch (error) {
+    console.error('❌ [requireAdmin] Ошибка:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Ошибка проверки прав администратора'
+    });
+  }
+};
