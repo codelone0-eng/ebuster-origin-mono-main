@@ -1,242 +1,91 @@
-import React, { useRef, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import {
-  Copy,
-  Download,
-  Maximize2,
-  Minimize2,
-  RotateCcw,
-  Save,
-  Sparkles
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   language?: string;
-  readOnly?: boolean;
   height?: string | number;
-  className?: string;
-  showLineNumbers?: boolean;
-  showMinimap?: boolean;
   onSave?: () => void;
-  onFormat?: () => void;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
   language = 'javascript',
-  readOnly = false,
-  height = '500px',
-  className,
-  showLineNumbers = true,
-  showMinimap = false,
-  onSave,
-  onFormat
+  height = '100%',
+  onSave
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
-  const [selectedLang, setSelectedLang] = React.useState(language);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  // Sync scroll of line numbers with textarea
+  const handleScroll = () => {
+    if (textareaRef.current && lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
     }
-  }, [value]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([value], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `script.${selectedLang === 'javascript' ? 'js' : 'txt'}`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      onSave?.();
-    }
-    
-    // Tab support
     if (e.key === 'Tab') {
       e.preventDefault();
-      const target = e.target as HTMLTextAreaElement;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
+      const start = textareaRef.current?.selectionStart || 0;
+      const end = textareaRef.current?.selectionEnd || 0;
+      
       const newValue = value.substring(0, start) + '  ' + value.substring(end);
       onChange(newValue);
       
+      // Restore cursor position (async to wait for render)
       setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 2;
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
+        }
       }, 0);
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      onSave?.();
     }
   };
 
-  const lines = value.split('\n');
-  const lineCount = lines.length;
+  const lineCount = value.split('\n').length;
+  const lines = Array.from({ length: lineCount }, (_, i) => i + 1);
 
   return (
-    <Card
-      className={cn(
-        'relative overflow-hidden',
-        isFullscreen && 'fixed inset-0 z-50 rounded-none',
-        className
-      )}
-    >
-      {/* Toolbar */}
-      <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="font-mono text-xs">
-            {selectedLang}
-          </Badge>
-          <Select value={selectedLang} onValueChange={setSelectedLang}>
-            <SelectTrigger className="h-7 w-32 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="javascript">JavaScript</SelectItem>
-              <SelectItem value="typescript">TypeScript</SelectItem>
-              <SelectItem value="python">Python</SelectItem>
-              <SelectItem value="html">HTML</SelectItem>
-              <SelectItem value="css">CSS</SelectItem>
-              <SelectItem value="json">JSON</SelectItem>
-              <SelectItem value="markdown">Markdown</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-xs text-muted-foreground">
-            {lineCount} {lineCount === 1 ? 'строка' : 'строк'} · {value.length} символов
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1">
-          {onFormat && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onFormat}
-              className="h-7 px-2"
-            >
-              <Sparkles className="mr-1 h-3 w-3" />
-              Форматировать
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            className="h-7 px-2"
-          >
-            <Copy className="mr-1 h-3 w-3" />
-            Копировать
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDownload}
-            className="h-7 px-2"
-          >
-            <Download className="mr-1 h-3 w-3" />
-            Скачать
-          </Button>
-          {onSave && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onSave}
-              className="h-7 px-2"
-            >
-              <Save className="mr-1 h-3 w-3" />
-              Сохранить
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="h-7 px-2"
-          >
-            {isFullscreen ? (
-              <Minimize2 className="h-3 w-3" />
-            ) : (
-              <Maximize2 className="h-3 w-3" />
-            )}
-          </Button>
-        </div>
+    <div className="relative flex h-full font-mono text-sm bg-[#111111] text-[#d4d4d4] overflow-hidden group">
+      {/* Line Numbers */}
+      <div 
+        ref={lineNumbersRef}
+        className="flex-none w-12 bg-[#1a1a1a] border-r border-[#2d2d2d] text-[#606060] text-right select-none overflow-hidden pt-4 pb-4"
+      >
+        {lines.map((line) => (
+          <div key={line} className="px-3 leading-6 h-6 text-xs">
+            {line}
+          </div>
+        ))}
       </div>
 
       {/* Editor Area */}
-      <div
-        className="relative overflow-auto bg-background"
-        style={{ height: isFullscreen ? 'calc(100vh - 48px)' : height }}
-      >
-        <div className="flex">
-          {/* Line Numbers */}
-          {showLineNumbers && (
-            <div className="select-none border-r bg-muted/20 px-3 py-4 text-right font-mono text-xs text-muted-foreground">
-              {lines.map((_, index) => (
-                <div key={index} className="leading-6">
-                  {index + 1}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Code Area */}
-          <div className="relative flex-1">
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              readOnly={readOnly}
-              spellCheck={false}
-              className={cn(
-                'w-full resize-none bg-transparent px-4 py-4 font-mono text-sm leading-6 outline-none',
-                readOnly && 'cursor-default'
-              )}
-              style={{
-                minHeight: isFullscreen ? 'calc(100vh - 48px)' : height,
-                tabSize: 2
-              }}
-              placeholder="// Начните писать код..."
-            />
-          </div>
-        </div>
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onScroll={handleScroll}
+        onKeyDown={handleKeyDown}
+        className="flex-1 w-full h-full bg-transparent border-0 p-0 pl-4 pt-4 pb-4 resize-none focus:ring-0 focus:outline-none leading-6 text-sm font-mono text-[#e0e0e0] whitespace-pre"
+        spellCheck={false}
+        autoCapitalize="off"
+        autoComplete="off"
+        autoCorrect="off"
+        style={{ 
+          tabSize: 2,
+          outline: 'none'
+        }}
+      />
+      
+      <div className="absolute top-2 right-4 px-2 py-1 rounded bg-[#2d2d2d]/50 text-[10px] text-neutral-500 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        {language}
       </div>
-
-      {/* Status Bar */}
-      <div className="flex items-center justify-between border-t bg-muted/30 px-4 py-1 text-xs text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <span>UTF-8</span>
-          <span>LF</span>
-          {readOnly && <Badge variant="secondary">Только чтение</Badge>}
-        </div>
-        <div className="flex items-center gap-4">
-          <span>Ctrl+S для сохранения</span>
-          <span>Tab для отступа</span>
-        </div>
-      </div>
-    </Card>
+    </div>
   );
 };
-
-export default CodeEditor;
