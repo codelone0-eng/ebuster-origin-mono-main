@@ -88,6 +88,7 @@ interface ScriptResponse {
   published_at?: string | null;
   last_downloaded_at?: string | null;
   icon_url?: string | null;
+  icon?: string;
 }
 
 interface CreateScriptRequest {
@@ -139,7 +140,8 @@ const mapDbScriptToResponse = (script: DbScript): ScriptResponse => {
     updated_at: script.updated_at,
     published_at: null,
     last_downloaded_at: script.last_downloaded_at ?? null,
-    icon_url: script.icon_url ?? null
+    icon_url: script.icon_url ?? null,
+    icon: (script as any).icon ?? '⚡'
   };
 };
 
@@ -739,6 +741,7 @@ export const getUserInstalledScripts = async (req: Request, res: Response) => {
           status,
           changelog,
           icon_url,
+          icon,
           rating
         )
       `)

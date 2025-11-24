@@ -217,8 +217,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -226,270 +226,260 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="space-y-6">
       {/* Заголовок */}
-      <div>
-        <h2 className="text-3xl font-bold">Реферальная программа</h2>
-        <p className="text-muted-foreground mt-2">
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
+        <p className="text-[#808080]">
           Приглашайте друзей и зарабатывайте на каждой их подписке
         </p>
       </div>
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Всего рефералов</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.total_referrals || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.active_referrals || 0} активных
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex flex-row items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Всего рефералов</h3>
+            <Users className="h-4 w-4 text-[#808080]" />
+          </div>
+          <div className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</div>
+          <p className="text-xs text-[#808080] mt-1">
+            {stats?.active_referrals || 0} активных
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Заработано</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex flex-row items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Заработано</h3>
+            <DollarSign className="h-4 w-4 text-[#808080]" />
+          </div>
+          <div className="text-2xl font-bold text-white">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
+          <p className="text-xs text-[#808080] mt-1">
+            ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ожидает выплаты</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              Будет выплачено в конце месяца
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex flex-row items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Ожидает выплаты</h3>
+            <TrendingUp className="h-4 w-4 text-[#808080]" />
+          </div>
+          <div className="text-2xl font-bold text-white">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
+          <p className="text-xs text-[#808080] mt-1">
+            Будет выплачено в конце месяца
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Конверсия</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">
-              Процент оформивших подписку
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex flex-row items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Конверсия</h3>
+            <Award className="h-4 w-4 text-[#808080]" />
+          </div>
+          <div className="text-2xl font-bold text-white">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
+          <p className="text-xs text-[#808080] mt-1">
+            Процент оформивших подписку
+          </p>
+        </div>
       </div>
 
       {/* Реферальный код и ссылка */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ваш реферальный код</CardTitle>
-          <CardDescription>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
+          <p className="text-sm text-[#808080]">
             Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="space-y-4">
           <div className="flex gap-2">
             <Input
               value={referralCode?.code ?? '—'}
               readOnly
+              className="bg-[#111111] border-[#2d2d2d] text-white"
             />
-            <Button onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}>
+            <Button 
+              onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
 
           <div>
-            <p className="text-sm text-muted-foreground">Ваша реферальная ссылка</p>
-            <div className="flex gap-2 mt-2">
-              <Input value={referralLink} readOnly />
-              <Button onClick={() => { void copyToClipboard(referralLink, 'link'); }}>
-                Скопировать ссылку
+            <p className="text-sm text-[#808080] mb-2">Ваша реферальная ссылка</p>
+            <div className="flex gap-2">
+              <Input value={referralLink} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
+              <Button 
+                onClick={() => { void copyToClipboard(referralLink, 'link'); }}
+                className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+              >
+                Скопировать
               </Button>
-              <Button onClick={shareLink}>
+              <Button 
+                onClick={shareLink}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 <Share2 className="h-4 w-4 mr-2" />
                 Поделиться
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="referrals">Рефералы</TabsTrigger>
-          <TabsTrigger value="payouts">История выплат</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <TabsList className="grid w-full grid-cols-2 bg-[#1f1f1f] border border-[#2d2d2d]">
+          <TabsTrigger value="referrals" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">Рефералы</TabsTrigger>
+          <TabsTrigger value="payouts" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">История выплат</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="referrals">
-          <Card>
-            <CardHeader>
-              <CardTitle>Список рефералов</CardTitle>
-              <CardDescription>
-                Пользователи, зарегистрировавшиеся по вашей ссылке
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {referrals.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Пока нет рефералов</p>
-                  <p className="text-sm mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {referrals.map((referral) => (
-                    <div
-                      key={referral.id}
-                      className="flex items-start justify-between gap-4 p-4 border rounded-lg"
-                    >
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{maskEmail(referral.referred_user?.email)}</p>
-                          {referral.referred_user?.full_name && (
-                            <span className="text-sm text-muted-foreground">
-                              ({referral.referred_user.full_name})
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+        <TabsContent value="referrals" className="mt-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">Список рефералов</h3>
+            <p className="text-sm text-[#808080] mb-4">
+              Пользователи, зарегистрировавшиеся по вашей ссылке
+            </p>
+            {referrals.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-50" />
+                <p className="text-[#808080]">Пока нет рефералов</p>
+                <p className="text-sm text-[#808080] mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {referrals.map((referral) => (
+                  <div
+                    key={referral.id}
+                    className="flex items-start justify-between gap-4 p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg"
+                  >
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-white">{maskEmail(referral.referred_user?.email)}</p>
+                        {referral.referred_user?.full_name && (
+                          <span className="text-sm text-[#808080]">
+                            ({referral.referred_user.full_name})
                           </span>
-                          {referral.subscription && (
-                            <Badge variant={referral.subscription.status === 'active' ? 'default' : 'secondary'}>
-                              {referral.subscription.plan}
-                            </Badge>
-                          )}
-                          <Badge variant={getRewardStatusVariant(referral.reward_status)}>
-                            {getRewardStatusLabel(referral.reward_status)}
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-[#808080]">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+                        </span>
+                        {referral.subscription && (
+                          <Badge className={referral.subscription.status === 'active' ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                            {referral.subscription.plan}
                           </Badge>
-                        </div>
+                        )}
+                        <Badge className={getRewardStatusVariant(referral.reward_status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                          {getRewardStatusLabel(referral.reward_status)}
+                        </Badge>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
 
-        <TabsContent value="payouts">
-          <Card>
-            <CardHeader>
-              <CardTitle>История выплат</CardTitle>
-              <CardDescription>
-                Когда ваши рефералы оплачивают подписку, здесь появится начисление
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {payouts.length === 0 ? (
-                <div className="text-center py-10 text-muted-foreground">
-                  <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                  <p>Пока нет начислений</p>
-                  <p className="text-sm mt-2">Как только ваш реферал оплатит подписку, информация появится здесь.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {payouts.map((item) => (
-                    <div key={item.id} className="p-4 border rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium">
-                          {item.referred_user?.full_name || maskEmail(item.referred_user?.email)}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {item.created_at ? new Date(item.created_at).toLocaleString('ru-RU') : '—'}
-                        </div>
+        <TabsContent value="payouts" className="mt-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">История выплат</h3>
+            <p className="text-sm text-[#808080] mb-4">
+              Когда ваши рефералы оплачивают подписку, здесь появится начисление
+            </p>
+            {payouts.length === 0 ? (
+              <div className="text-center py-10">
+                <DollarSign className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-40" />
+                <p className="text-[#808080]">Пока нет начислений</p>
+                <p className="text-sm text-[#808080] mt-2">Как только ваш реферал оплатит подписку, информация появится здесь.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {payouts.map((item) => (
+                  <div key={item.id} className="p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-white">
+                        {item.referred_user?.full_name || maskEmail(item.referred_user?.email)}
                       </div>
-                      <div className="text-sm text-muted-foreground flex flex-col gap-1">
-                        <span>
-                          Оформил подписку на сумму <span className="text-foreground font-medium">{formatAmount(item.purchase_amount, item.currency)}</span>
-                        </span>
-                        <span>
-                          Ваш процент: <span className="text-foreground font-medium">{formatAmount(item.reward_amount, item.currency)}</span>
-                        </span>
+                      <div className="text-sm text-[#808080]">
+                        {item.created_at ? new Date(item.created_at).toLocaleString('ru-RU') : '—'}
                       </div>
-                      <Badge variant={getRewardStatusVariant(item.status)}>
-                        {getRewardStatusLabel(item.status)}
-                      </Badge>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="text-sm text-[#808080] flex flex-col gap-1">
+                      <span>
+                        Оформил подписку на сумму <span className="text-white font-medium">{formatAmount(item.purchase_amount, item.currency)}</span>
+                      </span>
+                      <span>
+                        Ваш процент: <span className="text-white font-medium">{formatAmount(item.reward_amount, item.currency)}</span>
+                      </span>
+                    </div>
+                    <Badge className={getRewardStatusVariant(item.status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                      {getRewardStatusLabel(item.status)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
       {/* Как это работает */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Как это работает?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                1
-              </div>
-              <div>
-                <h4 className="font-medium">Поделитесь ссылкой</h4>
-                <p className="text-sm text-muted-foreground">
-                  Отправьте свою реферальную ссылку друзьям или опубликуйте в соцсетях
-                </p>
-              </div>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-white mb-6">Как это работает?</h3>
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+              1
             </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                2
-              </div>
-              <div>
-                <h4 className="font-medium">Друзья получают скидку</h4>
-                <p className="text-sm text-muted-foreground">
-                  Ваши друзья регистрируются по ссылке и получают скидку {referralCode?.discount_value}% на первую подписку
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                3
-              </div>
-              <div>
-                <h4 className="font-medium">Вы зарабатываете</h4>
-                <p className="text-sm text-muted-foreground">
-                  Получайте {referralCode?.discount_value}% от каждого платежа ваших рефералов. Выплаты в конце месяца
-                </p>
-              </div>
+            <div>
+              <h4 className="font-medium text-white">Поделитесь ссылкой</h4>
+              <p className="text-sm text-[#808080]">
+                Отправьте свою реферальную ссылку друзьям или опубликуйте в соцсетях
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+              2
+            </div>
+            <div>
+              <h4 className="font-medium text-white">Друзья получают скидку</h4>
+              <p className="text-sm text-[#808080]">
+                Ваши друзья регистрируются по ссылке и получают скидку {referralCode?.discount_value}% на первую подписку
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+              3
+            </div>
+            <div>
+              <h4 className="font-medium text-white">Вы зарабатываете</h4>
+              <p className="text-sm text-[#808080]">
+                Получайте {referralCode?.discount_value}% от каждого платежа ваших рефералов. Выплаты в конце месяца
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
           <DialogHeader>
-            <DialogTitle>Поделиться ссылкой</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Поделиться ссылкой</DialogTitle>
+            <DialogDescription className="text-[#808080]">
               Скопируйте код или отправьте ссылку друзьями — они получат скидку, а вы вознаграждение.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Реферальный код</p>
+              <p className="text-sm text-[#808080] mb-2">Реферальный код</p>
               <div className="flex gap-2">
-                <Input value={referralCode?.code ?? '—'} readOnly />
+                <Input value={referralCode?.code ?? '—'} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
                 <Button
-                  variant="secondary"
+                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
                   onClick={() => {
                     void copyToClipboard(referralCode?.code ?? '', 'code');
                   }}
@@ -500,11 +490,11 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Реферальная ссылка</p>
+              <p className="text-sm text-[#808080] mb-2">Реферальная ссылка</p>
               <div className="flex gap-2">
-                <Input value={referralLink} readOnly />
+                <Input value={referralLink} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
                 <Button
-                  variant="secondary"
+                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
                   onClick={() => {
                     void copyToClipboard(referralLink, 'link');
                   }}
@@ -514,13 +504,13 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-[#808080]">
               Поделитесь ссылкой в соцсетях, мессенджерах или по email — каждое оформление подписки принесёт вам бонус.
             </p>
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setIsShareModalOpen(false)}>Готово</Button>
+            <Button onClick={() => setIsShareModalOpen(false)} className="bg-blue-600 hover:bg-blue-700 text-white">Готово</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

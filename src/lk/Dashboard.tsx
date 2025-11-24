@@ -615,7 +615,7 @@ const DashboardContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-[#111111] relative">
       <ParticleBackground />
       <div className="relative z-content min-h-screen flex flex-col">
         <Header />
@@ -626,28 +626,25 @@ const DashboardContent = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
+                <h1 className="text-3xl font-bold text-white mb-2">
                   {t('header.dashboard.title')}
                 </h1>
-                <p className="text-muted-foreground">{t('header.dashboard.welcome')} {user.name}!</p>
+                <p className="text-[#808080]">{t('header.dashboard.welcome')} {user.name}!</p>
               </div>
               <div className="flex items-center gap-4">
                 {(user.plan === 'premium' || user.plan === 'pro' || user.plan === 'enterprise') ? (
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-sm"></div>
-                    <Badge className="relative bg-gradient-to-r from-primary to-accent text-primary-foreground border-0 px-4 py-2 text-sm font-bold shadow-lg">
-                      <Crown className="h-4 w-4 mr-2" />
-                      {user.plan.toUpperCase()}
-                    </Badge>
-                  </div>
+                  <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 px-4 py-2 text-sm font-bold">
+                    <Crown className="h-4 w-4 mr-2" />
+                    {user.plan.toUpperCase()}
+                  </Badge>
                 ) : (
-                  <Badge variant="secondary" className="px-3 py-1">
+                  <Badge className="bg-[#2d2d2d] text-[#a3a3a3] border-[#404040] px-3 py-1">
                     {t('header.dashboard.plan.free')}
                   </Badge>
                 )}
-                <Avatar className="h-12 w-12">
+                <Avatar className="h-12 w-12 border-2 border-[#2d2d2d]">
                   <AvatarImage src={authUser?.avatar_url || user.avatar} />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-[#2d2d2d] text-white">
                     {user.name.includes(' ') 
                       ? user.name.split(' ').map(n => n[0]).join('').toUpperCase()
                       : user.name.substring(0, 2).toUpperCase()
@@ -662,13 +659,13 @@ const DashboardContent = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             <aside className="w-full lg:w-64 flex-shrink-0">
               <div className="sticky top-24 space-y-4">
-                <Card className="bg-card/80 backdrop-blur border border-border/60">
-                  <CardHeader className="pb-2 px-4">
-                    <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
+                  <div className="pb-2 px-4 pt-4">
+                    <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">
                       {language === 'ru' ? 'Навигация' : 'Navigation'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0 px-3 pb-3">
+                    </h3>
+                  </div>
+                  <div className="pt-0 px-3 pb-3">
                     <nav className="space-y-1">
                       {navigationItems.map((item) => {
                         const Icon = item.icon;
@@ -690,23 +687,23 @@ const DashboardContent = () => {
                               className={cn(
                                 'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
                                 isActive
-                                  ? 'bg-primary text-primary-foreground shadow-sm'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                                  ? 'bg-blue-600 text-white shadow-sm'
+                                  : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                               )}
                             >
                               <span className="flex items-center gap-2.5 flex-1 min-w-0">
-                                <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
+                                <Icon className={cn('h-4 w-4 transition-colors flex-shrink-0', isActive ? 'text-white' : 'text-[#808080]')} />
                                 <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
                               </span>
                               {hasChildren ? (
-                                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isExpanded ? 'rotate-180' : 'rotate-0')} />
+                                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0 text-[#808080]', isExpanded ? 'rotate-180' : 'rotate-0')} />
                               ) : (
-                                <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                                <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0 text-[#808080]', isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
                               )}
                             </button>
 
                             {hasChildren && isExpanded && (
-                              <div className="ml-3 mt-1 space-y-1 border-l-2 border-border/50 pl-2">
+                              <div className="ml-3 mt-1 space-y-1 border-l-2 border-[#2d2d2d] pl-2">
                                 {item.children.map((child: any) => {
                                   const ChildIcon = child.icon;
                                   const isChildActive = activeTab === child.value;
@@ -717,14 +714,14 @@ const DashboardContent = () => {
                                       className={cn(
                                         'w-full flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all',
                                         isChildActive
-                                          ? 'bg-primary text-primary-foreground shadow-sm'
-                                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                                          ? 'bg-blue-600 text-white shadow-sm'
+                                          : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                                       )}
                                     >
                                       <span className="flex items-center gap-2 flex-1 min-w-0">
                                         <span className="whitespace-nowrap overflow-hidden text-ellipsis">{child.label}</span>
                                       </span>
-                                      <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0', isChildActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
+                                      <ChevronRight className={cn('h-3.5 w-3.5 transition-transform flex-shrink-0 text-[#808080]', isChildActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-1')} />
                                     </button>
                                   );
                                 })}
@@ -734,8 +731,8 @@ const DashboardContent = () => {
                         );
                       })}
                     </nav>
-                  </CardContent>
-              </Card>
+                  </div>
+                </div>
               </div>
             </aside>
 
@@ -754,86 +751,104 @@ const DashboardContent = () => {
 
             {activeTab === 'installed' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.installed')}</h2>
-                  <GradientButton className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    {t('header.dashboard.installed.addScript')}
-                  </GradientButton>
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.installed')}</h2>
+                      <p className="text-sm text-[#808080]">Управление установленными скриптами</p>
+                    </div>
+                    <Button 
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                      onClick={() => handleTabChange('scripts')}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t('header.dashboard.installed.addScript')}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
                   {installedScripts.length === 0 ? (
-                    <Card className="p-12 text-center border-primary/20">
+                    <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-12 text-center">
                       <div className="flex flex-col items-center gap-4">
-                        <Library className="h-12 w-12 text-primary/50" />
+                        <Library className="h-12 w-12 text-[#808080]" />
                         <div>
-                          <h3 className="text-lg font-semibold text-foreground mb-2">
+                          <h3 className="text-lg font-semibold text-white mb-2">
                             {t('header.dashboard.installed.noScripts')}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-[#808080]">
                             {t('header.dashboard.installed.noScriptsDescription')}
                           </p>
                         </div>
-                        <GradientButton onClick={() => handleTabChange('scripts')}>
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => handleTabChange('scripts')}
+                        >
                           {t('header.dashboard.installed.browseScripts')}
-                        </GradientButton>
+                        </Button>
                       </div>
-                    </Card>
+                    </div>
                   ) : installedScripts
-                    .filter((item: any) => item.script !== null && item.script !== undefined) // Фильтруем null скрипты
+                    .filter((item: any) => item.script !== null && item.script !== undefined)
                     .map((item: any) => {
                     const scriptTitle = item.script?.title || item.script?.name || 'Скрипт';
                     const scriptDescription = item.script?.short_description || item.script?.description || '';
                     const scriptVersion = item.script?.version || item.version || '1.0.0';
+                    const scriptIconUrl = item.script?.icon_url;
+                    const scriptIcon = item.script?.icon || '⚡';
 
                     return (
-                      <Card key={item.script_id} className="group hover:shadow-lg hover:border-primary/30 transition-all duration-200 border-border/50">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <Library className="h-6 w-6 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-foreground">{scriptTitle}</h3>
-                                {scriptDescription && (
-                                  <p className="text-sm text-muted-foreground line-clamp-2">{scriptDescription}</p>
-                                )}
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                  <span>v{scriptVersion}</span>
-                                  <span>•</span>
-                                  <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
-                                </div>
-                              </div>
+                      <div key={item.script_id} className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-6 hover:bg-[#262626] transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="w-12 h-12 bg-[#2d2d2d] border border-[#404040] rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {scriptIconUrl ? (
+                                <img src={scriptIconUrl} alt={scriptTitle} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-lg">{scriptIcon}</span>
+                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <GradientButton 
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setChangelogScript({ id: item.script_id, name: scriptTitle })}
-                              >
-                                <FileText className="h-3 w-3 mr-1" />
-                                История версий
-                              </GradientButton>
-                              <GradientButton 
-                                variant="outline"
-                                size="sm"
-                              >
-                                <Settings className="h-3 w-3 mr-1" />
-                                {t('header.dashboard.installed.configure')}
-                              </GradientButton>
-                              <GradientButton 
-                                variant="destructive"
-                                size="sm"
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                {t('header.dashboard.installed.uninstall')}
-                              </GradientButton>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-white mb-1">{scriptTitle}</h3>
+                              {scriptDescription && (
+                                <p className="text-sm text-[#a3a3a3] line-clamp-2 mb-2">{scriptDescription}</p>
+                              )}
+                              <div className="flex items-center gap-4 text-xs text-[#808080]">
+                                <span className="font-mono">v{scriptVersion}</span>
+                                <span>•</span>
+                                <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
+                              </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                              onClick={() => setChangelogScript({ id: item.script_id, name: scriptTitle })}
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              История
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                            >
+                              <Settings className="h-3 w-3 mr-1" />
+                              Настройки
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              className="bg-red-600/10 border-red-500/20 text-red-500 hover:bg-red-600/20"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Удалить
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -860,16 +875,17 @@ const DashboardContent = () => {
 
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.profile.personalInfo')}</h2>
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                  <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.profile.personalInfo')}</h2>
+                  <p className="text-sm text-[#808080]">Управление личной информацией</p>
+                </div>
                 <div className="max-w-2xl mx-auto">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        {t('header.dashboard.profile.personalInfo')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <User className="h-5 w-5 text-white" />
+                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.profile.personalInfo')}</h3>
+                    </div>
+                    <div className="space-y-4">
                       <AvatarUpload 
                         currentAvatar={authUser?.avatar_url || user.avatar}
                         onAvatarUpdate={(avatarUrl) => {
@@ -878,68 +894,69 @@ const DashboardContent = () => {
                       />
                       <div className="space-y-3">
                         <div>
-                          <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.name')}</label>
+                          <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">{t('header.dashboard.profile.name')}</label>
                           <Input
                             type="text"
                             value={user.name}
                             onChange={(e) => setUser((prev) => ({ ...prev, name: e.target.value }))}
-                            className="w-full mt-1"
+                            className="w-full bg-[#111111] border-[#2d2d2d] text-white"
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-foreground">{t('header.dashboard.profile.email')}</label>
+                          <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">{t('header.dashboard.profile.email')}</label>
                           <Input
                             type="email"
                             value={user.email}
                             onChange={(e) => setUser((prev) => ({ ...prev, email: e.target.value }))}
-                            className="w-full mt-1"
+                            className="w-full bg-[#111111] border-[#2d2d2d] text-white disabled:opacity-50"
                             disabled
                           />
                         </div>
                       </div>
-                      <GradientButton className="w-full" onClick={handleSaveProfile} disabled={isSaving}>
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-4" onClick={handleSaveProfile} disabled={isSaving}>
                         <UserCheck className="h-4 w-4 mr-2" />
                         {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
-                      </GradientButton>
-                    </CardContent>
-                  </Card>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'settings' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">{t('header.dashboard.tabs.settings')}</h2>
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                  <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.settings')}</h2>
+                  <p className="text-sm text-[#808080]">Настройки безопасности и аккаунта</p>
+                </div>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="border border-border/40 bg-card/80">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-foreground">
-                        <Shield className="h-5 w-5 text-primary" />
-                        {t('header.dashboard.settings.security')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Shield className="h-5 w-5 text-blue-500" />
+                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.security')}</h3>
+                    </div>
+                    <div className="space-y-4">
                       <div className="grid gap-3">
                         <Button
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
                           onClick={() => setIsChangePasswordOpen(true)}
                         >
-                          <Key className="h-4 w-4 mr-2 text-primary" />
+                          <Key className="h-4 w-4 mr-2 text-blue-500" />
                           {t('header.dashboard.settings.changePassword')}
                         </Button>
                         <Button
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
                           onClick={() => setIsChangeEmailOpen(true)}
                         >
-                          <Mail className="h-4 w-4 mr-2 text-primary" />
+                          <Mail className="h-4 w-4 mr-2 text-blue-500" />
                           {t('header.dashboard.settings.changeEmail')}
                         </Button>
-                        <div className="flex items-center justify-between rounded-lg border border-border/40 bg-card/60 px-4 py-3">
+                        <div className="flex items-center justify-between rounded-lg border border-[#2d2d2d] bg-[#1f1f1f] px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium text-foreground">{t('header.dashboard.settings.twoFactorAuth')}</span>
+                            <Shield className="h-4 w-4 text-blue-500" />
+                            <span className="text-sm font-medium text-white">{t('header.dashboard.settings.twoFactorAuth')}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Switch
@@ -983,16 +1000,16 @@ const DashboardContent = () => {
                                   }
                                 }
                               }}
-                              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted"
+                              className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-[#2d2d2d]"
                             />
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-[#808080]">
                               {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
                             </span>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* История входов */}
@@ -1009,31 +1026,29 @@ const DashboardContent = () => {
 
             {activeTab === 'api-docs' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">API Документация</h2>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Использование API</CardTitle>
-                    <CardDescription>
-                      Создайте API ключ в настройках и используйте его для доступа к нашему API
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                  <h2 className="text-2xl font-bold text-white mb-2">API Документация</h2>
+                  <p className="text-sm text-[#808080]">Создайте API ключ в настройках и используйте его для доступа к нашему API</p>
+                </div>
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-white mb-6">Использование API</h3>
+                  <div className="space-y-4">
                     <div>
-                      <h3 className="font-semibold mb-2">Аутентификация</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <h4 className="text-sm font-semibold text-white mb-2">Аутентификация</h4>
+                      <p className="text-sm text-[#808080] mb-2">
                         Используйте API ключ в заголовке запроса:
                       </p>
-                      <pre className="p-3 bg-muted rounded-lg text-sm">
+                      <pre className="p-3 bg-[#111111] border border-[#2d2d2d] rounded-lg text-sm text-[#d4d4d4] font-mono">
                         <code>X-API-Key: ebk_your_api_key_here</code>
                       </pre>
                     </div>
                     
                     <div>
-                      <h3 className="font-semibold mb-2">Примеры</h3>
+                      <h4 className="text-sm font-semibold text-white mb-2">Примеры</h4>
                       <div className="space-y-3">
                         <div>
-                          <p className="text-sm font-medium mb-1">JavaScript/Node.js</p>
-                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+                          <p className="text-sm font-medium text-white mb-1">JavaScript/Node.js</p>
+                          <pre className="p-3 bg-[#111111] border border-[#2d2d2d] rounded-lg text-xs overflow-x-auto text-[#d4d4d4] font-mono">
 {`const response = await fetch('https://api.ebuster.ru/api/v1/scripts', {
   headers: { 'X-API-Key': 'ebk_your_api_key_here' }
 });
@@ -1042,8 +1057,8 @@ const data = await response.json();`}
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-1">Python</p>
-                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+                          <p className="text-sm font-medium text-white mb-1">Python</p>
+                          <pre className="p-3 bg-[#111111] border border-[#2d2d2d] rounded-lg text-xs overflow-x-auto text-[#d4d4d4] font-mono">
 {`import requests
 headers = {'X-API-Key': 'ebk_your_api_key_here'}
 response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers)`}
@@ -1051,41 +1066,39 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-1">cURL</p>
-                          <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">
+                          <p className="text-sm font-medium text-white mb-1">cURL</p>
+                          <pre className="p-3 bg-[#111111] border border-[#2d2d2d] rounded-lg text-xs overflow-x-auto text-[#d4d4d4] font-mono">
 {`curl -H "X-API-Key: ebk_your_api_key_here" https://api.ebuster.ru/api/v1/scripts`}
                           </pre>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
 
             {activeTab === 'general-settings' && (
               <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="h-5 w-5" />
-                        {t('header.dashboard.settings.general')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
+                <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Settings className="h-5 w-5 text-white" />
+                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.general')}</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between rounded-lg bg-[#1f1f1f] px-4 py-3 border border-[#2d2d2d]">
                         <div>
-                          <h4 className="font-medium text-foreground">{t('header.dashboard.settings.autoUpdate')}</h4>
-                          <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.autoUpdateDesc')}</p>
+                          <h4 className="font-medium text-white">{t('header.dashboard.settings.autoUpdate')}</h4>
+                          <p className="text-sm text-[#808080]">{t('header.dashboard.settings.autoUpdateDesc')}</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch defaultChecked className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-[#2d2d2d]" />
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between rounded-lg bg-[#1f1f1f] px-4 py-3 border border-[#2d2d2d]">
                         <div>
-                          <h4 className="font-medium text-foreground">{t('header.dashboard.settings.newScripts')}</h4>
-                          <p className="text-sm text-muted-foreground">{t('header.dashboard.settings.newScriptsDesc')}</p>
+                          <h4 className="font-medium text-white">{t('header.dashboard.settings.newScripts')}</h4>
+                          <p className="text-sm text-[#808080]">{t('header.dashboard.settings.newScriptsDesc')}</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch defaultChecked className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-[#2d2d2d]" />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>

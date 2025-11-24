@@ -169,28 +169,25 @@ const statusConfig: Record<Status, {
   dotClass: string;
 }> = {
   completed: {
-    icon: <CircleCheck className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
+    icon: <CircleCheck className="h-3.5 w-3.5 text-[#808080]" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-green-600/20 border border-green-500/40',
   },
   'in-progress': {
-    icon: <Loader2 className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
+    icon: <Loader2 className="h-3.5 w-3.5 text-[#808080]" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-blue-600/20 border border-blue-500/40',
   },
   planned: {
-    icon: <Flag className="h-3.5 w-3.5 text-muted-foreground" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border border-border/60',
+    icon: <Flag className="h-3.5 w-3.5 text-[#808080]" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
   },
 };
-
-const statusContainerBaseClasses =
-  'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-card/60 border border-dashed content-border-50 text-muted-foreground backdrop-blur-sm transition-all';
 
 const Roadmap = () => {
   const { language } = useLanguage();
   const content = language === 'ru' ? roadmapContent.ru : roadmapContent.eng;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#111111]">
       <SEO
         title={content.hero.title}
         description={content.hero.description}
@@ -201,21 +198,21 @@ const Roadmap = () => {
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section className="text-center space-y-6">
-          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/60 border border-dashed content-border-50 backdrop-blur-sm">
-            <Milestone className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">{content.hero.badge}</span>
+          <div className="mx-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d]">
+            <Milestone className="h-5 w-5 text-[#808080]" />
+            <span className="text-sm font-semibold text-[#808080]">{content.hero.badge}</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground">
+          <h1 className="text-4xl md:text-6xl font-bold text-white">
             {content.hero.title.split(' ').map((word, index) => (
-              <span key={index} className={index % 2 === 1 ? 'gradient-text' : undefined}>
+              <span key={index} className={index % 2 === 1 ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent' : undefined}>
                 {word}{' '}
               </span>
             ))}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-[#808080] max-w-3xl mx-auto">
             {content.hero.subtitle}
           </p>
-          <p className="text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-[#808080] max-w-3xl mx-auto">
             {content.hero.description}
           </p>
         </section>
@@ -223,83 +220,77 @@ const Roadmap = () => {
         <section className="space-y-8">
           <div className="space-y-6">
             {content.timeline.map((entry) => (
-              <Card key={entry.period} className="bg-card/40 backdrop-blur border border-dashed border-border/60">
-                <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div key={entry.period} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6 text-primary" />
-                    <CardTitle className="text-2xl">{entry.period}</CardTitle>
+                    <Calendar className="h-6 w-6 text-blue-500" />
+                    <h3 className="text-2xl font-semibold text-white">{entry.period}</h3>
                   </div>
-                  <div className={statusContainerBaseClasses}>
+                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-[#1f1f1f] border border-[#2d2d2d] text-[#808080]">
                     <span className={statusConfig[entry.status as Status].dotClass} aria-hidden="true" />
                     {statusConfig[entry.status as Status].icon}
-                    <span className="text-sm text-muted-foreground">{content.statusLabels[entry.status as Status]}</span>
+                    <span className="text-sm">{content.statusLabels[entry.status as Status]}</span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {entry.items.map((item) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <Sparkles className="mt-1 h-4 w-4 text-primary" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                </div>
+                <ul className="space-y-2 text-[#808080]">
+                  {entry.items.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <Sparkles className="mt-1 h-4 w-4 text-blue-500" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </section>
 
-        <Separator className="bg-border/50" />
+        <div className="h-px bg-[#2d2d2d]" />
 
         <section className="space-y-8">
-          <h2 className="text-3xl font-semibold text-foreground text-center">
+          <h2 className="text-3xl font-semibold text-white text-center">
             {content.updates.title}
           </h2>
           <div className="space-y-6">
             {content.updates.list.map((update) => (
-              <Card key={update.date} className="bg-card/40 border border-dashed border-border/60">
-                <CardHeader>
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div className="flex items-center gap-3 text-primary">
-                      <Calendar className="h-5 w-5" />
-                      <span className="font-semibold">{update.date}</span>
-                    </div>
-                    <span className="text-muted-foreground">{update.summary}</span>
+              <div key={update.date} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-3 text-blue-500">
+                    <Calendar className="h-5 w-5" />
+                    <span className="font-semibold">{update.date}</span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {update.points.map((point) => (
-                      <li key={point} className="flex items-start gap-3">
-                        <CircleCheck className="mt-1 h-4 w-4 text-primary" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                  <span className="text-[#808080]">{update.summary}</span>
+                </div>
+                <ul className="space-y-2 text-[#808080]">
+                  {update.points.map((point) => (
+                    <li key={point} className="flex items-start gap-3">
+                      <CircleCheck className="mt-1 h-4 w-4 text-blue-500" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </section>
 
-        <Separator className="bg-border/50" />
+        <div className="h-px bg-[#2d2d2d]" />
 
         <section className="space-y-6 text-center">
-          <h2 className="text-3xl font-semibold text-foreground">
+          <h2 className="text-3xl font-semibold text-white">
             {content.influence.title}
           </h2>
-          <p className="text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-[#808080] max-w-3xl mx-auto">
             {content.influence.description}
           </p>
           <div className="grid gap-4 md:grid-cols-3 text-left">
             {content.influence.actions.map((action) => (
-              <Card key={action} className="bg-card/40 border border-dashed border-border/60 h-full">
-                <CardContent className="p-6 flex items-start gap-3">
-                  <Sparkles className="mt-1 h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">{action}</span>
-                </CardContent>
-              </Card>
+              <div key={action} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6 h-full">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="mt-1 h-5 w-5 text-blue-500" />
+                  <span className="text-[#808080]">{action}</span>
+                </div>
+              </div>
             ))}
           </div>
         </section>

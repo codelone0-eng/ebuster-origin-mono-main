@@ -6,44 +6,40 @@ import { FileText, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 const Terms = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#111111] flex flex-col">
       <Header />
       
       <main className="flex-1">
         <div className="container mx-auto max-w-4xl px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-            Условия <span className="gradient-text">использования</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            Условия <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">использования</span>
           </h1>
-          <p className="text-muted-foreground">Последнее обновление: {new Date().toLocaleDateString('ru-RU')}</p>
+          <p className="text-[#808080]">Последнее обновление: {new Date().toLocaleDateString('ru-RU')}</p>
         </div>
 
         <div className="space-y-8">
-          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <FileText className="h-6 w-6 text-primary" />
-                <CardTitle>Общие положения</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Общие положения</h3>
+            </div>
+            <div className="space-y-4 text-[#808080]">
               <p>
                 Используя наш сервис, вы соглашаетесь с настоящими условиями использования. Пожалуйста, внимательно прочитайте их перед началом работы с платформой.
               </p>
               <p>
                 Мы оставляем за собой право изменять эти условия в любое время. Продолжая использовать сервис после внесения изменений, вы соглашаетесь с новыми условиями.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-6 w-6 text-primary" />
-                <CardTitle>Права пользователя</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Права пользователя</h3>
+            </div>
+            <div className="space-y-4 text-[#808080]">
               <p>
                 При использовании нашего сервиса вы имеете право:
               </p>
@@ -53,17 +49,15 @@ const Terms = () => {
                 <li>Экспортировать ваши данные</li>
                 <li>Удалить ваш аккаунт в любое время</li>
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-6 w-6 text-primary" />
-                <CardTitle>Обязанности пользователя</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Обязанности пользователя</h3>
+            </div>
+            <div className="space-y-4 text-[#808080]">
               <p>
                 Используя наш сервис, вы обязуетесь:
               </p>
@@ -74,17 +68,15 @@ const Terms = () => {
                 <li>Не нарушать права других пользователей</li>
                 <li>Обеспечивать безопасность вашего аккаунта</li>
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <XCircle className="h-6 w-6 text-primary" />
-                <CardTitle>Ограничения</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <XCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Ограничения</h3>
+            </div>
+            <div className="space-y-4 text-[#808080]">
               <p>
                 Запрещается:
               </p>
@@ -95,17 +87,15 @@ const Terms = () => {
                 <li>Использование автоматизированных средств для сбора данных</li>
                 <li>Нарушение работы сервиса</li>
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/30 backdrop-blur-sm border border-dashed content-border-30">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <FileText className="h-6 w-6 text-primary" />
-                <CardTitle>Ответственность</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Ответственность</h3>
+            </div>
+            <div className="space-y-4 text-[#808080]">
               <p>
                 Мы предоставляем сервис "как есть" и не несем ответственности за:
               </p>
@@ -115,10 +105,10 @@ const Terms = () => {
                 <li>Действия третьих лиц</li>
               </ul>
               <p className="mt-4">
-                Для получения дополнительной информации свяжитесь с нами: <a href="mailto:techsupport@ebuster.ru" className="text-primary hover:underline">techsupport@ebuster.ru</a>
+                Для получения дополнительной информации свяжитесь с нами: <a href="mailto:techsupport@ebuster.ru" className="text-blue-500 hover:underline">techsupport@ebuster.ru</a>
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
         </div>
       </main>

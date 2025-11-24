@@ -268,7 +268,9 @@ export class ScriptsService {
       owner_id: payload.owner?.id,
       owner_email: payload.owner?.email,
       owner_name: payload.owner?.name,
-      changelog: payload.changelog || null
+      changelog: payload.changelog || null,
+      icon: (payload.metadata as any)?.icon || '⚡',
+      icon_url: (payload.metadata as any)?.icon_url || null
     };
 
     const { data, error } = await this.client
@@ -330,6 +332,12 @@ export class ScriptsService {
     if (payload.last_review_comment !== undefined) dbUpdate.last_review_comment = payload.last_review_comment;
     if (payload.last_reviewed_by !== undefined) dbUpdate.last_reviewed_by = payload.last_reviewed_by;
     if (payload.last_reviewed_at !== undefined) dbUpdate.last_reviewed_at = payload.last_reviewed_at;
+    // Поддержка icon и icon_url из metadata или напрямую
+    if (payload.metadata && typeof payload.metadata === 'object') {
+      const meta = payload.metadata as any;
+      if (meta.icon !== undefined) dbUpdate.icon = meta.icon;
+      if (meta.icon_url !== undefined) dbUpdate.icon_url = meta.icon_url;
+    }
 
     if (Object.keys(dbUpdate).length === 0) {
       return this.getById(id);

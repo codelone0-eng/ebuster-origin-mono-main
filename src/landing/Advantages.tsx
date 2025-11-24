@@ -55,31 +55,31 @@ const Advantages = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#111111]">
       <Header />
       
       <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border content-border-50 mb-8">
-            <Award className="h-5 w-5 text-primary" />
-            <span className="text-sm font-semibold text-muted-foreground">{t('advantages.hero.badge')}</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
+            <Award className="h-5 w-5 text-blue-500" />
+            <span className="text-sm font-semibold text-[#808080]">{t('advantages.hero.badge')}</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-            {t('advantages.hero.title')} <span className="gradient-text">{t('advantages.hero.subtitle')}</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            {t('advantages.hero.title')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('advantages.hero.subtitle')}</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
             {t('advantages.hero.description')}
           </p>
 
           <div className="flex items-center justify-center gap-4 mb-12">
-            <Button size="lg" className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
               <Rocket className="h-4 w-4 mr-2" />
               {t('advantages.cta.getStarted')}
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8">
+            <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
               <Terminal className="h-4 w-4 mr-2" />
               {t('advantages.cta.viewApi')}
             </Button>
@@ -89,37 +89,33 @@ const Advantages = () => {
 
         {/* Core Advantages */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+          <h2 className="text-3xl font-bold text-center mb-12 text-white">
             {t('advantages.features.title')}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             {coreAdvantages.map((advantage, index) => (
-              <Card key={index} className="bg-card/30 backdrop-blur-sm border content-border-30 hover:bg-card/50 transition-all duration-300 group">
-                <CardHeader>
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <advantage.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl">{advantage.title}</CardTitle>
-                      <CardDescription className="text-base">
-                        {advantage.description}
-                      </CardDescription>
-                    </div>
+              <div key={index} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <advantage.icon className="h-6 w-6 text-blue-500" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {advantage.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">{advantage.title}</h3>
+                    <p className="text-[#808080] text-base">
+                      {advantage.description}
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {advantage.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-[#808080]">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </div>
@@ -128,27 +124,23 @@ const Advantages = () => {
 
         {/* CTA Section */}
         <div className="text-center">
-          <Card className="bg-gradient-to-r from-primary/5 via-transparent to-accent/5 border content-border-30 p-12">
-            <CardHeader>
-              <CardTitle className="text-3xl mb-4">{t('advantages.cta.title')}</CardTitle>
-              <CardDescription className="text-lg">
-                {t('advantages.cta.description')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center gap-4">
-                <Button size="lg" className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Rocket className="h-4 w-4 mr-2" />
-                  {t('advantages.cta.getStarted')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button size="lg" variant="outline" className="h-12 px-8">
-                  <Users className="h-4 w-4 mr-2" />
-                  {t('advantages.cta.joinCommunity')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-gradient-to-r from-blue-600/10 via-transparent to-purple-600/10 border border-[#2d2d2d] rounded-2xl p-12">
+            <h3 className="text-3xl font-bold mb-4 text-white">{t('advantages.cta.title')}</h3>
+            <p className="text-[#808080] text-lg mb-6">
+              {t('advantages.cta.description')}
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
+                <Rocket className="h-4 w-4 mr-2" />
+                {t('advantages.cta.getStarted')}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
+                <Users className="h-4 w-4 mr-2" />
+                {t('advantages.cta.joinCommunity')}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
       

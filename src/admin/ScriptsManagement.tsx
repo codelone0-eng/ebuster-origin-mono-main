@@ -155,7 +155,7 @@ export default function ScriptsManagement() {
             </div>
           ) : scripts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-neutral-500 px-4 text-center">
-              <Box className="h-8 w-8 mb-2 opacity-20" />
+              <Code className="h-8 w-8 mb-2 opacity-20" />
               <p className="text-sm">No scripts found.</p>
               <p className="text-xs mt-1">Create one to get started.</p>
             </div>
@@ -301,7 +301,26 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
   };
 
   const handleSave = () => {
-    updateMutation.mutate(draft);
+    // Преобразуем draft в формат для API
+    const updatePayload: any = {
+      title: draft.name,
+      short_description: draft.short_description,
+      full_description: draft.full_description,
+      code: draft.code,
+      category: draft.category,
+      tags: draft.tags,
+      status: draft.status,
+      version: draft.version,
+      pricing_plan: draft.pricing_plan,
+      visibility: draft.visibility,
+      allowed_roles: draft.allowed_roles,
+      metadata: {
+        ...(draft.metadata || {}),
+        icon: draft.icon || '⚡',
+        icon_url: draft.icon_url || null
+      }
+    };
+    updateMutation.mutate(updatePayload);
   };
 
   return (
@@ -404,8 +423,8 @@ function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) 
 
   return (
     <div className="max-w-2xl space-y-6 animate-in fade-in duration-300">
-      <div className="flex items-start gap-6">
-        <div className="space-y-2 flex-1">
+      <div className="space-y-4">
+        <div className="space-y-2">
           <Label>Script Name</Label>
           <Input 
             value={draft.name} 
@@ -414,22 +433,35 @@ function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) 
           />
         </div>
         
-        <div className="space-y-2 w-32">
-          <Label>Avatar URL</Label>
-          <div className="flex gap-2">
-             <div className="w-10 h-10 rounded bg-[#2d2d2d] flex items-center justify-center text-lg overflow-hidden border border-[#333]">
-                {draft.icon_url ? (
-                  <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
-                ) : (
-                  <ImageIcon className="h-4 w-4 text-neutral-500" />
-                )}
-             </div>
-             <Input 
-                value={draft.icon_url || ''} 
-                onChange={e => onChange({ icon_url: e.target.value })}
-                className="bg-[#111111] border-[#2d2d2d] text-white text-xs"
-                placeholder="https://..."
-             />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Icon (Emoji)</Label>
+            <Input 
+              value={draft.icon || '⚡'} 
+              onChange={e => onChange({ icon: e.target.value })}
+              className="bg-[#111111] border-[#2d2d2d] text-white text-center text-lg"
+              placeholder="⚡"
+              maxLength={4}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Avatar URL</Label>
+            <div className="flex gap-2">
+               <div className="w-10 h-10 rounded bg-[#2d2d2d] flex items-center justify-center text-lg overflow-hidden border border-[#333] flex-shrink-0">
+                  {draft.icon_url ? (
+                    <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs">{draft.icon || '⚡'}</span>
+                  )}
+               </div>
+               <Input 
+                  value={draft.icon_url || ''} 
+                  onChange={e => onChange({ icon_url: e.target.value })}
+                  className="bg-[#111111] border-[#2d2d2d] text-white text-xs flex-1"
+                  placeholder="https://... (опционально)"
+               />
+            </div>
+            <p className="text-xs text-neutral-500">Если указан URL, он будет использоваться вместо эмодзи</p>
           </div>
         </div>
       </div>
@@ -647,7 +679,10 @@ function CreateScriptDialog({ open, onOpenChange, onSubmit, isLoading }: any) {
       status: 'draft',
       pricing_plan: 'free',
       visibility: 'public',
-      icon: '⚡' // Default icon
+      category: 'general',
+      metadata: {
+        icon: '⚡'
+      }
     });
     setName('');
   };

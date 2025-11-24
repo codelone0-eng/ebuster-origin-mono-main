@@ -149,11 +149,11 @@ export const Header = () => {
   }, [location, navigate]);
 
   return (
-    <header className="relative z-header bg-gradient-to-r from-card/90 via-card/80 to-card/90 backdrop-blur-xl border-b border-border/30 px-6 py-4 rounded-t-3xl group">
+    <header className="relative z-header bg-[#1a1a1a] backdrop-blur-xl border-b border-[#2d2d2d] px-6 py-4 group">
       {/* Animated background effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
       
       <div className="relative max-w-7xl mx-auto flex h-16 items-center justify-between gap-12">
 
@@ -167,7 +167,7 @@ export const Header = () => {
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="text-muted-foreground hover:text-foreground bg-transparent px-0 py-0 font-medium text-sm hover:scale-105 transition-transform duration-200 h-auto"
+                        className="text-[#808080] hover:text-white bg-transparent px-0 py-0 font-medium text-sm hover:scale-105 transition-transform duration-200 h-auto"
                       >
                         {link.label}
                         <ChevronDown className="ml-1 h-3 w-3" />
@@ -175,20 +175,20 @@ export const Header = () => {
                     </PopoverTrigger>
                     <PopoverContent 
                       align="start" 
-                      className="z-dropdown w-72 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl"
+                      className="z-dropdown w-72 p-2 bg-[#1a1a1a] backdrop-blur-xl border border-[#2d2d2d] rounded-2xl shadow-2xl"
                     >
                       <div className="space-y-1">
                         {link.submenu.items.map((item, itemIndex) => (
                           <a 
                             key={itemIndex}
                             href={item.href}
-                            className="block p-3 rounded-xl hover:bg-accent/20 transition-colors duration-200 group"
+                            className="block p-3 rounded-xl hover:bg-[#2d2d2d] transition-colors duration-200 group"
                           >
                             <div className="space-y-1">
-                              <div className="font-medium group-hover:text-primary transition-colors">
+                              <div className="font-medium text-white group-hover:text-blue-500 transition-colors">
                                 {item.label}
                               </div>
-                              <p className="text-muted-foreground line-clamp-2 text-xs">
+                              <p className="text-[#808080] line-clamp-2 text-xs">
                                 {item.description}
                               </p>
                             </div>
@@ -200,10 +200,10 @@ export const Header = () => {
                 ) : (
                   <a
                     href={link.href.startsWith('/') ? `https://ebuster.ru${link.href}` : link.href}
-                    className="text-muted-foreground hover:text-foreground px-0 py-0 font-medium text-sm hover:scale-105 transition-all duration-200 relative group"
+                    className="text-[#808080] hover:text-white px-0 py-0 font-medium text-sm hover:scale-105 transition-all duration-200 relative group"
                   >
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300" />
                   </a>
                 )}
               </div>
@@ -216,12 +216,12 @@ export const Header = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground px-3 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+            className="text-[#808080] hover:text-white px-3 py-2 h-auto rounded-xl hover:bg-[#2d2d2d] transition-all duration-200 group"
             onClick={() => setIsSearchOpen(true)}
           >
             <Search className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
             <span className="text-sm font-medium">Поиск</span>
-            <kbd className="ml-2 px-1.5 py-0.5 text-[10px] bg-muted border border-border rounded">⌘K</kbd>
+            <kbd className="ml-2 px-1.5 py-0.5 text-[10px] bg-[#2d2d2d] border border-[#404040] rounded text-[#808080]">⌘K</kbd>
           </Button>
           <ThemeToggle />
           <CursorSelector 
@@ -231,7 +231,7 @@ export const Header = () => {
           <Button 
             variant="ghost" 
             size="sm"
-            className="text-muted-foreground hover:text-foreground px-3 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200"
+            className="text-[#808080] hover:text-white px-3 py-2 h-auto rounded-xl hover:bg-[#2d2d2d] transition-all duration-200"
             onClick={toggleLanguage}
           >
             <span className="text-sm font-medium">{t('header.buttons.language')}</span>
@@ -242,7 +242,7 @@ export const Header = () => {
         <div className="flex items-center gap-4">
           {loading ? (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-[#2d2d2d] animate-pulse" />
             </div>
           ) : user ? (
             <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export const Header = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+                    className="text-[#808080] hover:text-white px-4 py-2 h-auto rounded-xl hover:bg-[#2d2d2d] transition-all duration-200 group"
                   >
                     <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-sm font-medium">
@@ -260,15 +260,15 @@ export const Header = () => {
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="z-dropdown w-64 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
+                <PopoverContent align="end" className="z-dropdown w-64 p-2 bg-[#1a1a1a] backdrop-blur-xl border border-[#2d2d2d] rounded-2xl shadow-2xl">
                   <div className="space-y-2">
-                    <div className="px-3 py-2 text-sm font-medium text-foreground border-b border-border/30">
+                    <div className="px-3 py-2 text-sm font-medium text-white border-b border-[#2d2d2d]">
                       {user?.full_name || user?.email}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start text-muted-foreground hover:text-foreground"
+                      className="w-full justify-start text-[#808080] hover:text-white"
                       onClick={() => {
                         const isProduction = window.location.hostname !== 'localhost';
                         if (isProduction) {
@@ -285,7 +285,7 @@ export const Header = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
+                        className="w-full justify-start text-[#808080] hover:text-white"
                         onClick={() => window.location.href = 'https://admin.ebuster.ru'}
                       >
                         <Shield className="h-4 w-4 mr-2" />
@@ -295,7 +295,7 @@ export const Header = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start text-destructive hover:text-destructive"
+                      className="w-full justify-start text-red-500 hover:text-red-600"
                       onClick={handleSignOut}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
@@ -310,7 +310,7 @@ export const Header = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-muted-foreground hover:text-foreground px-4 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200 group"
+                className="text-[#808080] hover:text-white px-4 py-2 h-auto rounded-xl hover:bg-[#2d2d2d] transition-all duration-200 group"
                 onClick={handleOpenRegister}
               >
                 <User className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
@@ -320,7 +320,7 @@ export const Header = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 text-primary hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 rounded-xl px-4 py-2 h-auto group"
+                className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border-blue-500/30 text-blue-500 hover:from-blue-600/20 hover:to-purple-600/20 hover:border-blue-500/50 rounded-xl px-4 py-2 h-auto group"
                 onClick={handleOpenLogin}
               >
                 <LogIn className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
@@ -339,7 +339,7 @@ export const Header = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-muted-foreground hover:text-foreground px-3 py-2 h-auto rounded-xl hover:bg-accent/20 transition-all duration-200"
+              className="text-[#808080] hover:text-white px-3 py-2 h-auto rounded-xl hover:bg-[#2d2d2d] transition-all duration-200"
               onClick={toggleLanguage}
             >
               <span className="text-sm font-medium">{t('header.buttons.language')}</span>
@@ -351,7 +351,7 @@ export const Header = () => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  className="group size-10 rounded-xl hover:bg-accent/20 transition-all duration-200"
+                  className="group size-10 rounded-xl hover:bg-[#2d2d2d] transition-all duration-200 text-white"
                   variant="ghost"
                   size="icon"
                 >
@@ -382,13 +382,13 @@ export const Header = () => {
                   </svg>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="z-dropdown w-72 p-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
+              <PopoverContent align="end" className="z-dropdown w-72 p-2 bg-[#1a1a1a] backdrop-blur-xl border border-[#2d2d2d] rounded-2xl shadow-2xl">
                 <div className="space-y-1">
                   {navigationLinks.map((link, index) => (
                     <div key={index}>
                       {link.submenu?.items ? (
                         <>
-                          <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
+                          <div className="text-[#808080] px-3 py-2 text-xs font-medium">
                             {link.label}
                           </div>
                           <div className="space-y-1">
@@ -396,7 +396,7 @@ export const Header = () => {
                               <Link 
                                 key={itemIndex}
                                 to={item.href} 
-                                className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
+                                className="block py-2 px-3 rounded-xl hover:bg-[#2d2d2d] transition-colors duration-200 text-white"
                               >
                                 {item.label}
                               </Link>
@@ -406,7 +406,7 @@ export const Header = () => {
                       ) : (
                         <Link 
                           to={link.href} 
-                          className="block py-2 px-3 rounded-xl hover:bg-accent/20 transition-colors duration-200"
+                          className="block py-2 px-3 rounded-xl hover:bg-[#2d2d2d] transition-colors duration-200 text-white"
                         >
                           {link.label}
                         </Link>
@@ -415,7 +415,7 @@ export const Header = () => {
                         <div
                           role="separator"
                           aria-orientation="horizontal"
-                          className="bg-border/50 -mx-1 my-1 h-px w-full"
+                          className="bg-[#2d2d2d] -mx-1 my-1 h-px w-full"
                         />
                       )}
                     </div>

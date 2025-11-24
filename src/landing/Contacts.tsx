@@ -57,7 +57,7 @@ const Contacts = () => {
   const faqItems = t('contacts.faq.items');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#111111] flex flex-col">
       <SEO
         title="Контакты EBUSTER"
         description="Свяжитесь с командой EBUSTER: email поддержка, Discord сообщество и система тикетов."
@@ -69,16 +69,16 @@ const Contacts = () => {
         <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border content-border-50 mb-8">
-            <Headphones className="h-5 w-5 text-primary" />
-            <span className="text-sm font-semibold text-muted-foreground">{t('contacts.hero.badge')}</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
+            <Headphones className="h-5 w-5 text-blue-500" />
+            <span className="text-sm font-semibold text-[#808080]">{t('contacts.hero.badge')}</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-            {t('contacts.hero.title')} <span className="gradient-text">{t('contacts.hero.subtitle')}</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            {t('contacts.hero.title')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('contacts.hero.subtitle')}</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
             {t('contacts.hero.description')}
           </p>
         </div>
@@ -97,25 +97,25 @@ const Contacts = () => {
             const IconComponent = getIcon(method.icon);
             
             return (
-              <Card key={index} className="bg-card/30 backdrop-blur-sm border content-border-30 hover:bg-card/50 transition-all duration-300 group">
-                <CardHeader className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-4 group-hover:scale-110 transition-transform duration-200">
-                    <IconComponent className="h-6 w-6 text-primary" />
+              <div key={index} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300 group">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600/10 mb-4 group-hover:scale-110 transition-transform duration-200">
+                    <IconComponent className="h-6 w-6 text-blue-500" />
                   </div>
-                  <CardTitle className="text-lg">{method.title}</CardTitle>
-                  <CardDescription className="text-sm">
+                  <h3 className="text-lg font-semibold text-white mb-2">{method.title}</h3>
+                  <p className="text-sm text-[#808080] mb-4">
                     {method.description}
-                  </CardDescription>
-                </CardHeader>
-              <CardContent className="text-center space-y-3">
-                <div className="font-mono text-sm bg-muted/50 px-3 py-2 rounded-lg">
-                  {method.contact}
+                  </p>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {method.responseTime}
+                <div className="text-center space-y-3">
+                  <div className="font-mono text-sm bg-[#111111] border border-[#2d2d2d] px-3 py-2 rounded-lg text-white">
+                    {method.contact}
+                  </div>
+                  <div className="text-xs text-[#808080]">
+                    {method.responseTime}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
             );
           })}
         </div>

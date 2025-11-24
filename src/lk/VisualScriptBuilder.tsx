@@ -237,25 +237,23 @@ export const VisualScriptBuilder: React.FC = () => {
   // Проверка доступа
   if (!permissions.canAccessVisualBuilder()) {
     return (
-      <Card className="max-w-2xl mx-auto mt-12">
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Lock className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle>Визуальный конструктор недоступен</CardTitle>
-              <CardDescription>Требуется подписка Pro или выше</CardDescription>
-            </div>
+      <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-8 max-w-2xl mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-[#2d2d2d] flex items-center justify-center">
+            <Lock className="h-6 w-6 text-[#808080]" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
+          <div>
+            <h3 className="text-lg font-semibold text-white">Визуальный конструктор недоступен</h3>
+            <p className="text-sm text-[#808080]">Требуется подписка Pro или выше</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <p className="text-[#a3a3a3]">
             Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
           </p>
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <h4 className="font-semibold">Что вы получите:</h4>
-            <ul className="space-y-1 text-sm text-muted-foreground">
+          <div className="bg-[#2d2d2d] rounded-lg p-4 space-y-2">
+            <h4 className="font-semibold text-white">Что вы получите:</h4>
+            <ul className="space-y-1 text-sm text-[#a3a3a3]">
               <li>✓ Создание скриптов без кода</li>
               <li>✓ Drag & Drop интерфейс</li>
               <li>✓ Автоматическая генерация кода</li>
@@ -263,11 +261,14 @@ export const VisualScriptBuilder: React.FC = () => {
               <li>✓ Экспорт готового кода</li>
             </ul>
           </div>
-          <Button className="w-full" onClick={() => window.location.href = '/pricing'}>
+          <Button 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+            onClick={() => window.location.href = '/pricing'}
+          >
             Посмотреть тарифы
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -436,69 +437,81 @@ export const VisualScriptBuilder: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Заголовок и действия */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="space-y-2 flex-1">
-              <Input
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="text-2xl font-bold border-none p-0 h-auto focus-visible:ring-0"
-                placeholder="Название проекта"
-              />
-              <Input
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-                className="text-sm text-muted-foreground border-none p-0 h-auto focus-visible:ring-0"
-                placeholder="Описание (необязательно)"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleSaveProject}>
-                <Save className="h-4 w-4 mr-2" />
-                Сохранить локально
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleGenerateCode}>
-                <Code className="h-4 w-4 mr-2" />
-                Генерировать
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={handleSaveToExtension} 
-                className="bg-gradient-to-r from-primary to-accent"
-                disabled={!permissions.canSaveToExtension()}
-              >
-                <Cloud className="h-4 w-4 mr-2" />
-                В расширение
-                {!permissions.canSaveToExtension() && <Lock className="h-3 w-3 ml-2" />}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportCode}>
-                <Download className="h-4 w-4 mr-2" />
-                Экспорт .js
-              </Button>
-            </div>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="space-y-2 flex-1 min-w-0">
+            <Input
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              className="text-2xl font-bold bg-transparent border-none p-0 h-auto focus-visible:ring-0 text-white placeholder:text-[#808080]"
+              placeholder="Название проекта"
+            />
+            <Input
+              value={projectDescription}
+              onChange={(e) => setProjectDescription(e.target.value)}
+              className="text-sm bg-transparent border-none p-0 h-auto focus-visible:ring-0 text-[#808080] placeholder:text-[#606060]"
+              placeholder="Описание (необязательно)"
+            />
           </div>
-        </CardHeader>
-      </Card>
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSaveProject}
+              className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Сохранить
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleGenerateCode}
+              className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+            >
+              <Code className="h-4 w-4 mr-2" />
+              Генерировать
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={handleSaveToExtension} 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={!permissions.canSaveToExtension()}
+            >
+              <Cloud className="h-4 w-4 mr-2" />
+              В расширение
+              {!permissions.canSaveToExtension() && <Lock className="h-3 w-3 ml-2" />}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportCode}
+              className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Экспорт
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-[300px,1fr,350px] gap-6">
         {/* Панель блоков */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Библиотека блоков</CardTitle>
-            <CardDescription>Нажмите на блок, чтобы добавить</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ScrollArea className="h-[600px] pr-4">
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white mb-1">Библиотека блоков</h3>
+            <p className="text-xs text-[#808080]">Нажмите на блок, чтобы добавить</p>
+          </div>
+          <ScrollArea className="h-[600px] pr-4">
               {/* Категория: Действия */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Действия</h3>
+                <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wider mb-3">Действия</h3>
                 <div className="space-y-2">
                   {BLOCK_TYPES.filter(b => ['click', 'input', 'navigate'].includes(b.type)).map((blockType) => (
                     <Button
                       key={blockType.type}
                       variant="outline"
-                      className="w-full justify-start hover:bg-accent/50 transition-all"
+                      className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-all"
                       onClick={() => addBlock(blockType.type)}
                     >
                       <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
@@ -512,7 +525,7 @@ export const VisualScriptBuilder: React.FC = () => {
 
               {/* Категория: Ожидание и проверки */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Ожидание</h3>
+                <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wider mb-3">Ожидание</h3>
                 <div className="space-y-2">
                   {BLOCK_TYPES.filter(b => ['wait', 'condition', 'url-match'].includes(b.type)).map((blockType) => {
                     const isAdvanced = ['condition', 'url-match'].includes(blockType.type);
@@ -522,7 +535,7 @@ export const VisualScriptBuilder: React.FC = () => {
                       <Button
                         key={blockType.type}
                         variant="outline"
-                        className="w-full justify-start hover:bg-accent/50 transition-all relative"
+                        className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-all relative disabled:opacity-50"
                         onClick={() => hasAccess && addBlock(blockType.type)}
                         disabled={!hasAccess}
                       >
@@ -531,7 +544,7 @@ export const VisualScriptBuilder: React.FC = () => {
                         </div>
                         <span className="text-sm truncate">{blockType.label}</span>
                         {!hasAccess && (
-                          <Badge variant="secondary" className="ml-auto">
+                          <Badge className="ml-auto bg-purple-500/10 text-purple-500 border-purple-500/20">
                             <Lock className="h-3 w-3 mr-1" />
                             Premium
                           </Badge>
@@ -544,7 +557,7 @@ export const VisualScriptBuilder: React.FC = () => {
 
               {/* Категория: Данные и циклы */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Данные</h3>
+                <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wider mb-3">Данные</h3>
                 <div className="space-y-2">
                   {BLOCK_TYPES.filter(b => ['extract', 'loop', 'code'].includes(b.type)).map((blockType) => {
                     const isAdvanced = ['loop', 'code'].includes(blockType.type);
@@ -554,7 +567,7 @@ export const VisualScriptBuilder: React.FC = () => {
                       <Button
                         key={blockType.type}
                         variant="outline"
-                        className="w-full justify-start hover:bg-accent/50 transition-all"
+                        className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-all disabled:opacity-50"
                         onClick={() => hasAccess && addBlock(blockType.type)}
                         disabled={!hasAccess}
                       >
@@ -563,7 +576,7 @@ export const VisualScriptBuilder: React.FC = () => {
                         </div>
                         <span className="text-sm truncate">{blockType.label}</span>
                         {!hasAccess && (
-                          <Badge variant="secondary" className="ml-auto">
+                          <Badge className="ml-auto bg-purple-500/10 text-purple-500 border-purple-500/20">
                             <Lock className="h-3 w-3 mr-1" />
                             Premium
                           </Badge>
@@ -575,111 +588,108 @@ export const VisualScriptBuilder: React.FC = () => {
               </div>
 
               {/* Подсказка */}
-              <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <p className="text-xs text-muted-foreground">
-                  <strong className="text-foreground">Совет:</strong> Начните с блока "URL фильтр", чтобы указать, на каких страницах будет работать скрипт.
+              <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <p className="text-xs text-[#a3a3a3]">
+                  <strong className="text-white">Совет:</strong> Начните с блока "URL фильтр", чтобы указать, на каких страницах будет работать скрипт.
                 </p>
               </div>
             </ScrollArea>
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Рабочая область */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Рабочая область</CardTitle>
-            <CardDescription>{blocks.length} блоков в сценарии</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[600px]">
-              {blocks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                  <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Пустой сценарий</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Добавьте блоки из левой панели, чтобы начать создание скрипта
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {blocks.map((block, index) => {
-                    const blockDef = BLOCK_TYPES.find(b => b.type === block.type);
-                    if (!blockDef) return null;
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white mb-1">Рабочая область</h3>
+            <p className="text-xs text-[#808080]">{blocks.length} блоков в сценарии</p>
+          </div>
+          <ScrollArea className="h-[600px]">
+            {blocks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                <AlertCircle className="h-12 w-12 text-[#808080] mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-white">Пустой сценарий</h3>
+                <p className="text-sm text-[#808080]">
+                  Добавьте блоки из левой панели, чтобы начать создание скрипта
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {blocks.map((block, index) => {
+                  const blockDef = BLOCK_TYPES.find(b => b.type === block.type);
+                  if (!blockDef) return null;
 
-                    return (
-                      <Card
-                        key={block.id}
-                        className={`cursor-pointer transition-all ${
-                          selectedBlock?.id === block.id
-                            ? 'ring-2 ring-primary'
-                            : 'hover:shadow-md'
-                        }`}
-                        onClick={() => setSelectedBlock(block)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="secondary" className="shrink-0">
-                              {index + 1}
-                            </Badge>
-                            <div className={`w-10 h-10 rounded flex items-center justify-center ${blockDef.color} text-white shrink-0`}>
-                              {blockDef.icon}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm">{blockDef.label}</h4>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {block.params.description || block.params.selector || block.params.url || 'Настройте параметры'}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteBlock(block.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                  return (
+                    <div
+                      key={block.id}
+                      className={`cursor-pointer transition-all bg-[#1f1f1f] border rounded-lg p-4 ${
+                        selectedBlock?.id === block.id
+                          ? 'ring-2 ring-blue-500 border-blue-500/50'
+                          : 'border-[#2d2d2d] hover:border-[#404040]'
+                      }`}
+                      onClick={() => setSelectedBlock(block)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Badge className="shrink-0 bg-[#2d2d2d] text-[#a3a3a3] border-[#404040]">
+                          {index + 1}
+                        </Badge>
+                        <div className={`w-10 h-10 rounded flex items-center justify-center ${blockDef.color} text-white shrink-0`}>
+                          {blockDef.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm text-white">{blockDef.label}</h4>
+                          <p className="text-xs text-[#808080] truncate">
+                            {block.params.description || block.params.selector || block.params.url || 'Настройте параметры'}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteBlock(block.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
 
         {/* Панель свойств */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Свойства</CardTitle>
-            <CardDescription>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white mb-1">Свойства</h3>
+            <p className="text-xs text-[#808080]">
               {selectedBlock ? 'Настройте параметры блока' : 'Выберите блок'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[600px]">
-              {selectedBlock ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Описание</label>
-                    <Textarea
-                      value={selectedBlock.params.description || ''}
-                      onChange={(e) => updateBlockParams(selectedBlock.id, { description: e.target.value })}
-                      placeholder="Опишите, что делает этот блок"
-                      rows={2}
-                    />
-                  </div>
+            </p>
+          </div>
+          <ScrollArea className="h-[600px]">
+            {selectedBlock ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Описание</label>
+                  <Textarea
+                    value={selectedBlock.params.description || ''}
+                    onChange={(e) => updateBlockParams(selectedBlock.id, { description: e.target.value })}
+                    placeholder="Опишите, что делает этот блок"
+                    rows={2}
+                    className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
+                  />
+                </div>
 
                   {selectedBlock.type === 'click' && (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                      <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">CSS Селектор</label>
                       <Input
                         value={selectedBlock.params.selector || ''}
                         onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                         placeholder="button.submit, #login, .btn-primary"
+                        className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                       />
                     </div>
                   )}
@@ -687,19 +697,21 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'input' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">CSS Селектор</label>
                         <Input
                           value={selectedBlock.params.selector || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                           placeholder="input[name='email']"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Текст для ввода</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Текст для ввода</label>
                         <Input
                           value={selectedBlock.params.text || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { text: e.target.value })}
                           placeholder="test@example.com"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                     </>
@@ -707,11 +719,12 @@ export const VisualScriptBuilder: React.FC = () => {
 
                   {selectedBlock.type === 'navigate' && (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">URL</label>
+                      <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">URL</label>
                       <Input
                         value={selectedBlock.params.url || ''}
                         onChange={(e) => updateBlockParams(selectedBlock.id, { url: e.target.value })}
                         placeholder="https://example.com"
+                        className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                       />
                     </div>
                   )}
@@ -719,19 +732,21 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'wait' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">CSS Селектор</label>
                         <Input
                           value={selectedBlock.params.selector || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                           placeholder=".loading-complete"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Таймаут (мс)</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Таймаут (мс)</label>
                         <Input
                           type="number"
                           value={selectedBlock.params.timeout || 5000}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { timeout: parseInt(e.target.value) })}
+                          className="bg-[#111111] border-[#2d2d2d] text-white"
                         />
                       </div>
                     </>
@@ -740,27 +755,30 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'extract' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">CSS Селектор</label>
                         <Input
                           value={selectedBlock.params.selector || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                           placeholder=".price, h1.title"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Атрибут</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Атрибут</label>
                         <Input
                           value={selectedBlock.params.attribute || 'textContent'}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { attribute: e.target.value })}
                           placeholder="textContent, href, src"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Имя переменной</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Имя переменной</label>
                         <Input
                           value={selectedBlock.params.variable || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { variable: e.target.value })}
                           placeholder="price, title, imageUrl"
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                     </>
@@ -768,13 +786,13 @@ export const VisualScriptBuilder: React.FC = () => {
 
                   {selectedBlock.type === 'code' && (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">JavaScript код</label>
+                      <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">JavaScript код</label>
                       <Textarea
                         value={selectedBlock.params.code || ''}
                         onChange={(e) => updateBlockParams(selectedBlock.id, { code: e.target.value })}
                         placeholder="await page.evaluate(() => { ... })"
                         rows={8}
-                        className="font-mono text-xs"
+                        className="font-mono text-xs bg-[#111111] border-[#2d2d2d] text-[#d4d4d4] placeholder:text-[#606060]"
                       />
                     </div>
                   )}
@@ -782,11 +800,11 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'condition' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Тип условия</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Тип условия</label>
                         <select
                           value={selectedBlock.params.conditionType || 'element-exists'}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { conditionType: e.target.value })}
-                          className="w-full p-2 border rounded-md bg-background"
+                          className="w-full p-2 border border-[#2d2d2d] rounded-md bg-[#111111] text-white"
                         >
                           <option value="element-exists">Элемент существует</option>
                           <option value="element-visible">Элемент видим</option>
@@ -795,22 +813,24 @@ export const VisualScriptBuilder: React.FC = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">
                           {selectedBlock.params.conditionType === 'url-contains' ? 'Часть URL' : 'CSS Селектор'}
                         </label>
                         <Input
                           value={selectedBlock.params.selector || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                           placeholder={selectedBlock.params.conditionType === 'url-contains' ? '/products/' : '.success-message'}
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
                       {selectedBlock.params.conditionType === 'text-contains' && (
                         <div>
-                          <label className="text-sm font-medium mb-2 block">Искомый текст</label>
+                          <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Искомый текст</label>
                           <Input
                             value={selectedBlock.params.value || ''}
                             onChange={(e) => updateBlockParams(selectedBlock.id, { value: e.target.value })}
                             placeholder="Успешно"
+                            className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                           />
                         </div>
                       )}
@@ -820,11 +840,11 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'loop' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Тип цикла</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Тип цикла</label>
                         <select
                           value={selectedBlock.params.loopType || 'count'}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { loopType: e.target.value })}
-                          className="w-full p-2 border rounded-md bg-background"
+                          className="w-full p-2 border border-[#2d2d2d] rounded-md bg-[#111111] text-white"
                         >
                           <option value="count">Повторить N раз</option>
                           <option value="while-exists">Пока элемент существует</option>
@@ -833,22 +853,24 @@ export const VisualScriptBuilder: React.FC = () => {
                       </div>
                       {selectedBlock.params.loopType === 'count' && (
                         <div>
-                          <label className="text-sm font-medium mb-2 block">Количество повторений</label>
+                          <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Количество повторений</label>
                           <Input
                             type="number"
                             value={selectedBlock.params.count || 5}
                             onChange={(e) => updateBlockParams(selectedBlock.id, { count: parseInt(e.target.value) })}
                             min="1"
+                            className="bg-[#111111] border-[#2d2d2d] text-white"
                           />
                         </div>
                       )}
                       {(selectedBlock.params.loopType === 'while-exists' || selectedBlock.params.loopType === 'for-each') && (
                         <div>
-                          <label className="text-sm font-medium mb-2 block">CSS Селектор</label>
+                          <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">CSS Селектор</label>
                           <Input
                             value={selectedBlock.params.selector || ''}
                             onChange={(e) => updateBlockParams(selectedBlock.id, { selector: e.target.value })}
                             placeholder=".item, .product-card"
+                            className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                           />
                         </div>
                       )}
@@ -858,11 +880,11 @@ export const VisualScriptBuilder: React.FC = () => {
                   {selectedBlock.type === 'url-match' && (
                     <>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Тип совпадения</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Тип совпадения</label>
                         <select
                           value={selectedBlock.params.matchType || 'contains'}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { matchType: e.target.value })}
-                          className="w-full p-2 border rounded-md bg-background"
+                          className="w-full p-2 border border-[#2d2d2d] rounded-md bg-[#111111] text-white"
                         >
                           <option value="contains">Содержит</option>
                           <option value="exact">Точное совпадение</option>
@@ -871,7 +893,7 @@ export const VisualScriptBuilder: React.FC = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Шаблон URL</label>
+                        <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Шаблон URL</label>
                         <Input
                           value={selectedBlock.params.pattern || ''}
                           onChange={(e) => updateBlockParams(selectedBlock.id, { pattern: e.target.value })}
@@ -882,11 +904,12 @@ export const VisualScriptBuilder: React.FC = () => {
                               ? 'https://example.com/page'
                               : '/products/'
                           }
+                          className="bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#606060]"
                         />
                       </div>
-                      <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-xs text-muted-foreground">
-                          <strong>Совет:</strong> URL фильтр определяет, на каких страницах будет выполняться скрипт.
+                      <div className="p-3 bg-[#2d2d2d] rounded-lg border border-[#404040]">
+                        <p className="text-xs text-[#a3a3a3]">
+                          <strong className="text-white">Совет:</strong> URL фильтр определяет, на каких страницах будет выполняться скрипт.
                           {selectedBlock.params.matchType === 'contains' && ' Скрипт запустится на всех URL, содержащих указанный текст.'}
                           {selectedBlock.params.matchType === 'exact' && ' Скрипт запустится только на точно указанном URL.'}
                           {selectedBlock.params.matchType === 'starts-with' && ' Скрипт запустится на всех URL, начинающихся с указанного текста.'}
@@ -896,9 +919,9 @@ export const VisualScriptBuilder: React.FC = () => {
                     </>
                   )}
 
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-semibold mb-2">Предпросмотр кода:</h4>
-                    <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+                  <div className="pt-4 border-t border-[#2d2d2d]">
+                    <h4 className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2">Предпросмотр кода:</h4>
+                    <pre className="text-xs bg-[#111111] border border-[#2d2d2d] p-3 rounded overflow-x-auto text-[#d4d4d4] font-mono">
                       <code>
                         {BLOCK_TYPES.find(b => b.type === selectedBlock.type)?.generateCode(selectedBlock.params)}
                       </code>
@@ -907,46 +930,51 @@ export const VisualScriptBuilder: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                  <Settings className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-sm text-muted-foreground">
+                  <Settings className="h-12 w-12 text-[#808080] mb-4" />
+                  <p className="text-sm text-[#808080]">
                     Выберите блок для настройки параметров
                   </p>
                 </div>
               )}
             </ScrollArea>
-          </CardContent>
-        </Card>
+        </div>
       </div>
 
       {/* Вкладка с кодом */}
       {generatedCode && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Сгенерированный код</CardTitle>
-                <CardDescription>Готовый JavaScript для выполнения</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleCopyCode}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Копировать
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleExportCode}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Скачать
-                </Button>
-              </div>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-1">Сгенерированный код</h3>
+              <p className="text-xs text-[#808080]">Готовый JavaScript для выполнения</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px]">
-              <pre className="text-xs bg-muted p-4 rounded font-mono">
-                <code>{generatedCode}</code>
-              </pre>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCopyCode}
+                className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Копировать
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExportCode}
+                className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Скачать
+              </Button>
+            </div>
+          </div>
+          <ScrollArea className="h-[400px]">
+            <pre className="text-xs bg-[#111111] border border-[#2d2d2d] p-4 rounded font-mono text-[#d4d4d4]">
+              <code>{generatedCode}</code>
+            </pre>
+          </ScrollArea>
+        </div>
       )}
     </div>
   );

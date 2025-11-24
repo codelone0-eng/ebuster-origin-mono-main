@@ -192,41 +192,37 @@ export const LoginHistory: React.FC = () => {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>История входов</CardTitle>
-          <CardDescription>Загрузка...</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
+        <p className="text-sm text-[#808080]">Загрузка...</p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>История входов</CardTitle>
-            <CardDescription>
-              Последние 50 входов в ваш аккаунт
-            </CardDescription>
-          </div>
-          <Button 
-            variant="destructive" 
-            size="sm"
-            onClick={handleLogoutAllDevices}
-            disabled={loggingOut}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Выйти из всех устройств
-          </Button>
+    <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
+          <p className="text-sm text-[#808080]">
+            Последние 50 входов в ваш аккаунт
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
+        <Button 
+          className="bg-red-600 hover:bg-red-700 text-white"
+          size="sm"
+          onClick={handleLogoutAllDevices}
+          disabled={loggingOut}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Выйти из всех устройств
+        </Button>
+      </div>
+      <div>
         {loginHistory.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>История входов пуста</p>
+          <div className="text-center py-8">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-50" />
+            <p className="text-[#808080]">История входов пуста</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -236,25 +232,23 @@ export const LoginHistory: React.FC = () => {
               return (
                 <div
                   key={record.id}
-                  className={cn(
-                    "flex items-start gap-4 p-4 rounded-lg border bg-card/70 border-border/50"
-                  )}
+                  className="flex items-start gap-4 p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg"
                 >
-                  <div className="mt-1">
+                  <div className="mt-1 text-[#808080]">
                     {getDeviceIcon(record.user_agent)}
                   </div>
                   
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">
+                      <span className="font-medium text-sm text-white">
                         {browser} на {os}{device ? ` • ${device}` : ''}
                       </span>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className={cn("text-xs", record.success ? "bg-green-600 text-white" : "bg-red-600 text-white")}>
                         {record.success ? 'Успешно' : 'Неудачно'}
                       </Badge>
                     </div>
                     
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 text-xs text-[#808080]">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         <span>{record.location || record.ip_address}</span>
@@ -270,7 +264,7 @@ export const LoginHistory: React.FC = () => {
             })}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

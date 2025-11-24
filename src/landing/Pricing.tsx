@@ -155,7 +155,7 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-[#111111] relative">
       <ParticleBackground />
       <div className="relative z-content">
         <Header />
@@ -163,23 +163,23 @@ const Pricing = () => {
         <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-card/50 backdrop-blur-sm border border-dashed content-border-50 mb-8">
-            <Crown className="h-5 w-5 text-primary" />
-            <span className="text-sm font-semibold text-muted-foreground">{t('pricing.hero.badge')}</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
+            <Crown className="h-5 w-5 text-yellow-500" />
+            <span className="text-sm font-semibold text-[#808080]">{t('pricing.hero.badge')}</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-            {t('pricing.hero.title')} <span className="gradient-text">{t('pricing.hero.subtitle')}</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            {t('pricing.hero.title')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('pricing.hero.subtitle')}</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
             {t('pricing.hero.description')}
           </p>
 
           <div className="flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
               onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -190,10 +190,11 @@ const Pricing = () => {
 
         {/* Переключатель периода */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 p-1 bg-card/50 backdrop-blur-sm border border-dashed border-border/30 rounded-lg">
+          <div className="inline-flex items-center gap-2 p-1 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
             <Button
               variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
               size="sm"
+              className={billingPeriod === 'monthly' ? 'bg-blue-600 text-white' : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'}
               onClick={() => setBillingPeriod('monthly')}
             >
               Ежемесячно
@@ -201,10 +202,11 @@ const Pricing = () => {
             <Button
               variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
               size="sm"
+              className={billingPeriod === 'yearly' ? 'bg-blue-600 text-white' : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'}
               onClick={() => setBillingPeriod('yearly')}
             >
               Ежегодно
-              <Badge variant="secondary" className="ml-2">-17%</Badge>
+              <Badge className="ml-2 bg-green-600 text-white">-17%</Badge>
             </Button>
           </div>
         </div>
@@ -212,7 +214,7 @@ const Pricing = () => {
         {/* Pricing Slider */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
         ) : (
           <div className="relative mb-16 pt-6">
@@ -222,7 +224,7 @@ const Pricing = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-card/80 backdrop-blur-sm border-border/40"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
                   onClick={prevSlide}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -230,7 +232,7 @@ const Pricing = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-card/80 backdrop-blur-sm border-border/40"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
                   onClick={nextSlide}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -254,20 +256,20 @@ const Pricing = () => {
                       key={role.id}
                       className="w-full md:w-[calc(33.333%-1rem)] flex-shrink-0 pt-6"
                     >
-                      <Card
+                      <div
                         className={cn(
-                          "relative overflow-visible rounded-2xl border transition-all duration-300 flex flex-col backdrop-blur",
+                          "relative overflow-visible rounded-2xl border transition-all duration-300 flex flex-col",
                           "shadow-[0_28px_60px_-40px_rgba(0,0,0,0.9)] hover:-translate-y-1",
                           isPremium
-                            ? "border-primary/30 bg-gradient-to-br from-primary/8 via-card/85 to-card/70"
-                            : "border-border/50 bg-gradient-to-br from-card/85 via-card/70 to-card/60",
+                            ? "border-blue-500/50 bg-gradient-to-br from-blue-600/10 via-[#1f1f1f] to-[#1a1a1a]"
+                            : "border-[#2d2d2d] bg-[#1f1f1f]",
                           "min-h-[520px]"
                         )}
                       >
                         {/* Premium Badge */}
                         {isPremium && (
                           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                            <Badge className="bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold">
+                            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-1 text-xs font-semibold">
                               <Star className="h-3 w-3 mr-1" />
                               Популярный
                             </Badge>
@@ -275,38 +277,38 @@ const Pricing = () => {
                         )}
 
                         {/* Content */}
-                        <CardContent className="p-6 pt-8 flex flex-col h-full">
+                        <div className="p-6 pt-8 flex flex-col h-full">
                           <div className="text-center mb-6">
                             <div className={cn(
                               "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
-                              isPremium ? "bg-primary/10 border-primary/20 border-dashed" : "bg-muted/20 border-border/30 border-dashed"
+                              isPremium ? "bg-blue-600/10 border-blue-500/20 border-dashed" : "bg-[#2d2d2d] border-[#404040] border-dashed"
                             )}>
                               {isPremium ? (
-                                <Crown className="h-6 w-6 text-primary" />
+                                <Crown className="h-6 w-6 text-yellow-500" />
                               ) : (
-                                <Code2 className="h-5 w-5 text-muted-foreground" />
+                                <Code2 className="h-5 w-5 text-[#808080]" />
                               )}
                             </div>
                             <h3 className={cn(
                               "text-2xl mb-2 font-bold",
-                              isPremium && "text-primary"
+                              isPremium ? "text-white" : "text-white"
                             )}>
                               {role.display_name}
                             </h3>
                             <div className="mb-3">
                               <span className={cn(
                                 "text-4xl font-bold",
-                                isPremium && "text-primary"
+                                isPremium ? "text-white" : "text-white"
                               )}>
                                 {price}₽
                               </span>
                               {price > 0 && (
-                                <span className="text-muted-foreground ml-1 text-sm">
+                                <span className="text-[#808080] ml-1 text-sm">
                                   /{billingPeriod === 'monthly' ? 'мес' : 'год'}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-[#808080]">
                               {role.description}
                             </p>
                           </div>
@@ -317,9 +319,9 @@ const Pricing = () => {
                                 <li key={index} className="flex items-start gap-2">
                                   <Check className={cn(
                                     "h-4 w-4 mt-0.5 flex-shrink-0",
-                                    isPremium ? "text-primary" : "text-muted-foreground"
+                                    isPremium ? "text-blue-500" : "text-[#808080]"
                                   )} />
-                                  <span className="text-sm text-muted-foreground">
+                                  <span className="text-sm text-[#808080]">
                                     {feature}
                                   </span>
                                 </li>
@@ -329,16 +331,15 @@ const Pricing = () => {
                             <Button 
                               className={cn(
                                 "w-full h-10 rounded-lg font-semibold text-sm mt-auto",
-                                isPremium ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border-border/30 bg-card/50 text-foreground hover:bg-card"
+                                isPremium ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700" : "border-[#2d2d2d] bg-[#1a1a1a] text-white hover:bg-[#2d2d2d]"
                               )}
-                              variant={isPremium ? "default" : "outline"}
                             >
                               {role.name === 'free' ? 'Начать бесплатно' : 'Выбрать план'}
                               <ArrowRight className="h-4 w-4 ml-2" />
                             </Button>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
@@ -354,7 +355,7 @@ const Pricing = () => {
                     onClick={() => setCurrentSlide(index)}
                     className={cn(
                       "w-2 h-2 rounded-full transition-all duration-300",
-                      currentSlide === index ? "bg-primary w-8" : "bg-muted-foreground/30"
+                      currentSlide === index ? "bg-blue-600 w-8" : "bg-[#2d2d2d]"
                     )}
                   />
                 ))}
@@ -528,55 +529,47 @@ const Pricing = () => {
 
         {/* FAQ Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+          <h2 className="text-3xl font-bold text-center mb-12 text-white">
             {t('pricing.faq.title')}
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
             {Array.isArray(faqArray) && faqArray.map((item: any, index: number) => (
-              <Card key={index} className="bg-card/30 backdrop-blur-sm border content-border-30">
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.question}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    {item.answer}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+              <div key={index} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-3">{item.question}</h3>
+                <p className="text-[#808080] text-base">
+                  {item.answer}
+                </p>
+              </div>
             ))}
           </div>
         </div>
 
         {/* CTA Section */}
         <div className="text-center">
-          <Card className="bg-gradient-to-r from-primary/5 via-transparent to-accent/5 border content-border-30 p-12">
-            <CardHeader>
-              <CardTitle className="text-3xl mb-4">{t('pricing.cta.title')}</CardTitle>
-              <CardDescription className="text-lg">
-                {t('pricing.cta.description')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center gap-4">
-                <Button 
-                  size="lg" 
-                  className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90"
-                  onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {t('pricing.cta.downloadExtension')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button size="lg" variant="outline" className="h-12 px-8" asChild>
-                  <a href="/contacts">
-                    <Shield className="h-4 w-4 mr-2" />
-                    {t('pricing.cta.contactUs')}
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-gradient-to-r from-blue-600/10 via-transparent to-purple-600/10 border border-[#2d2d2d] rounded-2xl p-12">
+            <h3 className="text-3xl font-bold mb-4 text-white">{t('pricing.cta.title')}</h3>
+            <p className="text-[#808080] text-lg mb-6">
+              {t('pricing.cta.description')}
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <Button 
+                size="lg" 
+                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {t('pricing.cta.downloadExtension')}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]" asChild>
+                <a href="/contacts">
+                  <Shield className="h-4 w-4 mr-2" />
+                  {t('pricing.cta.contactUs')}
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
         </div>
         

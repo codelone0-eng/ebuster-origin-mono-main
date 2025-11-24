@@ -48,6 +48,8 @@ interface Script {
   created_at: string;
   updated_at: string;
   published_at?: string;
+  icon_url?: string | null;
+  icon?: string;
 }
 
 const ScriptsList: React.FC = () => {
@@ -585,8 +587,8 @@ const ScriptsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">{t('header.dashboard.scripts.loading')}</div>
+      <div className="flex items-center justify-center h-64 bg-[#1a1a1a] rounded-lg border border-[#2d2d2d]">
+        <div className="text-lg text-white">{t('header.dashboard.scripts.loading')}</div>
       </div>
     );
   }
@@ -594,106 +596,108 @@ const ScriptsList: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Заголовок */}
-      <div>
-        <h2 className="text-2xl font-bold">{t('header.dashboard.scripts.title')}</h2>
-        <p className="text-muted-foreground">{t('header.dashboard.scripts.description')}</p>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.scripts.title')}</h2>
+        <p className="text-sm text-[#808080]">{t('header.dashboard.scripts.description')}</p>
       </div>
 
       {/* Фильтры и поиск */}
-        <Card className="bg-card/50 backdrop-blur-sm border border-dashed border-border/30">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-64">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={t('header.dashboard.scripts.searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-4">
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-64">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+              <Input
+                placeholder={t('header.dashboard.scripts.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080]"
+              />
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder={t('header.dashboard.scripts.allCategories')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('header.dashboard.scripts.allCategories')}</SelectItem>
-                <SelectItem value="ui">UI</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
-                <SelectItem value="productivity">Productivity</SelectItem>
-                <SelectItem value="general">General</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Сортировка" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created_at">По дате</SelectItem>
-                <SelectItem value="downloads_count">По загрузкам</SelectItem>
-                <SelectItem value="rating">По рейтингу</SelectItem>
-                <SelectItem value="title">По названию</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desc">↓ Убывание</SelectItem>
-                <SelectItem value="asc">↑ Возрастание</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-        </CardContent>
-      </Card>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-48 bg-[#111111] border-[#2d2d2d] text-white">
+              <SelectValue placeholder={t('header.dashboard.scripts.allCategories')} />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+              <SelectItem value="all">{t('header.dashboard.scripts.allCategories')}</SelectItem>
+              <SelectItem value="ui">UI</SelectItem>
+              <SelectItem value="privacy">Privacy</SelectItem>
+              <SelectItem value="productivity">Productivity</SelectItem>
+              <SelectItem value="general">General</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-48 bg-[#111111] border-[#2d2d2d] text-white">
+              <SelectValue placeholder="Сортировка" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+              <SelectItem value="created_at">По дате</SelectItem>
+              <SelectItem value="downloads_count">По загрузкам</SelectItem>
+              <SelectItem value="rating">По рейтингу</SelectItem>
+              <SelectItem value="title">По названию</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger className="w-32 bg-[#111111] border-[#2d2d2d] text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+              <SelectItem value="desc">↓ Убывание</SelectItem>
+              <SelectItem value="asc">↑ Возрастание</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {/* Список скриптов */}
       <div className="grid grid-cols-1 gap-4">
         {filteredScripts.map((script) => (
-          <Card
+          <div
             key={script.id}
-            className="relative overflow-hidden rounded-xl border border-dashed border-border/40 bg-card/70 shadow-sm transition-colors duration-200 hover:border-border/20 hover:bg-card/80"
+            className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-6 hover:bg-[#262626] transition-colors"
           >
-            <div className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 min-w-0 items-start gap-4">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-border/30 bg-card text-muted-foreground">
-                  <Code className="h-5 w-5" />
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-[#2d2d2d] border border-[#404040] overflow-hidden">
+                  {script.icon_url ? (
+                    <img src={script.icon_url} alt={script.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg">{script.icon || '⚡'}</span>
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-lg font-semibold text-foreground line-clamp-1">
+                    <h3 className="text-lg font-semibold text-white line-clamp-1">
                       {script.title}
                     </h3>
                     {script.is_featured && (
-                      <Badge variant="secondary" className="text-xs font-medium uppercase tracking-wide">
+                      <Badge className="text-xs font-medium bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
                         <Crown className="h-3 w-3 mr-1" />
                         Featured
                       </Badge>
                     )}
                     {script.is_premium && (
-                      <Badge variant="outline" className="text-xs font-medium uppercase tracking-wide">
+                      <Badge className="text-xs font-medium bg-purple-500/10 text-purple-500 border-purple-500/20">
                         <Zap className="h-3 w-3 mr-1" />
                         Premium
                       </Badge>
                     )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-[#a3a3a3] line-clamp-2">
                     {script.description || t('header.dashboard.scripts.descriptionPlaceholder')}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="border-border/30 bg-card/60 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-[#808080]">
+                    <Badge className="bg-[#2d2d2d] text-[#a3a3a3] border-[#404040] text-xs px-2 py-0.5">
                       {script.category}
                     </Badge>
                     <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 text-primary" />
-                      <span className="font-medium text-foreground">{(script.rating ?? 0).toFixed(1)}</span>
-                      <span className="text-muted-foreground">({script.rating_count ?? 0})</span>
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                      <span className="font-medium text-white">{(script.rating ?? 0).toFixed(1)}</span>
+                      <span className="text-[#808080]">({script.rating_count ?? 0})</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Download className="h-3 w-3" />
@@ -715,7 +719,7 @@ const ScriptsList: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border/30 bg-card/50 text-foreground hover:bg-card"
+                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
                   onClick={() => {
                     setChangelogScript({ id: script.id, name: script.title });
                     setIsChangelogDialogOpen(true);
@@ -727,7 +731,7 @@ const ScriptsList: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border/30 bg-card/50 text-foreground hover:bg-card"
+                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
                   onClick={() => handleRateScript(script)}
                 >
                   <Star className="h-4 w-4 mr-2" />
@@ -736,7 +740,7 @@ const ScriptsList: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border/30 bg-card/50 text-foreground hover:bg-card"
+                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
                   onClick={() => handleViewScript(script)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -745,7 +749,7 @@ const ScriptsList: React.FC = () => {
                 <Button
                   size="sm"
                   disabled={installedScriptIds.has(script.id)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+                  className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-[#2d2d2d] disabled:text-[#808080] disabled:border-[#404040]"
                   onClick={() => handleDownloadScript(script.id)}
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -753,37 +757,35 @@ const ScriptsList: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
       {/* Пустое состояние */}
       {filteredScripts.length === 0 && !loading && (
-        <Card className="bg-card/50 backdrop-blur-sm border border-dashed border-border/30">
-          <CardContent className="p-8 text-center">
-            <Code className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">{t('header.dashboard.scripts.notFound')}</h3>
-            <p className="text-muted-foreground">
-              {t('header.dashboard.scripts.notFoundDescription')}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-12 text-center">
+          <Code className="h-12 w-12 mx-auto mb-4 text-[#808080]" />
+          <h3 className="text-lg font-semibold mb-2 text-white">{t('header.dashboard.scripts.notFound')}</h3>
+          <p className="text-[#808080]">
+            {t('header.dashboard.scripts.notFoundDescription')}
+          </p>
+        </div>
       )}
 
       {/* Диалог просмотра скрипта */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#1a1a1a] border-[#2d2d2d] text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-white">
               {selectedScript?.title}
               {selectedScript?.is_featured && (
-                <Badge variant="secondary">
+                <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
                   <Zap className="h-3 w-3 mr-1" />
                   Featured
                 </Badge>
               )}
               {selectedScript?.is_premium && (
-                <Badge variant="outline">
+                <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">
                   <Crown className="h-3 w-3 mr-1" />
                   Premium
                 </Badge>
@@ -795,26 +797,26 @@ const ScriptsList: React.FC = () => {
               {/* Информация о скрипте */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Описание</label>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Описание</label>
+                  <p className="text-sm text-[#a3a3a3] mt-1">
                     {selectedScript.description}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Автор</label>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Автор</label>
+                  <p className="text-sm text-white mt-1">
                     {selectedScript.author_name}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Версия</label>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Версия</label>
+                  <p className="text-sm text-white mt-1 font-mono">
                     {selectedScript.version}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Размер</label>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Размер</label>
+                  <p className="text-sm text-white mt-1">
                     {formatFileSize(selectedScript.file_size)}
                   </p>
                 </div>
@@ -823,10 +825,10 @@ const ScriptsList: React.FC = () => {
               {/* Теги */}
               {selectedScript.tags.length > 0 && (
                 <div>
-                  <label className="text-sm font-medium">Теги</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Теги</label>
+                  <div className="flex flex-wrap gap-2">
                     {selectedScript.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline">
+                      <Badge key={index} className="bg-[#2d2d2d] text-[#a3a3a3] border-[#404040]">
                         <Tag className="h-3 w-3 mr-1" />
                         {tag}
                       </Badge>
@@ -837,15 +839,18 @@ const ScriptsList: React.FC = () => {
 
               {/* Код скрипта */}
               <div>
-                <label className="text-sm font-medium">Код скрипта</label>
-                <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto mt-1 max-h-96">
+                <label className="text-xs font-semibold text-[#808080] uppercase tracking-wide mb-2 block">Код скрипта</label>
+                <pre className="bg-[#111111] border border-[#2d2d2d] p-4 rounded-md text-sm overflow-x-auto max-h-96 text-[#d4d4d4] font-mono">
                   {selectedScript.code}
                 </pre>
               </div>
 
               {/* Кнопка загрузки */}
               <div className="flex justify-end">
-                <Button onClick={() => handleDownloadScript(selectedScript.id)}>
+                <Button 
+                  onClick={() => handleDownloadScript(selectedScript.id)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
                   <Download className="h-4 w-4 mr-2" />
                   {t('header.dashboard.scripts.downloadScript')}
                 </Button>
