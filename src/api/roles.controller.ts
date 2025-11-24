@@ -22,7 +22,7 @@ export const getRoles = async (req: Request, res: Response) => {
 
     const { data: roles, error } = await supabase
       .from('roles')
-      .select('id, name, display_name, description, permissions, display_order, created_at, updated_at')
+      .select('id, name, display_name, description, permissions, price_monthly, price_yearly, features, limits, is_active, is_subscription, display_order, created_at, updated_at')
       .order('display_order', { ascending: true });
 
     if (error) {

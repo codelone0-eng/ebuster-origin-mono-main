@@ -49,19 +49,19 @@ interface SubscriptionsManagementProps {
   className?: string;
 }
 
-const PLAN_PRICES = {
-  free: 0,
-  premium: 9.99,
-  pro: 29.99,
-  enterprise: 99.99
-};
-
-const PLAN_FEATURES = {
-  free: ['Basic Scripts', 'Community Support'],
-  premium: ['Premium Scripts', 'Priority Support', 'No Ads'],
-  pro: ['Pro Scripts', 'API Access', 'Analytics', 'Custom Scripts'],
-  enterprise: ['Unlimited Scripts', 'Dedicated Support', 'SLA', 'Custom Integration']
-};
+interface Role {
+  id: string;
+  name: string;
+  display_name: string;
+  description: string;
+  price_monthly: number;
+  price_yearly: number;
+  features?: any;
+  limits?: any;
+  is_active: boolean;
+  is_subscription: boolean;
+  display_order: number;
+}
 
 export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = ({ className }) => {
   const { 
@@ -80,6 +80,7 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
   
   // Filters
   const [filters, setFilters] = useState({
@@ -95,11 +96,21 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   // Form Data
   const [formData, setFormData] = useState({
     user_email: '',
-    plan: 'premium',
+    plan: '',
     duration_months: 1,
     auto_renew: true,
     status: 'active'
   });
+
+  // Установить первый план по умолчанию после загрузки ролей
+  useEffect(() => {
+    if (roles.length > 0 && !formData.plan) {
+      const firstRole = roles.find(r => r.is_subscription) || roles[0];
+      if (firstRole) {
+        setFormData(prev => ({ ...prev, plan: firstRole.name }));
+      }
+    }
+  }, [roles]);
   
   const [userOptions, setUserOptions] = useState<{ value: string; label: string }[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
@@ -110,8 +121,57 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
+    loadRoles();
     loadData();
   }, []);
+
+  const loadRoles = async () => {
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/roles`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Не удалось загрузить роли');
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const rolesWithDefaults = data.data.map((role: any) => ({
+          ...role,
+          price_monthly: role.price_monthly ?? 0,
+          price_yearly: role.price_yearly ?? 0,
+          features: role.features || {},
+          limits: role.limits || {}
+        }));
+        // Фильтруем только активные роли, которые могут быть подписками
+        const subscriptionRoles = rolesWithDefaults
+          .filter((r: Role) => r.is_active && (r.is_subscription || r.name === 'free'))
+          .sort((a: Role, b: Role) => a.display_order - b.display_order);
+        setRoles(subscriptionRoles);
+      }
+    } catch (error) {
+      console.error('Error loading roles:', error);
+      toast({ 
+        title: 'Error', 
+        description: error instanceof Error ? error.message : 'Failed to load roles', 
+        variant: 'destructive' 
+      });
+    }
+  };
 
   // Debounced user search
   useEffect(() => {
@@ -303,13 +363,45 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
 
   const selectedSubscription = subscriptions.find(s => s.id === selectedSubId);
 
-  const getPlanIcon = (plan: string) => {
-    switch (plan) {
-      case 'premium': return <Crown className="h-4 w-4 text-yellow-500" />;
-      case 'pro': return <Zap className="h-4 w-4 text-blue-500" />;
-      case 'enterprise': return <Shield className="h-4 w-4 text-purple-500" />;
-      default: return <Gift className="h-4 w-4 text-gray-500" />;
+  const getPlanIcon = (planName: string) => {
+    const role = roles.find(r => r.name === planName);
+    if (!role) {
+      // Fallback для старых планов
+      switch (planName) {
+        case 'premium': return <Crown className="h-4 w-4 text-yellow-500" />;
+        case 'pro': return <Zap className="h-4 w-4 text-blue-500" />;
+        case 'enterprise': return <Shield className="h-4 w-4 text-purple-500" />;
+        default: return <Gift className="h-4 w-4 text-gray-500" />;
+      }
     }
+    // Используем иконку на основе display_name или name
+    const name = role.display_name.toLowerCase();
+    if (name.includes('premium') || name.includes('премиум')) return <Crown className="h-4 w-4 text-yellow-500" />;
+    if (name.includes('pro') || name.includes('про')) return <Zap className="h-4 w-4 text-blue-500" />;
+    if (name.includes('enterprise') || name.includes('корпоратив')) return <Shield className="h-4 w-4 text-purple-500" />;
+    return <Gift className="h-4 w-4 text-gray-500" />;
+  };
+
+  const getPlanPrice = (planName: string) => {
+    const role = roles.find(r => r.name === planName);
+    return role ? role.price_monthly : 0;
+  };
+
+  const getPlanFeatures = (planName: string): string[] => {
+    const role = roles.find(r => r.name === planName);
+    if (!role || !role.features) return [];
+    
+    const features: string[] = [];
+    if (role.features.scripts?.can_create) features.push('Create Scripts');
+    if (role.features.scripts?.can_publish) features.push('Publish Scripts');
+    if (role.features.scripts?.can_feature) features.push('Feature Scripts');
+    if (role.features.downloads?.unlimited) features.push('Unlimited Downloads');
+    if (role.features.support?.priority) features.push('Priority Support');
+    if (role.features.support?.chat) features.push('Chat Support');
+    if (role.features.api?.enabled) features.push('API Access');
+    if (role.features.admin?.full_access) features.push('Admin Access');
+    
+    return features.length > 0 ? features : [role.description || 'Basic Features'];
   };
 
   const getStatusColor = (status: string) => {
@@ -360,10 +452,9 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                 </SelectTrigger>
                 <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
                    <SelectItem value="all">All Plans</SelectItem>
-                   <SelectItem value="free">Free</SelectItem>
-                   <SelectItem value="premium">Premium</SelectItem>
-                   <SelectItem value="pro">Pro</SelectItem>
-                   <SelectItem value="enterprise">Enterprise</SelectItem>
+                   {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>{role.display_name}</SelectItem>
+                   ))}
                 </SelectContent>
              </Select>
           </div>
@@ -474,9 +565,11 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                            {getPlanIcon(selectedSubscription.plan)}
                         </div>
                         <div>
-                           <h3 className="text-xl font-bold text-white capitalize">{selectedSubscription.plan} Plan</h3>
+                           <h3 className="text-xl font-bold text-white">
+                              {roles.find(r => r.name === selectedSubscription.plan)?.display_name || selectedSubscription.plan} Plan
+                           </h3>
                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>${selectedSubscription.amount || PLAN_PRICES[selectedSubscription.plan as keyof typeof PLAN_PRICES] || 0}/mo</span>
+                              <span>${selectedSubscription.amount || getPlanPrice(selectedSubscription.plan)}/mo</span>
                               <span>•</span>
                               <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", getStatusColor(selectedSubscription.status))}>
                                  {selectedSubscription.status}
@@ -508,7 +601,7 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                         <div className="pt-4 border-t border-[#2d2d2d]">
                            <span className="text-sm text-muted-foreground block mb-2">Features</span>
                            <ul className="text-sm text-white space-y-1">
-                              {(selectedSubscription.features || PLAN_FEATURES[selectedSubscription.plan as keyof typeof PLAN_FEATURES] || []).map((f: string, i: number) => (
+                              {getPlanFeatures(selectedSubscription.plan).map((f: string, i: number) => (
                                  <li key={i} className="flex items-center gap-2">
                                     <CheckCircle className="h-3 w-3 text-green-500" /> {f}
                                  </li>
@@ -658,10 +751,11 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                       <SelectValue />
                    </SelectTrigger>
                    <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                      <SelectItem value="pro">Pro</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      {roles.map((role) => (
+                         <SelectItem key={role.id} value={role.name}>
+                            {role.display_name} (${role.price_monthly}/mo)
+                         </SelectItem>
+                      ))}
                    </SelectContent>
                 </Select>
              </div>
@@ -715,10 +809,11 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                       <SelectValue />
                    </SelectTrigger>
                    <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                      <SelectItem value="pro">Pro</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      {roles.map((role) => (
+                         <SelectItem key={role.id} value={role.name}>
+                            {role.display_name} (${role.price_monthly}/mo)
+                         </SelectItem>
+                      ))}
                    </SelectContent>
                 </Select>
              </div>

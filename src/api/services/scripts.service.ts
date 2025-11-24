@@ -62,7 +62,8 @@ const mapScriptRecord = (payload: any): ScriptRecord => ({
   changelog: payload.changelog,
   changelog_summary: payload.changelog_summary,
   tags: payload.tags,
-  icon_url: payload.icon_url,
+  icon: payload.icon || (payload.metadata as any)?.icon || null,
+  icon_url: payload.icon_url || (payload.metadata as any)?.icon_url || null,
   thumbnail_url: payload.thumbnail_url,
   preview_video_url: payload.preview_video_url,
   published_at: payload.published_at,
@@ -195,44 +196,72 @@ export class ScriptsService {
   public async list(params: ScriptListParams = {}): Promise<ScriptListResult> {
     const { currentPage, perPage, offset } = buildPagination(params.page, params.limit);
 
-    // Строим базовый query
-    let query: any = applyFilters(this.client, params);
-    
-    // Применяем сортировку перед select
-    const sortColumn = params.sort || 'created_at';
-    const orderDirection = params.order === 'asc';
-    query = query.order(sortColumn, { ascending: orderDirection });
-    
-    // Теперь применяем select и range
-    query = query.select('*');
-    const rangedQuery = query.range(offset, offset + perPage - 1);
-    const { data: records, error } = await rangedQuery;
+    try {
+      // Строим базовый query с фильтрами
+      let query: any = this.client.from('scripts');
+      const filters = buildFilters(params);
 
-    if (error) {
+      // Применяем фильтры
+      filters.forEach((apply) => {
+        query = apply(query);
+      });
+
+      // Применяем поиск
+      if (params.search) {
+        query = query.or(
+          `name.ilike.%${params.search}%,description.ilike.%${params.search}%,short_description.ilike.%${params.search}%`
+        );
+      }
+
+      // Применяем сортировку
+      const sortColumn = params.sort || 'created_at';
+      const orderDirection = params.order === 'asc';
+      query = query.order(sortColumn, { ascending: orderDirection });
+
+      // Получаем данные с пагинацией
+      const { data: records, error } = await query
+        .select('*')
+        .range(offset, offset + perPage - 1);
+
+      if (error) {
+        console.error('[ScriptsService] list query error:', error);
+        throw error;
+      }
+
+      // Получаем общее количество
+      let countQuery: any = this.client.from('scripts');
+      filters.forEach((apply) => {
+        countQuery = apply(countQuery);
+      });
+      if (params.search) {
+        countQuery = countQuery.or(
+          `name.ilike.%${params.search}%,description.ilike.%${params.search}%,short_description.ilike.%${params.search}%`
+        );
+      }
+
+      const { count, error: countError } = await countQuery
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('[ScriptsService] count query error:', countError);
+        throw countError;
+      }
+
+      const total = count || 0;
+
+      return {
+        items: (records || []).map(mapScriptRecord),
+        pagination: {
+          page: currentPage,
+          limit: perPage,
+          total,
+          pages: Math.ceil(total / perPage)
+        }
+      };
+    } catch (error) {
+      console.error('[ScriptsService] list error:', error);
       throw error;
     }
-
-    const countQuery = applyFilters(this.client, params);
-    const { count, error: countError } = await (countQuery as any).select('*', {
-      count: 'exact',
-      head: true
-    });
-
-    if (countError) {
-      throw countError;
-    }
-
-    const total = count || 0;
-
-    return {
-      items: (records || []).map(mapScriptRecord),
-      pagination: {
-        page: currentPage,
-        limit: perPage,
-        total,
-        pages: Math.ceil(total / perPage)
-      }
-    };
   }
 
   public async getById(id: string): Promise<ScriptRecord | null> {

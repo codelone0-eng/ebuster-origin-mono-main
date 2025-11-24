@@ -80,7 +80,12 @@ const getActor = (req: Request) => {
 export const adminListScripts = async (req: Request, res: Response) => {
   try {
     const params = parseListParams(req);
+    console.log('[scripts-admin] list params:', params);
     const result = await scriptsService.list(params);
+    console.log('[scripts-admin] list result:', { 
+      itemsCount: result.items?.length || 0, 
+      total: result.pagination?.total || 0 
+    });
 
     res.json({
       success: true,
@@ -88,7 +93,10 @@ export const adminListScripts = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('[scripts-admin] list error:', error);
-    res.status(500).json({ success: false, error: 'Не удалось получить список скриптов' });
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Не удалось получить список скриптов' 
+    });
   }
 };
 

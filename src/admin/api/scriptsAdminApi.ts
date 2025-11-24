@@ -94,11 +94,27 @@ const buildQueryString = (params: Record<string, unknown>) => {
 export const scriptsAdminApi = {
   async list(params: ScriptListParams = {}): Promise<ScriptListResult> {
     const qs = buildQueryString(params as Record<string, unknown>);
-    const response = await fetch(`${API_CONFIG.SCRIPTS_URL}/admin${qs}`, {
+    const url = `${API_CONFIG.SCRIPTS_URL}/admin${qs}`;
+    console.log('[scriptsAdminApi] Fetching:', url);
+    
+    const response = await fetch(url, {
       headers: withAuthHeaders()
     });
 
-    return handleResponse<ScriptListResult>(response);
+    console.log('[scriptsAdminApi] Response status:', response.status);
+    
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('[scriptsAdminApi] Error response:', text);
+    }
+
+    const result = await handleResponse<ScriptListResult>(response);
+    console.log('[scriptsAdminApi] Parsed result:', { 
+      itemsCount: result.items?.length || 0, 
+      total: result.pagination?.total || 0 
+    });
+    
+    return result;
   },
 
   async getById(id: string): Promise<ScriptRecord> {

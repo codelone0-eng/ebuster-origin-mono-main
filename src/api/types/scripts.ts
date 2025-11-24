@@ -43,6 +43,7 @@ export interface ScriptRecord {
   changelog: string | null;
   changelog_summary: string | null;
   tags: string[] | null;
+  icon: string | null;
   icon_url: string | null;
   thumbnail_url?: string | null;
   preview_video_url?: string | null;
