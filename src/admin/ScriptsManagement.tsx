@@ -6,9 +6,7 @@ import {
   Plus,
   Save,
   Trash2,
-  FileText,
   Settings,
-  Box,
   History,
   LayoutTemplate,
   Loader2,
@@ -20,7 +18,8 @@ import {
   Terminal,
   AlertTriangle,
   BookOpen,
-  PenTool
+  ImageIcon,
+  Upload
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ export default function ScriptsManagement() {
 
   // -- Data Fetching --
   const { data: scriptsData, isLoading: isListLoading } = useQuery({
-    queryKey: ['admin-scripts', search, filterStatus], // Include filters in key
+    queryKey: ['admin-scripts', search, filterStatus],
     queryFn: () => scriptsAdminApi.list({ 
       search, 
       status: filterStatus !== 'all' ? filterStatus as ScriptStatus : undefined 
@@ -92,7 +91,7 @@ export default function ScriptsManagement() {
   const createMutation = useMutation({
     mutationFn: (payload: CreateScriptPayload) => scriptsAdminApi.create(payload),
     onSuccess: (newScript) => {
-      // Invalidate the specific query key to force refetch
+      // Force refetch list
       queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
       setIsCreateOpen(false);
       setSelectedId(newScript.id);
@@ -173,8 +172,12 @@ export default function ScriptsManagement() {
                 >
                   <div className="flex items-center justify-between w-full mb-1">
                     <div className="flex items-center gap-2 truncate max-w-[180px]">
-                      <div className="flex-none w-5 h-5 rounded-md bg-[#333] flex items-center justify-center text-[10px]">
-                        {script.icon || '⚡'}
+                      <div className="flex-none w-5 h-5 rounded-md bg-[#333] flex items-center justify-center text-[10px] overflow-hidden">
+                        {script.icon_url ? (
+                          <img src={script.icon_url} alt="icon" className="w-full h-full object-cover" />
+                        ) : (
+                          script.icon || '⚡'
+                        )}
                       </div>
                       <span className={cn(
                         "font-medium text-sm truncate",
@@ -260,8 +263,6 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
   // Initialize draft state when data loads
   useEffect(() => {
     if (serverScript) {
-      // If we haven't edited, or if the ID changed (handled by key={selectedId} in parent), reset draft
-      // Since key changes, this mounts fresh, so we just set initial state
       setDraft(JSON.parse(JSON.stringify(serverScript)));
       setHasUnsavedChanges(false);
     }
@@ -272,8 +273,8 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
     mutationFn: (data: any) => scriptsAdminApi.update(scriptId, data),
     onSuccess: (updatedScript) => {
       queryClient.invalidateQueries({ queryKey: ['admin-script', scriptId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] }); // Update list preview
-      setDraft(updatedScript); // Sync draft with server response
+      queryClient.invalidateQueries({ queryKey: ['admin-scripts'] });
+      setDraft(updatedScript);
       setHasUnsavedChanges(false);
       toast({ title: 'Saved', description: 'All changes saved successfully.' });
     },
@@ -291,7 +292,7 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
 
   if (isLoading) return <div className="h-full flex items-center justify-center text-neutral-500"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   if (isError || !serverScript) return <div className="h-full flex items-center justify-center text-red-500">Failed to load script details.</div>;
-  if (!draft) return null; // Wait for effect to set draft
+  if (!draft) return null;
 
   // Generic change handler for any tab
   const handleDraftChange = (updates: any) => {
@@ -309,8 +310,12 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-[#2d2d2d] flex items-center justify-center text-lg">
-              {draft.icon || '⚡'}
+            <div className="w-8 h-8 rounded bg-[#2d2d2d] flex items-center justify-center text-lg overflow-hidden">
+              {draft.icon_url ? (
+                <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
+              ) : (
+                draft.icon || '⚡'
+              )}
             </div>
             <h1 className="text-xl font-bold text-white">{draft.name}</h1>
             <Badge className={cn("font-normal capitalize border-0", STATUS_COLORS[draft.status || 'draft'])}>
@@ -392,9 +397,8 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
 // --- Tab Components ---
 
 function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) => void }) {
-  // Helper to handle tag splitting/joining
   const handleTagsChange = (val: string) => {
-    const tags = val.split(',').map(t => t.trim()); // Don't filter boolean yet to allow typing
+    const tags = val.split(',').map(t => t.trim());
     onChange({ tags });
   };
 
@@ -409,15 +413,24 @@ function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) 
             className="bg-[#111111] border-[#2d2d2d] text-white"
           />
         </div>
-        <div className="space-y-2 w-24">
-          <Label>Icon</Label>
-          <Input 
-            value={draft.icon || ''} 
-            onChange={e => onChange({ icon: e.target.value })}
-            className="bg-[#111111] border-[#2d2d2d] text-white text-center text-lg"
-            placeholder="⚡"
-            maxLength={4}
-          />
+        
+        <div className="space-y-2 w-32">
+          <Label>Avatar URL</Label>
+          <div className="flex gap-2">
+             <div className="w-10 h-10 rounded bg-[#2d2d2d] flex items-center justify-center text-lg overflow-hidden border border-[#333]">
+                {draft.icon_url ? (
+                  <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
+                ) : (
+                  <ImageIcon className="h-4 w-4 text-neutral-500" />
+                )}
+             </div>
+             <Input 
+                value={draft.icon_url || ''} 
+                onChange={e => onChange({ icon_url: e.target.value })}
+                className="bg-[#111111] border-[#2d2d2d] text-white text-xs"
+                placeholder="https://..."
+             />
+          </div>
         </div>
       </div>
 
