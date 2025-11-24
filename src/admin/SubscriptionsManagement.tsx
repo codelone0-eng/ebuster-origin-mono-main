@@ -123,6 +123,37 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
     return () => clearTimeout(timer);
   }, [formData.user_email, isCreateOpen]);
 
+  const loadUsersForSelect = async (page: number = 1, search: string = '') => {
+    try {
+      setLoadingUsers(true);
+      const params: any = {
+        page,
+        limit: usersPagination.limit,
+      };
+      if (search) {
+        params.search = search;
+      }
+      const data = await getUsers(params);
+      setUsersList(data.users || []);
+      setUsersPagination(data.pagination || { page, limit: 20, total: 0 });
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      toast({ 
+        title: 'Error', 
+        description: 'Failed to load users', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isUserSelectOpen) {
+      loadUsersForSelect(1, userSearchQuery);
+    }
+  }, [isUserSelectOpen, userSearchQuery]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -511,7 +542,6 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
                Select a subscription to view details
             </div>
          )}
-      </div>
       </div>
       </div>
 
