@@ -121,14 +121,14 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-card backdrop-blur-xl border border-gray-200 dark:border-border rounded-2xl shadow-2xl">
+      <DialogContent className="sm:max-w-md bg-[#1a1a1a] border-[#2d2d2d]">
         <DialogHeader className="space-y-3">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold text-foreground">
+            <DialogTitle className="text-2xl font-bold text-white">
               {t('login.title')}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-[#808080]">
             {t('login.description')}
           </DialogDescription>
         </DialogHeader>
@@ -138,11 +138,11 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
           <RecentUsers onUserSelect={handleUserSelect} />
           
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            <Label htmlFor="email" className="text-sm font-medium text-white">
               {t('login.fields.email')}
             </Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
               <Input
                 id="email"
                 name="email"
@@ -151,17 +151,17 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                 className="pl-10 rounded-xl h-12"
+                className="pl-10 h-12 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            <Label htmlFor="password" className="text-sm font-medium text-white">
               {t('login.fields.password')}
             </Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
               <Input
                 id="password"
                 name="password"
@@ -170,19 +170,19 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
                 value={formData.password}
                 onChange={handleInputChange}
                 required
-                 className="pl-10 pr-12 rounded-xl h-12"
+                className="pl-10 pr-12 h-12 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-[#808080] hover:text-[#d9d9d9] transition-colors"
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  <EyeOff className="h-4 w-4" />
                 ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
+                  <Eye className="h-4 w-4" />
                 )}
               </Button>
             </div>
@@ -199,8 +199,8 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
                   <div 
-                    className={`w-4 h-4 rounded border-2 hover:border-primary focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200 flex items-center justify-center cursor-pointer ${
-                      rememberMe ? 'border-primary bg-primary' : 'border-border bg-background'
+                    className={`w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center cursor-pointer ${
+                      rememberMe ? 'border-[#404040] bg-[#404040]' : 'border-[#2d2d2d] bg-[#111111]'
                     }`}
                     onClick={() => setRememberMe(!rememberMe)}
                   >
@@ -219,13 +219,13 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
                     </svg>
                   </div>
                 </div>
-                <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
+                <Label htmlFor="remember" className="text-sm text-[#808080] cursor-pointer">
                   {t('login.rememberMe')}
                 </Label>
               </div>
             <Button
               variant="link"
-              className="p-0 h-auto text-primary hover:text-primary/80 text-sm"
+              className="p-0 h-auto text-[#808080] hover:text-[#d9d9d9] text-sm transition-colors"
               asChild
             >
               <Link to="/forgot-password">
@@ -236,7 +236,7 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
 
           <Button
             type="submit"
-            className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-semibold"
+            className="w-full h-12 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors font-semibold"
             disabled={isLoading}
           >
             {isLoading ? t('header.modals.login.signingIn') : t('header.modals.login.signIn')}
@@ -244,12 +244,12 @@ export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
         </form>
 
         <div className="text-center mt-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[#808080]">
             {t('login.buttons.dontHaveAccount')}{" "}
             <Button
               variant="link"
               onClick={onSwitchToRegister}
-              className="p-0 h-auto text-primary hover:text-primary/80 font-medium"
+              className="p-0 h-auto text-[#d9d9d9] hover:text-white font-medium transition-colors"
             >
               {t('login.buttons.createAccount')}
             </Button>

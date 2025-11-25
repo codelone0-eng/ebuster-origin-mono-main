@@ -135,36 +135,36 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#111111] p-4">
       <div className="w-full max-w-md">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-4"
+          className="mb-6 text-[#808080] hover:text-white hover:bg-[#1a1a1a]"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           На главную
         </Button>
 
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
+        <Card className="bg-[#1a1a1a] border-[#2d2d2d]">
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-3xl font-bold text-center text-white">
               Вход в систему
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-[#808080]">
               Введите свои данные для входа
             </CardDescription>
           </CardHeader>
           
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               {/* Recent Users */}
               <RecentUsers onUserSelect={handleUserSelect} />
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium text-white">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
                   <Input
                     id="email"
                     name="email"
@@ -172,7 +172,7 @@ export default function Login() {
                     placeholder="your@email.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10"
+                    className="pl-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
                     required
                     disabled={loading}
                   />
@@ -181,16 +181,16 @@ export default function Login() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Пароль</Label>
+                  <Label htmlFor="password" className="text-sm font-medium text-white">Пароль</Label>
                   <Link 
                     to="/forgot-password" 
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm text-[#808080] hover:text-[#d9d9d9] transition-colors"
                   >
                     Забыли пароль?
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
                   <Input
                     id="password"
                     name="password"
@@ -198,7 +198,7 @@ export default function Login() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
                     required
                     disabled={loading}
                   />
@@ -206,14 +206,14 @@ export default function Login() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-[#808080] hover:text-[#d9d9d9]"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -226,16 +226,16 @@ export default function Login() {
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="h-4 w-4 rounded border-[#2d2d2d] bg-[#111111] text-[#404040] focus:ring-[#404040] focus:ring-offset-0"
                 />
-                <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer text-[#808080]">
                   Запомнить меня
                 </Label>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full h-12 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors" 
                 disabled={loading}
               >
                 {loading ? (
@@ -250,10 +250,10 @@ export default function Login() {
             </CardContent>
           </form>
 
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="text-sm text-center text-muted-foreground">
+          <CardFooter className="flex flex-col space-y-4 pt-6">
+            <div className="text-sm text-center text-[#808080]">
               Нет аккаунта?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium">
+              <Link to="/register" className="text-[#d9d9d9] hover:text-white hover:underline font-medium transition-colors">
                 Зарегистрироваться
               </Link>
             </div>
