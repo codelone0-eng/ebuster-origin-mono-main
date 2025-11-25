@@ -12,9 +12,15 @@ export const getSubscriptions = async (req: Request, res: Response) => {
       .from('subscriptions')
       .select(`
         *,
-        users!subscriptions_user_id_fkey (
+        users:users!subscriptions_user_id_fkey (
           email,
           full_name
+        ),
+        roles:roles!subscriptions_role_id_fkey (
+          id,
+          name,
+          display_name,
+          price_monthly
         )
       `)
       .order('created_at', { ascending: false });
@@ -28,22 +34,30 @@ export const getSubscriptions = async (req: Request, res: Response) => {
     }
 
     // Форматируем данные
-    const formattedSubscriptions = subscriptions.map(sub => ({
-      id: sub.id,
-      user_id: sub.user_id,
-      user_email: sub.auth_users?.email || 'Unknown',
-      user_name: sub.auth_users?.full_name || 'Unknown',
-      plan: sub.plan,
-      status: sub.status,
-      start_date: sub.start_date,
-      end_date: sub.end_date,
-      auto_renew: sub.auto_renew,
-      payment_method: sub.payment_method,
-      amount: sub.amount,
-      features: sub.features || [],
-      created_at: sub.created_at,
-      updated_at: sub.updated_at
-    }));
+    const formattedSubscriptions = subscriptions.map((sub) => {
+      const amount =
+        typeof sub.amount === 'number'
+          ? sub.amount
+          : Number(sub.amount || sub.roles?.price_monthly || 0);
+
+      return {
+        id: sub.id,
+        user_id: sub.user_id,
+        user_email: sub.users?.email || sub.user_email || 'Unknown',
+        user_name: sub.users?.full_name || sub.user_name || 'Unknown',
+        plan: sub.plan || sub.roles?.name || 'unknown',
+        plan_display_name: sub.roles?.display_name || sub.plan,
+        status: sub.status,
+        start_date: sub.start_date,
+        end_date: sub.end_date,
+        auto_renew: sub.auto_renew,
+        payment_method: sub.payment_method,
+        amount,
+        features: sub.features || [],
+        created_at: sub.created_at,
+        updated_at: sub.updated_at
+      };
+    });
 
     res.json({
       success: true,
