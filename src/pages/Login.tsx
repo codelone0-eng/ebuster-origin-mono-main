@@ -3,14 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { RecentUsers } from '@/components/RecentUsers';
 
-// Генерация authorization code для OAuth
 const generateAuthCode = () => {
   return 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
@@ -68,14 +66,12 @@ export default function Login() {
           variant: "destructive"
         });
       } else {
-        // Сохраняем email для будущих входов
         if (rememberMe) {
           localStorage.setItem('lastEmail', formData.email);
         } else {
           localStorage.removeItem('lastEmail');
         }
         
-        // Добавляем в список недавних пользователей
         const recentUsers = JSON.parse(localStorage.getItem('recentUsers') || '[]');
         const userExists = recentUsers.find((u: any) => u.email === formData.email);
         if (!userExists) {
@@ -86,24 +82,14 @@ export default function Login() {
           localStorage.setItem('recentUsers', JSON.stringify(recentUsers.slice(0, 3)));
         }
         
-        // Проверяем, есть ли OAuth параметры для расширения
         const oauthParams = sessionStorage.getItem('oauth_params');
         if (oauthParams) {
           try {
             const params = JSON.parse(oauthParams);
-            console.log('🔐 OAuth flow after login:', params);
-            
-            // Генерируем authorization code
             const authCode = generateAuthCode();
-            
-            // Перенаправляем обратно в расширение с кодом
             const redirectUrl = `${params.redirect_uri}?code=${authCode}&state=success`;
-            console.log('🔐 Redirecting to:', redirectUrl);
-            
-            // Сохраняем код для обмена на токен
             sessionStorage.setItem('auth_code', authCode);
             sessionStorage.setItem('oauth_client_id', params.client_id);
-            
             window.location.href = redirectUrl;
             return;
           } catch (error) {
@@ -117,7 +103,6 @@ export default function Login() {
           variant: "success"
         });
         
-        // Перенаправление в личный кабинет
         setTimeout(() => {
           window.location.href = 'https://lk.ebuster.ru/dashboard';
         }, 1000);
@@ -135,36 +120,30 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111111] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4">
       <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="mb-6 text-[#808080] hover:text-white hover:bg-[#1a1a1a]"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          На главную
-        </Button>
-
-        <Card className="bg-[#1a1a1a] border-[#2d2d2d]">
-          <CardHeader className="space-y-3">
-            <CardTitle className="text-3xl font-bold text-center text-white">
-              Вход в систему
-            </CardTitle>
-            <CardDescription className="text-center text-[#808080]">
-              Введите свои данные для входа
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-5">
-              {/* Recent Users */}
+        <div className="bg-black border border-white/10 rounded-lg p-12">
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <h1 className="text-5xl font-bold text-white" style={{ 
+                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.02em'
+              }}>
+                Вход в систему
+              </h1>
+              <p className="text-white/60 text-lg">
+                Введите свои данные для входа
+              </p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
               <RecentUsers onUserSelect={handleUserSelect} />
               
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-white">Email</Label>
+                <Label htmlFor="email" className="text-white/80 text-sm font-medium">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="email"
                     name="email"
@@ -172,7 +151,7 @@ export default function Login() {
                     placeholder="your@email.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -181,16 +160,16 @@ export default function Login() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium text-white">Пароль</Label>
+                  <Label htmlFor="password" className="text-white/80 text-sm font-medium">Пароль</Label>
                   <Link 
                     to="/forgot-password" 
-                    className="text-sm text-[#808080] hover:text-[#d9d9d9] transition-colors"
+                    className="text-sm text-white/60 hover:text-white transition-colors"
                   >
                     Забыли пароль?
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="password"
                     name="password"
@@ -198,7 +177,7 @@ export default function Login() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 pr-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -206,59 +185,58 @@ export default function Login() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-[#808080] hover:text-[#d9d9d9]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                 </div>
               </div>
 
-              {/* Remember me checkbox */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <input
                   type="checkbox"
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-[#2d2d2d] bg-[#111111] text-[#404040] focus:ring-[#404040] focus:ring-offset-0"
+                  className="h-4 w-4 rounded border-white/20 bg-black text-white focus:ring-white/20 focus:ring-2"
                 />
-                <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer text-[#808080]">
+                <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
                   Запомнить меня
                 </Label>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors" 
+                className="w-full h-14 bg-white text-black hover:bg-white/90 transition-colors text-base font-medium" 
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Вход...
                   </>
                 ) : (
                   'Войти'
                 )}
               </Button>
-            </CardContent>
-          </form>
+            </form>
 
-          <CardFooter className="flex flex-col space-y-4 pt-6">
-            <div className="text-sm text-center text-[#808080]">
-              Нет аккаунта?{' '}
-              <Link to="/register" className="text-[#d9d9d9] hover:text-white hover:underline font-medium transition-colors">
-                Зарегистрироваться
-              </Link>
+            <div className="text-center">
+              <p className="text-sm text-white/60">
+                Нет аккаунта?{' '}
+                <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
+                  Зарегистрироваться
+                </Link>
+              </p>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -180,7 +180,7 @@ const applyFilters = (client: SupabaseClient, params: ScriptListParams) => {
   const sortColumn = params.sort || 'created_at';
   const orderDirection = params.order === 'asc';
   if (query && typeof query.order === 'function') {
-    query = query.order(sortColumn, { ascending: orderDirection });
+  query = query.order(sortColumn, { ascending: orderDirection });
   }
 
   return query;
@@ -205,32 +205,32 @@ export class ScriptsService {
         .select('*')
         .range(offset, offset + perPage - 1);
 
-      if (error) {
+    if (error) {
         console.error('[ScriptsService] list query error:', error);
-        throw error;
-      }
+      throw error;
+    }
 
       // Получаем общее количество
       let countQuery = applyFilters(this.client, params);
       const { count, error: countError } = await countQuery
         .select('*', { count: 'exact', head: true });
 
-      if (countError) {
+    if (countError) {
         console.error('[ScriptsService] count query error:', countError);
-        throw countError;
+      throw countError;
+    }
+
+    const total = count || 0;
+
+    return {
+      items: (records || []).map(mapScriptRecord),
+      pagination: {
+        page: currentPage,
+        limit: perPage,
+        total,
+        pages: Math.ceil(total / perPage)
       }
-
-      const total = count || 0;
-
-      return {
-        items: (records || []).map(mapScriptRecord),
-        pagination: {
-          page: currentPage,
-          limit: perPage,
-          total,
-          pages: Math.ceil(total / perPage)
-        }
-      };
+    };
     } catch (error) {
       console.error('[ScriptsService] list error:', error);
       throw error;

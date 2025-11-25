@@ -396,8 +396,8 @@ export const getUserDetails = async (req: Request, res: Response) => {
     let userTickets = 0;
     try {
       const { count } = await supabase
-        .from('tickets')
-        .select('*', { count: 'exact', head: true })
+      .from('tickets')
+      .select('*', { count: 'exact', head: true })
         .eq('user_id', id);
       userTickets = count || 0;
     } catch (e) {
@@ -407,8 +407,8 @@ export const getUserDetails = async (req: Request, res: Response) => {
     let userScripts = 0;
     try {
       const { count } = await supabase
-        .from('scripts')
-        .select('*', { count: 'exact', head: true })
+      .from('scripts')
+      .select('*', { count: 'exact', head: true })
         .eq('author_id', id);
       userScripts = count || 0;
     } catch (e) {
@@ -552,7 +552,7 @@ export const getSystemLogs = async (req: Request, res: Response) => {
         level = 'ERROR';
       } else if (status >= 400 && status < 500) {
         level = 'WARNING';
-      }
+    }
 
       const message = `HTTP ${row.method || 'GET'} ${row.path || '/'} → ${
         row.status_code ?? '-'

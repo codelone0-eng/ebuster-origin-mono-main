@@ -3,10 +3,9 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, User, ArrowLeft, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Register() {
@@ -28,7 +27,6 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
 
-  // Проверяем реферальный код из localStorage или URL
   useEffect(() => {
     const savedRefCode = localStorage.getItem('referral_code');
     const urlRefCode = searchParams.get('ref');
@@ -41,7 +39,6 @@ export default function Register() {
     }
   }, [searchParams]);
 
-  // Password validation
   const passwordRequirements = [
     { 
       text: 'Минимум 8 символов', 
@@ -78,18 +75,15 @@ export default function Register() {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     let password = "";
     
-    // Гарантируем наличие хотя бы одного символа каждого типа
     password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
     password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
     password += "0123456789"[Math.floor(Math.random() * 10)];
     password += "!@#$%^&*"[Math.floor(Math.random() * 8)];
     
-    // Заполняем остальные символы
     for (let i = password.length; i < length; i++) {
       password += charset[Math.floor(Math.random() * charset.length)];
     }
     
-    // Перемешиваем символы
     password = password.split('').sort(() => Math.random() - 0.5).join('');
     
     setGeneratedPassword(password);
@@ -99,7 +93,6 @@ export default function Register() {
       confirmPassword: password
     }));
     
-    // Копируем в буфер обмена
     try {
       navigator.clipboard?.writeText(password).catch(() => {});
     } catch {}
@@ -162,19 +155,14 @@ export default function Register() {
           variant: "destructive"
         });
       } else {
-        // Сохраняем email для будущих входов
         localStorage.setItem('lastEmail', formData.email);
         
-        // Сохраняем реферальный код для применения после подтверждения email
         if (referralCode && referralCode.length > 0) {
           localStorage.setItem('pending_referral_code', referralCode);
         }
         
-        // Очищаем временный код
         localStorage.removeItem('referral_code');
       }
-      // Успешная регистрация обрабатывается в CustomAuthContext
-      // и перенаправляет на /verify-otp
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -188,33 +176,27 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111111] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4">
       <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="mb-6 text-[#808080] hover:text-white hover:bg-[#1a1a1a]"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          На главную
-        </Button>
-
-        <Card className="bg-[#1a1a1a] border-[#2d2d2d]">
-          <CardHeader className="space-y-3">
-            <CardTitle className="text-3xl font-bold text-center text-white">
-              Регистрация
-            </CardTitle>
-            <CardDescription className="text-center text-[#808080]">
-              Создайте аккаунт для доступа к EBUSTER
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-5">
-              {/* Реферальный код (если есть) */}
+        <div className="bg-black border border-white/10 rounded-lg p-12">
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <h1 className="text-5xl font-bold text-white" style={{ 
+                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.02em'
+              }}>
+                Регистрация
+              </h1>
+              <p className="text-white/60 text-lg">
+                Создайте аккаунт для доступа к EBUSTER
+              </p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
               {referralCode && (
-                <div className="bg-[#2d2d2d] border border-[#404040] rounded-lg p-3">
-                  <p className="text-sm font-medium text-[#d9d9d9] flex items-center gap-2">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <p className="text-sm font-medium text-white flex items-center gap-2">
                     <Gift className="h-4 w-4" />
                     Реферальный код: {referralCode}
                   </p>
@@ -222,9 +204,9 @@ export default function Register() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium text-white">Полное имя *</Label>
+                <Label htmlFor="fullName" className="text-white/80 text-sm font-medium">Полное имя *</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="fullName"
                     name="fullName"
@@ -232,7 +214,7 @@ export default function Register() {
                     placeholder="Иван Иванов"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="pl-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -240,9 +222,9 @@ export default function Register() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-white">Email *</Label>
+                <Label htmlFor="email" className="text-white/80 text-sm font-medium">Email *</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="email"
                     name="email"
@@ -250,7 +232,7 @@ export default function Register() {
                     placeholder="your@email.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -259,7 +241,7 @@ export default function Register() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium text-white">Пароль *</Label>
+                  <Label htmlFor="password" className="text-white/80 text-sm font-medium">Пароль *</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -269,7 +251,7 @@ export default function Register() {
                       e.stopPropagation();
                       generatePassword();
                     }}
-                    className="h-8 px-3 text-xs bg-[#111111] border-[#2d2d2d] text-[#808080] hover:bg-[#2d2d2d] hover:text-white"
+                    className="h-8 px-3 text-xs bg-transparent border-white/10 text-white/60 hover:bg-white/5 hover:text-white"
                     disabled={loading}
                   >
                     <RefreshCw className="h-3 w-3 mr-1" />
@@ -277,7 +259,7 @@ export default function Register() {
                   </Button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="password"
                     name="password"
@@ -285,7 +267,7 @@ export default function Register() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 pr-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -293,22 +275,21 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-[#808080] hover:text-[#d9d9d9]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                 </div>
 
-                {/* Password requirements */}
                 {formData.password && (
-                  <div className="mt-3 p-4 bg-[#111111] border border-[#2d2d2d] rounded-lg space-y-2">
-                    <p className="text-sm font-semibold text-white mb-3">Требования к паролю:</p>
+                  <div className="mt-4 p-4 bg-white/5 border border-white/10 rounded-lg space-y-2">
+                    <p className="text-sm font-semibold text-white">Требования к паролю:</p>
                     <div className="space-y-2">
                       {passwordRequirements.map((req, index) => {
                         const Icon = req.icon;
@@ -317,13 +298,13 @@ export default function Register() {
                           <div 
                             key={index}
                             className={`flex items-center gap-2 text-sm ${
-                              met ? 'text-[#d9d9d9]' : 'text-[#808080]'
+                              met ? 'text-white' : 'text-white/40'
                             }`}
                           >
                             {met ? (
-                              <Check className="h-4 w-4 text-[#d9d9d9]" />
+                              <Check className="h-4 w-4" />
                             ) : (
-                              <X className="h-4 w-4 text-[#808080]" />
+                              <X className="h-4 w-4" />
                             )}
                             <Icon className="h-3 w-3" />
                             <span>{req.text}</span>
@@ -336,9 +317,9 @@ export default function Register() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-white">Подтвердите пароль *</Label>
+                <Label htmlFor="confirmPassword" className="text-white/80 text-sm font-medium">Подтвердите пароль *</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#808080]" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -346,7 +327,7 @@ export default function Register() {
                     placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
+                    className="pl-12 pr-12 h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     required
                     disabled={loading}
                   />
@@ -354,31 +335,30 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent text-[#808080] hover:text-[#d9d9d9]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     disabled={loading}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                 </div>
 
-                {/* Password match indicator */}
                 {formData.confirmPassword && (
                   <div className={`flex items-center gap-2 text-sm mt-2 ${
-                    passwordsMatch ? 'text-[#d9d9d9]' : 'text-[#808080]'
+                    passwordsMatch ? 'text-white' : 'text-white/60'
                   }`}>
                     {passwordsMatch ? (
                       <>
-                        <Check className="h-4 w-4 text-[#d9d9d9]" />
+                        <Check className="h-4 w-4" />
                         <span className="font-medium">Пароли совпадают</span>
                       </>
                     ) : (
                       <>
-                        <X className="h-4 w-4 text-[#808080]" />
+                        <X className="h-4 w-4" />
                         <span className="font-medium">Пароли не совпадают</span>
                       </>
                     )}
@@ -386,27 +366,24 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Реферальный код */}
               {!referralCode && (
                 <div className="space-y-2">
-                  <Label htmlFor="referralCodeInput" className="text-sm font-medium text-white flex items-center gap-2">
+                  <Label htmlFor="referralCodeInput" className="text-white/80 text-sm font-medium flex items-center gap-2">
                     <Gift className="h-4 w-4" />
                     Реферальный код (опционально)
                   </Label>
-                  <div className="relative">
-                    <Input
-                      id="referralCodeInput"
-                      name="referralCodeInput"
-                      type="text"
-                      placeholder="Введите код, если есть"
-                      value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                      className="pl-4 uppercase bg-[#111111] border-[#2d2d2d] text-white placeholder:text-[#808080] focus:border-[#404040]"
-                      disabled={loading}
-                    />
-                  </div>
+                  <Input
+                    id="referralCodeInput"
+                    name="referralCodeInput"
+                    type="text"
+                    placeholder="Введите код, если есть"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    className="h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30 uppercase"
+                    disabled={loading}
+                  />
                   {referralCode && (
-                    <p className="text-xs text-[#d9d9d9] flex items-center gap-1">
+                    <p className="text-xs text-white flex items-center gap-1">
                       <Check className="h-3 w-3" />
                       Вы получите скидку при использовании этого кода!
                     </p>
@@ -416,30 +393,30 @@ export default function Register() {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors" 
+                className="w-full h-14 bg-white text-black hover:bg-white/90 transition-colors text-base font-medium" 
                 disabled={loading || !allRequirementsMet || !passwordsMatch}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Регистрация...
                   </>
                 ) : (
                   'Зарегистрироваться'
                 )}
               </Button>
-            </CardContent>
-          </form>
+            </form>
 
-          <CardFooter className="flex flex-col space-y-4 pt-6">
-            <div className="text-sm text-center text-[#808080]">
-              Уже есть аккаунт?{' '}
-              <Link to="/login" className="text-[#d9d9d9] hover:text-white hover:underline font-medium transition-colors">
-                Войти
-              </Link>
+            <div className="text-center">
+              <p className="text-sm text-white/60">
+                Уже есть аккаунт?{' '}
+                <Link to="/login" className="text-white hover:text-white/80 transition-colors font-medium">
+                  Войти
+                </Link>
+              </p>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

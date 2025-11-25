@@ -26,7 +26,6 @@ const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Lenis smooth scroll
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -47,7 +46,6 @@ const Index = () => {
     };
   }, []);
 
-  // Hero fade in
   useEffect(() => {
     if (!heroRef.current) return;
 
@@ -66,7 +64,6 @@ const Index = () => {
     };
   }, []);
 
-  // Features scroll reveal
   useEffect(() => {
     if (!featuresRef.current) return;
 
@@ -97,7 +94,6 @@ const Index = () => {
     };
   }, []);
 
-  // Section reveals
   useEffect(() => {
     const sections = document.querySelectorAll('section[data-section]');
     
@@ -148,7 +144,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#111111] overflow-x-hidden">
+    <div className="min-h-screen bg-black overflow-x-hidden">
       <SEO
         title="EBUSTER — расширение нового поколения для Chrome"
         description="EBUSTER — №1 userscript менеджер с автоматизацией браузера, библиотекой скриптов и API. Бесплатная альтернатива Tampermonkey."
@@ -158,29 +154,23 @@ const Index = () => {
         <AuthStatusChecker />
         <Header />
 
-        {/* Hero Section */}
-        <section ref={heroRef} className="relative pt-32 pb-32 px-4 min-h-[85vh] flex items-center">
+        {/* Hero Section - Nightwatch style */}
+        <section ref={heroRef} className="relative pt-32 pb-32 px-4 min-h-[95vh] flex items-center">
           <div className="container mx-auto max-w-7xl">
-            <div className="text-center max-w-4xl mx-auto">
-              <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-                <Code2 className="h-4 w-4 text-[#d9d9d9]" />
-                <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
-                  {t('index.hero.badge')}
-                </span>
-              </div>
-
-              <h1 className="hero-element text-6xl md:text-8xl font-bold mb-8 tracking-tight text-white" style={{ 
-                fontSize: 'clamp(3rem, 10vw, 5.5rem)',
+            <div className="text-center max-w-6xl mx-auto">
+              <h1 className="hero-element text-8xl md:text-[12rem] font-bold mb-8 tracking-tight text-white" style={{ 
+                fontSize: 'clamp(5rem, 15vw, 12rem)',
                 fontWeight: 700,
-                lineHeight: '1.1',
-                letterSpacing: '-0.02em'
+                lineHeight: '0.95',
+                letterSpacing: '-0.04em'
               }}>
                 {t('index.hero.title')}
               </h1>
               
-              <p className="hero-element text-xl md:text-2xl text-[#808080] mb-12 max-w-3xl mx-auto leading-relaxed" style={{
-                fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
-                lineHeight: '1.7'
+              <p className="hero-element text-2xl md:text-4xl text-white/70 mb-12 max-w-5xl mx-auto leading-relaxed" style={{
+                fontSize: 'clamp(1.5rem, 3.5vw, 2.25rem)',
+                lineHeight: '1.5',
+                fontWeight: 400
               }}>
                 {t('index.hero.subtitle')}
               </p>
@@ -188,20 +178,18 @@ const Index = () => {
               <div className="hero-element flex items-center justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg" 
-                  className="h-14 px-10 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors duration-200"
+                  className="h-14 px-10 bg-white text-black hover:bg-white/90 transition-colors duration-200 text-base font-medium"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
-                  <Download className="mr-2 h-5 w-5" />
                   {t('index.hero.getStarted')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-14 px-10 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors duration-200"
+                  className="h-14 px-10 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/30 transition-colors duration-200 text-base font-medium"
                   onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
                 >
-                  <Terminal className="mr-2 h-5 w-5" />
                   {t('index.hero.documentation')}
                 </Button>
               </div>
@@ -209,37 +197,38 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section ref={featuresRef} data-section className="py-32 px-4 bg-[#1a1a1a] relative">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl md:text-6xl font-bold mb-6 text-white" style={{
-                fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+        {/* Features Section - Nightwatch style */}
+        <section ref={featuresRef} data-section className="py-40 px-4 bg-black relative">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-32">
+              <h2 className="text-6xl md:text-8xl font-bold mb-8 text-white" style={{
+                fontSize: 'clamp(3rem, 8vw, 6rem)',
                 fontWeight: 700,
-                letterSpacing: '-0.02em'
+                letterSpacing: '-0.03em',
+                lineHeight: '1'
               }}>
                 {t('index.features.title')}
               </h2>
-              <p className="text-lg text-[#808080] max-w-2xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+              <p className="text-xl text-white/60 max-w-3xl mx-auto" style={{ fontSize: '18px', lineHeight: '1.6' }}>
                 {t('index.features.description')}
               </p>
             </div>
 
             {/* Main Feature Cards */}
-            <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid lg:grid-cols-3 gap-8 mb-24">
               {features.map((feature, i) => (
                 <Card 
                   key={i}
-                  className="feature-card bg-[#1a1a1a] border-[#2d2d2d] p-10 group"
+                  className="feature-card bg-black border border-white/10 p-12"
                 >
                   <CardContent className="p-0">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-14 h-14 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
-                        <feature.icon className="h-7 w-7 text-[#d9d9d9]" />
+                    <div className="mb-8">
+                      <div className="w-16 h-16 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                        <feature.icon className="h-8 w-8 text-white" />
                       </div>
-                      <h3 className="text-2xl font-semibold text-white">{feature.title}</h3>
+                      <h3 className="text-3xl font-semibold text-white mb-4">{feature.title}</h3>
                     </div>
-                    <p className="text-[#808080] leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.7' }}>
+                    <p className="text-white/60 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                       {feature.desc}
                     </p>
                   </CardContent>
@@ -252,14 +241,14 @@ const Index = () => {
               {gridFeatures.map((feature, i) => (
                 <Card 
                   key={i}
-                  className="feature-card bg-[#1a1a1a] border-[#2d2d2d] p-8 group"
+                  className="feature-card bg-black border border-white/10 p-10"
                 >
                   <CardContent className="p-0">
-                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center mb-5">
-                      <feature.icon className="h-6 w-6 text-[#d9d9d9]" />
+                    <div className="w-14 h-14 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                      <feature.icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-3 text-white">{feature.title}</h3>
-                    <p className="text-sm text-[#808080] leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                    <h3 className="text-xl font-semibold mb-4 text-white">{feature.title}</h3>
+                    <p className="text-white/60 leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.6' }}>
                       {feature.desc}
                     </p>
                   </CardContent>
@@ -270,33 +259,34 @@ const Index = () => {
         </section>
 
         {/* Extension Features Section */}
-        <section data-section className="py-32 px-4 bg-[#111111] relative">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl md:text-6xl font-bold mb-6 text-white" style={{
-                fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+        <section data-section className="py-40 px-4 bg-black relative">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-32">
+              <h2 className="text-6xl md:text-8xl font-bold mb-8 text-white" style={{
+                fontSize: 'clamp(3rem, 8vw, 6rem)',
                 fontWeight: 700,
-                letterSpacing: '-0.02em'
+                letterSpacing: '-0.03em',
+                lineHeight: '1'
               }}>
                 {t('index.extensionFeatures.title')}
               </h2>
-              <p className="text-lg text-[#808080] max-w-2xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+              <p className="text-xl text-white/60 max-w-3xl mx-auto" style={{ fontSize: '18px', lineHeight: '1.6' }}>
                 {t('index.extensionFeatures.description')}
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
               {extensionFeatures.map((feature, i) => (
                 <Card 
                   key={i}
-                  className="feature-card bg-[#1a1a1a] border-[#2d2d2d] p-8 group"
+                  className="feature-card bg-black border border-white/10 p-10"
                 >
                   <CardContent className="p-0">
-                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center mb-5">
-                      <feature.icon className="h-6 w-6 text-[#d9d9d9]" />
+                    <div className="w-14 h-14 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                      <feature.icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-3 text-white">{feature.title}</h3>
-                    <p className="text-sm text-[#808080] leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                    <h3 className="text-xl font-semibold mb-4 text-white">{feature.title}</h3>
+                    <p className="text-white/60 leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.6' }}>
                       {feature.desc}
                     </p>
                   </CardContent>
@@ -304,10 +294,10 @@ const Index = () => {
               ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button 
                 size="lg" 
-                className="h-14 px-10 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors duration-200"
+                className="h-16 px-12 bg-white text-black hover:bg-white/90 transition-colors duration-200 text-lg font-medium"
                 onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
               >
                 <Download className="mr-2 h-5 w-5" />
@@ -316,7 +306,7 @@ const Index = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="h-14 px-10 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors duration-200"
+                className="h-16 px-12 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/30 transition-colors duration-200 text-lg font-medium"
               >
                 <Code2 className="mr-2 h-5 w-5" />
                 Документация
@@ -326,7 +316,7 @@ const Index = () => {
         </section>
 
         {/* FAQ Section */}
-        <section data-section className="py-32 px-4 bg-[#1a1a1a]">
+        <section data-section className="py-40 px-4 bg-black">
           <div className="container mx-auto max-w-4xl">
             <FAQ />
           </div>
