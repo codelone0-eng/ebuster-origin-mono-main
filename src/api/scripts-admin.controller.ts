@@ -80,12 +80,7 @@ const getActor = (req: Request) => {
 export const adminListScripts = async (req: Request, res: Response) => {
   try {
     const params = parseListParams(req);
-    console.log('[scripts-admin] list params:', params);
     const result = await scriptsService.list(params);
-    console.log('[scripts-admin] list result:', { 
-      itemsCount: result.items?.length || 0, 
-      total: result.pagination?.total || 0 
-    });
 
     res.json({
       success: true,

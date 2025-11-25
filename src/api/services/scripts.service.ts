@@ -197,27 +197,9 @@ export class ScriptsService {
     const { currentPage, perPage, offset } = buildPagination(params.page, params.limit);
 
     try {
-      // Строим базовый query с фильтрами
-      let query: any = this.client.from('scripts');
-      const filters = buildFilters(params);
-
-      // Применяем фильтры
-      filters.forEach((apply) => {
-        query = apply(query);
-      });
-
-      // Применяем поиск
-      if (params.search) {
-        query = query.or(
-          `name.ilike.%${params.search}%,description.ilike.%${params.search}%,short_description.ilike.%${params.search}%`
-        );
-      }
-
-      // Применяем сортировку
-      const sortColumn = params.sort || 'created_at';
-      const orderDirection = params.order === 'asc';
-      query = query.order(sortColumn, { ascending: orderDirection });
-
+      // Используем applyFilters для построения query
+      let query = applyFilters(this.client, params);
+      
       // Получаем данные с пагинацией
       const { data: records, error } = await query
         .select('*')
@@ -229,16 +211,7 @@ export class ScriptsService {
       }
 
       // Получаем общее количество
-      let countQuery: any = this.client.from('scripts');
-      filters.forEach((apply) => {
-        countQuery = apply(countQuery);
-      });
-      if (params.search) {
-        countQuery = countQuery.or(
-          `name.ilike.%${params.search}%,description.ilike.%${params.search}%,short_description.ilike.%${params.search}%`
-        );
-      }
-
+      let countQuery = applyFilters(this.client, params);
       const { count, error: countError } = await countQuery
         .select('*', { count: 'exact', head: true });
 
