@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Milestone, Calendar, CircleCheck, Loader2, Flag, Sparkles } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const roadmapContent = {
   ru: {
@@ -184,25 +188,54 @@ const statusConfig: Record<Status, {
 const Roadmap = () => {
   const { language } = useLanguage();
   const content = language === 'ru' ? roadmapContent.ru : roadmapContent.eng;
+  const heroRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
+  }, []);
+
+  useEffect(() => {
+    if (!heroRef.current) return;
+
+    const elements = heroRef.current.querySelectorAll('.hero-element');
+    gsap.from(elements, {
+      opacity: 0,
+      y: 40,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+
+    return () => {
+      gsap.killTweensOf(elements);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!sectionsRef.current) return;
+
+    const sections = sectionsRef.current.querySelectorAll('.roadmap-section');
+    sections.forEach((section) => {
+      gsap.fromTo(section,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 90%",
+            toggleActions: "play none none none",
           }
-        });
-      },
-      { threshold: 0.1 }
-    );
+        }
+      );
+    });
 
-    const elements = document.querySelectorAll('.fade-in-on-scroll');
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   return (
@@ -216,34 +249,33 @@ const Roadmap = () => {
       <Header />
 
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
-        <section className="text-center space-y-6 fade-in-on-scroll">
-          <div className="mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d]">
+        <section ref={heroRef} className="text-center space-y-6">
+          <div className="hero-element mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d]">
             <Milestone className="h-4 w-4 text-[#d9d9d9]" />
             <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {content.hero.badge}
             </span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white" style={{
+          <h1 className="hero-element text-4xl md:text-6xl font-bold text-white" style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
             fontWeight: 700,
             lineHeight: '1.1'
           }}>
             {content.hero.title}
           </h1>
-          <p className="text-lg text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {content.hero.subtitle}
           </p>
-          <p className="text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+          <p className="hero-element text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '14px', lineHeight: '1.5' }}>
             {content.hero.description}
           </p>
         </section>
 
-        <section className="space-y-6">
+        <section ref={sectionsRef} className="space-y-6">
           {content.timeline.map((entry, index) => (
             <Card 
               key={entry.period} 
-              className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="roadmap-section bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
             >
               <CardContent className="p-0">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
@@ -272,7 +304,7 @@ const Roadmap = () => {
 
         <div className="h-px bg-[#2d2d2d]" />
 
-        <section className="space-y-6 fade-in-on-scroll">
+        <section className="roadmap-section space-y-6">
           <h2 className="text-3xl font-semibold text-white text-center">
             {content.updates.title}
           </h2>
@@ -280,8 +312,7 @@ const Roadmap = () => {
             {content.updates.list.map((update, index) => (
               <Card 
                 key={update.date} 
-                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
               >
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
@@ -307,7 +338,7 @@ const Roadmap = () => {
 
         <div className="h-px bg-[#2d2d2d]" />
 
-        <section className="space-y-6 text-center fade-in-on-scroll">
+        <section className="roadmap-section space-y-6 text-center">
           <h2 className="text-3xl font-semibold text-white">
             {content.influence.title}
           </h2>
@@ -318,8 +349,7 @@ const Roadmap = () => {
             {content.influence.actions.map((action, index) => (
               <Card 
                 key={action} 
-                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 h-full transition-colors"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 h-full transition-colors duration-200"
               >
                 <CardContent className="p-0">
                   <div className="flex items-start gap-3">
@@ -334,27 +364,6 @@ const Roadmap = () => {
       </div>
 
       <Footer />
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .fade-in-on-scroll {
-          opacity: 0;
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

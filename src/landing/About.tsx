@@ -1,28 +1,62 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Target, Award, Heart } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
+  }, []);
+
+  useEffect(() => {
+    if (!heroRef.current) return;
+
+    const elements = heroRef.current.querySelectorAll('.hero-element');
+    gsap.from(elements, {
+      opacity: 0,
+      y: 40,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+
+    return () => {
+      gsap.killTweensOf(elements);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cardsRef.current) return;
+
+    const cards = cardsRef.current.querySelectorAll('.about-card');
+    cards.forEach((card) => {
+      gsap.fromTo(card,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none none",
           }
-        });
-      },
-      { threshold: 0.1 }
-    );
+        }
+      );
+    });
 
-    const elements = document.querySelectorAll('.fade-in-on-scroll');
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   return (
@@ -32,8 +66,8 @@ const About = () => {
       <main className="flex-1">
         <div className="container mx-auto max-w-7xl px-4 py-16">
           {/* Hero Section */}
-          <div className="text-center mb-16 fade-in-on-scroll">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white" style={{
+          <div ref={heroRef} className="text-center mb-16">
+            <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{
               fontSize: 'clamp(2rem, 5vw, 3.5rem)',
               fontWeight: 700,
               lineHeight: '1.1'
@@ -41,14 +75,14 @@ const About = () => {
               О нас
             </h1>
             
-            <p className="text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+            <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
               Мы создаем инновационные решения для разработчиков и бизнеса
             </p>
           </div>
 
           {/* Mission & Values */}
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
+          <div ref={cardsRef} className="grid md:grid-cols-2 gap-6 mb-16">
+            <Card className="about-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
@@ -64,7 +98,7 @@ const About = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
+            <Card className="about-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
@@ -83,7 +117,7 @@ const About = () => {
 
           {/* Team & Community */}
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
+            <Card className="about-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
@@ -99,7 +133,7 @@ const About = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
+            <Card className="about-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
@@ -119,27 +153,6 @@ const About = () => {
       </main>
       
       <Footer />
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .fade-in-on-scroll {
-          opacity: 0;
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

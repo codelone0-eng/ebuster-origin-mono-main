@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -16,28 +16,61 @@ import {
   CheckCircle2,
   Code2
 } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Documentation = () => {
   const { t } = useLanguage();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
+  }, []);
+
+  useEffect(() => {
+    if (!heroRef.current) return;
+
+    const elements = heroRef.current.querySelectorAll('.hero-element');
+    gsap.from(elements, {
+      opacity: 0,
+      y: 40,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+
+    return () => {
+      gsap.killTweensOf(elements);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cardsRef.current) return;
+
+    const cards = cardsRef.current.querySelectorAll('.doc-card');
+    cards.forEach((card) => {
+      gsap.fromTo(card,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none none",
           }
-        });
-      },
-      { threshold: 0.1 }
-    );
+        }
+      );
+    });
 
-    const elements = document.querySelectorAll('.fade-in-on-scroll');
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   const quickStartSteps = t('documentation.quickStart.steps');
@@ -58,15 +91,15 @@ const Documentation = () => {
       
       <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16 fade-in-on-scroll">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
+        <div ref={heroRef} className="text-center mb-16">
+          <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
             <BookOpen className="h-4 w-4 text-[#d9d9d9]" />
             <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {t('documentation.hero.badge')}
             </span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white" style={{
+          <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
             fontWeight: 700,
             lineHeight: '1.1'
@@ -74,11 +107,11 @@ const Documentation = () => {
             {t('documentation.hero.title')}
           </h1>
           
-          <p className="text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {t('documentation.hero.description')}
           </p>
 
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="hero-element flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
               className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
@@ -92,19 +125,18 @@ const Documentation = () => {
 
         {/* Quick Start Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white fade-in-on-scroll">
+          <h2 className="text-3xl font-bold text-center mb-12 text-white">
             {t('documentation.quickStart.title')}
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div ref={cardsRef} className="grid md:grid-cols-2 gap-6">
             {Array.isArray(quickStartSteps) && quickStartSteps.map((step: any, index: number) => {
               const IconComponent = getIcon(step.icon);
               
               return (
                 <Card 
                   key={index} 
-                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="doc-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
                 >
                   <CardContent className="p-0">
                     <div className="flex items-start gap-4 mb-4">
@@ -149,7 +181,7 @@ const Documentation = () => {
         </div>
 
         {/* Download CTA Section */}
-        <div className="text-center fade-in-on-scroll">
+        <div className="text-center">
           <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-12">
             <CardContent className="p-0">
               <h3 className="text-3xl font-bold mb-4 text-white">{t('documentation.cta.title')}</h3>
@@ -184,27 +216,6 @@ const Documentation = () => {
       </div>
       
       <Footer />
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .fade-in-on-scroll {
-          opacity: 0;
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

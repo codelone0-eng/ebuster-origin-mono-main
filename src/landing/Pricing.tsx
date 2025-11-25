@@ -9,19 +9,20 @@ import { useToast } from '@/hooks/use-toast';
 import { API_CONFIG } from '@/config/api';
 import { 
   Check, 
-  Zap, 
   Shield, 
   Crown,
   ArrowRight,
   Download,
   Code2,
-  Terminal,
-  Headphones,
   Loader2,
   Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FAQ } from '@/components/FAQ';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Role {
   id: string;
@@ -43,28 +44,56 @@ const Pricing = () => {
   const [loading, setLoading] = useState(true);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     loadRoles();
   }, []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    if (!heroRef.current) return;
 
-    const elements = document.querySelectorAll('.fade-in-on-scroll');
-    elements.forEach((el) => observer.observe(el));
+    const elements = heroRef.current.querySelectorAll('.hero-element');
+    gsap.from(elements, {
+      opacity: 0,
+      y: 40,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
 
-    return () => observer.disconnect();
+    return () => {
+      gsap.killTweensOf(elements);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!cardsRef.current) return;
+
+    const cards = cardsRef.current.querySelectorAll('.pricing-card');
+    cards.forEach((card) => {
+      gsap.fromTo(card,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          }
+        }
+      );
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [roles]);
 
   const loadRoles = async () => {
     try {
@@ -141,15 +170,15 @@ const Pricing = () => {
         
         <div className="container mx-auto max-w-7xl px-4 py-16">
           {/* Hero Section */}
-          <div className="text-center mb-16 fade-in-on-scroll">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
+          <div ref={heroRef} className="text-center mb-16">
+            <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
               <Crown className="h-4 w-4 text-[#d9d9d9]" />
               <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
                 {t('pricing.hero.badge')}
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white" style={{
+            <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{
               fontSize: 'clamp(2rem, 5vw, 3.5rem)',
               fontWeight: 700,
               lineHeight: '1.1'
@@ -157,11 +186,11 @@ const Pricing = () => {
               {t('pricing.hero.title')}
             </h1>
             
-            <p className="text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+            <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
               {t('pricing.hero.description')}
             </p>
 
-            <div className="flex items-center justify-center gap-4 mb-12">
+            <div className="hero-element flex items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
                 className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
@@ -174,7 +203,7 @@ const Pricing = () => {
           </div>
 
           {/* Billing Period Toggle */}
-          <div className="flex justify-center mb-12 fade-in-on-scroll">
+          <div className="flex justify-center mb-12">
             <div className="inline-flex items-center gap-0 p-1 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg" style={{ borderRadius: '4px' }}>
               <button
                 onClick={() => setBillingPeriod('monthly')}
@@ -216,7 +245,7 @@ const Pricing = () => {
               <Loader2 className="h-8 w-8 animate-spin text-[#808080]" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
               {roles.map((role, index) => {
                 const isPremium = role.name === 'premium' || role.name === 'pro';
                 const features = getFeaturesList(role.features);
@@ -226,10 +255,9 @@ const Pricing = () => {
                   <Card
                     key={role.id}
                     className={cn(
-                      "bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-all duration-300",
+                      "pricing-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200",
                       !isPremium && "hover:border-[#404040]"
                     )}
-                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {isPremium && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
@@ -303,14 +331,14 @@ const Pricing = () => {
           )}
 
           {/* FAQ Section */}
-          <div className="mb-16 fade-in-on-scroll">
+          <div className="mb-16">
             <div className="max-w-4xl mx-auto">
               <FAQ />
             </div>
           </div>
 
           {/* CTA Section */}
-          <div className="text-center fade-in-on-scroll">
+          <div className="text-center">
             <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-12">
               <CardContent className="p-0">
                 <h3 className="text-3xl font-bold mb-4 text-white">{t('pricing.cta.title')}</h3>
@@ -346,27 +374,6 @@ const Pricing = () => {
         
         <Footer />
       </div>
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .fade-in-on-scroll {
-          opacity: 0;
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
