@@ -200,9 +200,13 @@ export const createSubscription = async (req: Request, res: Response) => {
     if (subError) {
       console.error('Error creating subscription:', subError);
       
-      // Если ошибка из-за отсутствия колонки auto_renew, пробуем без неё
-      if (subError.message && subError.message.includes('auto_renew')) {
-        delete subscriptionData.auto_renew;
+      // Если ошибка из-за отсутствия колонки, пробуем убрать её из запроса
+      const missingColumnMatch = subError.message?.match(/Could not find the '(\w+)' column/);
+      if (missingColumnMatch) {
+        const missingColumn = missingColumnMatch[1];
+        console.warn(`Column '${missingColumn}' not found, retrying without it`);
+        delete subscriptionData[missingColumn];
+        
         const { data: subscriptionRetry, error: retryError } = await supabaseAdmin
           .from('subscriptions')
           .insert(subscriptionData)
@@ -210,6 +214,32 @@ export const createSubscription = async (req: Request, res: Response) => {
           .single();
         
         if (retryError) {
+          // Если ошибка повторяется, возможно отсутствует другая колонка
+          const anotherMissingColumn = retryError.message?.match(/Could not find the '(\w+)' column/);
+          if (anotherMissingColumn) {
+            const anotherColumn = anotherMissingColumn[1];
+            delete subscriptionData[anotherColumn];
+            
+            const { data: subscriptionRetry2, error: retryError2 } = await supabaseAdmin
+              .from('subscriptions')
+              .insert(subscriptionData)
+              .select()
+              .single();
+            
+            if (retryError2) {
+              return res.status(500).json({
+                success: false,
+                error: 'Failed to create subscription. Please run migration to add missing columns: ' + retryError2.message
+              });
+            }
+            
+            return res.json({
+              success: true,
+              data: subscriptionRetry2,
+              warning: `Some columns were missing: ${missingColumn}, ${anotherColumn}`
+            });
+          }
+          
           return res.status(500).json({
             success: false,
             error: 'Failed to create subscription: ' + retryError.message
@@ -218,7 +248,8 @@ export const createSubscription = async (req: Request, res: Response) => {
         
         return res.json({
           success: true,
-          data: subscriptionRetry
+          data: subscriptionRetry,
+          warning: `Column '${missingColumn}' was missing and skipped`
         });
       }
       
