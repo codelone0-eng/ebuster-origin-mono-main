@@ -10,24 +10,21 @@ const Terms = () => {
       <Header />
       
       <main className="flex-1">
-        <div className="container mx-auto max-w-4xl px-4 py-6 space-y-6">
-        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <FileText className="h-5 w-5 text-neutral-500" />
-            <h1 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600 }}>
-              Условия использования
-            </h1>
-          </div>
-          <p className="text-xs text-neutral-500">Последнее обновление: {new Date().toLocaleDateString('ru-RU')}</p>
+        <div className="container mx-auto max-w-4xl px-4 py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            Условия <span className="text-blue-500">использования</span>
+          </h1>
+          <p className="text-[#808080]">Последнее обновление: {new Date().toLocaleDateString('ru-RU')}</p>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <FileText className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Общие положения</h3>
+        <div className="space-y-8">
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Общие положения</h3>
             </div>
-            <div className="space-y-2 text-xs text-neutral-500">
+            <div className="space-y-4 text-[#808080]">
               <p>
                 Используя наш сервис, вы соглашаетесь с настоящими условиями использования. Пожалуйста, внимательно прочитайте их перед началом работы с платформой.
               </p>
@@ -37,14 +34,16 @@ const Terms = () => {
             </div>
           </div>
 
-          <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Права пользователя</h3>
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Права пользователя</h3>
             </div>
-            <div className="space-y-2 text-xs text-neutral-500">
-              <p>При использовании нашего сервиса вы имеете право:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+            <div className="space-y-4 text-[#808080]">
+              <p>
+                При использовании нашего сервиса вы имеете право:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Получать доступ ко всем функциям в рамках вашего тарифного плана</li>
                 <li>Получать техническую поддержку</li>
                 <li>Экспортировать ваши данные</li>
@@ -53,14 +52,16 @@ const Terms = () => {
             </div>
           </div>
 
-          <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <AlertCircle className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Обязанности пользователя</h3>
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Обязанности пользователя</h3>
             </div>
-            <div className="space-y-2 text-xs text-neutral-500">
-              <p>Используя наш сервис, вы обязуетесь:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+            <div className="space-y-4 text-[#808080]">
+              <p>
+                Используя наш сервис, вы обязуетесь:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Предоставлять точную и актуальную информацию</li>
                 <li>Соблюдать законодательство РФ</li>
                 <li>Не использовать сервис для незаконной деятельности</li>
@@ -70,14 +71,16 @@ const Terms = () => {
             </div>
           </div>
 
-          <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <XCircle className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Ограничения</h3>
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <XCircle className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Ограничения</h3>
             </div>
-            <div className="space-y-2 text-xs text-neutral-500">
-              <p>Запрещается:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+            <div className="space-y-4 text-[#808080]">
+              <p>
+                Запрещается:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Попытки несанкционированного доступа к системе</li>
                 <li>Распространение вредоносного ПО</li>
                 <li>Перепродажа доступа к сервису без разрешения</li>
@@ -87,13 +90,14 @@ const Terms = () => {
             </div>
           </div>
 
-          <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <FileText className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-white">Ответственность</h3>
+          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-6 w-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-white">Ответственность</h3>
             </div>
-            <div className="space-y-2 text-xs text-neutral-500">
-              <p>Мы предоставляем сервис "как есть" и не несем ответственности за:
+            <div className="space-y-4 text-[#808080]">
+              <p>
+                Мы предоставляем сервис "как есть" и не несем ответственности за:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Прямые или косвенные убытки от использования сервиса</li>
