@@ -169,11 +169,11 @@ const statusConfig: Record<Status, {
 }> = {
   completed: {
     icon: <CircleCheck className="h-3.5 w-3.5 text-[#808080]" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-green-600/20 border border-green-500/40',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
   },
   'in-progress': {
     icon: <Loader2 className="h-3.5 w-3.5 text-[#808080]" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-blue-600/20 border border-blue-500/40',
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
   },
   planned: {
     icon: <Flag className="h-3.5 w-3.5 text-[#808080]" />,
@@ -242,13 +242,13 @@ const Roadmap = () => {
           {content.timeline.map((entry, index) => (
             <Card 
               key={entry.period} 
-              className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors"
+              className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-0">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6 text-blue-500" />
+                    <Calendar className="h-6 w-6 text-[#d9d9d9]" />
                     <h3 className="text-2xl font-semibold text-white">{entry.period}</h3>
                   </div>
                   <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-[#1a1a1a] border border-[#2d2d2d] text-[#808080]">
@@ -260,7 +260,7 @@ const Roadmap = () => {
                 <ul className="space-y-2 text-[#808080]">
                   {entry.items.map((item) => (
                     <li key={item} className="flex items-start gap-3">
-                      <Sparkles className="mt-1 h-4 w-4 text-blue-500 flex-shrink-0" />
+                      <Sparkles className="mt-1 h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
                       <span style={{ fontSize: '14px', lineHeight: '1.5' }}>{item}</span>
                     </li>
                   ))}
@@ -280,12 +280,12 @@ const Roadmap = () => {
             {content.updates.list.map((update, index) => (
               <Card 
                 key={update.date} 
-                className="bg-[#1f1f1f] border-[#2d2d2d] p-6 hover:border-blue-500/30 transition-colors"
+                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-                    <div className="flex items-center gap-3 text-blue-500">
+                    <div className="flex items-center gap-3 text-[#d9d9d9]">
                       <Calendar className="h-5 w-5" />
                       <span className="font-semibold">{update.date}</span>
                     </div>
@@ -294,7 +294,7 @@ const Roadmap = () => {
                   <ul className="space-y-2 text-[#808080]">
                     {update.points.map((point) => (
                       <li key={point} className="flex items-start gap-3">
-                        <CircleCheck className="mt-1 h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <CircleCheck className="mt-1 h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
                         <span style={{ fontSize: '14px', lineHeight: '1.5' }}>{point}</span>
                       </li>
                     ))}
@@ -318,12 +318,12 @@ const Roadmap = () => {
             {content.influence.actions.map((action, index) => (
               <Card 
                 key={action} 
-                className="bg-[#1f1f1f] border-[#2d2d2d] p-6 h-full hover:border-blue-500/30 transition-colors"
+                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 h-full transition-colors"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="mt-1 h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <Sparkles className="mt-1 h-5 w-5 text-[#d9d9d9] flex-shrink-0" />
                     <span className="text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>{action}</span>
                   </div>
                 </CardContent>

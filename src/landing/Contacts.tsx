@@ -127,12 +127,12 @@ const Contacts = () => {
               return (
                 <Card 
                   key={index} 
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardContent className="p-0 text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600/10 mb-4">
-                      <IconComponent className="h-6 w-6 text-blue-500" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#2d2d2d] mb-4">
+                      <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">{method.title}</h3>
                     <p className="text-sm text-[#808080] mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -154,7 +154,7 @@ const Contacts = () => {
 
           {/* Contact Form */}
           <div className="max-w-2xl mx-auto fade-in-on-scroll">
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8">
               <CardContent className="p-0">
                 <h2 className="text-2xl font-bold mb-6 text-white">Отправить сообщение</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -221,7 +221,7 @@ const Contacts = () => {
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    className="w-full h-12 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                   >
                     {isSubmitting ? (
                       <>Отправка...</>

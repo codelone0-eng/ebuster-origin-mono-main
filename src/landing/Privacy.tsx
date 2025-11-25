@@ -36,7 +36,7 @@ const Privacy = () => {
             fontWeight: 700,
             lineHeight: '1.1'
           }}>
-            Политика <span className="text-blue-500">конфиденциальности</span>
+            Политика конфиденциальности
           </h1>
           <p className="text-[#808080]" style={{ fontSize: '14px' }}>
             Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
@@ -44,10 +44,10 @@ const Privacy = () => {
         </div>
 
         <div className="space-y-6">
-          <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+          <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Shield className="h-6 w-6 text-blue-500" />
+                <Shield className="h-6 w-6 text-[#d9d9d9]" />
                 <h3 className="text-xl font-semibold text-white">Сбор информации</h3>
               </div>
               <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -61,10 +61,10 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+          <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Lock className="h-6 w-6 text-blue-500" />
+                <Lock className="h-6 w-6 text-[#d9d9d9]" />
                 <h3 className="text-xl font-semibold text-white">Использование данных</h3>
               </div>
               <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -81,10 +81,10 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+          <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Eye className="h-6 w-6 text-blue-500" />
+                <Eye className="h-6 w-6 text-[#d9d9d9]" />
                 <h3 className="text-xl font-semibold text-white">Защита данных</h3>
               </div>
               <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -98,10 +98,10 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+          <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <FileText className="h-6 w-6 text-blue-500" />
+                <FileText className="h-6 w-6 text-[#d9d9d9]" />
                 <h3 className="text-xl font-semibold text-white">Ваши права</h3>
               </div>
               <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -116,7 +116,7 @@ const Privacy = () => {
                   <li>Возразить против обработки данных</li>
                 </ul>
                 <p className="mt-4">
-                  Для реализации этих прав свяжитесь с нами по адресу: <a href="mailto:techsupport@ebuster.ru" className="text-blue-500 hover:underline">techsupport@ebuster.ru</a>
+                  Для реализации этих прав свяжитесь с нами по адресу: <a href="mailto:techsupport@ebuster.ru" className="text-[#d9d9d9] hover:underline">techsupport@ebuster.ru</a>
                 </p>
               </div>
             </CardContent>

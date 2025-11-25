@@ -164,7 +164,7 @@ const Pricing = () => {
             <div className="flex items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
-                className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                 onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -181,7 +181,7 @@ const Pricing = () => {
                 className={cn(
                   "px-4 py-2 text-sm font-medium transition-colors",
                   billingPeriod === 'monthly'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-[#404040] text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 )}
                 style={{
@@ -196,7 +196,7 @@ const Pricing = () => {
                 className={cn(
                   "px-4 py-2 text-sm font-medium transition-colors",
                   billingPeriod === 'yearly'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-[#404040] text-white'
                     : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
                 )}
                 style={{
@@ -205,7 +205,7 @@ const Pricing = () => {
                 }}
               >
                 Ежегодно
-                <Badge className="ml-2 bg-green-600 text-white text-[10px] px-1.5 py-0">-17%</Badge>
+                <Badge className="ml-2 bg-[#404040] text-white text-[10px] px-1.5 py-0">-17%</Badge>
               </button>
             </div>
           </div>
@@ -213,7 +213,7 @@ const Pricing = () => {
           {/* Pricing Cards */}
           {loading ? (
             <div className="flex justify-center items-center py-24">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#808080]" />
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -226,15 +226,14 @@ const Pricing = () => {
                   <Card
                     key={role.id}
                     className={cn(
-                      "bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll transition-all duration-300",
-                      isPremium && "border-blue-500/30 hover:border-blue-500/50",
+                      "bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-all duration-300",
                       !isPremium && "hover:border-[#404040]"
                     )}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {isPremium && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                        <Badge className="bg-blue-600 text-white px-3 py-1 text-xs font-semibold">
+                        <Badge className="bg-[#404040] text-white px-3 py-1 text-xs font-semibold">
                           <Star className="h-3 w-3 mr-1" />
                           Популярный
                         </Badge>
@@ -245,10 +244,10 @@ const Pricing = () => {
                       <div className="text-center mb-6">
                         <div className={cn(
                           "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
-                          isPremium ? "bg-blue-600/10 border-blue-500/20" : "bg-[#2d2d2d] border-[#404040]"
+                          "bg-[#2d2d2d] border-[#404040]"
                         )}>
                           {isPremium ? (
-                            <Crown className="h-6 w-6 text-blue-500" />
+                            <Crown className="h-6 w-6 text-[#d9d9d9]" />
                           ) : (
                             <Code2 className="h-5 w-5 text-[#808080]" />
                           )}
@@ -277,7 +276,7 @@ const Pricing = () => {
                             <li key={featureIndex} className="flex items-start gap-2">
                               <Check className={cn(
                                 "h-4 w-4 mt-0.5 flex-shrink-0",
-                                isPremium ? "text-blue-500" : "text-[#808080]"
+                                "text-[#808080]"
                               )} />
                               <span className="text-sm text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                                 {feature}
@@ -289,9 +288,7 @@ const Pricing = () => {
                         <Button 
                           className={cn(
                             "w-full h-10 rounded-lg font-semibold text-sm mt-auto transition-colors",
-                            isPremium 
-                              ? "bg-blue-600 text-white hover:bg-blue-700" 
-                              : "bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]"
+                              "bg-[#404040] text-white hover:bg-[#4d4d4d]"
                           )}
                         >
                           {role.name === 'free' ? 'Начать бесплатно' : 'Выбрать план'}
@@ -323,7 +320,7 @@ const Pricing = () => {
                 <div className="flex items-center justify-center gap-4 flex-wrap">
                   <Button 
                     size="lg" 
-                    className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                     onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                   >
                     <Download className="h-4 w-4 mr-2" />

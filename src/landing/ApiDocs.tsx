@@ -90,7 +90,7 @@ const ApiDocs = () => {
           <div className="flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
             >
               <Key className="h-4 w-4 mr-2" />
               {t('api-docs.cta.getApiKey')}
@@ -111,12 +111,12 @@ const ApiDocs = () => {
               return (
                 <Card 
                   key={index} 
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors text-center"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors text-center"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardContent className="p-0">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-blue-600/10 mb-6">
-                      <IconComponent className="h-8 w-8 text-blue-500" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-[#2d2d2d] mb-6">
+                      <IconComponent className="h-8 w-8 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-xl font-semibold mb-3 text-white">
                       {feature.title}
@@ -139,25 +139,25 @@ const ApiDocs = () => {
 
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8 bg-[#1a1a1a] border-[#2d2d2d]">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">
-                {t('api-docs.sections.overview')}
+              <TabsTrigger value="overview" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              {t('api-docs.sections.overview')}
               </TabsTrigger>
-              <TabsTrigger value="authentication" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">
-                {t('api-docs.sections.authentication.title')}
+              <TabsTrigger value="authentication" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              {t('api-docs.sections.authentication.title')}
               </TabsTrigger>
-              <TabsTrigger value="endpoints" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">
-                {t('api-docs.sections.endpoints.title')}
+              <TabsTrigger value="endpoints" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              {t('api-docs.sections.endpoints.title')}
               </TabsTrigger>
-              <TabsTrigger value="examples" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">
+              <TabsTrigger value="examples" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
                 {t('api-docs.sections.examples.title')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Globe className="h-5 w-5 text-blue-500" />
+                    <Globe className="h-5 w-5 text-[#d9d9d9]" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.baseUrl')}</h3>
                   </div>
                   <code className="text-lg font-mono bg-[#111111] border border-[#2d2d2d] px-4 py-2 rounded-lg text-white block">
@@ -166,10 +166,10 @@ const ApiDocs = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Settings className="h-5 w-5 text-blue-500" />
+                    <Settings className="h-5 w-5 text-[#d9d9d9]" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.dataFormat')}</h3>
                   </div>
                   <p className="text-[#808080] mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -185,10 +185,10 @@ const ApiDocs = () => {
             </TabsContent>
 
             <TabsContent value="authentication" className="space-y-6">
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Key className="h-5 w-5 text-blue-500" />
+                    <Key className="h-5 w-5 text-[#d9d9d9]" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.authentication.title')}</h3>
                   </div>
                   <div className="space-y-4">
@@ -213,13 +213,13 @@ const ApiDocs = () => {
 
             <TabsContent value="endpoints" className="space-y-6">
               {Array.isArray(apiEndpoints) && apiEndpoints.map((endpoint: any, index: number) => (
-                <Card key={index} className="bg-[#1f1f1f] border-[#2d2d2d] p-6">
+                <Card key={index} className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                   <CardContent className="p-0">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <Badge 
                           className={endpoint.method === 'GET' ? 'bg-green-600 text-white' : 
-                                  endpoint.method === 'POST' ? 'bg-blue-600 text-white' :
+                                  endpoint.method === 'POST' ? 'bg-[#404040] text-white' :
                                   endpoint.method === 'PUT' ? 'bg-yellow-600 text-white' : 'bg-red-600 text-white'}
                         >
                           {endpoint.method}
@@ -262,10 +262,10 @@ const ApiDocs = () => {
             </TabsContent>
 
             <TabsContent value="examples" className="space-y-6">
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Code2 className="h-5 w-5 text-blue-500" />
+                    <Code2 className="h-5 w-5 text-[#d9d9d9]" />
                     <h3 className="text-lg font-semibold text-white">JavaScript SDK</h3>
                   </div>
                   <div className="space-y-4">

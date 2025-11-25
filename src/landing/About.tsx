@@ -38,7 +38,7 @@ const About = () => {
               fontWeight: 700,
               lineHeight: '1.1'
             }}>
-              О <span className="text-blue-500">нас</span>
+              О нас
             </h1>
             
             <p className="text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
@@ -48,11 +48,11 @@ const About = () => {
 
           {/* Mission & Values */}
           <div className="grid md:grid-cols-2 gap-6 mb-16">
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                    <Target className="h-6 w-6 text-blue-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Target className="h-6 w-6 text-[#d9d9d9]" />
                   </div>
                   <CardTitle className="text-2xl text-white">Наша миссия</CardTitle>
                 </div>
@@ -64,11 +64,11 @@ const About = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                    <Heart className="h-6 w-6 text-blue-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Heart className="h-6 w-6 text-[#d9d9d9]" />
                   </div>
                   <CardTitle className="text-2xl text-white">Наши ценности</CardTitle>
                 </div>
@@ -83,11 +83,11 @@ const About = () => {
 
           {/* Team & Community */}
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-blue-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Users className="h-6 w-6 text-[#d9d9d9]" />
                   </div>
                   <CardTitle className="text-2xl text-white">Команда</CardTitle>
                 </div>
@@ -99,11 +99,11 @@ const About = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                    <Award className="h-6 w-6 text-blue-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Award className="h-6 w-6 text-[#d9d9d9]" />
                   </div>
                   <CardTitle className="text-2xl text-white">Достижения</CardTitle>
                 </div>

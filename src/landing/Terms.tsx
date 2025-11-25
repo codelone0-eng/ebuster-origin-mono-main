@@ -37,7 +37,7 @@ const Terms = () => {
               fontWeight: 700,
               lineHeight: '1.1'
             }}>
-              Условия <span className="text-blue-500">использования</span>
+              Условия использования
             </h1>
             <p className="text-[#808080]" style={{ fontSize: '14px' }}>
               Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
@@ -45,10 +45,10 @@ const Terms = () => {
           </div>
 
           <div className="space-y-6">
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
               <CardContent className="p-0">
                 <div className="flex items-center gap-3 mb-4">
-                  <FileText className="h-6 w-6 text-blue-500" />
+                  <FileText className="h-6 w-6 text-[#d9d9d9]" />
                   <h3 className="text-xl font-semibold text-white">Общие положения</h3>
                 </div>
                 <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -62,10 +62,10 @@ const Terms = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
               <CardContent className="p-0">
                 <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle2 className="h-6 w-6 text-blue-500" />
+                  <CheckCircle2 className="h-6 w-6 text-[#d9d9d9]" />
                   <h3 className="text-xl font-semibold text-white">Права пользователя</h3>
                 </div>
                 <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -82,10 +82,10 @@ const Terms = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
               <CardContent className="p-0">
                 <div className="flex items-center gap-3 mb-4">
-                  <AlertCircle className="h-6 w-6 text-blue-500" />
+                  <AlertCircle className="h-6 w-6 text-[#d9d9d9]" />
                   <h3 className="text-xl font-semibold text-white">Обязанности пользователя</h3>
                 </div>
                 <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -103,10 +103,10 @@ const Terms = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
               <CardContent className="p-0">
                 <div className="flex items-center gap-3 mb-4">
-                  <XCircle className="h-6 w-6 text-blue-500" />
+                  <XCircle className="h-6 w-6 text-[#d9d9d9]" />
                   <h3 className="text-xl font-semibold text-white">Ограничения</h3>
                 </div>
                 <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -124,10 +124,10 @@ const Terms = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors">
+            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors">
               <CardContent className="p-0">
                 <div className="flex items-center gap-3 mb-4">
-                  <FileText className="h-6 w-6 text-blue-500" />
+                  <FileText className="h-6 w-6 text-[#d9d9d9]" />
                   <h3 className="text-xl font-semibold text-white">Ответственность</h3>
                 </div>
                 <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>

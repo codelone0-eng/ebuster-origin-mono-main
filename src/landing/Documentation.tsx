@@ -81,7 +81,7 @@ const Documentation = () => {
           <div className="flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
               onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -103,13 +103,13 @@ const Documentation = () => {
               return (
                 <Card 
                   key={index} 
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardContent className="p-0">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                        <IconComponent className="h-6 w-6 text-blue-500" />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                        <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -129,8 +129,8 @@ const Documentation = () => {
                       <div className="space-y-3">
                         {step.instructions.map((instruction: string, instructionIndex: number) => (
                           <div key={instructionIndex} className="flex items-start gap-3">
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600/10 flex items-center justify-center mt-0.5">
-                              <span className="text-xs font-semibold text-blue-500">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#2d2d2d] flex items-center justify-center mt-0.5">
+                              <span className="text-xs font-semibold text-[#d9d9d9]">
                                 {instructionIndex + 1}
                               </span>
                             </div>
@@ -159,7 +159,7 @@ const Documentation = () => {
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg" 
-                  className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
                   <Download className="h-4 w-4 mr-2" />

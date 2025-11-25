@@ -73,7 +73,7 @@ const Advantages = () => {
           <div className="flex items-center justify-center gap-4 mb-12 flex-wrap">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
             >
               <Rocket className="h-4 w-4 mr-2" />
               {t('advantages.cta.getStarted')}
@@ -101,16 +101,16 @@ const Advantages = () => {
               return (
                 <Card 
                   key={index} 
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll hover:border-blue-500/30 transition-colors"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardContent className="p-0">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
                         {typeof IconComponent === 'string' ? (
-                          <Code2 className="h-6 w-6 text-blue-500" />
+                          <Code2 className="h-6 w-6 text-[#d9d9d9]" />
                         ) : (
-                          <IconComponent className="h-6 w-6 text-blue-500" />
+                          <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
                         )}
                       </div>
                       <div className="flex-1">
@@ -124,7 +124,7 @@ const Advantages = () => {
                       <ul className="space-y-2 mt-4">
                         {advantage.features.map((feature: string, featureIndex: number) => (
                           <li key={featureIndex} className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            <CheckCircle2 className="h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
                             <span className="text-[#808080]" style={{ fontSize: '14px' }}>{feature}</span>
                           </li>
                         ))}
@@ -148,7 +148,7 @@ const Advantages = () => {
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg" 
-                  className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
                   <Rocket className="h-4 w-4 mr-2" />

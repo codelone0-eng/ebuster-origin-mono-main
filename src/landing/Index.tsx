@@ -81,7 +81,7 @@ const Index = () => {
               <div className="flex items-center justify-center gap-4 flex-wrap mb-16">
                 <Button 
                   size="lg" 
-                  className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
                   <Download className="mr-2 h-5 w-5" />
@@ -119,11 +119,11 @@ const Index = () => {
 
             {/* Main Feature Cards */}
             <div className="grid lg:grid-cols-2 gap-6 mb-12">
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll group hover:border-blue-500/30 transition-colors">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-blue-600/10 flex items-center justify-center">
-                      <Layers className="h-6 w-6 text-blue-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Layers className="h-6 w-6 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-2xl font-semibold text-white">{t('index.features.modularArchitecture.title')}</h3>
                   </div>
@@ -133,11 +133,11 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll group hover:border-blue-500/30 transition-colors">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                      <Zap className="h-6 w-6 text-yellow-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Zap className="h-6 w-6 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-2xl font-semibold text-white">{t('index.features.blazingFast.title')}</h3>
                   </div>
@@ -147,11 +147,11 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1f1f1f] border-[#2d2d2d] p-8 fade-in-on-scroll group hover:border-blue-500/30 transition-colors">
+              <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8 fade-in-on-scroll transition-colors">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <Shield className="h-6 w-6 text-green-500" />
+                    <div className="w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-2xl font-semibold text-white">{t('index.features.fortKnoxSecurity.title')}</h3>
                   </div>
@@ -174,11 +174,11 @@ const Index = () => {
               ].map((feature, i) => (
                 <Card 
                   key={i}
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll group hover:border-blue-500/30 transition-colors"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
                 >
                   <CardContent className="p-0">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center mb-4">
-                      <feature.icon className="h-5 w-5 text-blue-500" />
+                    <div className="w-10 h-10 rounded-lg bg-[#2d2d2d] flex items-center justify-center mb-4">
+                      <feature.icon className="h-5 w-5 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-white">{feature.title}</h3>
                     <p className="text-sm text-[#808080] leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -217,11 +217,11 @@ const Index = () => {
               ].map((feature, i) => (
                 <Card 
                   key={i}
-                  className="bg-[#1f1f1f] border-[#2d2d2d] p-6 fade-in-on-scroll group hover:border-blue-500/30 transition-colors"
+                  className="bg-[#1a1a1a] border-[#2d2d2d] p-6 fade-in-on-scroll transition-colors"
                 >
                   <CardContent className="p-0">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center mb-4">
-                      <feature.icon className="h-5 w-5 text-blue-500" />
+                    <div className="w-10 h-10 rounded-lg bg-[#2d2d2d] flex items-center justify-center mb-4">
+                      <feature.icon className="h-5 w-5 text-[#d9d9d9]" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-white">{feature.title}</h3>
                     <p className="text-sm text-[#808080] leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -235,7 +235,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center fade-in-on-scroll">
               <Button 
                 size="lg" 
-                className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
                 onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
               >
                 <Download className="mr-2 h-5 w-5" />
