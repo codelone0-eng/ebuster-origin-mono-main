@@ -81,6 +81,7 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
   const [loading, setLoading] = useState(true);
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
   
   // Filters
   const [filters, setFilters] = useState({
@@ -127,6 +128,7 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
 
   const loadRoles = async () => {
     try {
+      setLoadingRoles(true);
       const token = localStorage.getItem('ebuster_token');
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/roles`, {
         headers: {
@@ -142,34 +144,63 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
           throw new Error(errorData.error || 'Не удалось загрузить роли');
         } else {
           const text = await response.text();
-          console.error('Non-JSON response:', text);
+          console.error('[SubscriptionsManagement] Non-JSON response:', text);
           throw new Error(`Server returned ${response.status}: ${response.statusText}`);
         }
       }
 
       const data = await response.json();
+      console.log('[SubscriptionsManagement] Roles API response:', data);
       
-      if (data.success) {
+      if (data.success && data.data && Array.isArray(data.data)) {
         const rolesWithDefaults = data.data.map((role: any) => ({
           ...role,
           price_monthly: role.price_monthly ?? 0,
           price_yearly: role.price_yearly ?? 0,
           features: role.features || {},
-          limits: role.limits || {}
+          limits: role.limits || {},
+          is_active: role.is_active !== undefined ? role.is_active : true,
+          is_subscription: role.is_subscription !== undefined ? role.is_subscription : false
         }));
+        
+        console.log('[SubscriptionsManagement] Roles with defaults:', rolesWithDefaults);
+        
         // Фильтруем только активные роли, которые могут быть подписками
+        // Если is_active не указан, считаем что роль активна
         const subscriptionRoles = rolesWithDefaults
-          .filter((r: Role) => r.is_active && (r.is_subscription || r.name === 'free'))
-          .sort((a: Role, b: Role) => a.display_order - b.display_order);
-        setRoles(subscriptionRoles);
+          .filter((r: Role) => {
+            const isActive = r.is_active !== false; // Если undefined, считаем активной
+            const canBeSubscription = r.is_subscription || r.name === 'free';
+            return isActive && canBeSubscription;
+          })
+          .sort((a: Role, b: Role) => (a.display_order || 0) - (b.display_order || 0));
+        
+        console.log('[SubscriptionsManagement] Filtered subscription roles:', subscriptionRoles);
+        
+        // Если после фильтрации ничего не осталось, показываем все активные роли
+        if (subscriptionRoles.length === 0) {
+          const allActiveRoles = rolesWithDefaults
+            .filter((r: Role) => r.is_active !== false)
+            .sort((a: Role, b: Role) => (a.display_order || 0) - (b.display_order || 0));
+          console.log('[SubscriptionsManagement] No subscription roles found, using all active roles:', allActiveRoles);
+          setRoles(allActiveRoles);
+        } else {
+          setRoles(subscriptionRoles);
+        }
+      } else {
+        console.warn('[SubscriptionsManagement] No roles data in response or invalid format:', data);
+        setRoles([]);
       }
     } catch (error) {
-      console.error('Error loading roles:', error);
+      console.error('[SubscriptionsManagement] Error loading roles:', error);
       toast({ 
         title: 'Error', 
         description: error instanceof Error ? error.message : 'Failed to load roles', 
         variant: 'destructive' 
       });
+      setRoles([]);
+    } finally {
+      setLoadingRoles(false);
     }
   };
 
@@ -746,16 +777,22 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
              </div>
              <div className="space-y-2">
                 <Label>Plan</Label>
-                <Select value={formData.plan} onValueChange={(v: any) => setFormData(prev => ({ ...prev, plan: v }))}>
+                <Select value={formData.plan} onValueChange={(v: any) => setFormData(prev => ({ ...prev, plan: v }))} disabled={loadingRoles}>
                    <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                      <SelectValue />
+                      <SelectValue placeholder={loadingRoles ? "Loading plans..." : "Select a plan"} />
                    </SelectTrigger>
                    <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                      {roles.map((role) => (
-                         <SelectItem key={role.id} value={role.name}>
-                            {role.display_name} (${role.price_monthly}/mo)
-                         </SelectItem>
-                      ))}
+                      {loadingRoles ? (
+                         <div className="p-4 text-center text-muted-foreground">Loading plans...</div>
+                      ) : roles.length === 0 ? (
+                         <div className="p-4 text-center text-muted-foreground">No plans available</div>
+                      ) : (
+                         roles.map((role) => (
+                            <SelectItem key={role.id} value={role.name}>
+                               {role.display_name} (${role.price_monthly}/mo)
+                            </SelectItem>
+                         ))
+                      )}
                    </SelectContent>
                 </Select>
              </div>
@@ -804,16 +841,22 @@ export const SubscriptionsManagement: React.FC<SubscriptionsManagementProps> = (
              </div>
              <div className="space-y-2">
                 <Label>Plan</Label>
-                <Select value={formData.plan} onValueChange={(v: any) => setFormData(prev => ({ ...prev, plan: v }))}>
+                <Select value={formData.plan} onValueChange={(v: any) => setFormData(prev => ({ ...prev, plan: v }))} disabled={loadingRoles}>
                    <SelectTrigger className="bg-[#111111] border-[#2d2d2d] text-white">
-                      <SelectValue />
+                      <SelectValue placeholder={loadingRoles ? "Loading plans..." : "Select a plan"} />
                    </SelectTrigger>
                    <SelectContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
-                      {roles.map((role) => (
-                         <SelectItem key={role.id} value={role.name}>
-                            {role.display_name} (${role.price_monthly}/mo)
-                         </SelectItem>
-                      ))}
+                      {loadingRoles ? (
+                         <div className="p-4 text-center text-muted-foreground">Loading plans...</div>
+                      ) : roles.length === 0 ? (
+                         <div className="p-4 text-center text-muted-foreground">No plans available</div>
+                      ) : (
+                         roles.map((role) => (
+                            <SelectItem key={role.id} value={role.name}>
+                               {role.display_name} (${role.price_monthly}/mo)
+                            </SelectItem>
+                         ))
+                      )}
                    </SelectContent>
                 </Select>
              </div>
