@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { ParticleBackground } from '@/components/ParticleBackground';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -155,31 +154,25 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] relative">
-      <ParticleBackground />
-      <div className="relative z-content">
-        <Header />
-        
-        <div className="container mx-auto max-w-7xl px-4 py-16">
+    <div className="min-h-screen bg-[#111111]">
+      <Header />
+      
+      <div className="container mx-auto max-w-7xl px-4 py-6 space-y-6">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-            <Crown className="h-5 w-5 text-yellow-500" />
-            <span className="text-sm font-semibold text-[#808080]">{t('pricing.hero.badge')}</span>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Crown className="h-5 w-5 text-neutral-500" />
+            <h1 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600 }}>
+              {t('pricing.hero.title')}
+            </h1>
           </div>
-          
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            {t('pricing.hero.title')} <span className="text-blue-500">{t('pricing.hero.subtitle')}</span>
-          </h1>
-          
-          <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xs text-neutral-500 mb-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>
             {t('pricing.hero.description')}
           </p>
-
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="flex items-center justify-center gap-4">
             <Button 
-              size="lg" 
-              className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700"
+              size="sm" 
+              className="h-9 px-6 bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -189,25 +182,38 @@ const Pricing = () => {
         </div>
 
         {/* Переключатель периода */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 p-1 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
-            <Button
-              variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
-              size="sm"
-              className={billingPeriod === 'monthly' ? 'bg-blue-600 text-white' : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'}
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex items-center justify-center gap-0" style={{ border: '1px solid #404040', borderRadius: '4px', overflow: 'hidden' }}>
+            <button
               onClick={() => setBillingPeriod('monthly')}
+              className={`px-4 py-2 text-xs font-medium transition-colors ${
+                billingPeriod === 'monthly'
+                  ? 'text-white'
+                  : 'text-neutral-500 hover:text-white hover:bg-[#2d2d2d]'
+              }`}
+              style={{
+                backgroundColor: billingPeriod === 'monthly' ? '#2563eb' : 'transparent',
+                borderRight: '1px solid #404040',
+                letterSpacing: '0.08em',
+              }}
             >
               Ежемесячно
-            </Button>
-            <Button
-              variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
-              size="sm"
-              className={billingPeriod === 'yearly' ? 'bg-blue-600 text-white' : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'}
+            </button>
+            <button
               onClick={() => setBillingPeriod('yearly')}
+              className={`px-4 py-2 text-xs font-medium transition-colors ${
+                billingPeriod === 'yearly'
+                  ? 'text-white'
+                  : 'text-neutral-500 hover:text-white hover:bg-[#2d2d2d]'
+              }`}
+              style={{
+                backgroundColor: billingPeriod === 'yearly' ? '#2563eb' : 'transparent',
+                letterSpacing: '0.08em',
+              }}
             >
               Ежегодно
-              <Badge className="ml-2 bg-green-600 text-white">-17%</Badge>
-            </Button>
+              <Badge className="ml-2 bg-green-600 text-white text-[10px]">-17%</Badge>
+            </button>
           </div>
         </div>
 
@@ -528,16 +534,19 @@ const Pricing = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white">
-            {t('pricing.faq.title')}
-          </h2>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-neutral-500" />
+            <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600 }}>
+              {t('pricing.faq.title')}
+            </h2>
+          </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             {Array.isArray(faqArray) && faqArray.map((item: any, index: number) => (
-              <div key={index} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-3">{item.question}</h3>
-                <p className="text-[#808080] text-base">
+              <div key={index} className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-white mb-2">{item.question}</h3>
+                <p className="text-xs text-neutral-500">
                   {item.answer}
                 </p>
               </div>
@@ -546,29 +555,27 @@ const Pricing = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center">
-          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-12">
-            <h3 className="text-3xl font-bold mb-4 text-white">{t('pricing.cta.title')}</h3>
-            <p className="text-[#808080] text-lg mb-6">
-              {t('pricing.cta.description')}
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Button 
-                size="lg" 
-                className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {t('pricing.cta.downloadExtension')}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]" asChild>
-                <a href="/contacts">
-                  <Shield className="h-4 w-4 mr-2" />
-                  {t('pricing.cta.contactUs')}
-                </a>
-              </Button>
-            </div>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-3 text-white">{t('pricing.cta.title')}</h3>
+          <p className="text-xs text-neutral-500 mb-4">
+            {t('pricing.cta.description')}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button 
+              size="sm" 
+              className="h-9 px-6 bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {t('pricing.cta.downloadExtension')}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button size="sm" variant="outline" className="h-9 px-6 bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]" asChild>
+              <a href="/contacts">
+                <Shield className="h-4 w-4 mr-2" />
+                {t('pricing.cta.contactUs')}
+              </a>
+            </Button>
           </div>
         </div>
         </div>

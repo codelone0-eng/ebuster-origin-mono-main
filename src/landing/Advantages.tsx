@@ -58,60 +58,58 @@ const Advantages = () => {
     <div className="min-h-screen bg-[#111111]">
       <Header />
       
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+      <div className="container mx-auto max-w-7xl px-4 py-6 space-y-6">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-            <Award className="h-5 w-5 text-blue-500" />
-            <span className="text-sm font-semibold text-[#808080]">{t('advantages.hero.badge')}</span>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Award className="h-5 w-5 text-neutral-500" />
+            <h1 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600 }}>
+              {t('advantages.hero.title')}
+            </h1>
           </div>
-          
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            {t('advantages.hero.title')} <span className="text-blue-500">{t('advantages.hero.subtitle')}</span>
-          </h1>
-          
-          <p className="text-xl text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xs text-neutral-500 mb-4" style={{ fontSize: '12px', lineHeight: '1.5' }}>
             {t('advantages.hero.description')}
           </p>
-
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <Button size="lg" className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700">
+          <div className="flex items-center justify-center gap-3">
+            <Button size="sm" className="h-9 px-6 bg-blue-600 text-white hover:bg-blue-700">
               <Rocket className="h-4 w-4 mr-2" />
               {t('advantages.cta.getStarted')}
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
+            <Button size="sm" variant="outline" className="h-9 px-6 bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
               <Terminal className="h-4 w-4 mr-2" />
               {t('advantages.cta.viewApi')}
             </Button>
           </div>
-
         </div>
 
         {/* Core Advantages */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white">
-            {t('advantages.features.title')}
-          </h2>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Layers className="h-5 w-5 text-neutral-500" />
+            <h2 className="text-lg font-semibold text-white" style={{ fontSize: '18px', fontWeight: 600 }}>
+              {t('advantages.features.title')}
+            </h2>
+          </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-4">
             {coreAdvantages.map((advantage, index) => (
-              <div key={index} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300 group">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <advantage.icon className="h-6 w-6 text-blue-500" />
+              <div key={index} className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded bg-blue-600/10 flex items-center justify-center">
+                    <advantage.icon className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white">{advantage.title}</h3>
-                    <p className="text-[#808080] text-base">
+                    <h3 className="text-sm font-semibold text-white mb-1">{advantage.title}</h3>
+                    <p className="text-xs text-neutral-500">
                       {advantage.description}
                     </p>
                   </div>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-1 mt-2">
                   {advantage.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                      <span className="text-[#808080]">{feature}</span>
+                    <li key={featureIndex} className="flex items-center gap-2 text-xs">
+                      <CheckCircle className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                      <span className="text-neutral-500">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -120,26 +118,22 @@ const Advantages = () => {
           </div>
         </div>
 
-        {/* Technical Specifications — скрыты по требованиям приватности */}
-
         {/* CTA Section */}
-        <div className="text-center">
-          <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-2xl p-12">
-            <h3 className="text-3xl font-bold mb-4 text-white">{t('advantages.cta.title')}</h3>
-            <p className="text-[#808080] text-lg mb-6">
-              {t('advantages.cta.description')}
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Button size="lg" className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700">
-                <Rocket className="h-4 w-4 mr-2" />
-                {t('advantages.cta.getStarted')}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
-                <Users className="h-4 w-4 mr-2" />
-                {t('advantages.cta.joinCommunity')}
-              </Button>
-            </div>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-3 text-white">{t('advantages.cta.title')}</h3>
+          <p className="text-xs text-neutral-500 mb-4">
+            {t('advantages.cta.description')}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button size="sm" className="h-9 px-6 bg-blue-600 text-white hover:bg-blue-700">
+              <Rocket className="h-4 w-4 mr-2" />
+              {t('advantages.cta.getStarted')}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button size="sm" variant="outline" className="h-9 px-6 bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d]">
+              <Users className="h-4 w-4 mr-2" />
+              {t('advantages.cta.joinCommunity')}
+            </Button>
           </div>
         </div>
       </div>
