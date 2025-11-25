@@ -168,29 +168,63 @@ export const createSubscription = async (req: Request, res: Response) => {
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + duration_months);
 
+    // Подготавливаем данные для вставки
+    const subscriptionData: any = {
+      user_id: user.id,
+      plan,
+      status: status || 'active',
+      start_date: startDate.toISOString(),
+      end_date: endDate.toISOString(),
+      amount: role.price_monthly || planPrices[plan] || 0,
+      features: role.features || planFeatures[plan] || [],
+      payment_method: 'manual'
+    };
+
+    // Добавляем role_id, если есть
+    if (role.id) {
+      subscriptionData.role_id = role.id;
+    }
+
+    // Добавляем auto_renew только если колонка существует
+    // Проверяем наличие колонки через попытку вставки с auto_renew
+    // Если ошибка - убираем из запроса
+    subscriptionData.auto_renew = auto_renew !== undefined ? auto_renew : true;
+
     // Создаем подписку
     const { data: subscription, error: subError } = await supabaseAdmin
       .from('subscriptions')
-      .insert({
-        user_id: user.id,
-        role_id: role.id, // ← ДОБАВЛЕНО!
-        plan,
-        status: status || 'active',
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        auto_renew: auto_renew !== undefined ? auto_renew : true,
-        amount: role.price_monthly || planPrices[plan] || 0,
-        features: role.features || planFeatures[plan] || [],
-        payment_method: 'manual'
-      })
+      .insert(subscriptionData)
       .select()
       .single();
 
     if (subError) {
       console.error('Error creating subscription:', subError);
+      
+      // Если ошибка из-за отсутствия колонки auto_renew, пробуем без неё
+      if (subError.message && subError.message.includes('auto_renew')) {
+        delete subscriptionData.auto_renew;
+        const { data: subscriptionRetry, error: retryError } = await supabaseAdmin
+          .from('subscriptions')
+          .insert(subscriptionData)
+          .select()
+          .single();
+        
+        if (retryError) {
+          return res.status(500).json({
+            success: false,
+            error: 'Failed to create subscription: ' + retryError.message
+          });
+        }
+        
+        return res.json({
+          success: true,
+          data: subscriptionRetry
+        });
+      }
+      
       return res.status(500).json({
         success: false,
-        error: 'Failed to create subscription'
+        error: 'Failed to create subscription: ' + (subError.message || 'Unknown error')
       });
     }
 
