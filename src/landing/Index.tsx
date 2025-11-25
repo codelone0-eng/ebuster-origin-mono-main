@@ -10,7 +10,7 @@ import { Footer } from "@/components/Footer";
 import { 
   Zap, Shield, Layers, ArrowRight, Code2, 
   Boxes, Puzzle, Orbit, Binary, Cpu, Cloud, User, RefreshCw,
-  Sparkles
+  Sparkles, Terminal, Download
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
