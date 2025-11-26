@@ -314,23 +314,22 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
 
           <div>
-              <p className="text-sm text-white/60 mb-2">Ваша реферальная ссылка</p>
+            <p className="text-sm text-white/60 mb-2">Ваша реферальная ссылка</p>
             <div className="flex gap-2">
-                <Input value={referralLink} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
+              <Input value={referralLink} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
               <Button 
                 onClick={() => { void copyToClipboard(referralLink, 'link'); }}
-                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
+                className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
               >
                 Скопировать
               </Button>
               <Button 
                 onClick={shareLink}
-                  className="bg-white text-black hover:bg-white/90 rounded-xl"
+                className="bg-white text-black hover:bg-white/90 rounded-xl"
               >
                 <Share2 className="h-4 w-4 mr-2" />
                 Поделиться
               </Button>
-              </div>
             </div>
           </div>
         </div>
