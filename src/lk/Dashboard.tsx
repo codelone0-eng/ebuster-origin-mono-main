@@ -793,9 +793,10 @@ const DashboardContent = () => {
                       </div>
                     </div>
                   ) : (
-                    installedScripts
-                    .filter((item: any) => item.script !== null && item.script !== undefined)
-                    .map((item: any) => {
+                    <>
+                      {installedScripts
+                        .filter((item: any) => item.script !== null && item.script !== undefined)
+                        .map((item: any) => {
                     const scriptTitle = item.script?.title || item.script?.name || 'Скрипт';
                     const scriptDescription = item.script?.short_description || item.script?.description || '';
                     const scriptVersion = item.script?.version || item.version || '1.0.0';
@@ -857,8 +858,9 @@ const DashboardContent = () => {
                         </div>
                       </div>
                     );
-                  })
-                )}
+                  })}
+                    </>
+                  )}
                 </div>
               </div>
             )}
