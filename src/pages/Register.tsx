@@ -419,6 +419,7 @@ export default function Register() {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Right: User Card */}
         <div className="hidden lg:block">
