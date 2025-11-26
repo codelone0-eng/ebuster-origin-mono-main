@@ -48,7 +48,13 @@ function extendMaterial(BaseMaterial, cfg) {
 }
 
 const CanvasWrapper = ({ children }) => (
-  <Canvas dpr={[1, 2]} frameloop="always" className="beams-container">
+  <Canvas 
+    dpr={[1, 2]} 
+    frameloop="always" 
+    className="beams-container"
+    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent' }}
+    gl={{ alpha: true, antialias: true }}
+  >
     {children}
   </Canvas>
 );
@@ -213,7 +219,6 @@ const Beams = ({
         <DirLight color={lightColor} position={[0, 3, 10]} />
       </group>
       <ambientLight intensity={1} />
-      <color attach="background" args={['#000000']} />
       <PerspectiveCamera makeDefault position={[0, 0, 20]} fov={30} />
     </CanvasWrapper>
   );

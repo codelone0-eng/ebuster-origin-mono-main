@@ -138,11 +138,11 @@ const Index = () => {
         <Header />
 
         {/* Hero Section - Exact Nightwatch style from Figma */}
-        <section ref={heroRef} className="relative overflow-hidden border-b border-white/10">
+        <section ref={heroRef} className="relative overflow-hidden border-b border-white/10" style={{ minHeight: '600px' }}>
           <div className="absolute inset-0 bg-black" />
           
           {/* Beams background */}
-          <div className="absolute inset-0" style={{ width: '100%', height: '100%', position: 'relative' }}>
+          <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
             <Beams
               beamWidth={2}
               beamHeight={15}
@@ -156,7 +156,7 @@ const Index = () => {
           </div>
           
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black/95" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/95 z-[1]" />
           
           <div className="relative py-40 px-4 z-10">
             <div className="container mx-auto max-w-[1440px]">
