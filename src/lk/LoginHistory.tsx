@@ -194,8 +194,7 @@ export const LoginHistory: React.FC = () => {
     return (
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
-          <p className="text-sm text-white/60">Загрузка...</p>
-        </div>
+        <p className="text-sm text-white/60">Загрузка...</p>
       </div>
     );
   }
