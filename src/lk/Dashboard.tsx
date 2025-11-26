@@ -774,22 +774,21 @@ const DashboardContent = () => {
                   {installedScripts.length === 0 ? (
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center">
                       <div className="flex flex-col items-center gap-4">
-                          <Library className="h-12 w-12 text-white/60" />
+                        <Library className="h-12 w-12 text-white/60" />
                         <div>
                           <h3 className="text-lg font-semibold text-white mb-2">
                             {t('header.dashboard.installed.noScripts')}
                           </h3>
-                            <p className="text-sm text-white/60">
+                          <p className="text-sm text-white/60">
                             {t('header.dashboard.installed.noScriptsDescription')}
                           </p>
                         </div>
                         <Button 
-                            className="bg-white text-black hover:bg-white/90 rounded-xl"
+                          className="bg-white text-black hover:bg-white/90 rounded-xl"
                           onClick={() => handleTabChange('scripts')}
                         >
                           {t('header.dashboard.installed.browseScripts')}
                         </Button>
-                        </div>
                       </div>
                     </div>
                   ) : (
