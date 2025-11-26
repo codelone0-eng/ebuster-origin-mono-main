@@ -173,7 +173,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4" style={{
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative" style={{
       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       backgroundSize: '60px 60px'
     }}>
@@ -396,17 +396,19 @@ export default function Register() {
         {/* Right: User Card */}
         <div className="hidden lg:flex items-center justify-center">
           <div className="w-full max-w-sm">
-            <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border border-white/10 rounded-lg p-8 relative" style={{
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-8 relative" style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px'
+              backgroundSize: '60px 60px',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)'
             }}>
               <div className="space-y-6">
                 {/* Avatar */}
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-lg border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center mb-3 relative">
-                    <Plus className="h-6 w-6 text-white/40 mb-1" />
-                    <span className="text-[10px] text-white/40">Avatar</span>
-                    <span className="text-[10px] text-white/30">Max 2MB</span>
+                  <div className="w-20 h-20 rounded-lg border-2 border-dashed border-white/30 bg-white/[0.08] flex flex-col items-center justify-center mb-3 relative">
+                    <Plus className="h-6 w-6 text-white/50 mb-1" />
+                    <span className="text-[10px] text-white/50 font-medium">Avatar</span>
+                    <span className="text-[10px] text-white/40">Max 2MB</span>
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-1">New User</h3>
                   <p className="text-white/60 text-sm font-mono">{formData.email || 'your@email.com'}</p>
@@ -414,20 +416,39 @@ export default function Register() {
                 
                 {/* Password dots */}
                 <div className="text-center">
-                  <div className="text-white/60 text-sm font-mono tracking-widest">*****</div>
+                  <div className="text-white/70 text-sm font-mono tracking-widest">*****</div>
                 </div>
                 
                 {/* Barcode */}
-                <div className="h-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-sm relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]"></div>
+                <div className="h-2.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-sm relative overflow-hidden">
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      animation: 'shimmer 2s linear infinite'
+                    }}
+                  ></div>
                 </div>
                 
                 {/* User ID */}
-                <div className="font-mono text-[10px] text-white/60 break-all text-center leading-relaxed">
+                <div className="font-mono text-xs text-white/70 break-all text-center leading-relaxed tracking-tight">
                   {generateUserId()}
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 py-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+          <p className="text-white/60">© 2025. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/docs" className="text-white/80 hover:text-white transition-colors">Docs</Link>
+            <Link to="/legal" className="text-white/80 hover:text-white transition-colors">Legal</Link>
+            <Link to="/support" className="text-white/80 hover:text-white transition-colors">Support</Link>
           </div>
         </div>
       </div>
