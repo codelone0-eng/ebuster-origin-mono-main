@@ -310,7 +310,6 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
             </div>
           )}
         </div>
-        </div>
 
       <CreateTicketModal
         isOpen={isCreateModalOpen}
