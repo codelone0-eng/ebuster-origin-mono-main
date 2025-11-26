@@ -766,12 +766,11 @@ const ScriptsList: React.FC = () => {
       {/* Пустое состояние */}
       {filteredScripts.length === 0 && !loading && (
         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center">
-            <Code className="h-12 w-12 mx-auto mb-4 text-white/60" />
+          <Code className="h-12 w-12 mx-auto mb-4 text-white/60" />
           <h3 className="text-lg font-semibold mb-2 text-white">{t('header.dashboard.scripts.notFound')}</h3>
-            <p className="text-white/60">
+          <p className="text-white/60">
             {t('header.dashboard.scripts.notFoundDescription')}
           </p>
-          </div>
         </div>
       )}
 

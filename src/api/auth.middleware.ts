@@ -40,12 +40,12 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
     const isDev = process.env.NODE_ENV !== 'production';
     
     if (isDev) {
-      console.log('🔐 [authenticateUser] Проверка токена для:', req.method, req.path);
+    console.log('🔐 [authenticateUser] Проверка токена для:', req.method, req.path);
     }
     
     if (!token) {
       if (isDev) {
-        console.log('❌ [authenticateUser] Токен не предоставлен');
+      console.log('❌ [authenticateUser] Токен не предоставлен');
       }
       return res.status(401).json({
         error: 'Токен не предоставлен'
@@ -57,11 +57,11 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
     try {
       decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
       if (isDev) {
-        console.log('✅ [authenticateUser] JWT декодирован:', { userId: decoded.userId, email: decoded.email });
+      console.log('✅ [authenticateUser] JWT декодирован:', { userId: decoded.userId, email: decoded.email });
       }
     } catch (jwtError: any) {
       if (isDev) {
-        console.log('❌ [authenticateUser] JWT ошибка:', jwtError.message);
+      console.log('❌ [authenticateUser] JWT ошибка:', jwtError.message);
       }
       return res.status(401).json({
         error: 'Недействительный токен',
@@ -84,7 +84,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
 
       if (userError || !data) {
         if (isDev) {
-          console.log('❌ [authenticateUser] Пользователь не найден:', userError);
+        console.log('❌ [authenticateUser] Пользователь не найден:', userError);
         }
         return res.status(401).json({
           error: 'Пользователь не найден'
@@ -92,13 +92,13 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       }
       
       if (isDev) {
-        console.log('✅ [authenticateUser] Пользователь найден:', data.email);
+      console.log('✅ [authenticateUser] Пользователь найден:', data.email);
       }
       
       // Проверка token_version (если пользователь вышел из всех устройств)
       if (data.token_version && decoded.tokenVersion !== data.token_version) {
         if (isDev) {
-          console.log('❌ [authenticateUser] Токен устарел (пользователь вышел из всех устройств)');
+        console.log('❌ [authenticateUser] Токен устарел (пользователь вышел из всех устройств)');
         }
         return res.status(401).json({
           error: 'Сессия устарела. Пожалуйста, войдите снова.',
@@ -109,7 +109,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       // Проверка бана
       if (data.status === 'banned') {
         if (isDev) {
-          console.log('❌ [authenticateUser] Пользователь заблокирован');
+        console.log('❌ [authenticateUser] Пользователь заблокирован');
         }
         return res.status(403).json({
           error: 'Ваш аккаунт заблокирован',
@@ -156,7 +156,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
     
     if (!token) {
       if (isDev) {
-        console.log('🔍 [optionalAuthenticateUser] Токен не найден');
+      console.log('🔍 [optionalAuthenticateUser] Токен не найден');
       }
       req.user = undefined;
       return next();
@@ -167,11 +167,11 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
     try {
       decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
       if (isDev) {
-        console.log('🔍 [optionalAuthenticateUser] JWT декодирован:', { userId: decoded.userId, email: decoded.email });
+      console.log('🔍 [optionalAuthenticateUser] JWT декодирован:', { userId: decoded.userId, email: decoded.email });
       }
     } catch (jwtError) {
       if (isDev) {
-        console.log('🔍 [optionalAuthenticateUser] JWT ошибка:', jwtError);
+      console.log('🔍 [optionalAuthenticateUser] JWT ошибка:', jwtError);
       }
       req.user = undefined;
       return next();
@@ -182,7 +182,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
 
     if (supabase) {
       if (isDev) {
-        console.log('🔍 [optionalAuthenticateUser] Ищем пользователя в users:', decoded.userId);
+      console.log('🔍 [optionalAuthenticateUser] Ищем пользователя в users:', decoded.userId);
       }
       // Поиск в Supabase
       const { data, error: userError } = await supabase
@@ -193,7 +193,7 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
 
       if (!userError && data && data.email_confirmed && data.status !== 'banned') {
         if (isDev) {
-          console.log('🔍 [optionalAuthenticateUser] Пользователь найден и подтвержден:', data.email);
+        console.log('🔍 [optionalAuthenticateUser] Пользователь найден и подтвержден:', data.email);
         }
         req.user = {
           id: data.id,
@@ -203,17 +203,17 @@ export const optionalAuthenticateUser = async (req: Request, res: Response, next
         };
       } else {
         if (isDev) {
-          if (data?.status === 'banned') {
-            console.log('🔍 [optionalAuthenticateUser] Пользователь заблокирован');
-          } else {
-            console.log('🔍 [optionalAuthenticateUser] Пользователь не найден или не подтвержден');
+        if (data?.status === 'banned') {
+          console.log('🔍 [optionalAuthenticateUser] Пользователь заблокирован');
+        } else {
+          console.log('🔍 [optionalAuthenticateUser] Пользователь не найден или не подтвержден');
           }
         }
         req.user = undefined;
       }
     } else {
       if (isDev) {
-        console.log('🔍 [optionalAuthenticateUser] Supabase клиент недоступен');
+      console.log('🔍 [optionalAuthenticateUser] Supabase клиент недоступен');
       }
       req.user = undefined;
     }
@@ -286,7 +286,7 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
     const isDev = process.env.NODE_ENV !== 'production';
     if (userRole !== 'admin' && userRole !== 'administrator') {
       if (isDev) {
-        console.log('❌ [requireAdmin] Доступ запрещен для роли:', userRole);
+      console.log('❌ [requireAdmin] Доступ запрещен для роли:', userRole);
       }
       return res.status(403).json({
         success: false,
@@ -303,7 +303,7 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
     };
 
     if (isDev) {
-      console.log('✅ [requireAdmin] Доступ разрешен для администратора:', user.email);
+    console.log('✅ [requireAdmin] Доступ разрешен для администратора:', user.email);
     }
     next();
   } catch (error) {
