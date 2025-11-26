@@ -280,8 +280,8 @@ const Contacts = () => {
           </div>
         </div>
         </section>
-        </div>
       </main>
+      </div>
       
       <Footer />
       </div>
