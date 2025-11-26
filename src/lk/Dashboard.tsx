@@ -1080,10 +1080,9 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                         
                         <div>
                           <p className="text-sm font-medium text-white mb-1">cURL</p>
-                            <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs overflow-x-auto text-white/80 font-mono">
+                          <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs overflow-x-auto text-white/80 font-mono">
 {`curl -H "X-API-Key: ebk_your_api_key_here" https://api.ebuster.ru/api/v1/scripts`}
                           </pre>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1121,15 +1120,14 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                         </div>
                         <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
                       </div>
-                      </div>
                     </div>
                   </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <Shield className="h-5 w-5 text-emerald-400" />
-                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.twoFactorAuth')}</h3>
-                    </div>
+                  <div className="flex items-center gap-2 mb-6">
+                    <Shield className="h-5 w-5 text-emerald-400" />
+                    <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.twoFactorAuth')}</h3>
+                  </div>
                     <div className="space-y-4">
                       <div className="space-y-3">
                         <h4 className="font-medium text-white">{t('header.dashboard.settings.request2FA')}</h4>
