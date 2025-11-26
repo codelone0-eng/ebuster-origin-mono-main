@@ -28,6 +28,7 @@ import Error500 from "./landing/Error500";
 import Error503 from "./landing/Error503";
 import Error403 from "./landing/Error403";
 import BanPage from "./landing/BanPage";
+import Status from "./landing/Status";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const LandingApp = () => (
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/roadmap" element={<Roadmap />} />
+                  <Route path="/status" element={<Status />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/signin" element={<Login />} />
