@@ -600,8 +600,7 @@ const ScriptsList: React.FC = () => {
       {/* Заголовок */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.scripts.title')}</h2>
-          <p className="text-sm text-white/60">{t('header.dashboard.scripts.description')}</p>
-        </div>
+        <p className="text-sm text-white/60">{t('header.dashboard.scripts.description')}</p>
       </div>
 
       {/* Фильтры и поиск */}
