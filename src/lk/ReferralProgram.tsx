@@ -376,18 +376,19 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                           )}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-white/40">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
-                        </span>
-                        {referral.subscription && (
-                          <Badge className={referral.subscription.status === 'active' ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
-                            {referral.subscription.plan}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+                          </span>
+                          {referral.subscription && (
+                            <Badge className={referral.subscription.status === 'active' ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                              {referral.subscription.plan}
+                            </Badge>
+                          )}
+                          <Badge className={getRewardStatusVariant(referral.reward_status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                            {getRewardStatusLabel(referral.reward_status)}
                           </Badge>
-                        )}
-                        <Badge className={getRewardStatusVariant(referral.reward_status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
-                          {getRewardStatusLabel(referral.reward_status)}
-                        </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
