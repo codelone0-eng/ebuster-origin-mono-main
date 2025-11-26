@@ -213,7 +213,7 @@ const Index = () => {
                       <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 3</div>
                       <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step3')}</div>
                       <div className="text-white/40 text-xs">Просмотр библиотеки</div>
-                    </div>
+                      </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                       <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 4</div>
                       <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step4')}</div>
