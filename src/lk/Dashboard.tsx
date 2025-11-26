@@ -1041,8 +1041,7 @@ const DashboardContent = () => {
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <h2 className="text-2xl font-bold text-white mb-2">API Документация</h2>
-                    <p className="text-sm text-white/60">Создайте API ключ в настройках и используйте его для доступа к нашему API</p>
-                </div>
+                  <p className="text-sm text-white/60">Создайте API ключ в настройках и используйте его для доступа к нашему API</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <h3 className="text-lg font-semibold text-white mb-6">Использование API</h3>
