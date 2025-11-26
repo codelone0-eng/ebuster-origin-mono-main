@@ -1170,11 +1170,11 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                               {t('header.dashboard.settings.configure')}
                             </Button>
                           </div>
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
               </div>
             )}
           </div>
