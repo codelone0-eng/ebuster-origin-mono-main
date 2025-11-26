@@ -142,13 +142,13 @@ const Index = () => {
           {/* Beams background - покрывает весь контент между Header и Footer */}
           <div className="absolute inset-0 z-0 pointer-events-none">
             <Beams
-              beamWidth={2}
-              beamHeight={15}
-              beamNumber={12}
+              beamWidth={0.3}
+              beamHeight={4}
+              beamNumber={30}
               lightColor="#ffffff"
-              speed={2}
-              noiseIntensity={1.75}
-              scale={0.2}
+              speed={0.8}
+              noiseIntensity={1.2}
+              scale={0.05}
               rotation={0}
             />
           </div>
