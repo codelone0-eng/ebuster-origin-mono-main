@@ -14,7 +14,7 @@ import {
   Database, Mail, Calendar, CheckCircle2, AlertCircle, Settings,
   Copy, Check, FileCode, Clock, Activity, TrendingUp, ChevronDown
 } from "lucide-react";
-import Beams from "@/components/Beams";
+import Silk from "@/components/Silk";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -137,22 +137,19 @@ const Index = () => {
         <AuthStatusChecker />
         <Header />
 
-        {/* Beams background - fixed для покрытия всего экрана */}
-        <div className="fixed inset-0 z-0 pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
-          <Beams
-            beamWidth={1}
-            beamHeight={10}
-            beamNumber={15}
-            lightColor="#ffffff"
-            speed={1.5}
-            noiseIntensity={1.5}
-            scale={0.15}
+        {/* Silk background - fixed для покрытия всего экрана */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk
+            speed={5}
+            scale={1}
+            color="#ffffff"
+            noiseIntensity={4.3}
             rotation={0}
           />
         </div>
         
-        {/* Gradient overlay - более прозрачный, чтобы Beams был виден */}
-        <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-[1] pointer-events-none" />
+        {/* Gradient overlay - более прозрачный, чтобы Silk был виден */}
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
 
         {/* Контейнер для всего контента */}
         <div className="relative z-10">
