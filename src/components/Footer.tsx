@@ -8,7 +8,7 @@ export const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="py-16 px-4 border-t border-white/10 bg-black">
+    <footer className="relative z-50 py-16 px-4 border-t border-white/10 bg-black">
       <div className="container mx-auto max-w-7xl">
         <div className="grid md:grid-cols-5 gap-12 mb-12">
           {/* Left Column - Branding & Subscription */}

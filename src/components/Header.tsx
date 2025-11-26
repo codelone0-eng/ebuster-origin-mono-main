@@ -149,7 +149,7 @@ export const Header = () => {
   }, [location, navigate]);
 
   return (
-    <header className="relative z-header bg-black backdrop-blur-xl border-b border-white/10 px-6 py-4">
+    <header className="relative z-50 bg-black backdrop-blur-xl border-b border-white/10 px-6 py-4">
       
       <div className="relative max-w-7xl mx-auto flex h-16 items-center justify-between gap-12">
 
