@@ -886,8 +886,7 @@ const DashboardContent = () => {
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.profile.personalInfo')}</h2>
-                    <p className="text-sm text-white/60">Управление личной информацией</p>
-                  </div>
+                  <p className="text-sm text-white/60">Управление личной информацией</p>
                 </div>
                 <div className="max-w-2xl mx-auto">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02]">
@@ -939,8 +938,7 @@ const DashboardContent = () => {
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.settings')}</h2>
-                    <p className="text-sm text-white/60">Настройки безопасности и аккаунта</p>
-                  </div>
+                  <p className="text-sm text-white/60">Настройки безопасности и аккаунта</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02]">
