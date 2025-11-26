@@ -188,10 +188,9 @@ const Terms = () => {
             </Card>
           </div>
         </div>
-        </div>
         </section>
-        </div>
       </main>
+      </div>
       
       <Footer />
       </div>
