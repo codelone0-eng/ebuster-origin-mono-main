@@ -138,22 +138,8 @@ jobs:
             echo "📦 Dockerfile: Dockerfile.frontend"
             echo "📋 Компоненты: React приложение, Tailwind CSS, Vite сборка"
             echo "🌐 Домены: ebuster.ru, www.ebuster.ru"
-            # Retry логика для сетевых проблем
-            MAX_RETRIES=3
-            RETRY_COUNT=0
-            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-              if docker compose build --no-cache frontend; then
-                echo "✅ UI Лендинга успешно собран"
-                exit 0
-              fi
-              RETRY_COUNT=$((RETRY_COUNT + 1))
-              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                echo "⚠️  Попытка $RETRY_COUNT/$MAX_RETRIES не удалась. Повтор через 10 секунд..."
-                sleep 10
-              fi
-            done
-            echo "❌ Не удалось собрать UI Лендинга после $MAX_RETRIES попыток"
-            exit 1
+            docker compose build --no-cache frontend
+            echo "✅ UI Лендинга успешно собран"
           ENDSSH
       
       - name: 👤 Сборка UI Личного кабинета (lk.ebuster.ru)

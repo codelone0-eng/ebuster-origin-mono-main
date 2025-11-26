@@ -192,16 +192,15 @@ export function ApiKeysManagement() {
                 </Button>
               </div>
               <Button
-                  variant="outline"
+                variant="outline"
                 size="sm"
-                  className="mt-3 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
+                className="mt-3 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
                 onClick={() => setShowNewKey(false)}
               >
                 Я сохранил ключ
               </Button>
             </div>
           )}
-          </div>
         </div>
       </div>
 
