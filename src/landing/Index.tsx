@@ -154,42 +154,41 @@ const Index = () => {
         {/* Контейнер для всего контента */}
         <div className="relative z-10">
 
-            {/* Hero Section - Exact Nightwatch style from Figma */}
+            {/* Hero Section - Minimalist Nightwatch style */}
           <section ref={heroRef} className="relative overflow-hidden border-b border-white/10" style={{ minHeight: '600px' }}>
             <div className="absolute inset-0 bg-black/80" />
             
             <div className="relative py-40 px-4 z-10">
-            <div className="container mx-auto max-w-[1440px]">
-              <div className="max-w-[672px] mx-auto text-center">
-                {/* Split heading like Nightwatch */}
-                <h1 className="hero-element text-7xl md:text-9xl font-bold tracking-tight leading-[0.95] text-white mb-10">
-                  <span className="block">{t('index.hero.title')}</span>
-                </h1>
-                <p className="hero-element text-xl md:text-2xl text-white/60 max-w-[613px] mx-auto leading-relaxed mb-12">
-                  {t('index.hero.subtitle')}
-                </p>
+              <div className="container mx-auto max-w-[1440px]">
+                <div className="max-w-[672px] mx-auto text-center">
+                  <h1 className="hero-element text-7xl md:text-9xl font-semibold tracking-tight leading-[0.95] text-white mb-6">
+                    {t('index.hero.title')}
+                  </h1>
+                  <p className="hero-element text-xl md:text-2xl text-white/60 max-w-[613px] mx-auto leading-relaxed mb-10">
+                    {t('index.hero.subtitle')}
+                  </p>
 
-                <div className="hero-element flex flex-wrap items-center justify-center gap-4">
-                  <Button 
-                    size="lg" 
-                    className="h-11 px-6 bg-[#4287ff] hover:bg-[#2f6be0] text-white text-base font-medium rounded-lg"
-                    onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
-                  >
-                    {t('index.hero.getStarted')}
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-11 px-6 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/40 transition-colors text-base font-medium rounded-lg"
-                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-                  >
-                    {t('index.hero.documentation')}
-                  </Button>
+                  <div className="hero-element flex flex-wrap items-center justify-center gap-4">
+                    <Button 
+                      size="lg" 
+                      className="h-11 px-6 bg-white text-black hover:bg-white/90 text-base font-normal rounded-lg"
+                      onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
+                    >
+                      {t('index.hero.getStarted')}
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="h-11 px-6 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/40 transition-colors text-base font-normal rounded-lg"
+                      onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                    >
+                      {t('index.hero.documentation')}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
           {/* Start monitoring section - Exact Nightwatch style from Figma */}
           <section ref={featureBlocksRef} className="relative bg-black/80 px-4 py-32 z-10" data-section>
@@ -627,35 +626,34 @@ const Index = () => {
           </div>
         </section>
 
-          {/* Final CTA - Exact Nightwatch style from Figma */}
+          {/* Final CTA - Minimalist style */}
           <section className="relative overflow-hidden border-y border-white/10 bg-black/80 z-10">
-          <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.7) 70%)" }} />
-          <div className="relative px-4 py-28">
-            <div className="container mx-auto max-w-[768px]">
-              <div className="rounded-[32px] border border-white/10 bg-black/70 p-12 backdrop-blur-xl text-center space-y-6">
-                <h3 className="text-4xl md:text-5xl font-semibold text-white">{t('index.hero.title')}</h3>
-                <p className="text-white/70 text-lg">
-                  Get started for free
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Button 
-                    size="lg" 
-                    className="h-11 px-6 bg-[#4287ff] hover:bg-[#2f6be0] text-white text-base font-medium rounded-lg"
-                    onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
-                  >
-                    {t('index.hero.getStarted')}
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="h-11 px-6 bg-transparent border-white/20 text-white hover:bg-white/10 hover:border-white/40 text-base font-medium rounded-lg"
-                  >
-                    {t('index.hero.documentation')}
-                  </Button>
+            <div className="relative px-4 py-28">
+              <div className="container mx-auto max-w-[768px]">
+                <div className="rounded-[32px] border border-white/10 bg-black/70 p-12 backdrop-blur-xl text-center space-y-6">
+                  <h3 className="text-4xl md:text-5xl font-semibold text-white">{t('index.hero.title')}</h3>
+                  <p className="text-white/60 text-lg">
+                    Get started for free
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <Button 
+                      size="lg" 
+                      className="h-11 px-6 bg-white text-black hover:bg-white/90 text-base font-normal rounded-lg"
+                      onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
+                    >
+                      {t('index.hero.getStarted')}
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="h-11 px-6 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/40 text-base font-normal rounded-lg"
+                    >
+                      {t('index.hero.documentation')}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           </section>
         </div>
 

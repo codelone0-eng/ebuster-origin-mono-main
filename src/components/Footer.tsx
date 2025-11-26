@@ -8,8 +8,17 @@ export const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="relative z-50 py-16 px-4 border-t border-white/10 bg-black">
-      <div className="container mx-auto max-w-7xl">
+    <footer className="relative z-50 py-16 px-4 border-t border-white/10 bg-[#0a0a0a]">
+      {/* Noise effect */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundSize: '200px 200px',
+        }}
+      />
+      
+      <div className="relative container mx-auto max-w-7xl">
         <div className="grid md:grid-cols-5 gap-12 mb-12">
           {/* Left Column - Branding & Subscription */}
           <div className="md:col-span-2 space-y-6">
