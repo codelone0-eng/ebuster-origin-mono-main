@@ -362,6 +362,25 @@ input:hover {
   border-color: #707070 !important;
 }
 
+/* Autofill styles - fix for browser autocomplete */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.02) inset !important;
+  box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.02) inset !important;
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input[type="email"]:-webkit-autofill,
+input[type="password"]:-webkit-autofill {
+  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.02) inset !important;
+  box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.02) inset !important;
+}
+
 /* Дополнительные стили для модалок и всех возможных селекторов */
 .dialog input:focus,
 .dialog textarea:focus,
