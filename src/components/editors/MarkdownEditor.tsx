@@ -20,6 +20,7 @@ import {
   Minimize2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 interface MarkdownEditorProps {
   value: string;
@@ -91,7 +92,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     // Line breaks
     html = html.replace(/\n/gim, '<br />');
 
-    return html;
+    // Санитизация для защиты от XSS
+    return sanitizeHTML(html);
   };
 
   const toolbarButtons = [

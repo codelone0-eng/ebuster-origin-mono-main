@@ -4,6 +4,8 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import emailRoutes from './src/api/email.routes';
 import authRoutes from './src/api/auth.routes';
 import userRoutes from './src/api/user.routes';
@@ -25,7 +27,41 @@ import { getSupabaseClient } from './src/api/admin.controller';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Security Middleware - ДОЛЖНО БЫТЬ ПЕРВЫМ
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.SUPABASE_URL || ""],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Для работы с Supabase
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 100, // максимум 100 запросов с одного IP
+  message: 'Слишком много запросов с этого IP, попробуйте позже.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Строгий rate limit для аутентификации
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 5, // максимум 5 попыток входа/регистрации
+  message: 'Слишком много попыток входа. Попробуйте через 15 минут.',
+  skipSuccessfulRequests: true,
+});
+
+app.use('/api/', limiter);
+app.use('/api/auth/', authLimiter);
+
+// CORS Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [

@@ -27,8 +27,11 @@ interface LoginRequest {
   password: string;
 }
 
-// JWT секрет (в продакшене должен быть в .env)
-const JWT_SECRET = process.env.JWT_SECRET || 'ebuster_2024_super_secure_jwt_key_7f8a9b2c4d6e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b';
+// JWT секрет (ОБЯЗАТЕЛЬНО должен быть в .env)
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required! Set it in .env file.');
+}
 
 // Временное хранилище пользователей (пока не создана таблица auth_users)
 const users: User[] = [];
