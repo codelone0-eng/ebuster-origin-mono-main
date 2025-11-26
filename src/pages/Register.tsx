@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, User, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift, Plus } from 'lucide-react';
+import { Loader2, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift, Plus } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Register() {
@@ -165,11 +165,10 @@ export default function Register() {
 
   const generateUserId = () => {
     if (!formData.email) return '00000000-0000-0000-0000-000000000000';
-    return Array.from(formData.email)
+    const hash = Array.from(formData.email)
       .reduce((acc, char) => acc + char.charCodeAt(0).toString(16), '')
-      .substring(0, 36)
-      .match(/.{1,8}/g)
-      ?.join('-') || '00000000-0000-0000-0000-000000000000';
+      .substring(0, 36);
+    return hash.match(/.{1,8}/g)?.join('-') || '00000000-0000-0000-0000-000000000000';
   };
 
   return (
@@ -177,118 +176,117 @@ export default function Register() {
       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       backgroundSize: '60px 60px'
     }}>
-      <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">
+      <div className="w-full max-w-[1920px] grid lg:grid-cols-2 gap-0 items-center min-h-screen">
         {/* Left: Form */}
-        <div className="w-full max-w-md mx-auto">
-          <h2 className="text-2xl font-semibold text-white mb-2">Create an account</h2>
-          <p className="text-sm text-white/60 mb-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-white/80 hover:text-white transition-colors">
-              Sign in
-            </Link>
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {referralCode && (
-              <div className="bg-white/5 border border-white/10 rounded p-3">
-                <p className="text-sm font-medium text-white flex items-center gap-2">
-                  <Gift className="h-4 w-4" />
-                  Реферальный код: {referralCode}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-white text-sm font-medium">Full name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="Enter full name"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded"
-                style={{
-                  WebkitTextFillColor: 'white',
-                  WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
-                }}
-                required
-                disabled={loading}
-              />
+        <div className="w-full flex items-center justify-center px-8 py-16">
+          <div className="w-full max-w-[512px]">
+            {/* Header */}
+            <div className="mb-16">
+              <h1 className="text-3xl font-semibold text-white mb-2">Create an account</h1>
+              <p className="text-white/60 text-sm">
+                Already have an account?{' '}
+                <Link to="/login" className="text-white hover:text-white/80 transition-colors">
+                  Sign in
+                </Link>
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white text-sm font-medium">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded"
-                style={{
-                  WebkitTextFillColor: 'white',
-                  WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
-                }}
-                required
-                disabled={loading}
-              />
-            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {referralCode && (
+                <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
+                  <p className="text-sm font-medium text-white flex items-center gap-2">
+                    <Gift className="h-4 w-4" />
+                    Реферальный код: {referralCode}
+                  </p>
+                </div>
+              )}
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    generatePassword();
-                  }}
-                  className="h-7 px-2 text-xs bg-transparent border-0 text-white/60 hover:text-white hover:bg-white/5"
-                  disabled={loading}
-                >
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  Generate
-                </Button>
-              </div>
-              <div className="relative">
+              {/* Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-white text-sm font-medium">Full name</Label>
                 <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  value={formData.password}
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  placeholder="Enter full name"
+                  value={formData.fullName}
                   onChange={handleInputChange}
-                  className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded pr-10"
-                  style={{
-                    WebkitTextFillColor: 'white',
-                    WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
-                  }}
+                  className="h-11 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-0 rounded"
                   required
                   disabled={loading}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-white/5 text-white/60 hover:text-white"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
               </div>
 
+              {/* Email and Password in one row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white text-sm font-medium">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="h-11 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-0 rounded"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        generatePassword();
+                      }}
+                      className="h-6 px-2 text-xs bg-transparent border-0 text-white/60 hover:text-white hover:bg-white/5"
+                      disabled={loading}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Generate
+                    </Button>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="h-11 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-0 rounded pr-10"
+                      required
+                      disabled={loading}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password requirements */}
               {formData.password && (
-                <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded space-y-2">
+                <div className="p-3 bg-white/5 border border-white/10 rounded space-y-2">
                   <p className="text-xs font-semibold text-white">Password requirements:</p>
                   <div className="space-y-1.5">
                     {passwordRequirements.map((req, index) => {
@@ -314,113 +312,121 @@ export default function Register() {
                   </div>
                 </div>
               )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-white text-sm font-medium">Confirm password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Enter password again"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded pr-10"
-                  style={{
-                    WebkitTextFillColor: 'white',
-                    WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
-                  }}
-                  required
-                  disabled={loading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-white/5 text-white/60 hover:text-white"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  disabled={loading}
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-white text-sm font-medium">Confirm password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Enter password again"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="h-11 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-0 rounded pr-10"
+                    required
+                    disabled={loading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={loading}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+
+                {formData.confirmPassword && (
+                  <div className={`flex items-center gap-2 text-xs mt-2 ${
+                    passwordsMatch ? 'text-white' : 'text-white/60'
+                  }`}>
+                    {passwordsMatch ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        <span className="font-medium">Passwords match</span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-3 w-3" />
+                        <span>Passwords do not match</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium rounded transition-colors" 
+                  disabled={loading || !allRequirementsMet || !passwordsMatch}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    'Create account'
                   )}
                 </Button>
               </div>
+            </form>
 
-              {formData.confirmPassword && (
-                <div className={`flex items-center gap-2 text-xs mt-2 ${
-                  passwordsMatch ? 'text-white' : 'text-white/60'
-                }`}>
-                  {passwordsMatch ? (
-                    <>
-                      <Check className="h-3 w-3" />
-                      <span className="font-medium">Passwords match</span>
-                    </>
-                  ) : (
-                    <>
-                      <X className="h-3 w-3" />
-                      <span>Passwords do not match</span>
-                    </>
-                  )}
-                </div>
-              )}
+            {/* Terms */}
+            <p className="mt-8 text-xs text-white/60">
+              By signing up, you agree to our{' '}
+              <Link to="/terms" className="text-white/80 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+            </p>
+
+            {/* Footer */}
+            <div className="mt-16 flex items-center justify-between text-xs text-white/60">
+              <p>© 2025. All rights reserved.</p>
+              <div className="flex items-center gap-6">
+                <Link to="/docs" className="text-white/80 hover:text-white transition-colors">Docs</Link>
+                <Link to="/legal" className="text-white/80 hover:text-white transition-colors">Legal</Link>
+                <Link to="/support" className="text-white/80 hover:text-white transition-colors">Support</Link>
+              </div>
             </div>
-
-            <Button 
-              type="submit" 
-              className="w-full h-11 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium rounded transition-colors" 
-              disabled={loading || !allRequirementsMet || !passwordsMatch}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                'Create account'
-              )}
-            </Button>
-          </form>
-
-          <p className="mt-4 text-xs text-white/60">
-            By signing up, you agree to our{' '}
-            <Link to="/terms" className="text-white/80 hover:text-white transition-colors">
-              Terms of Service
-            </Link>
-          </p>
+          </div>
         </div>
 
         {/* Right: User Card */}
-        <div className="hidden lg:flex items-center justify-center">
-          <div className="w-full max-w-sm">
-            <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-8 relative" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)'
-            }}>
-              <div className="space-y-6">
+        <div className="hidden lg:flex items-center justify-center px-8 py-16 bg-gradient-to-b from-transparent via-white/5 to-transparent">
+          <div className="w-full max-w-[448px]">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-xl p-8 relative">
+              {/* Top accent tab */}
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-2 bg-gray-300 rounded-full"></div>
+              
+              <div className="space-y-8">
                 {/* Avatar */}
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-lg border-2 border-dashed border-white/30 bg-white/[0.08] flex flex-col items-center justify-center mb-3 relative">
-                    <Plus className="h-6 w-6 text-white/50 mb-1" />
-                    <span className="text-[10px] text-white/50 font-medium">Avatar</span>
-                    <span className="text-[10px] text-white/40">Max 2MB</span>
+                  <div className="w-24 h-24 rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/50 flex flex-col items-center justify-center relative">
+                    <Plus className="h-6 w-6 text-gray-400 mb-1" />
+                    <span className="text-[10px] text-gray-500 font-medium">Avatar</span>
+                    <span className="text-[10px] text-gray-400">Max 2MB</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-1">New User</h3>
-                  <p className="text-white/60 text-sm font-mono">{formData.email || 'your@email.com'}</p>
                 </div>
-                
-                {/* Password dots */}
-                <div className="text-center">
-                  <div className="text-white/70 text-sm font-mono tracking-widest">*****</div>
+
+                {/* User Info */}
+                <div className="text-center space-y-2">
+                  <h3 className="text-2xl font-semibold text-gray-900">New User</h3>
+                  <p className="text-lg text-gray-600 font-mono tracking-widest">•••••</p>
                 </div>
                 
                 {/* Barcode */}
-                <div className="h-2.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-sm relative overflow-hidden">
+                <div className="h-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-full relative overflow-hidden">
                   <div 
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
                     style={{
@@ -432,23 +438,11 @@ export default function Register() {
                 </div>
                 
                 {/* User ID */}
-                <div className="font-mono text-xs text-white/70 break-all text-center leading-relaxed tracking-tight">
+                <div className="font-mono text-xs text-gray-600 break-all text-center leading-relaxed">
                   {generateUserId()}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-          <p className="text-white/60">© 2025. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link to="/docs" className="text-white/80 hover:text-white transition-colors">Docs</Link>
-            <Link to="/legal" className="text-white/80 hover:text-white transition-colors">Legal</Link>
-            <Link to="/support" className="text-white/80 hover:text-white transition-colors">Support</Link>
           </div>
         </div>
       </div>
