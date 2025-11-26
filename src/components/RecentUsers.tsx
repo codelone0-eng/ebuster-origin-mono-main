@@ -4,9 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { User, Clock } from 'lucide-react';
+import { User, Clock, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/useLanguage';
 
 interface RecentUser {
@@ -59,52 +58,54 @@ export const RecentUsers = ({ onUserSelect }: { onUserSelect: (email: string) =>
   }
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            {t('header.modals.login.recentLogins')}
-          </div>
-          
-          {recentUsers.map((user, index) => (
-            <div key={user.email} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {user.name || user.email.split('@')[0]}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
+    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 via-white/0 to-transparent p-5 space-y-4 backdrop-blur-lg">
+      <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-emerald-300" />
+          {t('header.modals.login.recentLogins')}
+        </div>
+        <span className="text-white/30">{recentUsers.length}</span>
+      </div>
+
+      <div className="space-y-3">
+        {recentUsers.map((user) => (
+          <div
+            key={user.email}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3 hover:bg-black/60 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full border border-white/15 bg-white/10 flex items-center justify-center">
+                <User className="h-5 w-5 text-white/80" />
               </div>
-              
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onUserSelect(user.email)}
-                  className="h-8 px-2 text-xs"
-                >
-                  {t('header.modals.login.signIn')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeRecentUser(user.email)}
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                >
-                  ×
-                </Button>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {user.name || user.email.split('@')[0]}
+                </p>
+                <p className="text-xs text-white/50 font-mono">{user.email}</p>
               </div>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onUserSelect(user.email)}
+                className="h-8 px-4 rounded-full border border-white/15 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                {t('header.modals.login.signIn')}
+              </Button>
+              <button
+                type="button"
+                onClick={() => removeRecentUser(user.email)}
+                className="h-8 w-8 flex items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Remove recent user"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };

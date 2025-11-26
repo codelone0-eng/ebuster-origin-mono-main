@@ -18,7 +18,9 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRu = language === 'ru';
+  const translate = (ruText: string, enText: string) => (isRu ? ruText : enText);
   
   const [formData, setFormData] = useState({
     email: localStorage.getItem('lastEmail') || '',
@@ -48,8 +50,8 @@ export default function Login() {
     
     if (!formData.email || !formData.password) {
       toast({
-        title: "Ошибка",
-        description: "Заполните все поля",
+        title: translate("Ошибка", "Error"),
+        description: translate("Заполните все поля", "Please fill in all fields"),
         variant: "destructive"
       });
       return;
@@ -62,8 +64,8 @@ export default function Login() {
       
       if (result.error) {
         toast({
-          title: "Ошибка входа",
-          description: result.error.message || "Неверный email или пароль",
+          title: translate("Ошибка входа", "Login error"),
+          description: result.error.message || translate("Неверный email или пароль", "Incorrect email or password"),
           variant: "destructive"
         });
       } else {
@@ -99,8 +101,8 @@ export default function Login() {
         }
         
         toast({
-          title: "Успешно!",
-          description: "Добро пожаловать!",
+          title: translate("Успешно!", "Success!"),
+          description: translate("Добро пожаловать!", "Welcome back!"),
           variant: "success"
         });
         
@@ -111,8 +113,8 @@ export default function Login() {
     } catch (error) {
       console.error('Login error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось войти. Попробуйте позже.",
+        title: translate("Ошибка", "Error"),
+        description: translate("Не удалось войти. Попробуйте позже.", "Unable to sign in. Please try again later."),
         variant: "destructive"
       });
     } finally {
@@ -145,7 +147,7 @@ export default function Login() {
             to="/"
             className="text-sm text-white/70 hover:text-white inline-flex items-center gap-2 transition-colors"
           >
-            Вернуться на лендинг
+            {translate("Вернуться на лендинг", "Back to landing")}
           </Link>
         </header>
 
@@ -154,14 +156,14 @@ export default function Login() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <span className="inline-flex px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-300/70 border border-emerald-300/30 rounded-full bg-emerald-300/10">
-                  Авторизация
+                  {translate("Авторизация", "Authorization")}
                 </span>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-semibold leading-tight">Вход в систему</h1>
+                  <h1 className="text-3xl md:text-4xl font-semibold leading-tight">{t('header.modals.login.title')}</h1>
                   <p className="text-white/70 mt-3">
-                    Нет аккаунта?{' '}
+                    {t('header.modals.login.noAccount')}{' '}
                     <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
-                      Создать
+                      {t('header.modals.login.createOne')}
                     </Link>
                   </p>
                 </div>
@@ -173,12 +175,14 @@ export default function Login() {
                     <RecentUsers onUserSelect={handleUserSelect} />
 
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-white text-sm font-medium">Email</Label>
+                      <Label htmlFor="email" className="text-white text-sm font-medium">
+                        {t('header.modals.login.email')}
+                      </Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="Enter email"
+                        placeholder={t('header.modals.login.emailPlaceholder')}
                         value={formData.email}
                         onChange={handleInputChange}
                         className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
@@ -189,12 +193,14 @@ export default function Login() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
+                        <Label htmlFor="password" className="text-white text-sm font-medium">
+                          {t('header.modals.login.password')}
+                        </Label>
                         <Link 
                           to="/forgot-password" 
                           className="text-sm text-white/60 hover:text-white transition-colors"
                         >
-                          Forgot password?
+                          {t('header.modals.login.forgotPassword')}
                         </Link>
                       </div>
                       <div className="relative">
@@ -202,7 +208,7 @@ export default function Login() {
                           id="password"
                           name="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter password"
+                          placeholder={t('header.modals.login.passwordPlaceholder')}
                           value={formData.password}
                           onChange={handleInputChange}
                           className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl pr-12"
@@ -235,7 +241,7 @@ export default function Login() {
                         className="h-4 w-4 rounded border-white/30 bg-black text-white focus:ring-white/20 focus:ring-2"
                       />
                       <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
-                        Remember me
+                        {t('header.modals.login.rememberMe')}
                       </Label>
                     </div>
 
@@ -247,20 +253,26 @@ export default function Login() {
                       {loading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
+                          {t('header.modals.login.signingIn')}
                         </>
                       ) : (
-                        'Sign in'
+                        t('header.modals.login.signIn')
                       )}
                     </Button>
                   </form>
 
                   <div className="flex flex-col gap-4 text-xs text-white/60 pt-4 border-t border-white/5">
-                    <p>© 2025 EBUSTER. All rights reserved.</p>
+                    <p>{isRu ? "© 2025 EBUSTER. Все права защищены." : "© 2025 EBUSTER. All rights reserved."}</p>
                     <div className="flex items-center gap-6">
-                      <Link to="/docs" className="hover:text-white transition-colors">Docs</Link>
-                      <Link to="/legal" className="hover:text-white transition-colors">Legal</Link>
-                      <Link to="/support" className="hover:text-white transition-colors">Support</Link>
+                      <Link to="/docs" className="hover:text-white transition-colors">
+                        {isRu ? "Документация" : "Docs"}
+                      </Link>
+                      <Link to="/legal" className="hover:text-white transition-colors">
+                        {isRu ? "Правовая информация" : "Legal"}
+                      </Link>
+                      <Link to="/support" className="hover:text-white transition-colors">
+                        {isRu ? "Поддержка" : "Support"}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -275,13 +287,19 @@ export default function Login() {
                     <div className="flex flex-col items-center">
                       <div className="w-24 h-28 rounded-2xl border-2 border-dashed border-emerald-300/50 bg-emerald-400/5 flex flex-col items-center justify-center">
                         <Plus className="h-6 w-6 text-emerald-200 mb-1" />
-                        <span className="text-[11px] text-emerald-100/70 font-medium uppercase tracking-wide">Avatar</span>
-                        <span className="text-[10px] text-emerald-100/60">Max 2MB</span>
+                        <span className="text-[11px] text-emerald-100/70 font-medium uppercase tracking-wide">
+                          {translate("Аватар", "Avatar")}
+                        </span>
+                        <span className="text-[10px] text-emerald-100/60">
+                          {translate("Макс 2 МБ", "Max 2MB")}
+                        </span>
                       </div>
                     </div>
 
                     <div className="text-center space-y-2">
-                      <p className="text-sm text-white/50 uppercase tracking-[0.4em]">New User</p>
+                      <p className="text-sm text-white/50 uppercase tracking-[0.4em]">
+                        {translate("Новый пользователь", "New User")}
+                      </p>
                       <p className="text-xl text-white font-mono tracking-[0.8em]">•••••</p>
                     </div>
 
