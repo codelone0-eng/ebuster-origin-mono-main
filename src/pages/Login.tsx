@@ -152,7 +152,7 @@ export default function Login() {
 
         <main className="flex-1 px-4 lg:px-10 py-12">
           <div className="w-full max-w-[1920px] mx-auto grid lg:grid-cols-2 gap-12 items-start">
-            <div className="space-y-8">
+          <div className="space-y-8">
               <div className="space-y-4">
                 <span className="inline-flex px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-300/70 border border-emerald-300/30 rounded-full bg-emerald-300/10">
                   {translate("Авторизация", "Authorization")}
@@ -164,101 +164,101 @@ export default function Login() {
                     <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
                       {t('header.modals.login.createOne')}
                     </Link>
-                  </p>
+              </p>
                 </div>
-              </div>
-
+            </div>
+            
               <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-1">
                 <div className="rounded-[24px] border border-white/10 bg-black/70 p-8 space-y-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <RecentUsers onUserSelect={handleUserSelect} />
-
-                    <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <RecentUsers onUserSelect={handleUserSelect} />
+              
+              <div className="space-y-2">
                       <Label htmlFor="email" className="text-white text-sm font-medium">
                         {t('header.modals.login.email')}
                       </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
                         placeholder={t('header.modals.login.emailPlaceholder')}
-                        value={formData.email}
-                        onChange={handleInputChange}
+                    value={formData.email}
+                    onChange={handleInputChange}
                         className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+                    required
+                    disabled={loading}
+                  />
+              </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                         <Label htmlFor="password" className="text-white text-sm font-medium">
                           {t('header.modals.login.password')}
                         </Label>
-                        <Link 
-                          to="/forgot-password" 
-                          className="text-sm text-white/60 hover:text-white transition-colors"
-                        >
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm text-white/60 hover:text-white transition-colors"
+                  >
                           {t('header.modals.login.forgotPassword')}
-                        </Link>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          name="password"
-                          type={showPassword ? "text" : "password"}
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
                           placeholder={t('header.modals.login.passwordPlaceholder')}
-                          value={formData.password}
-                          onChange={handleInputChange}
+                    value={formData.password}
+                    onChange={handleInputChange}
                           className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl pr-12"
-                          required
-                          disabled={loading}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
+                    required
+                    disabled={loading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={loading}
-                        >
-                          {showPassword ? (
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                  >
+                    {showPassword ? (
                             <EyeOff className="h-4 w-4" />
-                          ) : (
+                    ) : (
                             <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
+                    )}
+                  </Button>
+                </div>
+              </div>
 
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id="rememberMe"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                         className="h-4 w-4 rounded border-white/30 bg-black text-white focus:ring-white/20 focus:ring-2"
-                      />
-                      <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
+                />
+                <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
                         {t('header.modals.login.rememberMe')}
-                      </Label>
-                    </div>
+                </Label>
+              </div>
 
-                    <Button 
-                      type="submit" 
+              <Button 
+                type="submit" 
                       className="w-full h-12 bg-white text-black hover:bg-white/90 font-medium rounded-xl transition-colors" 
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t('header.modals.login.signingIn')}
-                        </>
-                      ) : (
+                  </>
+                ) : (
                         t('header.modals.login.signIn')
-                      )}
-                    </Button>
-                  </form>
+                )}
+              </Button>
+            </form>
 
                   <div className="flex flex-col gap-4 text-xs text-white/60 pt-4 border-t border-white/5">
                     <p>{isRu ? "© 2025 EBUSTER. Все права защищены." : "© 2025 EBUSTER. All rights reserved."}</p>
@@ -271,19 +271,19 @@ export default function Login() {
                       </Link>
                       <Link to="/support" className="hover:text-white transition-colors">
                         {isRu ? "Поддержка" : "Support"}
-                      </Link>
+                </Link>
                     </div>
                   </div>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
             <div className="hidden lg:flex items-center justify-center px-8 py-16">
               <div className="w-full max-w-[460px]">
                 <div className="rounded-[32px] border border-white/10 bg-black/60 backdrop-blur-xl p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/5 opacity-20 pointer-events-none" />
                   <div className="relative z-10 space-y-10">
-                    <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center">
                       <div className="w-24 h-28 rounded-2xl border-2 border-dashed border-emerald-300/50 bg-emerald-400/5 flex flex-col items-center justify-center">
                         <Plus className="h-6 w-6 text-emerald-200 mb-1" />
                         <span className="text-[11px] text-emerald-100/70 font-medium uppercase tracking-wide">
@@ -293,15 +293,15 @@ export default function Login() {
                           {translate("Макс 2 МБ", "Max 2MB")}
                         </span>
                       </div>
-                    </div>
+                </div>
 
                     <div className="text-center space-y-2">
                       <p className="text-sm text-white/50 uppercase tracking-[0.4em]">
                         {translate("Новый пользователь", "New User")}
                       </p>
                       <p className="text-xl text-white font-mono tracking-[0.8em]">•••••</p>
-                    </div>
-
+              </div>
+              
                     <div className="h-3 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-full relative overflow-hidden">
                       <div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"

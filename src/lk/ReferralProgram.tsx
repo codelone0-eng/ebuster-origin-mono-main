@@ -229,10 +229,10 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
     <div className="space-y-6">
       {/* Заголовок */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-          <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
+        <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
           <p className="text-white/60">
-            Приглашайте друзей и зарабатывайте на каждой их подписке
-          </p>
+          Приглашайте друзей и зарабатывайте на каждой их подписке
+        </p>
         </div>
       </div>
 
@@ -240,97 +240,97 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="rounded-xl border border-white/10 bg-white/[0.02]">
           <div className="p-4">
-            <div className="flex flex-row items-center justify-between mb-2">
+          <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Всего рефералов</h3>
               <Users className="h-4 w-4 text-white/60" />
-            </div>
-            <div className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</div>
+          </div>
+          <div className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</div>
             <p className="text-xs text-white/40 mt-1">
-              {stats?.active_referrals || 0} активных
-            </p>
+            {stats?.active_referrals || 0} активных
+          </p>
           </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/[0.02]">
           <div className="p-4">
-            <div className="flex flex-row items-center justify-between mb-2">
+          <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Заработано</h3>
               <DollarSign className="h-4 w-4 text-white/60" />
-            </div>
-            <div className="text-2xl font-bold text-white">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
+          </div>
+          <div className="text-2xl font-bold text-white">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
             <p className="text-xs text-white/40 mt-1">
-              ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
-            </p>
+            ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
+          </p>
           </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/[0.02]">
           <div className="p-4">
-            <div className="flex flex-row items-center justify-between mb-2">
+          <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Ожидает выплаты</h3>
               <TrendingUp className="h-4 w-4 text-white/60" />
-            </div>
-            <div className="text-2xl font-bold text-white">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
+          </div>
+          <div className="text-2xl font-bold text-white">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
             <p className="text-xs text-white/40 mt-1">
-              Будет выплачено в конце месяца
-            </p>
+            Будет выплачено в конце месяца
+          </p>
           </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/[0.02]">
           <div className="p-4">
-            <div className="flex flex-row items-center justify-between mb-2">
+          <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Конверсия</h3>
               <Award className="h-4 w-4 text-white/60" />
-            </div>
-            <div className="text-2xl font-bold text-white">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
+          </div>
+          <div className="text-2xl font-bold text-white">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
             <p className="text-xs text-white/40 mt-1">
-              Процент оформивших подписку
-            </p>
+            Процент оформивших подписку
+          </p>
           </div>
         </div>
       </div>
 
       {/* Реферальный код и ссылка */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
             <p className="text-sm text-white/60">
-              Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
-            </p>
-          </div>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                value={referralCode?.code ?? '—'}
-                readOnly
+            Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              value={referralCode?.code ?? '—'}
+              readOnly
                 className="bg-white/5 border-white/15 text-white rounded-xl"
-              />
-              <Button 
-                onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}
+            />
+            <Button 
+              onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}
                 className="bg-white text-black hover:bg-white/90 rounded-xl"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
 
-            <div>
+          <div>
               <p className="text-sm text-white/60 mb-2">Ваша реферальная ссылка</p>
-              <div className="flex gap-2">
+            <div className="flex gap-2">
                 <Input value={referralLink} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
-                <Button 
-                  onClick={() => { void copyToClipboard(referralLink, 'link'); }}
+              <Button 
+                onClick={() => { void copyToClipboard(referralLink, 'link'); }}
                   className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                >
-                  Скопировать
-                </Button>
-                <Button 
-                  onClick={shareLink}
+              >
+                Скопировать
+              </Button>
+              <Button 
+                onClick={shareLink}
                   className="bg-white text-black hover:bg-white/90 rounded-xl"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Поделиться
-                </Button>
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Поделиться
+              </Button>
               </div>
             </div>
           </div>
@@ -342,7 +342,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 rounded-xl">
             <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">Рефералы</TabsTrigger>
             <TabsTrigger value="payouts" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">История выплат</TabsTrigger>
-          </TabsList>
+        </TabsList>
 
         <TabsContent value="referrals" className="mt-6">
           <div>
@@ -364,28 +364,28 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                     className="rounded-xl border border-white/10 bg-white/5 p-4"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-white">{maskEmail(referral.referred_user?.email)}</p>
-                          {referral.referred_user?.full_name && (
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-white">{maskEmail(referral.referred_user?.email)}</p>
+                        {referral.referred_user?.full_name && (
                             <span className="text-sm text-white/60">
-                              ({referral.referred_user.full_name})
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-white/40">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+                            ({referral.referred_user.full_name})
                           </span>
-                          {referral.subscription && (
-                            <Badge className={referral.subscription.status === 'active' ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
-                              {referral.subscription.plan}
-                            </Badge>
-                          )}
-                          <Badge className={getRewardStatusVariant(referral.reward_status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
-                            {getRewardStatusLabel(referral.reward_status)}
+                        )}
+                      </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-white/40">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}
+                        </span>
+                        {referral.subscription && (
+                          <Badge className={referral.subscription.status === 'active' ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                            {referral.subscription.plan}
                           </Badge>
+                        )}
+                        <Badge className={getRewardStatusVariant(referral.reward_status) === 'default' ? 'bg-green-600 text-white' : 'bg-[#2d2d2d] text-[#a3a3a3]'}>
+                          {getRewardStatusLabel(referral.reward_status)}
+                        </Badge>
                         </div>
                       </div>
                     </div>
@@ -476,8 +476,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                 Получайте {referralCode?.discount_value}% от каждого платежа ваших рефералов. Выплаты в конце месяца
               </p>
             </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
 

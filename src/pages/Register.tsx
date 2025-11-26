@@ -198,8 +198,8 @@ export default function Register() {
 
         <main className="flex-1 px-4 lg:px-10 py-12">
           <div className="w-full max-w-[1920px] mx-auto grid lg:grid-cols-2 gap-12 items-start">
-            {/* Left: Form */}
-            <div className="space-y-8">
+        {/* Left: Form */}
+          <div className="space-y-8">
               <div className="space-y-4">
                 <span className="inline-flex px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-300/70 border border-emerald-300/30 rounded-full bg-emerald-300/10">
                   {translate("Регистрация", "Registration")}
@@ -211,211 +211,211 @@ export default function Register() {
                     <Link to="/login" className="text-white hover:text-white/80 transition-colors font-medium">
                       {t('header.modals.register.signIn')}
                     </Link>
-                  </p>
+              </p>
                 </div>
-              </div>
-
+            </div>
+            
               <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-1">
                 <div className="rounded-[24px] border border-white/10 bg-black/70 p-8 space-y-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {referralCode && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {referralCode && (
                       <div className="bg-white/5 border border-white/10 rounded-lg p-3">
                   <p className="text-sm font-medium text-white flex items-center gap-2">
                     <Gift className="h-4 w-4" />
                     {translate("Реферальный код", "Referral code")}: {referralCode}
                   </p>
-                      </div>
-                    )}
+                </div>
+              )}
 
-                    <div className="space-y-2">
+              <div className="space-y-2">
                       <Label htmlFor="fullName" className="text-white text-sm font-medium">
                         {t('header.modals.register.fullName')}
                       </Label>
-                      <Input
-                        id="fullName"
-                        name="fullName"
-                        type="text"
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
                         placeholder={t('header.modals.register.namePlaceholder')}
-                        value={formData.fullName}
-                        onChange={handleInputChange}
+                    value={formData.fullName}
+                    onChange={handleInputChange}
                         className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+                    required
+                    disabled={loading}
+                  />
+              </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
+              <div className="space-y-2">
                         <Label htmlFor="email" className="text-white text-sm font-medium">
                           {t('header.modals.register.email')}
                         </Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
                           placeholder={t('header.modals.register.emailPlaceholder')}
-                          value={formData.email}
-                          onChange={handleInputChange}
+                    value={formData.email}
+                    onChange={handleInputChange}
                           className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
-                          required
-                          disabled={loading}
-                        />
-                      </div>
+                    required
+                    disabled={loading}
+                  />
+              </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                           <Label htmlFor="password" className="text-white text-sm font-medium">
                             {t('header.modals.register.password')}
                           </Label>
-                          <Button
-                            type="button"
+                  <Button
+                    type="button"
                             variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              generatePassword();
-                            }}
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      generatePassword();
+                    }}
                             className="h-7 px-3 text-[11px] bg-transparent border border-white/15 rounded-full text-white/70 hover:text-white hover:bg-white/10"
-                            disabled={loading}
-                          >
-                            <RefreshCw className="h-3 w-3 mr-1" />
+                    disabled={loading}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
                             {t('header.modals.register.generate')}
-                          </Button>
-                        </div>
-                        <div className="relative">
-                          <Input
-                            id="password"
-                            name="password"
-                            type={showPassword ? "text" : "password"}
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
                             placeholder={t('header.modals.register.passwordPlaceholder')}
-                            value={formData.password}
-                            onChange={handleInputChange}
+                    value={formData.password}
+                    onChange={handleInputChange}
                             className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl pr-12"
-                            required
-                            disabled={loading}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
+                    required
+                    disabled={loading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
-                            onClick={() => setShowPassword(!showPassword)}
-                            disabled={loading}
-                          >
-                            {showPassword ? (
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                  >
+                    {showPassword ? (
                               <EyeOff className="h-4 w-4" />
-                            ) : (
+                    ) : (
                               <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
+                    )}
+                  </Button>
                         </div>
                       </div>
-                    </div>
+                </div>
 
-                    {formData.password && (
+                {formData.password && (
                       <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2">
                         <p className="text-xs font-semibold text-white uppercase tracking-[0.2em]">
                           {translate("Требования к паролю", "Password requirements")}
                         </p>
                         <div className="space-y-1.5">
-                          {passwordRequirements.map((req, index) => {
-                            const Icon = req.icon;
-                            const met = req.test(formData.password);
-                            return (
-                              <div 
-                                key={index}
+                      {passwordRequirements.map((req, index) => {
+                        const Icon = req.icon;
+                        const met = req.test(formData.password);
+                        return (
+                          <div 
+                            key={index}
                                 className={`flex items-center gap-2 text-xs ${
-                                  met ? 'text-white' : 'text-white/40'
-                                }`}
-                              >
-                                {met ? (
+                              met ? 'text-white' : 'text-white/40'
+                            }`}
+                          >
+                            {met ? (
                                   <Check className="h-3 w-3" />
-                                ) : (
+                            ) : (
                                   <X className="h-3 w-3" />
-                                )}
-                                <Icon className="h-3 w-3" />
+                            )}
+                            <Icon className="h-3 w-3" />
                                 <span>{req.label}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-                    <div className="space-y-2">
+              <div className="space-y-2">
                       <Label htmlFor="confirmPassword" className="text-white text-sm font-medium">
                         {t('header.modals.register.confirmPassword')}
                       </Label>
-                      <div className="relative">
-                        <Input
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          type={showConfirmPassword ? "text" : "password"}
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
                           placeholder={t('header.modals.register.confirmPasswordPlaceholder')}
-                          value={formData.confirmPassword}
-                          onChange={handleInputChange}
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                           className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl pr-12"
-                          required
-                          disabled={loading}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
+                    required
+                    disabled={loading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          disabled={loading}
-                        >
-                          {showConfirmPassword ? (
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={loading}
+                  >
+                    {showConfirmPassword ? (
                             <EyeOff className="h-4 w-4" />
-                          ) : (
+                    ) : (
                             <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
+                    )}
+                  </Button>
+                </div>
 
-                      {formData.confirmPassword && (
+                {formData.confirmPassword && (
                         <div className={`flex items-center gap-2 text-xs mt-2 ${
-                          passwordsMatch ? 'text-white' : 'text-white/60'
-                        }`}>
-                          {passwordsMatch ? (
-                            <>
+                    passwordsMatch ? 'text-white' : 'text-white/60'
+                  }`}>
+                    {passwordsMatch ? (
+                      <>
                               <Check className="h-3 w-3" />
                               <span className="font-medium">{t('header.modals.register.passwordMatch.success')}</span>
-                            </>
-                          ) : (
-                            <>
+                      </>
+                    ) : (
+                      <>
                               <X className="h-3 w-3" />
                               <span>{t('header.modals.register.passwordMatch.error')}</span>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
 
-                    <Button 
-                      type="submit" 
+              <Button 
+                type="submit" 
                       className="w-full h-12 bg-white text-black hover:bg-white/90 font-medium rounded-xl transition-colors" 
-                      disabled={loading || !allRequirementsMet || !passwordsMatch}
-                    >
-                      {loading ? (
-                        <>
+                disabled={loading || !allRequirementsMet || !passwordsMatch}
+              >
+                {loading ? (
+                  <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t('header.modals.register.creating')}
-                        </>
-                      ) : (
+                  </>
+                ) : (
                         t('header.modals.register.createAccount')
-                      )}
-                    </Button>
-                  </form>
+                )}
+              </Button>
+            </form>
 
                   <p className="text-xs text-white/60">
                     {translate("Регистрируясь, вы соглашаетесь с нашими", "By signing up, you agree to our")}{' '}
                     <Link to="/terms" className="text-white/80 hover:text-white transition-colors">
                       {translate("Условиями обслуживания", "Terms of Service")}
-                    </Link>
-                  </p>
+                </Link>
+              </p>
 
                   <div className="flex flex-col gap-4 text-xs text-white/60 pt-4 border-t border-white/5">
                     <p>{isRu ? "© 2025 EBUSTER. Все права защищены." : "© 2025 EBUSTER. All rights reserved."}</p>
@@ -431,17 +431,17 @@ export default function Register() {
                       </Link>
                     </div>
                   </div>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Right: User Card */}
+        {/* Right: User Card */}
             <div className="hidden lg:flex items-center justify-center px-8 py-16">
               <div className="w-full max-w-[460px]">
                 <div className="rounded-[32px] border border-white/10 bg-black/60 backdrop-blur-xl p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/5 opacity-20 pointer-events-none" />
                   <div className="relative z-10 space-y-10">
-                    <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center">
                       <div className="w-24 h-28 rounded-2xl border-2 border-dashed border-emerald-300/50 bg-emerald-400/5 flex flex-col items-center justify-center">
                         <Plus className="h-6 w-6 text-emerald-200 mb-1" />
                         <span className="text-[11px] text-emerald-100/70 font-medium uppercase tracking-wide">
@@ -451,15 +451,15 @@ export default function Register() {
                           {translate("Макс 2 МБ", "Max 2MB")}
                         </span>
                       </div>
-                    </div>
+                </div>
 
                     <div className="text-center space-y-2">
                       <p className="text-sm text-white/50 uppercase tracking-[0.4em]">
                         {translate("Новый пользователь", "New User")}
                       </p>
                       <p className="text-xl text-white font-mono tracking-[0.8em]">•••••</p>
-                    </div>
-
+              </div>
+              
                     <div className="h-3 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-full relative overflow-hidden">
                       <div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"

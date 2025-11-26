@@ -239,35 +239,35 @@ export const VisualScriptBuilder: React.FC = () => {
     return (
       <div className="rounded-xl border border-white/10 bg-white/[0.02] max-w-2xl mx-auto">
         <div className="p-8">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
               <Lock className="h-6 w-6 text-white/60" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">Визуальный конструктор недоступен</h3>
-              <p className="text-sm text-white/60">Требуется подписка Pro или выше</p>
-            </div>
           </div>
-          <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-white">Визуальный конструктор недоступен</h3>
+              <p className="text-sm text-white/60">Требуется подписка Pro или выше</p>
+          </div>
+        </div>
+        <div className="space-y-4">
             <p className="text-white/60">
-              Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
-            </p>
+            Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
+          </p>
             <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-              <h4 className="font-semibold text-white">Что вы получите:</h4>
+            <h4 className="font-semibold text-white">Что вы получите:</h4>
               <ul className="space-y-1 text-sm text-white/60">
-                <li>✓ Создание скриптов без кода</li>
-                <li>✓ Drag & Drop интерфейс</li>
-                <li>✓ Автоматическая генерация кода</li>
-                <li>✓ Сохранение в расширение</li>
-                <li>✓ Экспорт готового кода</li>
-              </ul>
-            </div>
-            <Button 
+              <li>✓ Создание скриптов без кода</li>
+              <li>✓ Drag & Drop интерфейс</li>
+              <li>✓ Автоматическая генерация кода</li>
+              <li>✓ Сохранение в расширение</li>
+              <li>✓ Экспорт готового кода</li>
+            </ul>
+          </div>
+          <Button 
               className="w-full bg-white text-black hover:bg-white/90 rounded-xl" 
-              onClick={() => window.location.href = '/pricing'}
-            >
-              Посмотреть тарифы
-            </Button>
+            onClick={() => window.location.href = '/pricing'}
+          >
+            Посмотреть тарифы
+          </Button>
           </div>
         </div>
       </div>

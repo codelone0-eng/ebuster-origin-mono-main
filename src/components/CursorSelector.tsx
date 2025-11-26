@@ -35,7 +35,7 @@ export const CursorSelector = ({ currentCursor, onCursorChange }: CursorSelector
   const getCursorPreview = (cursorType: CursorType) => {
     switch (cursorType) {
       case 'custom':
-        return {
+        return { 
           width: '20px',
           height: '20px',
           border: '2px solid rgba(255, 255, 255, 0.8)',

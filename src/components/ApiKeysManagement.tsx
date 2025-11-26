@@ -150,57 +150,57 @@ export function ApiKeysManagement() {
             Создать новый API ключ
           </h3>
           <div className="space-y-4 mt-4">
-            <div className="flex gap-2">
-              <div className="flex-1">
+          <div className="flex gap-2">
+            <div className="flex-1">
                 <Label htmlFor="keyName" className="text-white/60">Название ключа</Label>
-                <Input
-                  id="keyName"
-                  placeholder="Мое приложение"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && createKey()}
+              <Input
+                id="keyName"
+                placeholder="Мое приложение"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && createKey()}
                   className="bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl mt-2"
-                />
-              </div>
-              <div className="flex items-end">
-                <Button onClick={createKey} disabled={loading} className="bg-white text-black hover:bg-white/90 rounded-xl">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Создать
-                </Button>
-              </div>
+              />
             </div>
-            
-            {showNewKey && (
+            <div className="flex items-end">
+                <Button onClick={createKey} disabled={loading} className="bg-white text-black hover:bg-white/90 rounded-xl">
+                <Plus className="h-4 w-4 mr-2" />
+                Создать
+              </Button>
+            </div>
+          </div>
+          
+          {showNewKey && (
               <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="flex items-start gap-3 mb-4">
+              <div className="flex items-start gap-3 mb-4">
                   <AlertCircle className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1">
+                <div className="space-y-1">
                     <p className="text-sm font-semibold text-white">
-                      Сохраните ключ — после закрытия блока он больше не будет доступен.
-                    </p>
+                    Сохраните ключ — после закрытия блока он больше не будет доступен.
+                  </p>
                     <p className="text-xs text-white/60">
-                      Скопируйте ключ и добавьте его в надёжный менеджер секретов.
-                    </p>
-                  </div>
+                    Скопируйте ключ и добавьте его в надёжный менеджер секретов.
+                  </p>
                 </div>
-                <div className="flex gap-2">
+              </div>
+              <div className="flex gap-2">
                   <code className="flex-1 rounded-lg border border-white/10 bg-black/50 p-3 text-sm font-mono text-white break-all">
-                    {newKeyValue}
-                  </code>
+                  {newKeyValue}
+                </code>
                   <Button variant="outline" size="sm" onClick={() => copyKey(newKeyValue)} className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                  onClick={() => setShowNewKey(false)}
-                >
-                  Я сохранил ключ
+                  <Copy className="h-4 w-4" />
                 </Button>
               </div>
-            )}
+              <Button
+                  variant="outline"
+                size="sm"
+                  className="mt-3 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
+                onClick={() => setShowNewKey(false)}
+              >
+                Я сохранил ключ
+              </Button>
+            </div>
+          )}
           </div>
         </div>
       </div>

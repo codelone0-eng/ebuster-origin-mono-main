@@ -667,9 +667,9 @@ const DashboardContent = () => {
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="pb-3 mb-4 border-b border-white/10">
                       <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">
-                        {language === 'ru' ? 'Навигация' : 'Navigation'}
-                      </h3>
-                    </div>
+                      {language === 'ru' ? 'Навигация' : 'Navigation'}
+                    </h3>
+                  </div>
                     <nav className="space-y-1">
                       {navigationItems.map((item) => {
                         const Icon = item.icon;
@@ -735,8 +735,8 @@ const DashboardContent = () => {
                         );
                       })}
                     </nav>
-                  </div>
                 </div>
+              </div>
             </aside>
 
           <div className="flex-1 space-y-8">
@@ -773,26 +773,27 @@ const DashboardContent = () => {
                 <div className="space-y-4">
                   {installedScripts.length === 0 ? (
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center">
-                        <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4">
                           <Library className="h-12 w-12 text-white/60" />
-                          <div>
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                              {t('header.dashboard.installed.noScripts')}
-                            </h3>
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-2">
+                            {t('header.dashboard.installed.noScripts')}
+                          </h3>
                             <p className="text-sm text-white/60">
-                              {t('header.dashboard.installed.noScriptsDescription')}
-                            </p>
-                          </div>
-                          <Button 
+                            {t('header.dashboard.installed.noScriptsDescription')}
+                          </p>
+                        </div>
+                        <Button 
                             className="bg-white text-black hover:bg-white/90 rounded-xl"
-                            onClick={() => handleTabChange('scripts')}
-                          >
-                            {t('header.dashboard.installed.browseScripts')}
-                          </Button>
+                          onClick={() => handleTabChange('scripts')}
+                        >
+                          {t('header.dashboard.installed.browseScripts')}
+                        </Button>
                         </div>
                       </div>
                     </div>
-                  ) : installedScripts
+                  ) : (
+                    installedScripts
                     .filter((item: any) => item.script !== null && item.script !== undefined)
                     .map((item: any) => {
                     const scriptTitle = item.script?.title || item.script?.name || 'Скрипт';
@@ -804,59 +805,60 @@ const DashboardContent = () => {
                     return (
                       <div key={item.script_id} className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors">
                         <div className="p-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
                               <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                                {scriptIconUrl ? (
-                                  <img src={scriptIconUrl} alt={scriptTitle} className="w-full h-full object-cover" />
-                                ) : (
-                                  <span className="text-lg">{scriptIcon}</span>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-white mb-1">{scriptTitle}</h3>
-                                {scriptDescription && (
+                              {scriptIconUrl ? (
+                                <img src={scriptIconUrl} alt={scriptTitle} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-lg">{scriptIcon}</span>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-white mb-1">{scriptTitle}</h3>
+                              {scriptDescription && (
                                   <p className="text-sm text-white/60 line-clamp-2 mb-2">{scriptDescription}</p>
-                                )}
+                              )}
                                 <div className="flex items-center gap-4 text-xs text-white/40">
-                                  <span className="font-mono">v{scriptVersion}</span>
-                                  <span>•</span>
-                                  <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
-                                </div>
+                                <span className="font-mono">v{scriptVersion}</span>
+                                <span>•</span>
+                                <span>{t('header.dashboard.scripts.installed')} {formatDate(item.installed_at)}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button 
-                                variant="outline"
-                                size="sm"
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button 
+                              variant="outline"
+                              size="sm"
                                 className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                                onClick={() => setChangelogScript({ id: item.script_id, name: scriptTitle })}
-                              >
-                                <FileText className="h-3 w-3 mr-1" />
-                                История
-                              </Button>
-                              <Button 
-                                variant="outline"
-                                size="sm"
+                              onClick={() => setChangelogScript({ id: item.script_id, name: scriptTitle })}
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              История
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              size="sm"
                                 className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                              >
-                                <Settings className="h-3 w-3 mr-1" />
-                                Настройки
-                              </Button>
-                              <Button 
-                                variant="outline"
-                                size="sm"
+                            >
+                              <Settings className="h-3 w-3 mr-1" />
+                              Настройки
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              size="sm"
                                 className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl"
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                Удалить
-                              </Button>
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Удалить
+                            </Button>
                             </div>
                           </div>
                         </div>
                       </div>
                     );
-                  })}
+                  })
+                )}
                 </div>
               </div>
             )}
@@ -882,49 +884,49 @@ const DashboardContent = () => {
             {activeTab === 'profile' && (
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.profile.personalInfo')}</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.profile.personalInfo')}</h2>
                     <p className="text-sm text-white/60">Управление личной информацией</p>
                   </div>
                 </div>
                 <div className="max-w-2xl mx-auto">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className=" p-6">
-                      <div className="flex items-center gap-2 mb-6">
-                        <User className="h-5 w-5 text-white" />
-                        <h3 className="text-lg font-semibold text-white">{t('header.dashboard.profile.personalInfo')}</h3>
-                      </div>
-                      <div className="space-y-4">
-                        <AvatarUpload 
-                          currentAvatar={authUser?.avatar_url || user.avatar}
-                          onAvatarUpdate={(avatarUrl) => {
-                            setUser(prev => ({ ...prev, avatar: avatarUrl }));
-                          }}
-                        />
-                        <div className="space-y-3">
-                          <div>
+                    <div className="flex items-center gap-2 mb-6">
+                      <User className="h-5 w-5 text-white" />
+                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.profile.personalInfo')}</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <AvatarUpload 
+                        currentAvatar={authUser?.avatar_url || user.avatar}
+                        onAvatarUpdate={(avatarUrl) => {
+                          setUser(prev => ({ ...prev, avatar: avatarUrl }));
+                        }}
+                      />
+                      <div className="space-y-3">
+                        <div>
                             <label className="text-xs font-semibold text-white/60 uppercase tracking-wide mb-2 block">{t('header.dashboard.profile.name')}</label>
-                            <Input
-                              type="text"
-                              value={user.name}
-                              onChange={(e) => setUser((prev) => ({ ...prev, name: e.target.value }))}
+                          <Input
+                            type="text"
+                            value={user.name}
+                            onChange={(e) => setUser((prev) => ({ ...prev, name: e.target.value }))}
                               className="w-full bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold text-white/60 uppercase tracking-wide mb-2 block">{t('header.dashboard.profile.email')}</label>
-                            <Input
-                              type="email"
-                              value={user.email}
-                              onChange={(e) => setUser((prev) => ({ ...prev, email: e.target.value }))}
-                              className="w-full bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl disabled:opacity-50"
-                              disabled
-                            />
-                          </div>
+                          />
                         </div>
+                        <div>
+                            <label className="text-xs font-semibold text-white/60 uppercase tracking-wide mb-2 block">{t('header.dashboard.profile.email')}</label>
+                          <Input
+                            type="email"
+                            value={user.email}
+                            onChange={(e) => setUser((prev) => ({ ...prev, email: e.target.value }))}
+                              className="w-full bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl disabled:opacity-50"
+                            disabled
+                          />
+                        </div>
+                      </div>
                         <Button className="w-full bg-white text-black hover:bg-white/90 mt-4 rounded-xl" onClick={handleSaveProfile} disabled={isSaving}>
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
-                        </Button>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        {isSaving ? t('header.dashboard.settings.saving') : t('header.dashboard.settings.saveChanges')}
+                      </Button>
                       </div>
                     </div>
                   </div>
@@ -935,87 +937,87 @@ const DashboardContent = () => {
             {activeTab === 'settings' && (
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.settings')}</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.settings')}</h2>
                     <p className="text-sm text-white/60">Настройки безопасности и аккаунта</p>
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className=" p-6">
-                      <div className="flex items-center gap-2 mb-6">
+                    <div className="flex items-center gap-2 mb-6">
                         <Shield className="h-5 w-5 text-emerald-400" />
-                        <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.security')}</h3>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="grid gap-3">
-                          <Button
-                            variant="outline"
+                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.security')}</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="grid gap-3">
+                        <Button
+                          variant="outline"
                             className="w-full justify-start bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                            onClick={() => setIsChangePasswordOpen(true)}
-                          >
+                          onClick={() => setIsChangePasswordOpen(true)}
+                        >
                             <Key className="h-4 w-4 mr-2 text-emerald-400" />
-                            {t('header.dashboard.settings.changePassword')}
-                          </Button>
-                          <Button
-                            variant="outline"
+                          {t('header.dashboard.settings.changePassword')}
+                        </Button>
+                        <Button
+                          variant="outline"
                             className="w-full justify-start bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
-                            onClick={() => setIsChangeEmailOpen(true)}
-                          >
+                          onClick={() => setIsChangeEmailOpen(true)}
+                        >
                             <Mail className="h-4 w-4 mr-2 text-emerald-400" />
-                            {t('header.dashboard.settings.changeEmail')}
-                          </Button>
+                          {t('header.dashboard.settings.changeEmail')}
+                        </Button>
                           <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
                               <Shield className="h-4 w-4 text-emerald-400" />
-                              <span className="text-sm font-medium text-white">{t('header.dashboard.settings.twoFactorAuth')}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={is2FAEnabled}
-                                onCheckedChange={async (checked) => {
-                                  if (checked) {
-                                    setIs2FASetupOpen(true);
-                                  } else {
-                                    try {
-                                      const token = localStorage.getItem('ebuster_token');
-                                      const response = await fetch(`${API_CONFIG.USER_URL}/2fa/disable`, {
-                                        method: 'POST',
-                                        headers: {
-                                          'Authorization': `Bearer ${token}`,
-                                          'Content-Type': 'application/json'
-                                        }
-                                      });
-
-                                      if (response.ok) {
-                                        setIs2FAEnabled(false);
-                                        setUser(prev => ({ ...prev, twoFactorEnabled: false }));
-                                        loadUserProfile();
-                                        toast({
-                                          title: 'Двухфакторная аутентификация отключена',
-                                          description: 'Вы можете включить её снова в любое время',
-                                          variant: 'success'
-                                        });
-                                      } else {
-                                        toast({
-                                          title: 'Ошибка',
-                                          description: 'Не удалось отключить 2FA',
-                                          variant: 'destructive'
-                                        });
+                            <span className="text-sm font-medium text-white">{t('header.dashboard.settings.twoFactorAuth')}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={is2FAEnabled}
+                              onCheckedChange={async (checked) => {
+                                if (checked) {
+                                  setIs2FASetupOpen(true);
+                                } else {
+                                  try {
+                                    const token = localStorage.getItem('ebuster_token');
+                                    const response = await fetch(`${API_CONFIG.USER_URL}/2fa/disable`, {
+                                      method: 'POST',
+                                      headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                        'Content-Type': 'application/json'
                                       }
-                                    } catch (error) {
+                                    });
+
+                                    if (response.ok) {
+                                      setIs2FAEnabled(false);
+                                      setUser(prev => ({ ...prev, twoFactorEnabled: false }));
+                                      loadUserProfile();
+                                      toast({
+                                        title: 'Двухфакторная аутентификация отключена',
+                                        description: 'Вы можете включить её снова в любое время',
+                                        variant: 'success'
+                                      });
+                                    } else {
                                       toast({
                                         title: 'Ошибка',
                                         description: 'Не удалось отключить 2FA',
                                         variant: 'destructive'
                                       });
                                     }
+                                  } catch (error) {
+                                    toast({
+                                      title: 'Ошибка',
+                                      description: 'Не удалось отключить 2FA',
+                                      variant: 'destructive'
+                                    });
                                   }
-                                }}
+                                }
+                              }}
                                 className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10"
-                              />
+                            />
                               <span className="text-sm text-white/60">
-                                {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
-                              </span>
+                              {is2FAEnabled ? t('header.dashboard.settings.enabled') : t('header.dashboard.settings.disabled')}
+                            </span>
                             </div>
                           </div>
                         </div>
@@ -1039,50 +1041,50 @@ const DashboardContent = () => {
             {activeTab === 'api-docs' && (
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">API Документация</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">API Документация</h2>
                     <p className="text-sm text-white/60">Создайте API ключ в настройках и используйте его для доступа к нашему API</p>
-                  </div>
+                </div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <h3 className="text-lg font-semibold text-white mb-6">Использование API</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-sm font-semibold text-white mb-2">Аутентификация</h4>
+                  <h3 className="text-lg font-semibold text-white mb-6">Использование API</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-semibold text-white mb-2">Аутентификация</h4>
                         <p className="text-sm text-white/60 mb-2">
-                          Используйте API ключ в заголовке запроса:
-                        </p>
+                        Используйте API ключ в заголовке запроса:
+                      </p>
                         <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white/80 font-mono">
-                          <code>X-API-Key: ebk_your_api_key_here</code>
-                        </pre>
-                      </div>
-                      
-                      <div>
-                        <h4 className="text-sm font-semibold text-white mb-2">Примеры</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-sm font-medium text-white mb-1">JavaScript/Node.js</p>
+                        <code>X-API-Key: ebk_your_api_key_here</code>
+                      </pre>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-semibold text-white mb-2">Примеры</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium text-white mb-1">JavaScript/Node.js</p>
                             <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs overflow-x-auto text-white/80 font-mono">
 {`const response = await fetch('https://api.ebuster.ru/api/v1/scripts', {
   headers: { 'X-API-Key': 'ebk_your_api_key_here' }
 });
 const data = await response.json();`}
-                            </pre>
-                          </div>
-                          
-                          <div>
-                            <p className="text-sm font-medium text-white mb-1">Python</p>
+                          </pre>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-white mb-1">Python</p>
                             <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs overflow-x-auto text-white/80 font-mono">
 {`import requests
 headers = {'X-API-Key': 'ebk_your_api_key_here'}
 response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers)`}
-                            </pre>
-                          </div>
-                          
-                          <div>
-                            <p className="text-sm font-medium text-white mb-1">cURL</p>
+                          </pre>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-white mb-1">cURL</p>
                             <pre className="p-3 bg-white/5 border border-white/10 rounded-xl text-xs overflow-x-auto text-white/80 font-mono">
 {`curl -H "X-API-Key: ebk_your_api_key_here" https://api.ebuster.ru/api/v1/scripts`}
-                            </pre>
+                          </pre>
                           </div>
                         </div>
                       </div>
@@ -1121,9 +1123,9 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                         </div>
                         <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
                       </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="flex items-center gap-2 mb-6">
@@ -1172,11 +1174,11 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                               {t('header.dashboard.settings.configure')}
                             </Button>
                           </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
               </div>
             )}
           </div>

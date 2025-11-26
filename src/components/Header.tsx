@@ -203,9 +203,9 @@ export const Header = () => {
                                 {item.label}
                               </div>
                               {item.description && (
-                                <p className="text-white/40 line-clamp-2 text-xs">
-                                  {item.description}
-                                </p>
+                              <p className="text-white/40 line-clamp-2 text-xs">
+                                {item.description}
+                              </p>
                               )}
                             </div>
                           </a>
@@ -228,54 +228,54 @@ export const Header = () => {
           {/* Right - Controls & Auth */}
           <div className="flex items-center gap-3">
             {/* Search Button (Desktop) */}
-            <Button
-              variant="ghost"
-              size="sm"
+          <Button
+            variant="ghost"
+            size="sm"
               className="hidden md:flex text-white/70 hover:text-white px-4 py-2 h-10 rounded-lg hover:bg-white/5 transition-colors duration-200 border border-white/10"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="h-4 w-4 mr-2 text-white/60" />
+            onClick={() => setIsSearchOpen(true)}
+          >
+            <Search className="h-4 w-4 mr-2 text-white/60" />
               <span className="text-sm font-medium">Поиск</span>
               <kbd className="ml-3 px-2 py-0.5 text-[10px] bg-white/5 border border-white/10 rounded text-white/50 font-mono">⌘K</kbd>
-            </Button>
+          </Button>
 
             {/* Cursor Selector */}
             <div className="hidden md:block">
-              <CursorSelector 
-                currentCursor={cursorType}
-                onCursorChange={setCursorType}
-              />
+          <CursorSelector 
+            currentCursor={cursorType}
+            onCursorChange={setCursorType}
+          />
             </div>
 
             {/* Language Toggle */}
-            <Button 
-              variant="ghost" 
-              size="sm"
+          <Button 
+            variant="ghost" 
+            size="sm"
               className="hidden md:flex text-white/70 hover:text-white px-4 py-2 h-10 rounded-lg hover:bg-white/5 transition-colors duration-200 border border-white/10"
-              onClick={toggleLanguage}
-            >
+            onClick={toggleLanguage}
+          >
               <span className="text-sm font-medium">{t('header.buttons.language')}</span>
-            </Button>
+          </Button>
 
             {/* Authentication */}
-            {loading ? (
-              <div className="flex items-center gap-2">
+          {loading ? (
+            <div className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse" />
-              </div>
-            ) : user ? (
+            </div>
+          ) : user ? (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
+              <Button 
+                variant="ghost" 
+                size="sm"
                     className="text-white/70 hover:text-white px-4 py-2 h-10 rounded-lg hover:bg-white/5 transition-colors duration-200 border border-white/10"
-                  >
-                    <User className="h-4 w-4 mr-2 text-white/60" />
+              >
+                <User className="h-4 w-4 mr-2 text-white/60" />
                     <span className="text-sm font-medium">
-                      {user?.full_name || user?.email?.split('@')[0] || 'Пользователь'}
-                    </span>
+                  {user?.full_name || user?.email?.split('@')[0] || 'Пользователь'}
+                </span>
                     <ChevronDown className="h-3.5 w-3.5 ml-2 text-white/50" />
-                  </Button>
+              </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="z-dropdown w-64 p-3 bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl">
                   <div className="space-y-2">
@@ -321,33 +321,33 @@ export const Header = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-            ) : (
+          ) : (
               <div className="hidden md:flex items-center gap-3">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
+              <Button 
+                variant="ghost" 
+                size="sm"
                   className="text-white/70 hover:text-white px-4 py-2 h-10 rounded-lg hover:bg-white/5 transition-colors duration-200 border border-white/10"
-                  onClick={handleOpenRegister}
-                >
-                  <User className="h-4 w-4 mr-2 text-white/60" />
+                onClick={handleOpenRegister}
+              >
+                <User className="h-4 w-4 mr-2 text-white/60" />
                   <span className="text-sm font-medium">{t('header.buttons.createAccount')}</span>
-                </Button>
+              </Button>
 
-                <Button 
-                  variant="outline" 
-                  size="sm"
+              <Button 
+                variant="outline" 
+                size="sm"
                   className="bg-white text-black hover:bg-white/90 border-white rounded-lg px-6 py-2 h-10 font-medium shadow-lg"
-                  onClick={handleOpenLogin}
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{t('header.buttons.signIn')}</span>
-                </Button>
-              </div>
-            )}
+                onClick={handleOpenLogin}
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                <span className="text-sm">{t('header.buttons.signIn')}</span>
+              </Button>
+            </div>
+          )}
 
             {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
+            <Button 
+              variant="ghost" 
               size="icon"
               className="md:hidden text-white hover:text-white hover:bg-white/5 rounded-lg h-10 w-10"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -359,45 +359,45 @@ export const Header = () => {
               )}
             </Button>
           </div>
-        </div>
+          </div>
 
-        {/* Mobile Menu */}
+          {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden pb-6 pt-4 border-t border-white/10 mt-4">
             <div className="space-y-4">
               {/* Mobile Navigation */}
               <nav className="space-y-2">
-                {navigationLinks.map((link, index) => (
-                  <div key={index}>
-                    {link.submenu?.items ? (
+                  {navigationLinks.map((link, index) => (
+                    <div key={index}>
+                      {link.submenu?.items ? (
                       <div className="space-y-2">
                         <div className="text-white/40 px-2 py-1 text-xs font-semibold uppercase tracking-wider">
-                          {link.label}
-                        </div>
+                            {link.label}
+                          </div>
                         <div className="space-y-1 pl-4">
-                          {link.submenu.items.map((item, itemIndex) => (
+                            {link.submenu.items.map((item, itemIndex) => (
                             <a 
-                              key={itemIndex}
+                                key={itemIndex}
                               href={item.href}
                               className="block py-2 px-3 rounded-lg hover:bg-white/5 transition-colors duration-200 text-white/70 hover:text-white text-sm"
                               onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              {item.label}
+                              >
+                                {item.label}
                             </a>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
                       </div>
-                    ) : (
+                      ) : (
                       <a 
                         href={link.href.startsWith('/') ? `https://ebuster.ru${link.href}` : link.href}
                         className="block py-2 px-3 rounded-lg hover:bg-white/5 transition-colors duration-200 text-white/70 hover:text-white text-sm font-medium"
                         onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {link.label}
+                        >
+                          {link.label}
                       </a>
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  ))}
               </nav>
 
               {/* Mobile Controls */}

@@ -177,95 +177,95 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
     <div className="space-y-6">
       {/* Фильтры и поиск */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-2">Тикеты поддержки</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-2">Тикеты поддержки</h2>
               <p className="text-sm text-white/60">
-                Управление запросами в службу поддержки
-              </p>
-            </div>
+              Управление запросами в службу поддержки
+            </p>
+          </div>
             <Button onClick={handleCreateTicket} className="bg-white text-black hover:bg-white/90 rounded-xl">
-              <Plus className="h-4 w-4 mr-2" />
-              Создать тикет
-            </Button>
-          </div>
-          <div className="mb-6">
-            <div className="relative">
+            <Plus className="h-4 w-4 mr-2" />
+            Создать тикет
+          </Button>
+        </div>
+        <div className="mb-6">
+          <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60" />
-              <Input
-                placeholder="Поиск по номеру, теме или описанию..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+            <Input
+              placeholder="Поиск по номеру, теме или описанию..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-4 h-12 bg-white/5 border-white/15 text-white rounded-xl focus:border-white focus:ring-0 placeholder:text-white/40"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-white/10 rounded-md transition-colors"
-                >
+              >
                   <X className="h-4 w-4 text-white/60" />
-                </button>
-              )}
-            </div>
+              </button>
+            )}
           </div>
+        </div>
 
-          {/* Список тикетов */}
-          {loading ? (
-            <div className="text-center py-12">
+        {/* Список тикетов */}
+        {loading ? (
+          <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
               <p className="mt-4 text-white/60">Загрузка тикетов...</p>
-            </div>
-          ) : tickets.length === 0 ? (
-            <div className="text-center py-12">
+          </div>
+        ) : tickets.length === 0 ? (
+          <div className="text-center py-12">
               <Ticket className="h-12 w-12 mx-auto text-white/60 mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-white">Тикетов не найдено</h3>
+            <h3 className="text-lg font-semibold mb-2 text-white">Тикетов не найдено</h3>
               <p className="text-white/60 mb-4">
-                {searchQuery
-                  ? 'Попробуйте изменить запрос'
-                  : 'Создайте первый тикет для обращения в поддержку'}
-              </p>
-              {!searchQuery && (
+              {searchQuery
+                ? 'Попробуйте изменить запрос'
+                : 'Создайте первый тикет для обращения в поддержку'}
+            </p>
+            {!searchQuery && (
                 <Button onClick={handleCreateTicket} className="bg-white text-black hover:bg-white/90 rounded-xl">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Создать тикет
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {tickets.map((ticket) => {
-                const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig] || { label: ticket.status, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
-                const priorityInfo = priorityConfig[ticket.priority as keyof typeof priorityConfig] || { label: ticket.priority, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
+                <Plus className="h-4 w-4 mr-2" />
+                Создать тикет
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tickets.map((ticket) => {
+              const statusInfo = statusConfig[ticket.status as keyof typeof statusConfig] || { label: ticket.status, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
+              const priorityInfo = priorityConfig[ticket.priority as keyof typeof priorityConfig] || { label: ticket.priority, color: 'bg-gray-500', textColor: 'text-gray-700', bgLight: 'bg-gray-50' };
 
-                return (
-                  <div
-                    key={ticket.id}
+              return (
+                <div
+                  key={ticket.id}
                     className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all cursor-pointer"
-                    onClick={() => setSelectedTicket(ticket.id)}
-                  >
+                  onClick={() => setSelectedTicket(ticket.id)}
+                >
                     <div className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm font-mono text-white/60">
-                              Тикет # {ticket.ticket_number || formatTicketNumber(ticket.id)}
-                            </span>
-                            <Badge
-                              className={cn(
+                          Тикет # {ticket.ticket_number || formatTicketNumber(ticket.id)}
+                        </span>
+                        <Badge
+                          className={cn(
                                 'text-xs rounded-lg',
-                                statusInfo.color,
-                                'text-white'
-                              )}
-                            >
-                              {statusInfo.label}
-                            </Badge>
-                            <div className={cn('w-2 h-2 rounded-full', priorityInfo.color)} />
-                          </div>
-                          <h4 className="font-semibold text-base mb-1 line-clamp-1 text-white">
-                            {ticket.subject}
-                          </h4>
+                            statusInfo.color,
+                            'text-white'
+                          )}
+                        >
+                          {statusInfo.label}
+                        </Badge>
+                        <div className={cn('w-2 h-2 rounded-full', priorityInfo.color)} />
+                      </div>
+                      <h4 className="font-semibold text-base mb-1 line-clamp-1 text-white">
+                        {ticket.subject}
+                      </h4>
                           <p className="text-sm text-white/60 line-clamp-2 mb-2">
-                            {ticket.description}
+                        {ticket.description}
                           </p>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/40">
                             {ticket.customer?.full_name && (
@@ -303,14 +303,14 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
+                      </div>
                     </div>
-                  </div>
                 );
               })}
             </div>
           )}
         </div>
-      </div>
+        </div>
 
       <CreateTicketModal
         isOpen={isCreateModalOpen}

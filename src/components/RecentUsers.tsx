@@ -62,50 +62,50 @@ export const RecentUsers = ({ onUserSelect }: { onUserSelect: (email: string) =>
       <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-emerald-300" />
-          {t('header.modals.login.recentLogins')}
+            {t('header.modals.login.recentLogins')}
         </div>
         <span className="text-white/30">{recentUsers.length}</span>
-      </div>
-
+          </div>
+          
       <div className="space-y-3">
         {recentUsers.map((user) => (
           <div
             key={user.email}
             className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3 hover:bg-black/60 transition-colors"
           >
-            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full border border-white/15 bg-white/10 flex items-center justify-center">
                 <User className="h-5 w-5 text-white/80" />
-              </div>
-              <div>
+                </div>
+                <div>
                 <p className="text-sm font-semibold text-white">
-                  {user.name || user.email.split('@')[0]}
-                </p>
+                    {user.name || user.email.split('@')[0]}
+                  </p>
                 <p className="text-xs text-white/50 font-mono">{user.email}</p>
+                </div>
               </div>
-            </div>
-
+              
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onUserSelect(user.email)}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onUserSelect(user.email)}
                 className="h-8 px-4 rounded-full border border-white/15 text-white/70 hover:text-white hover:bg-white/10"
-              >
-                {t('header.modals.login.signIn')}
-              </Button>
+                >
+                  {t('header.modals.login.signIn')}
+                </Button>
               <button
                 type="button"
-                onClick={() => removeRecentUser(user.email)}
+                  onClick={() => removeRecentUser(user.email)}
                 className="h-8 w-8 flex items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
                 aria-label="Remove recent user"
-              >
+                >
                 <X className="h-4 w-4" />
               </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
     </div>
   );
 };

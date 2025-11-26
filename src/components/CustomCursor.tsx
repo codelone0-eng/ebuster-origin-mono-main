@@ -8,7 +8,7 @@ export const CustomCursor = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // If default, hide custom cursor (show system cursor)
-  useEffect(() => {
+      useEffect(() => {
     // Remove cursor: none from body and all elements when default
     if (cursorType === 'default') {
       if (cursorRef.current) {
@@ -56,16 +56,16 @@ export const CustomCursor = () => {
     const cursor = cursorRef.current;
     if (!cursor) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+        const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
-      
+          cursor.style.left = `${e.clientX}px`;
+          cursor.style.top = `${e.clientY}px`;
+
       // Check if hovering over interactive elements
       const target = e.target as HTMLElement;
       const isInteractive = target.closest('button, a, input, textarea, select, [role="button"], [tabindex]');
       setIsHovering(!!isInteractive);
-    };
+        };
 
     const handleMouseDown = () => {
       if (cursor) {
@@ -75,7 +75,7 @@ export const CustomCursor = () => {
 
     const handleMouseUp = () => {
       if (cursor) {
-        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
       }
     };
 
@@ -93,20 +93,20 @@ export const CustomCursor = () => {
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseenter', handleMouseEnter);
+        document.addEventListener('mouseleave', handleMouseLeave);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+          document.removeEventListener('mousemove', handleMouseMove);
+          document.removeEventListener('mouseenter', handleMouseEnter);
+          document.removeEventListener('mouseleave', handleMouseLeave);
+          document.removeEventListener('mousedown', handleMouseDown);
+          document.removeEventListener('mouseup', handleMouseUp);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [cursorType]);
 
@@ -118,17 +118,17 @@ export const CustomCursor = () => {
   const hoverScale = isHovering ? 1.3 : 1;
 
   const cursorStyle = {
-    position: 'fixed' as const,
-    pointerEvents: 'none' as const,
+          position: 'fixed' as const,
+          pointerEvents: 'none' as const,
     zIndex: 2147483651,
-    transform: 'translate(-50%, -50%)',
+          transform: 'translate(-50%, -50%)',
     opacity: '1',
     transition: 'transform 0.1s ease, width 0.2s ease, height 0.2s ease',
     width: `${20 * hoverScale}px`,
     height: `${20 * hoverScale}px`,
     border: '2px solid rgba(255, 255, 255, 0.8)',
-    borderRadius: '50%',
-    background: 'transparent',
+          borderRadius: '50%',
+          background: 'transparent',
     boxShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
   };
 
@@ -139,7 +139,7 @@ export const CustomCursor = () => {
         className="custom-cursor"
         style={cursorStyle}
       />
-
+      
       <style>
         {`
           .custom-cursor {
