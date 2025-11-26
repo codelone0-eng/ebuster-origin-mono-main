@@ -11,11 +11,7 @@ RUN npm install
 # Копируем исходники тестов и скрипты
 COPY tests ./tests
 COPY tsconfig*.json ./
-COPY run-tests-and-deploy.sh ./
 COPY .env.autotest* ./
-
-# Делаем скрипт исполняемым
-RUN chmod +x run-tests-and-deploy.sh
 
 # Создаём директории для отчётов
 RUN mkdir -p tests/public/autotest tests/reports tests/storage
