@@ -230,10 +230,9 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       {/* Заголовок */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
-          <p className="text-white/60">
+        <p className="text-white/60">
           Приглашайте друзей и зарабатывайте на каждой их подписке
         </p>
-        </div>
       </div>
 
       {/* Статистика */}
