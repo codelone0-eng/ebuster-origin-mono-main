@@ -793,7 +793,7 @@ const DashboardContent = () => {
                       </div>
                     </div>
                   ) : (
-                    <>
+                    <div>
                       {installedScripts
                         .filter((item: any) => item.script !== null && item.script !== undefined)
                         .map((item: any) => {
@@ -859,7 +859,7 @@ const DashboardContent = () => {
                       </div>
                     );
                   })}
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
