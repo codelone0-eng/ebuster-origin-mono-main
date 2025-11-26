@@ -618,7 +618,7 @@ const DashboardContent = () => {
     <div className="min-h-screen bg-black overflow-x-hidden text-white relative">
       {/* Silk background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
       </div>
       <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
       
@@ -664,8 +664,7 @@ const DashboardContent = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             <aside className="w-full lg:w-72 flex-shrink-0">
               <div className="sticky top-24 space-y-4">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="pb-3 mb-4 border-b border-white/10">
                       <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">
                         {language === 'ru' ? 'Навигация' : 'Navigation'}
@@ -756,8 +755,7 @@ const DashboardContent = () => {
 
             {activeTab === 'installed' && (
               <div className="space-y-6">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.installed')}</h2>
@@ -776,8 +774,7 @@ const DashboardContent = () => {
 
                 <div className="space-y-4">
                   {installedScripts.length === 0 ? (
-                    <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                      <div className="rounded-[16px] border border-white/10 bg-black/70 p-12 text-center">
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center">
                         <div className="flex flex-col items-center gap-4">
                           <Library className="h-12 w-12 text-white/60" />
                           <div>
@@ -807,8 +804,8 @@ const DashboardContent = () => {
                     const scriptIcon = item.script?.icon || '⚡';
 
                     return (
-                      <div key={item.script_id} className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1 hover:border-white/20 transition-colors">
-                        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                      <div key={item.script_id} className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors">
+                        <div className="p-6">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                               <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -886,15 +883,14 @@ const DashboardContent = () => {
 
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.profile.personalInfo')}</h2>
                     <p className="text-sm text-white/60">Управление личной информацией</p>
                   </div>
                 </div>
                 <div className="max-w-2xl mx-auto">
-                  <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                    <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className=" p-6">
                       <div className="flex items-center gap-2 mb-6">
                         <User className="h-5 w-5 text-white" />
                         <h3 className="text-lg font-semibold text-white">{t('header.dashboard.profile.personalInfo')}</h3>
@@ -940,15 +936,14 @@ const DashboardContent = () => {
 
             {activeTab === 'settings' && (
               <div className="space-y-6">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.settings')}</h2>
                     <p className="text-sm text-white/60">Настройки безопасности и аккаунта</p>
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                    <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className=" p-6">
                       <div className="flex items-center gap-2 mb-6">
                         <Shield className="h-5 w-5 text-emerald-400" />
                         <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.security')}</h3>
@@ -1045,14 +1040,12 @@ const DashboardContent = () => {
 
             {activeTab === 'api-docs' && (
               <div className="space-y-6">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <h2 className="text-2xl font-bold text-white mb-2">API Документация</h2>
                     <p className="text-sm text-white/60">Создайте API ключ в настройках и используйте его для доступа к нашему API</p>
                   </div>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <h3 className="text-lg font-semibold text-white mb-6">Использование API</h3>
                     <div className="space-y-4">
                       <div>
@@ -1103,8 +1096,7 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
 
             {activeTab === 'general-settings' && (
               <div className="space-y-6">
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="flex items-center gap-2 mb-6">
                       <Settings className="h-5 w-5 text-white" />
                       <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.general')}</h3>
@@ -1135,8 +1127,7 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-                  <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="flex items-center gap-2 mb-6">
                       <Shield className="h-5 w-5 text-emerald-400" />
                       <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.twoFactorAuth')}</h3>

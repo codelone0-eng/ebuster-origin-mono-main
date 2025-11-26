@@ -176,8 +176,7 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
   return (
     <div className="space-y-6">
       {/* Фильтры и поиск */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Тикеты поддержки</h2>
@@ -241,10 +240,10 @@ export const TicketsSystem: React.FC<TicketsSystemProps> = ({ initialFilter = 'a
                 return (
                   <div
                     key={ticket.id}
-                    className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1 hover:border-white/20 transition-all cursor-pointer"
+                    className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all cursor-pointer"
                     onClick={() => setSelectedTicket(ticket.id)}
                   >
-                    <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+                    <div className="p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">

@@ -237,8 +237,8 @@ export const VisualScriptBuilder: React.FC = () => {
   // Проверка доступа
   if (!permissions.canAccessVisualBuilder()) {
     return (
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1 max-w-2xl mx-auto">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-8">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] max-w-2xl mx-auto">
+        <div className="p-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
               <Lock className="h-6 w-6 text-white/60" />

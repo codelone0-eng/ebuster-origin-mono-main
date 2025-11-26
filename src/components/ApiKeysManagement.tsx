@@ -144,8 +144,7 @@ export function ApiKeysManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
             <Key className="h-5 w-5" />
             Создать новый API ключ
@@ -210,8 +209,8 @@ export function ApiKeysManagement() {
         <h3 className="text-lg font-semibold text-white">Ваши API ключи ({keys.length}/10)</h3>
         
         {keys.length === 0 ? (
-          <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-            <div className="rounded-[16px] border border-white/10 bg-black/70 p-8 text-center">
+          <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+            <div className="p-8 text-center">
               <Key className="h-12 w-12 mx-auto mb-4 text-white/60" />
               <h3 className="text-lg font-semibold mb-2 text-white">Нет API ключей</h3>
               <p className="text-white/60 text-sm">
@@ -221,8 +220,8 @@ export function ApiKeysManagement() {
           </div>
         ) : (
           keys.map((key) => (
-            <div key={key.id} className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-              <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+            <div key={key.id} className="rounded-xl border border-white/10 bg-white/[0.02]">
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
                     <Key className="h-5 w-5 text-white/60 flex-shrink-0" />

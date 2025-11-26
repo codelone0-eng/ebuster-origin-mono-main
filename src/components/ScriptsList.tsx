@@ -587,8 +587,8 @@ const ScriptsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 w-full h-full flex items-center justify-center">
+      <div className="flex items-center justify-center h-64 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className=" w-full h-full flex items-center justify-center">
           <div className="text-lg text-white">{t('header.dashboard.scripts.loading')}</div>
         </div>
       </div>
@@ -598,16 +598,14 @@ const ScriptsList: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Заголовок */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.scripts.title')}</h2>
           <p className="text-sm text-white/60">{t('header.dashboard.scripts.description')}</p>
         </div>
       </div>
 
       {/* Фильтры и поиск */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-64">
               <div className="relative">
@@ -661,9 +659,8 @@ const ScriptsList: React.FC = () => {
         {filteredScripts.map((script) => (
           <div
             key={script.id}
-            className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1 hover:border-white/20 transition-colors"
+            className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors p-6"
           >
-            <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 overflow-hidden">
@@ -771,8 +768,7 @@ const ScriptsList: React.FC = () => {
 
       {/* Пустое состояние */}
       {filteredScripts.length === 0 && !loading && (
-        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-          <div className="rounded-[16px] border border-white/10 bg-black/70 p-12 text-center">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center">
             <Code className="h-12 w-12 mx-auto mb-4 text-white/60" />
             <h3 className="text-lg font-semibold mb-2 text-white">{t('header.dashboard.scripts.notFound')}</h3>
             <p className="text-white/60">

@@ -217,8 +217,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 w-full h-full flex items-center justify-center">
+      <div className="flex items-center justify-center h-64 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className=" w-full h-full flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
         </div>
       </div>
@@ -228,8 +228,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="space-y-6">
       {/* Заголовок */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
           <p className="text-white/60">
             Приглашайте друзей и зарабатывайте на каждой их подписке
@@ -239,8 +238,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+          <div className="p-4">
             <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Всего рефералов</h3>
               <Users className="h-4 w-4 text-white/60" />
@@ -252,8 +251,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+          <div className="p-4">
             <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Заработано</h3>
               <DollarSign className="h-4 w-4 text-white/60" />
@@ -265,8 +264,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+          <div className="p-4">
             <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Ожидает выплаты</h3>
               <TrendingUp className="h-4 w-4 text-white/60" />
@@ -278,8 +277,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+          <div className="p-4">
             <div className="flex flex-row items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Конверсия</h3>
               <Award className="h-4 w-4 text-white/60" />
@@ -293,8 +292,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       </div>
 
       {/* Реферальный код и ссылка */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
             <p className="text-sm text-white/60">
@@ -339,8 +337,8 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')} className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')} className="rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="p-6">
           <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 rounded-xl">
             <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">Рефералы</TabsTrigger>
             <TabsTrigger value="payouts" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">История выплат</TabsTrigger>
@@ -443,8 +441,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       </Tabs>
 
       {/* Как это работает */}
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <h3 className="text-lg font-semibold text-white mb-6">Как это работает?</h3>
         <div className="space-y-4">
           <div className="flex gap-4">

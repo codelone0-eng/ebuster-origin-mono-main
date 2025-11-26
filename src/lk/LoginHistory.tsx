@@ -192,8 +192,7 @@ export const LoginHistory: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
           <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
           <p className="text-sm text-white/60">Загрузка...</p>
         </div>
@@ -202,8 +201,8 @@ export const LoginHistory: React.FC = () => {
   }
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
-      <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02]">
+      <div className=" p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
