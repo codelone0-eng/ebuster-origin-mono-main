@@ -177,8 +177,10 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-black border border-white/10 rounded-lg p-12">
+      <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">
+        {/* Left: Form */}
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-black border border-white/10 rounded-lg p-12">
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-5xl font-bold text-white" style={{ 
@@ -414,6 +416,32 @@ export default function Register() {
                   Войти
                 </Link>
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: User Card */}
+        <div className="hidden lg:block">
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-8 max-w-md mx-auto">
+            <div className="space-y-6">
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 rounded-lg border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center mb-4">
+                  <User className="h-8 w-8 text-white/40 mb-2" />
+                  <span className="text-xs text-white/40">Avatar</span>
+                  <span className="text-xs text-white/30">Max 2MB</span>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-1">New User</h3>
+                <p className="text-white/60 text-sm">{formData.email || 'your@email.com'}</p>
+              </div>
+              
+              <div className="h-1 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full" />
+              
+              <div className="font-mono text-xs text-white/60 break-all text-center">
+                {formData.email ? 
+                  Array.from(formData.email).reduce((acc, char) => acc + char.charCodeAt(0).toString(16), '').substring(0, 36).match(/.{1,8}/g)?.join('-') || '00000000-0000-0000-0000-000000000000' :
+                  '00000000-0000-0000-0000-000000000000'
+                }
+              </div>
             </div>
           </div>
         </div>

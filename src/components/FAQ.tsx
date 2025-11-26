@@ -17,7 +17,7 @@ export const FAQ = () => {
       {(faqs as unknown as any[]).map((faq: any, index: number) => (
         <div 
           key={index}
-          className="bg-black border border-white/10 rounded-lg p-5 hover:border-white/20 transition-colors"
+          className="rounded-xl border border-white/10 bg-white/[0.02] p-6 hover:border-white/20 transition-colors"
         >
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value={`item-${index}`} className="border-none">

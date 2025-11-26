@@ -143,14 +143,20 @@ export const eng = {
     legal: "Legal",
     privacy: "Privacy",
     terms: "Terms",
-    copyright: "© 2025 Ebuster. All rights belong to the author.",
+    copyright: "© 2025 EBUSTER. All rights reserved.",
     product: "Product",
     resources: "Resources",
     features: "Features",
     components: "Components",
     documentation: "Documentation",
     support: "Support",
-    faq: "FAQ"
+    faq: "FAQ",
+    description: "Userscript manager for Chrome. Browser automation, script library and API.",
+    emailPlaceholder: "Email address",
+    subscribe: "Stay updated",
+    status: "All systems operational",
+    contacts: "Contacts",
+    roadmap: "Roadmap"
   },
   featuresGrid: {
     structuredLibrary: {
@@ -183,6 +189,10 @@ export const eng = {
     title: "Start using scripts in under a minute",
     description: "EBUSTER is a userscript manager for Chrome. Install the extension and get access to a huge library of ready-made scripts for browser automation.",
     codeExample: "Installation Example",
+    step1: "1. Install EBUSTER extension",
+    step2: "2. Open extension popup",
+    step3: "3. Browse script library",
+    step4: "4. Click \"Install\" on any script",
     installedScripts: "Installed Scripts",
     installedCount: "247 scripts",
     installedDesc: "actively running in your browser",

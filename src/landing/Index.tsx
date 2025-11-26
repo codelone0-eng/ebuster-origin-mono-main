@@ -202,10 +202,10 @@ const Index = () => {
                     <div className="rounded-2xl border border-white/10 bg-[#05090f] p-6">
                       <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">{t('index.scripts.codeExample')}</div>
                       <div className="font-mono text-sm text-white/80 space-y-2">
-                        <div className="text-emerald-300">1. Install EBUSTER extension</div>
-                        <div className="text-white/40">2. Open extension popup</div>
-                        <div className="text-white/40">3. Browse script library</div>
-                        <div className="text-white/40">4. Click "Install" on any script</div>
+                        <div className="text-emerald-300">{t('index.scripts.step1')}</div>
+                        <div className="text-white/40">{t('index.scripts.step2')}</div>
+                        <div className="text-white/40">{t('index.scripts.step3')}</div>
+                        <div className="text-white/40">{t('index.scripts.step4')}</div>
                       </div>
                     </div>
                   </div>
@@ -229,48 +229,52 @@ const Index = () => {
               {/* Script metrics cards - unified style */}
               <div className="mt-16 grid md:grid-cols-3 gap-6" data-block>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.installedScripts')}</div>
-                  <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.installedCount')}</div>
-                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.installedDesc')}</div>
-                  <div className="space-y-2">
-                    {['Auto-fill forms', 'Page enhancer', 'API integration'].map((script, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                        <span className="text-white/70">{script}</span>
-                        <span className="text-white/50">{['Active', 'Active', 'Active'][i]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button variant="outline" size="sm" className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5">
-                    View
-                  </Button>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.libraryScripts')}</div>
-                  <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.libraryCount')}</div>
-                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.libraryDesc')}</div>
-                  <div className="text-white/40 text-xs mb-4">New scripts added daily.</div>
-                  <div className="h-[150px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
-                    <div className="text-white/30 text-xs">Chart</div>
-                  </div>
-                  <div className="flex items-center gap-4 mt-4 text-xs text-white/50">
-                    <span>8,234 PUBLISHED</span>
-                    <span>4,315 BETA</span>
-                  </div>
-                  <Button variant="outline" size="sm" className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5">
-                    View
-                  </Button>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Script Executions</div>
                   <div className="text-white text-2xl font-semibold mb-1">24.2k</div>
+                  <div className="text-white/40 text-xs mb-4">executions today</div>
+                  {/* TODO: Заменить на график выполнения скриптов (линейный график с временной шкалой) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
                     <div className="text-white/30 text-xs">Chart</div>
                   </div>
                   <div className="mt-6">
                     <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Avg Execution</div>
                     <div className="text-white text-lg font-semibold">4.1ms — 2.1s</div>
+                    {/* TODO: Заменить на график среднего времени выполнения (гистограмма) */}
+                    <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
+                      <div className="text-white/30 text-xs">Chart</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Active Users</div>
+                  <div className="text-white text-2xl font-semibold mb-1">8,234</div>
+                  <div className="text-white/40 text-xs mb-4">users online</div>
+                  {/* TODO: Заменить на график активных пользователей (area chart с линией тренда) */}
+                  <div className="h-[150px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                    <div className="text-white/30 text-xs">Chart</div>
+                  </div>
+                  <div className="flex items-center gap-4 mt-4 text-xs text-white/50">
+                    <span>5,123 ACTIVE</span>
+                    <span>3,111 IDLE</span>
+                  </div>
+                  <Button variant="outline" size="sm" className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5">
+                    View
+                  </Button>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Script Updates</div>
+                  <div className="text-white text-2xl font-semibold mb-1">1,549</div>
+                  <div className="text-white/40 text-xs mb-4">updates this week</div>
+                  {/* TODO: Заменить на график обновлений скриптов (столбчатая диаграмма) */}
+                  <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
+                    <div className="text-white/30 text-xs">Chart</div>
+                  </div>
+                  <div className="mt-6">
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">New Scripts</div>
+                    <div className="text-white text-lg font-semibold">+127 today</div>
+                    {/* TODO: Заменить на график новых скриптов (линейный график роста) */}
                     <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
                       <div className="text-white/30 text-xs">Chart</div>
                     </div>
@@ -306,39 +310,19 @@ const Index = () => {
                 </p>
               </div>
 
-              {/* 3x3 Grid - Exact Nightwatch structure */}
+              {/* 3x3 Grid - unified style */}
               <div className="grid md:grid-cols-3 gap-6 mb-16">
                 {eventFeatures.map((feature, i) => (
-                  <Card key={i} className="bg-black border border-white/10 p-6 h-full hover:border-white/20 transition-colors">
-                    <CardContent className="p-0 space-y-3">
-                      <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                        <feature.icon className="h-6 w-6 text-emerald-300" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-white">{feature.title}</h4>
-                      <p className="text-white/60 text-sm leading-relaxed">{feature.desc}</p>
-                    </CardContent>
-                  </Card>
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.02] p-6 h-full hover:border-white/20 transition-colors">
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{feature.title}</div>
+                    <div className="text-white text-2xl font-semibold mb-1">—</div>
+                    <div className="text-white/40 text-xs mb-4">{feature.desc}</div>
+                    {/* TODO: Заменить на иконку или мини-график для каждой функции (библиотека, расширяемость, обновления и т.д.) */}
+                    <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                      <div className="text-white/30 text-xs">Chart</div>
+                    </div>
+                  </div>
                 ))}
-              </div>
-
-              {/* Testimonial - Exact Nightwatch style */}
-              <div className="text-center max-w-2xl mx-auto">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-                  <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-                </div>
-                <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  {t('index.ecosystem.testimonial1')}
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    {t('index.ecosystem.testimonial1Author').charAt(0)}
-                  </div>
-                  <div className="text-left">
-                    <div className="text-white font-medium">{t('index.ecosystem.testimonial1Author')}</div>
-                    <div className="text-white/50 text-sm">{t('index.ecosystem.testimonial1Role')}</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -364,68 +348,48 @@ const Index = () => {
                 {/* Features metrics cards */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.installedScripts')}</div>
-                    <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.installedCount')}</div>
-                    <div className="text-white/40 text-xs">{t('index.scripts.installedDesc')}</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Cloud Sync</div>
+                    <div className="text-white text-2xl font-semibold mb-1">100%</div>
+                    <div className="text-white/40 text-xs">automatic sync</div>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.libraryScripts')}</div>
-                    <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.libraryCount')}</div>
-                    <div className="text-white/40 text-xs">{t('index.scripts.libraryDesc')}</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Auto Updates</div>
+                    <div className="text-white text-2xl font-semibold mb-1">24/7</div>
+                    <div className="text-white/40 text-xs">always up to date</div>
                   </div>
                 </div>
 
               </div>
 
-              {/* Collaborate section - Exact Nightwatch style */}
-              <div className="grid md:grid-cols-3 gap-8" data-block>
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-white" />
+              {/* Features cards - unified style */}
+              <div className="grid md:grid-cols-3 gap-6" data-block>
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.cloudSync')}</div>
+                  <div className="text-white text-2xl font-semibold mb-1">—</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.features.cloudSyncDesc')}</div>
+                  {/* TODO: Заменить на график синхронизации (линия с точками синхронизации) */}
+                  <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                    <div className="text-white/30 text-xs">Chart</div>
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.features.cloudSync')}</h4>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.features.cloudSyncDesc')}
-                  </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <Settings className="h-6 w-6 text-white" />
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.autoUpdates')}</div>
+                  <div className="text-white text-2xl font-semibold mb-1">—</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.features.autoUpdatesDesc')}</div>
+                  {/* TODO: Заменить на график обновлений (столбчатая диаграмма с количеством обновлений) */}
+                  <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                    <div className="text-white/30 text-xs">Chart</div>
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.features.autoUpdates')}</h4>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.features.autoUpdatesDesc')}
-                  </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <Bell className="h-6 w-6 text-white" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.features.security')}</h4>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.features.securityDesc')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Testimonial */}
-              <div className="text-center max-w-2xl mx-auto pt-8" data-block>
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-                  <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-                </div>
-                <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  {t('index.features.testimonial2')}
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    {t('index.features.testimonial2Author').charAt(0)}
-                  </div>
-                  <div className="text-left">
-                    <div className="text-white font-medium">{t('index.features.testimonial2Author')}</div>
-                    <div className="text-white/50 text-sm">{t('index.features.testimonial2Role')}</div>
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.security')}</div>
+                  <div className="text-white text-2xl font-semibold mb-1">—</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.features.securityDesc')}</div>
+                  {/* TODO: Заменить на график безопасности (индикатор уровня безопасности или круговая диаграмма) */}
+                  <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                    <div className="text-white/30 text-xs">Chart</div>
                   </div>
                 </div>
               </div>
@@ -452,6 +416,7 @@ const Index = () => {
                     <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{item.title}</div>
                     <div className="text-white text-2xl font-semibold mb-1">—</div>
                     <div className="text-white/40 text-xs mb-4">{item.desc}</div>
+                    {/* TODO: Заменить на график производительности/хранилища/API (соответствующие метрики для каждой функции инфраструктуры) */}
                     <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
                       <div className="text-white/30 text-xs">Chart</div>
                     </div>
@@ -472,34 +437,14 @@ const Index = () => {
               </p>
             </div>
             <FAQ />
-            
-            {/* Testimonial */}
-            <div className="text-center max-w-2xl mx-auto pt-16" data-block>
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-                <div className="text-4xl text-emerald-300/30 leading-none">"</div>
-              </div>
-              <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                {t('index.infrastructure.testimonial3')}
-              </p>
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                  {t('index.infrastructure.testimonial3Author').charAt(0)}
-                </div>
-                <div className="text-left">
-                  <div className="text-white font-medium">{t('index.infrastructure.testimonial3Author')}</div>
-                  <div className="text-white/50 text-sm">{t('index.infrastructure.testimonial3Role')}</div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
-          {/* Final CTA - Minimalist style */}
+          {/* Final CTA - unified style */}
           <section className="relative overflow-hidden border-y border-white/10 bg-black/80 z-10">
             <div className="relative px-4 py-28">
               <div className="container mx-auto max-w-[768px]">
-                <div className="rounded-[32px] border border-white/10 bg-black/70 p-12 backdrop-blur-xl text-center space-y-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center space-y-6">
                   <h3 className="text-4xl md:text-5xl font-semibold text-white">{t('index.hero.title')}</h3>
                   <p className="text-white/60 text-lg">
                     {t('index.finalCta.subtitle')}
@@ -531,5 +476,7 @@ const Index = () => {
     </div>
   );
 };
+
+export default Index;
 
 export default Index;
