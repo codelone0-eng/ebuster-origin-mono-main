@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 
 export const Footer = () => {
   const { t } = useLanguage();
+  const f = (key: string) => t(`index.footer.${key}`);
 
   return (
     <footer className="relative z-50 py-16 px-4 border-t border-white/10 bg-[#0a0a0a]">
@@ -25,7 +26,7 @@ export const Footer = () => {
             <div>
               <h3 className="text-2xl font-bold mb-2 text-white">{t('index.hero.title')}</h3>
               <p className="text-white/60 leading-relaxed mb-6">
-                {t('footer.description')}
+                {f('description')}
               </p>
             </div>
 
@@ -33,11 +34,11 @@ export const Footer = () => {
             <div className="flex gap-2">
               <Input
                 type="email"
-                placeholder={t('footer.emailPlaceholder')}
+                placeholder={f('emailPlaceholder')}
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-10"
               />
               <Button className="bg-white/10 hover:bg-white/20 text-white border-white/10 h-10 px-6">
-                {t('footer.subscribe')}
+                {f('subscribe')}
               </Button>
             </div>
 
@@ -57,46 +58,46 @@ export const Footer = () => {
               </a>
               <div className="flex items-center gap-2 ml-4">
                 <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                <span className="text-white/60 text-sm">{t('footer.status')}</span>
+                <span className="text-white/60 text-sm">{f('status')}</span>
               </div>
             </div>
           </div>
 
           {/* Navigation Columns */}
           <div>
-            <h4 className="font-semibold mb-4 text-white">{t('footer.product')}</h4>
+            <h4 className="font-semibold mb-4 text-white">{f('product')}</h4>
             <ul className="space-y-3">
-              <li><a href="/price" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.pricing')}</a></li>
-              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.documentation')}</a></li>
-              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.contacts')}</a></li>
+              <li><a href="/price" className="text-white/60 hover:text-white transition-colors text-sm">{f('pricing')}</a></li>
+              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
+              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('contacts')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4 text-white">{t('footer.resources')}</h4>
+            <h4 className="font-semibold mb-4 text-white">{f('resources')}</h4>
             <ul className="space-y-3">
-              <li><a href="/advantages" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.features')}</a></li>
-              <li><a href="/about" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.about')}</a></li>
+              <li><a href="/advantages" className="text-white/60 hover:text-white transition-colors text-sm">{f('features')}</a></li>
+              <li><a href="/about" className="text-white/60 hover:text-white transition-colors text-sm">{f('about')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4 text-white">{t('footer.company')}</h4>
+            <h4 className="font-semibold mb-4 text-white">{f('company')}</h4>
             <ul className="space-y-3">
-              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.documentation')}</a></li>
-              <li><a href="/roadmap" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.roadmap')}</a></li>
-              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{t('footer.support')}</a></li>
+              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
+              <li><a href="/roadmap" className="text-white/60 hover:text-white transition-colors text-sm">{f('roadmap')}</a></li>
+              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('support')}</a></li>
             </ul>
           </div>
         </div>
 
         <div className="pt-6 border-t border-white/10 flex items-center justify-between">
           <div className="text-sm text-white/60">
-            {t('footer.copyright')}
+            {f('copyright')}
           </div>
           <div className="flex gap-6 text-sm">
-            <a href="/privacy" className="text-white/60 hover:text-white transition-colors">{t('footer.legal')}</a>
-            <a href="/terms" className="text-white/60 hover:text-white transition-colors">{t('footer.terms')}</a>
+            <a href="/privacy" className="text-white/60 hover:text-white transition-colors">{f('legal')}</a>
+            <a href="/terms" className="text-white/60 hover:text-white transition-colors">{f('terms')}</a>
           </div>
         </div>
       </div>
