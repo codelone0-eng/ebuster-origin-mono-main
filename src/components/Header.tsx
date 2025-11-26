@@ -168,12 +168,8 @@ export const Header = () => {
           {/* Left - Logo */}
           <Link 
             to="/" 
-            className="inline-flex items-center gap-3 text-white font-semibold tracking-[0.3em] text-sm uppercase hover:opacity-80 transition-opacity group"
+            className="inline-flex items-center text-white font-semibold tracking-[0.3em] text-sm uppercase hover:opacity-80 transition-opacity"
           >
-            <div className="relative">
-              <span className="w-3 h-3 rounded-full bg-emerald-400 block group-hover:scale-110 transition-transform" />
-              <span className="absolute inset-0 w-3 h-3 rounded-full bg-emerald-400 animate-ping opacity-20" />
-            </div>
             <span className="text-lg font-bold">EBUSTER</span>
           </Link>
 

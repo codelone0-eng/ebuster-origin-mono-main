@@ -28,6 +28,7 @@ import ErrorBoundary from "./landing/ErrorBoundary";
 import ErrorPagesDemo from "./landing/ErrorPagesDemo";
 import AdminDashboard from "./admin/AdminDashboard";
 import BanPage from "./landing/BanPage";
+import Status from "./landing/Status";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
                     <Route path="/verify-otp" element={<VerifyOtp />} />
                     <Route path="/contacts" element={<Contacts />} />
                     <Route path="/price" element={<Pricing />} />
+                    <Route path="/status" element={<Status />} />
                     <Route path="/dashboard" element={
                       <ProtectedRoute>
                         <Dashboard />

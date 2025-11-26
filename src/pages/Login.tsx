@@ -139,8 +139,7 @@ export default function Login() {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="px-6 lg:px-10 py-6 flex items-center justify-between border-b border-white/5">
-          <Link to="/" className="inline-flex items-center gap-2 text-white font-semibold tracking-[0.3em] text-xs uppercase">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <Link to="/" className="inline-flex items-center text-white font-semibold tracking-[0.3em] text-xs uppercase">
             EBUSTER
           </Link>
           <Link
