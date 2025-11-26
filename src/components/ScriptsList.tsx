@@ -649,7 +649,6 @@ const ScriptsList: React.FC = () => {
               <SelectItem value="asc">↑ Возрастание</SelectItem>
             </SelectContent>
           </Select>
-          </div>
         </div>
       </div>
 
