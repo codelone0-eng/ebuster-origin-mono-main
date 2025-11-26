@@ -1094,82 +1094,81 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
             {activeTab === 'general-settings' && (
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <Settings className="h-5 w-5 text-white" />
-                      <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.general')}</h3>
+                  <div className="flex items-center gap-2 mb-6">
+                    <Settings className="h-5 w-5 text-white" />
+                    <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.general')}</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                      <div>
+                        <h4 className="font-medium text-white">{t('header.dashboard.settings.autoUpdate')}</h4>
+                        <p className="text-sm text-white/60">{t('header.dashboard.settings.autoUpdateDesc')}</p>
+                      </div>
+                      <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                        <div>
-                          <h4 className="font-medium text-white">{t('header.dashboard.settings.autoUpdate')}</h4>
-                          <p className="text-sm text-white/60">{t('header.dashboard.settings.autoUpdateDesc')}</p>
-                        </div>
-                        <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                    <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                      <div>
+                        <h4 className="font-medium text-white">{t('header.dashboard.settings.newScripts')}</h4>
+                        <p className="text-sm text-white/60">{t('header.dashboard.settings.newScriptsDesc')}</p>
                       </div>
-                      <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                        <div>
-                          <h4 className="font-medium text-white">{t('header.dashboard.settings.newScripts')}</h4>
-                          <p className="text-sm text-white/60">{t('header.dashboard.settings.newScriptsDesc')}</p>
-                        </div>
-                        <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                      <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                      <div>
+                        <h4 className="font-medium text-white">{t('header.dashboard.settings.updateNotifications')}</h4>
+                        <p className="text-sm text-white/60">{t('header.dashboard.settings.updateNotificationsDesc')}</p>
                       </div>
-                      <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                        <div>
-                          <h4 className="font-medium text-white">{t('header.dashboard.settings.updateNotifications')}</h4>
-                          <p className="text-sm text-white/60">{t('header.dashboard.settings.updateNotificationsDesc')}</p>
-                        </div>
-                        <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
-                      </div>
+                      <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
                     </div>
                   </div>
+                </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                   <div className="flex items-center gap-2 mb-6">
                     <Shield className="h-5 w-5 text-emerald-400" />
                     <h3 className="text-lg font-semibold text-white">{t('header.dashboard.settings.twoFactorAuth')}</h3>
                   </div>
-                    <div className="space-y-4">
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-white">{t('header.dashboard.settings.request2FA')}</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                            <span className="text-sm text-white">{t('header.dashboard.settings.accountLogin')}</span>
-                            <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
-                          </div>
-                          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                            <span className="text-sm text-white">{t('header.dashboard.settings.passwordChange')}</span>
-                            <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
-                          </div>
-                          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                            <span className="text-sm text-white">{t('header.dashboard.settings.emailChange')}</span>
-                            <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
-                          </div>
-                          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
-                            <span className="text-sm text-white">{t('header.dashboard.settings.accountDeletion')}</span>
-                            <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
-                          </div>
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-white">{t('header.dashboard.settings.request2FA')}</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                          <span className="text-sm text-white">{t('header.dashboard.settings.accountLogin')}</span>
+                          <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                        </div>
+                        <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                          <span className="text-sm text-white">{t('header.dashboard.settings.passwordChange')}</span>
+                          <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                        </div>
+                        <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                          <span className="text-sm text-white">{t('header.dashboard.settings.emailChange')}</span>
+                          <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
+                        </div>
+                        <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/10">
+                          <span className="text-sm text-white">{t('header.dashboard.settings.accountDeletion')}</span>
+                          <Switch defaultChecked className="data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-white/10" />
                         </div>
                       </div>
+                    </div>
 
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-white">{t('header.dashboard.settings.methods2FA')}</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                            <div className="flex items-center gap-2">
-                              <Smartphone className="h-4 w-4 text-emerald-400" />
-                              <span className="text-sm text-white">{t('header.dashboard.settings.telegramBot')}</span>
-                            </div>
-                            <Badge className="bg-emerald-400/20 text-emerald-300 border-emerald-400/30">{t('header.dashboard.settings.active')}</Badge>
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-white">{t('header.dashboard.settings.methods2FA')}</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4 text-emerald-400" />
+                            <span className="text-sm text-white">{t('header.dashboard.settings.telegramBot')}</span>
                           </div>
-                          <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                            <div className="flex items-center gap-2">
-                              <QrCode className="h-4 w-4 text-emerald-400" />
-                              <span className="text-sm text-white">{t('header.dashboard.settings.googleAuth')}</span>
-                            </div>
-                            <Button variant="ghost" size="sm" className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">
-                              {t('header.dashboard.settings.configure')}
-                            </Button>
+                          <Badge className="bg-emerald-400/20 text-emerald-300 border-emerald-400/30">{t('header.dashboard.settings.active')}</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                          <div className="flex items-center gap-2">
+                            <QrCode className="h-4 w-4 text-emerald-400" />
+                            <span className="text-sm text-white">{t('header.dashboard.settings.googleAuth')}</span>
                           </div>
+                          <Button variant="ghost" size="sm" className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">
+                            {t('header.dashboard.settings.configure')}
+                          </Button>
                         </div>
                       </div>
                     </div>
