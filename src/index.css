@@ -286,15 +286,24 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    cursor: none;
     font-smooth: always;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
-  /* Hide cursor on all interactive elements */
-  button, a, input, textarea, select, [role="button"], [tabindex] {
+  /* Hide cursor only when custom cursor is enabled */
+  body.custom-cursor-enabled {
+    cursor: none;
+  }
+
+  body.custom-cursor-enabled button, 
+  body.custom-cursor-enabled a, 
+  body.custom-cursor-enabled input, 
+  body.custom-cursor-enabled textarea, 
+  body.custom-cursor-enabled select, 
+  body.custom-cursor-enabled [role="button"], 
+  body.custom-cursor-enabled [tabindex] {
     cursor: none !important;
   }
 

@@ -144,108 +144,110 @@ export function ApiKeysManagement() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+          <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
             <Key className="h-5 w-5" />
             Создать новый API ключ
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label htmlFor="keyName">Название ключа</Label>
-              <Input
-                id="keyName"
-                placeholder="Мое приложение"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && createKey()}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button onClick={createKey} disabled={loading}>
-                <Plus className="h-4 w-4 mr-2" />
-                Создать
-              </Button>
-            </div>
-          </div>
-          
-          {showNewKey && (
-            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 shadow-lg">
-              <div className="flex items-start gap-3 mb-4">
-                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-foreground">
-                    Сохраните ключ — после закрытия блока он больше не будет доступен.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Скопируйте ключ и добавьте его в надёжный менеджер секретов.
-                  </p>
-                </div>
+          </h3>
+          <div className="space-y-4 mt-4">
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Label htmlFor="keyName" className="text-white/60">Название ключа</Label>
+                <Input
+                  id="keyName"
+                  placeholder="Мое приложение"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && createKey()}
+                  className="bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl mt-2"
+                />
               </div>
-              <div className="flex gap-2">
-                <code className="flex-1 rounded-lg border border-border/40 bg-background/80 p-3 text-sm font-mono text-foreground break-all">
-                  {newKeyValue}
-                </code>
-                <Button variant="outline" size="sm" onClick={() => copyKey(newKeyValue)}>
-                  <Copy className="h-4 w-4" />
+              <div className="flex items-end">
+                <Button onClick={createKey} disabled={loading} className="bg-white text-black hover:bg-white/90 rounded-xl">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Создать
                 </Button>
               </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="mt-3"
-                onClick={() => setShowNewKey(false)}
-              >
-                Я сохранил ключ
-              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            
+            {showNewKey && (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-start gap-3 mb-4">
+                  <AlertCircle className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-white">
+                      Сохраните ключ — после закрытия блока он больше не будет доступен.
+                    </p>
+                    <p className="text-xs text-white/60">
+                      Скопируйте ключ и добавьте его в надёжный менеджер секретов.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <code className="flex-1 rounded-lg border border-white/10 bg-black/50 p-3 text-sm font-mono text-white break-all">
+                    {newKeyValue}
+                  </code>
+                  <Button variant="outline" size="sm" onClick={() => copyKey(newKeyValue)} className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
+                  onClick={() => setShowNewKey(false)}
+                >
+                  Я сохранил ключ
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Ваши API ключи ({keys.length}/10)</h3>
+        <h3 className="text-lg font-semibold text-white">Ваши API ключи ({keys.length}/10)</h3>
         
         {keys.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Key className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Нет API ключей</h3>
-              <p className="text-muted-foreground text-sm">
+          <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+            <div className="rounded-[16px] border border-white/10 bg-black/70 p-8 text-center">
+              <Key className="h-12 w-12 mx-auto mb-4 text-white/60" />
+              <h3 className="text-lg font-semibold mb-2 text-white">Нет API ключей</h3>
+              <p className="text-white/60 text-sm">
                 Создайте первый API ключ для доступа к нашему API
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ) : (
           keys.map((key) => (
-            <Card key={key.id}>
-              <CardContent className="pt-6">
+            <div key={key.id} className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+              <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <Key className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <Key className="h-5 w-5 text-white/60 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{key.key_name}</p>
-                      <code className="text-sm text-muted-foreground font-mono">
+                      <p className="font-medium truncate text-white">{key.key_name}</p>
+                      <code className="text-sm text-white/60 font-mono">
                         {key.api_key}
                       </code>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={key.is_active ? 'default' : 'secondary'}>
+                    <Badge className={key.is_active ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30 rounded-lg" : "bg-white/5 text-white/60 border-white/10 rounded-lg"}>
                       {key.is_active ? 'Активен' : 'Неактивен'}
                     </Badge>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => deleteKey(key.id)}
+                      className="text-white/60 hover:text-white hover:bg-white/10 rounded-xl"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="mt-3 flex items-center gap-4 text-xs text-white/40">
                   <span>Создан: {new Date(key.created_at).toLocaleDateString('ru-RU')}</span>
                   {key.last_used_at && (
                     <span>
@@ -258,8 +260,8 @@ export function ApiKeysManagement() {
                     </span>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))
         )}
       </div>

@@ -9,13 +9,44 @@ export const CustomCursor = () => {
 
   // If default, hide custom cursor (show system cursor)
   useEffect(() => {
-    if (cursorType === 'default' && cursorRef.current) {
-      cursorRef.current.style.display = 'none';
-      document.body.style.cursor = 'auto';
-      return;
-    } else if (cursorRef.current) {
-      cursorRef.current.style.display = 'block';
+    // Remove cursor: none from body and all elements when default
+    if (cursorType === 'default') {
+      if (cursorRef.current) {
+        cursorRef.current.style.display = 'none';
+      }
+      // Restore system cursor everywhere
+      document.body.style.cursor = '';
+      document.body.classList.remove('custom-cursor-enabled');
+      
+      // Remove cursor: none from all interactive elements
+      const style = document.createElement('style');
+      style.id = 'custom-cursor-override';
+      style.textContent = `
+        body, button, a, input, textarea, select, [role="button"], [tabindex] {
+          cursor: auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        const existingStyle = document.getElementById('custom-cursor-override');
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+      };
+    } else {
+      // Enable custom cursor
+      if (cursorRef.current) {
+        cursorRef.current.style.display = 'block';
+      }
       document.body.style.cursor = 'none';
+      document.body.classList.add('custom-cursor-enabled');
+      
+      // Remove override style if exists
+      const existingStyle = document.getElementById('custom-cursor-override');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
     }
   }, [cursorType]);
 

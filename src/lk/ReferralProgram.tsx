@@ -217,8 +217,10 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-64 rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 w-full h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
       </div>
     );
   }
@@ -226,110 +228,123 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="space-y-6">
       {/* Заголовок */}
-      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-        <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
-        <p className="text-[#808080]">
-          Приглашайте друзей и зарабатывайте на каждой их подписке
-        </p>
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+          <h2 className="text-3xl font-bold text-white mb-2">Реферальная программа</h2>
+          <p className="text-white/60">
+            Приглашайте друзей и зарабатывайте на каждой их подписке
+          </p>
+        </div>
       </div>
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-          <div className="flex flex-row items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Всего рефералов</h3>
-            <Users className="h-4 w-4 text-[#808080]" />
+        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Всего рефералов</h3>
+              <Users className="h-4 w-4 text-white/60" />
+            </div>
+            <div className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</div>
+            <p className="text-xs text-white/40 mt-1">
+              {stats?.active_referrals || 0} активных
+            </p>
           </div>
-          <div className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</div>
-          <p className="text-xs text-[#808080] mt-1">
-            {stats?.active_referrals || 0} активных
-          </p>
         </div>
 
-        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-          <div className="flex flex-row items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Заработано</h3>
-            <DollarSign className="h-4 w-4 text-[#808080]" />
+        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Заработано</h3>
+              <DollarSign className="h-4 w-4 text-white/60" />
+            </div>
+            <div className="text-2xl font-bold text-white">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
+            <p className="text-xs text-white/40 mt-1">
+              ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
+            </p>
           </div>
-          <div className="text-2xl font-bold text-white">${(stats?.total_earnings ?? 0).toFixed(2)}</div>
-          <p className="text-xs text-[#808080] mt-1">
-            ${(stats?.paid_earnings ?? 0).toFixed(2)} выплачено
-          </p>
         </div>
 
-        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-          <div className="flex flex-row items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Ожидает выплаты</h3>
-            <TrendingUp className="h-4 w-4 text-[#808080]" />
+        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Ожидает выплаты</h3>
+              <TrendingUp className="h-4 w-4 text-white/60" />
+            </div>
+            <div className="text-2xl font-bold text-white">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
+            <p className="text-xs text-white/40 mt-1">
+              Будет выплачено в конце месяца
+            </p>
           </div>
-          <div className="text-2xl font-bold text-white">${(stats?.pending_earnings ?? 0).toFixed(2)}</div>
-          <p className="text-xs text-[#808080] mt-1">
-            Будет выплачено в конце месяца
-          </p>
         </div>
 
-        <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-4">
-          <div className="flex flex-row items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wide">Конверсия</h3>
-            <Award className="h-4 w-4 text-[#808080]" />
+        <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+          <div className="rounded-[16px] border border-white/10 bg-black/70 p-4">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wide">Конверсия</h3>
+              <Award className="h-4 w-4 text-white/60" />
+            </div>
+            <div className="text-2xl font-bold text-white">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
+            <p className="text-xs text-white/40 mt-1">
+              Процент оформивших подписку
+            </p>
           </div>
-          <div className="text-2xl font-bold text-white">{(stats?.conversion_rate ?? 0).toFixed(1)}%</div>
-          <p className="text-xs text-[#808080] mt-1">
-            Процент оформивших подписку
-          </p>
         </div>
       </div>
 
       {/* Реферальный код и ссылка */}
-      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
-          <p className="text-sm text-[#808080]">
-            Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
-          </p>
-        </div>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={referralCode?.code ?? '—'}
-              readOnly
-              className="bg-[#111111] border-[#2d2d2d] text-white"
-            />
-            <Button 
-              onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-white mb-2">Ваш реферальный код</h3>
+            <p className="text-sm text-white/60">
+              Поделитесь кодом или ссылкой с друзьями. Они получат скидку {referralCode?.discount_value}% на первую подписку
+            </p>
           </div>
-
-          <div>
-            <p className="text-sm text-[#808080] mb-2">Ваша реферальная ссылка</p>
+          <div className="space-y-4">
             <div className="flex gap-2">
-              <Input value={referralLink} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
+              <Input
+                value={referralCode?.code ?? '—'}
+                readOnly
+                className="bg-white/5 border-white/15 text-white rounded-xl"
+              />
               <Button 
-                onClick={() => { void copyToClipboard(referralLink, 'link'); }}
-                className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                onClick={() => { void copyToClipboard(referralCode?.code ?? '', 'code'); }}
+                className="bg-white text-black hover:bg-white/90 rounded-xl"
               >
-                Скопировать
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
-              <Button 
-                onClick={shareLink}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Поделиться
-              </Button>
+            </div>
+
+            <div>
+              <p className="text-sm text-white/60 mb-2">Ваша реферальная ссылка</p>
+              <div className="flex gap-2">
+                <Input value={referralLink} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
+                <Button 
+                  onClick={() => { void copyToClipboard(referralLink, 'link'); }}
+                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
+                >
+                  Скопировать
+                </Button>
+                <Button 
+                  onClick={shareLink}
+                  className="bg-white text-black hover:bg-white/90 rounded-xl"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Поделиться
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')} className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-        <TabsList className="grid w-full grid-cols-2 bg-[#1f1f1f] border border-[#2d2d2d]">
-          <TabsTrigger value="referrals" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">Рефералы</TabsTrigger>
-          <TabsTrigger value="payouts" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-[#808080]">История выплат</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'referrals' | 'payouts')} className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 rounded-xl">
+            <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">Рефералы</TabsTrigger>
+            <TabsTrigger value="payouts" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-xl">История выплат</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="referrals" className="mt-6">
           <div>
@@ -339,27 +354,28 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             </p>
             {referrals.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-50" />
-                <p className="text-[#808080]">Пока нет рефералов</p>
-                <p className="text-sm text-[#808080] mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
+                <Users className="h-12 w-12 mx-auto mb-4 text-white/60 opacity-50" />
+                <p className="text-white/60">Пока нет рефералов</p>
+                <p className="text-sm text-white/60 mt-2">Поделитесь своей ссылкой, чтобы начать зарабатывать!</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {referrals.map((referral) => (
                   <div
                     key={referral.id}
-                    className="flex items-start justify-between gap-4 p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg"
+                    className="rounded-xl border border-white/10 bg-white/5 p-4"
                   >
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-white">{maskEmail(referral.referred_user?.email)}</p>
-                        {referral.referred_user?.full_name && (
-                          <span className="text-sm text-[#808080]">
-                            ({referral.referred_user.full_name})
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-[#808080]">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-white">{maskEmail(referral.referred_user?.email)}</p>
+                          {referral.referred_user?.full_name && (
+                            <span className="text-sm text-white/60">
+                              ({referral.referred_user.full_name})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-white/40">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—'}

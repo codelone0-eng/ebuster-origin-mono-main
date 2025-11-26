@@ -192,78 +192,84 @@ export const LoginHistory: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
-        <p className="text-sm text-[#808080]">Загрузка...</p>
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+          <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
+          <p className="text-sm text-white/60">Загрузка...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
-          <p className="text-sm text-[#808080]">
-            Последние 50 входов в ваш аккаунт
-          </p>
+    <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+      <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">История входов</h3>
+            <p className="text-sm text-white/60">
+              Последние 50 входов в ваш аккаунт
+            </p>
+          </div>
+          <Button 
+            className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl"
+            size="sm"
+            onClick={handleLogoutAllDevices}
+            disabled={loggingOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Выйти из всех устройств
+          </Button>
         </div>
-        <Button 
-          className="bg-red-600 hover:bg-red-700 text-white"
-          size="sm"
-          onClick={handleLogoutAllDevices}
-          disabled={loggingOut}
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Выйти из всех устройств
-        </Button>
-      </div>
-      <div>
-        {loginHistory.length === 0 ? (
-          <div className="text-center py-8">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-50" />
-            <p className="text-[#808080]">История входов пуста</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {loginHistory.map((record) => {
-              const { browser, os, device } = parseUserAgent(record.user_agent);
-              
-              return (
-                <div
-                  key={record.id}
-                  className="flex items-start gap-4 p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg"
-                >
-                  <div className="mt-1 text-[#808080]">
-                    {getDeviceIcon(record.user_agent)}
-                  </div>
-                  
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-white">
-                        {browser} на {os}{device ? ` • ${device}` : ''}
-                      </span>
-                      <Badge className={cn("text-xs", record.success ? "bg-green-600 text-white" : "bg-red-600 text-white")}>
-                        {record.success ? 'Успешно' : 'Неудачно'}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 text-xs text-[#808080]">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{record.location || record.ip_address}</span>
+        <div>
+          {loginHistory.length === 0 ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-white/60 opacity-50" />
+              <p className="text-white/60">История входов пуста</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {loginHistory.map((record) => {
+                const { browser, os, device } = parseUserAgent(record.user_agent);
+                
+                return (
+                  <div
+                    key={record.id}
+                    className="rounded-xl border border-white/10 bg-white/5 p-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1 text-white/60">
+                        {getDeviceIcon(record.user_agent)}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>{formatDate(record.created_at)}</span>
+                      
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-white">
+                            {browser} на {os}{device ? ` • ${device}` : ''}
+                          </span>
+                          <Badge className={cn("text-xs rounded-lg", record.success ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30" : "bg-red-500/20 text-red-400 border-red-500/30")}>
+                            {record.success ? 'Успешно' : 'Неудачно'}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-xs text-white/40">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{record.location || record.ip_address}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{formatDate(record.created_at)}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

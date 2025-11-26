@@ -237,36 +237,38 @@ export const VisualScriptBuilder: React.FC = () => {
   // Проверка доступа
   if (!permissions.canAccessVisualBuilder()) {
     return (
-      <div className="bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg p-8 max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-[#2d2d2d] flex items-center justify-center">
-            <Lock className="h-6 w-6 text-[#808080]" />
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1 max-w-2xl mx-auto">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <Lock className="h-6 w-6 text-white/60" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Визуальный конструктор недоступен</h3>
+              <p className="text-sm text-white/60">Требуется подписка Pro или выше</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white">Визуальный конструктор недоступен</h3>
-            <p className="text-sm text-[#808080]">Требуется подписка Pro или выше</p>
+          <div className="space-y-4">
+            <p className="text-white/60">
+              Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
+            </p>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+              <h4 className="font-semibold text-white">Что вы получите:</h4>
+              <ul className="space-y-1 text-sm text-white/60">
+                <li>✓ Создание скриптов без кода</li>
+                <li>✓ Drag & Drop интерфейс</li>
+                <li>✓ Автоматическая генерация кода</li>
+                <li>✓ Сохранение в расширение</li>
+                <li>✓ Экспорт готового кода</li>
+              </ul>
+            </div>
+            <Button 
+              className="w-full bg-white text-black hover:bg-white/90 rounded-xl" 
+              onClick={() => window.location.href = '/pricing'}
+            >
+              Посмотреть тарифы
+            </Button>
           </div>
-        </div>
-        <div className="space-y-4">
-          <p className="text-[#a3a3a3]">
-            Визуальный конструктор скриптов доступен пользователям с подпиской Pro, Premium или выше.
-          </p>
-          <div className="bg-[#2d2d2d] rounded-lg p-4 space-y-2">
-            <h4 className="font-semibold text-white">Что вы получите:</h4>
-            <ul className="space-y-1 text-sm text-[#a3a3a3]">
-              <li>✓ Создание скриптов без кода</li>
-              <li>✓ Drag & Drop интерфейс</li>
-              <li>✓ Автоматическая генерация кода</li>
-              <li>✓ Сохранение в расширение</li>
-              <li>✓ Экспорт готового кода</li>
-            </ul>
-          </div>
-          <Button 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-            onClick={() => window.location.href = '/pricing'}
-          >
-            Посмотреть тарифы
-          </Button>
         </div>
       </div>
     );
@@ -505,13 +507,13 @@ export const VisualScriptBuilder: React.FC = () => {
           <ScrollArea className="h-[600px] pr-4">
               {/* Категория: Действия */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wider mb-3">Действия</h3>
+                <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Действия</h3>
                 <div className="space-y-2">
                   {BLOCK_TYPES.filter(b => ['click', 'input', 'navigate'].includes(b.type)).map((blockType) => (
                     <Button
                       key={blockType.type}
                       variant="outline"
-                      className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-all"
+                      className="w-full justify-start bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all rounded-xl"
                       onClick={() => addBlock(blockType.type)}
                     >
                       <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${blockType.color} text-white shrink-0`}>
@@ -525,7 +527,7 @@ export const VisualScriptBuilder: React.FC = () => {
 
               {/* Категория: Ожидание и проверки */}
               <div className="mb-6">
-                <h3 className="text-xs font-semibold text-[#808080] uppercase tracking-wider mb-3">Ожидание</h3>
+                <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Ожидание</h3>
                 <div className="space-y-2">
                   {BLOCK_TYPES.filter(b => ['wait', 'condition', 'url-match'].includes(b.type)).map((blockType) => {
                     const isAdvanced = ['condition', 'url-match'].includes(blockType.type);
@@ -535,7 +537,7 @@ export const VisualScriptBuilder: React.FC = () => {
                       <Button
                         key={blockType.type}
                         variant="outline"
-                        className="w-full justify-start bg-[#1f1f1f] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-all relative disabled:opacity-50"
+                        className="w-full justify-start bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all relative disabled:opacity-50 rounded-xl"
                         onClick={() => hasAccess && addBlock(blockType.type)}
                         disabled={!hasAccess}
                       >
