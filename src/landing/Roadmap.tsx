@@ -5,6 +5,7 @@ import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Milestone, Calendar, CircleCheck, Loader2, Flag, Sparkles } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -172,16 +173,16 @@ const statusConfig: Record<Status, {
   dotClass: string;
 }> = {
   completed: {
-    icon: <CircleCheck className="h-3.5 w-3.5 text-[#808080]" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
+    icon: <CircleCheck className="h-3.5 w-3.5 text-white/60" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/5 border border-white/10',
   },
   'in-progress': {
-    icon: <Loader2 className="h-3.5 w-3.5 text-[#808080]" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
+    icon: <Loader2 className="h-3.5 w-3.5 text-white/60" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/5 border border-white/10',
   },
   planned: {
-    icon: <Flag className="h-3.5 w-3.5 text-[#808080]" />,
-    dotClass: 'h-2.5 w-2.5 rounded-full bg-[#2d2d2d] border border-[#404040]',
+    icon: <Flag className="h-3.5 w-3.5 text-white/60" />,
+    dotClass: 'h-2.5 w-2.5 rounded-full bg-white/5 border border-white/10',
   },
 };
 
@@ -239,20 +240,29 @@ const Roadmap = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#111111]">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
       <SEO
         title={content.hero.title}
         description={content.hero.description}
         url="https://ebuster.ru/roadmap"
         keywords="ebuster roadmap, обновления ebuster, ebuster updates, chrome extension roadmap"
       />
-      <Header />
+      <div className="relative">
+        <Header />
 
-      <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section ref={heroRef} className="text-center space-y-6">
-          <div className="hero-element mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d]">
-            <Milestone className="h-4 w-4 text-[#d9d9d9]" />
-            <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+          <div className="hero-element mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+            <Milestone className="h-4 w-4 text-white" />
+            <span className="text-xs text-white/60 uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {content.hero.badge}
             </span>
           </div>
@@ -263,10 +273,10 @@ const Roadmap = () => {
           }}>
             {content.hero.title}
           </h1>
-          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {content.hero.subtitle}
           </p>
-          <p className="hero-element text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+          <p className="hero-element text-white/60 max-w-3xl mx-auto" style={{ fontSize: '14px', lineHeight: '1.5' }}>
             {content.hero.description}
           </p>
         </section>
@@ -275,24 +285,24 @@ const Roadmap = () => {
           {content.timeline.map((entry, index) => (
             <Card 
               key={entry.period} 
-              className="roadmap-section bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
+              className="roadmap-section rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200"
             >
               <CardContent className="p-0">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6 text-[#d9d9d9]" />
+                    <Calendar className="h-6 w-6 text-white" />
                     <h3 className="text-2xl font-semibold text-white">{entry.period}</h3>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-[#1a1a1a] border border-[#2d2d2d] text-[#808080]">
+                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium tracking-wide bg-white/5 border border-white/10 text-white/60">
                     <span className={statusConfig[entry.status as Status].dotClass} aria-hidden="true" />
                     {statusConfig[entry.status as Status].icon}
                     <span className="text-sm">{content.statusLabels[entry.status as Status]}</span>
                   </div>
                 </div>
-                <ul className="space-y-2 text-[#808080]">
+                <ul className="space-y-2 text-white/60">
                   {entry.items.map((item) => (
                     <li key={item} className="flex items-start gap-3">
-                      <Sparkles className="mt-1 h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
+                      <Sparkles className="mt-1 h-4 w-4 text-white flex-shrink-0" />
                       <span style={{ fontSize: '14px', lineHeight: '1.5' }}>{item}</span>
                     </li>
                   ))}
@@ -312,20 +322,20 @@ const Roadmap = () => {
             {content.updates.list.map((update, index) => (
               <Card 
                 key={update.date} 
-                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
+                className="rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200"
               >
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-                    <div className="flex items-center gap-3 text-[#d9d9d9]">
+                    <div className="flex items-center gap-3 text-white">
                       <Calendar className="h-5 w-5" />
                       <span className="font-semibold">{update.date}</span>
                     </div>
-                    <span className="text-[#808080]" style={{ fontSize: '14px' }}>{update.summary}</span>
+                    <span className="text-white/60" style={{ fontSize: '14px' }}>{update.summary}</span>
                   </div>
-                  <ul className="space-y-2 text-[#808080]">
+                  <ul className="space-y-2 text-white/60">
                     {update.points.map((point) => (
                       <li key={point} className="flex items-start gap-3">
-                        <CircleCheck className="mt-1 h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
+                        <CircleCheck className="mt-1 h-4 w-4 text-white flex-shrink-0" />
                         <span style={{ fontSize: '14px', lineHeight: '1.5' }}>{point}</span>
                       </li>
                     ))}
@@ -342,19 +352,19 @@ const Roadmap = () => {
           <h2 className="text-3xl font-semibold text-white">
             {content.influence.title}
           </h2>
-          <p className="text-[#808080] max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="text-white/60 max-w-3xl mx-auto" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {content.influence.description}
           </p>
           <div className="grid gap-6 md:grid-cols-3 text-left">
             {content.influence.actions.map((action, index) => (
               <Card 
                 key={action} 
-                className="bg-[#1a1a1a] border-[#2d2d2d] p-6 h-full transition-colors duration-200"
+                className="rounded-xl border border-white/10 bg-white/[0.02] p-6 h-full transition-colors duration-200"
               >
                 <CardContent className="p-0">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="mt-1 h-5 w-5 text-[#d9d9d9] flex-shrink-0" />
-                    <span className="text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>{action}</span>
+                    <Sparkles className="mt-1 h-5 w-5 text-white flex-shrink-0" />
+                    <span className="text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>{action}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -362,8 +372,11 @@ const Roadmap = () => {
           </div>
         </section>
       </div>
-
+        </section>
+        </div>
+      
       <Footer />
+      </div>
     </div>
   );
 };

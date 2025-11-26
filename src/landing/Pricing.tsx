@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FAQ } from '@/components/FAQ';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -164,36 +165,50 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111]">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
       <div className="relative">
         <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk
+            speed={5}
+            scale={1}
+            color="#ffffff"
+            noiseIntensity={4.3}
+            rotation={0}
+          />
+        </div>
         
-        <div className="container mx-auto max-w-7xl px-4 py-16">
+        {/* Gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        {/* Content container */}
+        <div className="relative z-10">
+        
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-7xl">
           {/* Hero Section */}
           <div ref={heroRef} className="text-center mb-16">
-            <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-              <Crown className="h-4 w-4 text-[#d9d9d9]" />
-              <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+            <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+              <Crown className="h-4 w-4 text-white/70" />
+              <span className="text-xs text-white/60 uppercase tracking-wider">
                 {t('pricing.hero.badge')}
               </span>
             </div>
             
-            <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              fontWeight: 700,
-              lineHeight: '1.1'
-            }}>
+            <h1 className="hero-element text-4xl md:text-6xl font-semibold mb-6 text-white">
               {t('pricing.hero.title')}
             </h1>
             
-            <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+            <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto mb-8 leading-relaxed">
               {t('pricing.hero.description')}
             </p>
 
             <div className="hero-element flex items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
-                className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+                className="h-12 px-8 bg-white text-black hover:bg-white/90 transition-colors"
                 onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -204,37 +219,29 @@ const Pricing = () => {
 
           {/* Billing Period Toggle */}
           <div className="flex justify-center mb-12">
-            <div className="inline-flex items-center gap-0 p-1 bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg" style={{ borderRadius: '4px' }}>
+            <div className="inline-flex items-center gap-0 p-1 bg-white/5 border border-white/10 rounded-lg">
               <button
                 onClick={() => setBillingPeriod('monthly')}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium transition-colors",
+                  "px-4 py-2 text-sm font-medium transition-colors rounded",
                   billingPeriod === 'monthly'
-                    ? 'bg-[#404040] text-white'
-                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                 )}
-                style={{
-                  fontSize: '13px',
-                  letterSpacing: '0.05em'
-                }}
               >
                 Ежемесячно
               </button>
               <button
                 onClick={() => setBillingPeriod('yearly')}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium transition-colors",
+                  "px-4 py-2 text-sm font-medium transition-colors rounded",
                   billingPeriod === 'yearly'
-                    ? 'bg-[#404040] text-white'
-                    : 'text-[#808080] hover:text-white hover:bg-[#2d2d2d]'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                 )}
-                style={{
-                  fontSize: '13px',
-                  letterSpacing: '0.05em'
-                }}
               >
                 Ежегодно
-                <Badge className="ml-2 bg-[#404040] text-white text-[10px] px-1.5 py-0">-17%</Badge>
+                <Badge className="ml-2 bg-white/10 text-white text-[10px] px-1.5 py-0">-17%</Badge>
               </button>
             </div>
           </div>
@@ -242,7 +249,7 @@ const Pricing = () => {
           {/* Pricing Cards */}
           {loading ? (
             <div className="flex justify-center items-center py-24">
-              <Loader2 className="h-8 w-8 animate-spin text-[#808080]" />
+              <Loader2 className="h-8 w-8 animate-spin text-white/60" />
             </div>
           ) : (
             <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -255,13 +262,13 @@ const Pricing = () => {
                   <Card
                     key={role.id}
                     className={cn(
-                      "pricing-card bg-[#1a1a1a] border-[#2d2d2d] p-8 transition-colors duration-200",
-                      !isPremium && "hover:border-[#404040]"
+                      "pricing-card rounded-xl border border-white/10 bg-white/[0.02] p-8 transition-colors duration-200",
+                      !isPremium && "hover:border-white/20"
                     )}
                   >
                     {isPremium && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                        <Badge className="bg-[#404040] text-white px-3 py-1 text-xs font-semibold">
+                        <Badge className="bg-white text-black px-3 py-1 text-xs font-semibold">
                           <Star className="h-3 w-3 mr-1" />
                           Популярный
                         </Badge>
@@ -272,28 +279,28 @@ const Pricing = () => {
                       <div className="text-center mb-6">
                         <div className={cn(
                           "inline-flex items-center justify-center w-14 h-14 rounded-lg mb-4 border",
-                          "bg-[#2d2d2d] border-[#404040]"
+                          "bg-white/5 border-white/10"
                         )}>
                           {isPremium ? (
-                            <Crown className="h-6 w-6 text-[#d9d9d9]" />
+                            <Crown className="h-6 w-6 text-white" />
                           ) : (
-                            <Code2 className="h-5 w-5 text-[#808080]" />
+                            <Code2 className="h-5 w-5 text-white/60" />
                           )}
                         </div>
-                        <h3 className="text-2xl font-bold mb-2 text-white">
+                        <h3 className="text-2xl font-semibold mb-2 text-white">
                           {role.display_name}
                         </h3>
                         <div className="mb-3">
-                          <span className="text-4xl font-bold text-white">
+                          <span className="text-4xl font-semibold text-white">
                             {price}₽
                           </span>
                           {price > 0 && (
-                            <span className="text-[#808080] ml-1 text-sm">
+                            <span className="text-white/60 ml-1 text-sm">
                               /{billingPeriod === 'monthly' ? 'мес' : 'год'}
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                        <p className="text-sm text-white/60">
                           {role.description}
                         </p>
                       </div>
@@ -302,11 +309,8 @@ const Pricing = () => {
                         <ul className="space-y-3">
                           {features.slice(0, 8).map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-start gap-2">
-                              <Check className={cn(
-                                "h-4 w-4 mt-0.5 flex-shrink-0",
-                                "text-[#808080]"
-                              )} />
-                              <span className="text-sm text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-white/60" />
+                              <span className="text-sm text-white/60">
                                 {feature}
                               </span>
                             </li>
@@ -314,10 +318,7 @@ const Pricing = () => {
                         </ul>
 
                         <Button 
-                          className={cn(
-                            "w-full h-10 rounded-lg font-semibold text-sm mt-auto transition-colors",
-                              "bg-[#404040] text-white hover:bg-[#4d4d4d]"
-                          )}
+                          className="w-full h-10 rounded-lg font-semibold text-sm mt-auto transition-colors bg-white text-black hover:bg-white/90"
                         >
                           {role.name === 'free' ? 'Начать бесплатно' : 'Выбрать план'}
                           <ArrowRight className="h-4 w-4 ml-2" />
@@ -339,16 +340,16 @@ const Pricing = () => {
 
           {/* CTA Section */}
           <div className="text-center">
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-12">
+            <Card className="rounded-xl border border-white/10 bg-white/[0.02] p-12">
               <CardContent className="p-0">
-                <h3 className="text-3xl font-bold mb-4 text-white">{t('pricing.cta.title')}</h3>
-                <p className="text-[#808080] text-lg mb-6" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+                <h3 className="text-3xl font-semibold mb-4 text-white">{t('pricing.cta.title')}</h3>
+                <p className="text-white/60 text-lg mb-6">
                   {t('pricing.cta.description')}
                 </p>
                 <div className="flex items-center justify-center gap-4 flex-wrap">
                   <Button 
                     size="lg" 
-                    className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+                    className="h-12 px-8 bg-white text-black hover:bg-white/90 transition-colors"
                     onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                   >
                     <Download className="h-4 w-4 mr-2" />
@@ -358,7 +359,7 @@ const Pricing = () => {
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+                    className="h-12 px-8 bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/40 transition-colors"
                     asChild
                   >
                     <a href="/contacts">
@@ -370,6 +371,8 @@ const Pricing = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+        </section>
         </div>
         
         <Footer />

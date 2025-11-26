@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Code2
 } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -86,15 +87,24 @@ const Documentation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <Header />
-      
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
+      <div className="relative">
+        <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div ref={heroRef} className="text-center mb-16">
           <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-            <BookOpen className="h-4 w-4 text-[#d9d9d9]" />
-            <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+            <BookOpen className="h-4 w-4 text-white" />
+            <span className="text-xs text-white/60 uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {t('documentation.hero.badge')}
             </span>
           </div>
@@ -107,14 +117,14 @@ const Documentation = () => {
             {t('documentation.hero.title')}
           </h1>
           
-          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {t('documentation.hero.description')}
           </p>
 
           <div className="hero-element flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+              className="h-12 px-8 bg-white text-white hover:bg-[#4d4d4d] transition-colors"
               onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -140,19 +150,19 @@ const Documentation = () => {
                 >
                   <CardContent className="p-0">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
-                        <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                        <IconComponent className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge className="text-xs bg-[#2d2d2d] text-[#808080] border-[#404040]">
+                          <Badge className="text-xs bg-white/5 border border-white/10 text-white/60 border-[#404040]">
                             {t('documentation.quickStart.stepLabel')} {step.step}
                           </Badge>
                         </div>
                         <h3 className="text-xl font-semibold text-white mb-2">
                           {step.title}
                         </h3>
-                        <p className="text-[#808080] text-sm mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                        <p className="text-white/60 text-sm mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                           {step.description}
                         </p>
                       </div>
@@ -161,12 +171,12 @@ const Documentation = () => {
                       <div className="space-y-3">
                         {step.instructions.map((instruction: string, instructionIndex: number) => (
                           <div key={instructionIndex} className="flex items-start gap-3">
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#2d2d2d] flex items-center justify-center mt-0.5">
-                              <span className="text-xs font-semibold text-[#d9d9d9]">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mt-0.5">
+                              <span className="text-xs font-semibold text-white">
                                 {instructionIndex + 1}
                               </span>
                             </div>
-                            <p className="text-sm text-[#808080] leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                            <p className="text-sm text-white/60 leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                               {instruction}
                             </p>
                           </div>
@@ -185,13 +195,13 @@ const Documentation = () => {
           <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-12">
             <CardContent className="p-0">
               <h3 className="text-3xl font-bold mb-4 text-white">{t('documentation.cta.title')}</h3>
-              <p className="text-[#808080] text-lg mb-6" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+              <p className="text-white/60 text-lg mb-6" style={{ fontSize: '16px', lineHeight: '1.6' }}>
                 {t('documentation.cta.description')}
               </p>
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg" 
-                  className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+                  className="h-12 px-8 bg-white text-white hover:bg-[#4d4d4d] transition-colors"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -201,7 +211,7 @@ const Documentation = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+                  className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-white/5 border border-white/10 transition-colors"
                   asChild
                 >
                   <Link to="/api-docs">
@@ -214,8 +224,11 @@ const Documentation = () => {
           </Card>
         </div>
       </div>
+        </section>
+        </div>
       
       <Footer />
+      </div>
     </div>
   );
 };

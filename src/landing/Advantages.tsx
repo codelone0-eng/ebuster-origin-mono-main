@@ -13,6 +13,7 @@ import {
   Award,
   Code2
 } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -73,15 +74,24 @@ const Advantages = () => {
   const coreAdvantages = t('advantages.advantages');
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <Header />
-      
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
+      <div className="relative">
+        <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div ref={heroRef} className="text-center mb-16">
-          <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-            <Award className="h-4 w-4 text-[#d9d9d9]" />
-            <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+          <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+            <Award className="h-4 w-4 text-white" />
+            <span className="text-xs text-white/60 uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {t('advantages.hero.badge')}
             </span>
           </div>
@@ -94,14 +104,14 @@ const Advantages = () => {
             {t('advantages.hero.title')}
           </h1>
           
-          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {t('advantages.hero.description')}
           </p>
 
           <div className="hero-element flex items-center justify-center gap-4 mb-12 flex-wrap">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+              className="h-12 px-8 bg-white text-white hover:bg-white/90 transition-colors"
             >
               <Rocket className="h-4 w-4 mr-2" />
               {t('advantages.cta.getStarted')}
@@ -109,7 +119,7 @@ const Advantages = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+              className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-white/5 border border-white/10 transition-colors"
             >
               <Terminal className="h-4 w-4 mr-2" />
               {t('advantages.cta.viewApi')}
@@ -133,16 +143,16 @@ const Advantages = () => {
                 >
                   <CardContent className="p-0">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#2d2d2d] flex items-center justify-center">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                         {typeof IconComponent === 'string' ? (
-                          <Code2 className="h-6 w-6 text-[#d9d9d9]" />
+                          <Code2 className="h-6 w-6 text-white" />
                         ) : (
-                          <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
+                          <IconComponent className="h-6 w-6 text-white" />
                         )}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-white mb-2">{advantage.title}</h3>
-                        <p className="text-[#808080] text-sm leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                        <p className="text-white/60 text-sm leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                           {advantage.description}
                         </p>
                       </div>
@@ -151,8 +161,8 @@ const Advantages = () => {
                       <ul className="space-y-2 mt-4">
                         {advantage.features.map((feature: string, featureIndex: number) => (
                           <li key={featureIndex} className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-[#d9d9d9] flex-shrink-0" />
-                            <span className="text-[#808080]" style={{ fontSize: '14px' }}>{feature}</span>
+                            <CheckCircle2 className="h-4 w-4 text-white flex-shrink-0" />
+                            <span className="text-white/60" style={{ fontSize: '14px' }}>{feature}</span>
                           </li>
                         ))}
                       </ul>
@@ -169,13 +179,13 @@ const Advantages = () => {
           <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-12">
             <CardContent className="p-0">
               <h3 className="text-3xl font-bold mb-4 text-white">{t('advantages.cta.title')}</h3>
-              <p className="text-[#808080] text-lg mb-6" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+              <p className="text-white/60 text-lg mb-6" style={{ fontSize: '16px', lineHeight: '1.6' }}>
                 {t('advantages.cta.description')}
               </p>
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <Button 
                   size="lg" 
-                  className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+                  className="h-12 px-8 bg-white text-white hover:bg-white/90 transition-colors"
                   onClick={() => window.open('https://chromewebstore.google.com/detail/ebuster/npfeodlflpggafijagnhchkgkflpjhgl?hl=ru', '_blank')}
                 >
                   <Rocket className="h-4 w-4 mr-2" />
@@ -185,7 +195,7 @@ const Advantages = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+                  className="h-12 px-8 bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-white/5 border border-white/10 transition-colors"
                 >
                   <Users className="h-4 w-4 mr-2" />
                   {t('advantages.cta.joinCommunity')}
@@ -195,8 +205,11 @@ const Advantages = () => {
           </Card>
         </div>
       </div>
+        </section>
+        </div>
       
       <Footer />
+      </div>
     </div>
   );
 };

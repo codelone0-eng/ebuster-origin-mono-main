@@ -17,6 +17,7 @@ import {
   Key,
   Globe
 } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -95,15 +96,24 @@ const ApiDocs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <Header />
-      
-      <div className="container mx-auto max-w-7xl px-4 py-16">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
+      <div className="relative">
+        <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div ref={heroRef} className="text-center mb-16">
-          <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-            <Code2 className="h-4 w-4 text-[#d9d9d9]" />
-            <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+          <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+            <Code2 className="h-4 w-4 text-white" />
+            <span className="text-xs text-white/60 uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
               {t('api-docs.hero.badge')}
             </span>
           </div>
@@ -116,14 +126,14 @@ const ApiDocs = () => {
             {t('api-docs.hero.title')}
           </h1>
           
-          <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+          <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {t('api-docs.hero.description')}
           </p>
 
           <div className="hero-element flex items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="h-12 px-8 bg-[#404040] text-white hover:bg-[#4d4d4d] transition-colors"
+              className="h-12 px-8 bg-white text-white hover:bg-white/90 transition-colors"
             >
               <Key className="h-4 w-4 mr-2" />
               {t('api-docs.cta.getApiKey')}
@@ -147,13 +157,13 @@ const ApiDocs = () => {
                   className="api-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200 text-center"
                 >
                   <CardContent className="p-0">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-[#2d2d2d] mb-6">
-                      <IconComponent className="h-8 w-8 text-[#d9d9d9]" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-white/5 border border-white/10 mb-6">
+                      <IconComponent className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold mb-3 text-white">
                       {feature.title}
                     </h3>
-                    <p className="text-[#808080] text-sm leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                       {feature.description}
                     </p>
                   </CardContent>
@@ -171,16 +181,16 @@ const ApiDocs = () => {
 
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8 bg-[#1a1a1a] border-[#2d2d2d]">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-white text-white/60">
               {t('api-docs.sections.overview')}
               </TabsTrigger>
-              <TabsTrigger value="authentication" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              <TabsTrigger value="authentication" className="data-[state=active]:bg-white data-[state=active]:text-white text-white/60">
               {t('api-docs.sections.authentication.title')}
               </TabsTrigger>
-              <TabsTrigger value="endpoints" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              <TabsTrigger value="endpoints" className="data-[state=active]:bg-white data-[state=active]:text-white text-white/60">
               {t('api-docs.sections.endpoints.title')}
               </TabsTrigger>
-              <TabsTrigger value="examples" className="data-[state=active]:bg-[#404040] data-[state=active]:text-white text-[#808080]">
+              <TabsTrigger value="examples" className="data-[state=active]:bg-white data-[state=active]:text-white text-white/60">
                 {t('api-docs.sections.examples.title')}
               </TabsTrigger>
             </TabsList>
@@ -189,7 +199,7 @@ const ApiDocs = () => {
               <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Globe className="h-5 w-5 text-[#d9d9d9]" />
+                    <Globe className="h-5 w-5 text-white" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.baseUrl')}</h3>
                   </div>
                   <code className="text-lg font-mono bg-[#111111] border border-[#2d2d2d] px-4 py-2 rounded-lg text-white block">
@@ -201,16 +211,16 @@ const ApiDocs = () => {
               <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Settings className="h-5 w-5 text-[#d9d9d9]" />
+                    <Settings className="h-5 w-5 text-white" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.dataFormat')}</h3>
                   </div>
-                  <p className="text-[#808080] mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                  <p className="text-white/60 mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                     {t('api-docs.sections.dataFormatDescription')}
                   </p>
                   <div className="flex gap-2">
-                    <Badge className="bg-[#2d2d2d] text-[#808080] border-[#404040]">JSON</Badge>
-                    <Badge className="bg-[#2d2d2d] text-[#808080] border-[#404040]">UTF-8</Badge>
-                    <Badge className="bg-[#2d2d2d] text-[#808080] border-[#404040]">RESTful</Badge>
+                    <Badge className="bg-white/5 border border-white/10 text-white/60 border-[#404040]">JSON</Badge>
+                    <Badge className="bg-white/5 border border-white/10 text-white/60 border-[#404040]">UTF-8</Badge>
+                    <Badge className="bg-white/5 border border-white/10 text-white/60 border-[#404040]">RESTful</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -220,11 +230,11 @@ const ApiDocs = () => {
               <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Key className="h-5 w-5 text-[#d9d9d9]" />
+                    <Key className="h-5 w-5 text-white" />
                     <h3 className="text-lg font-semibold text-white">{t('api-docs.sections.authentication.title')}</h3>
                   </div>
                   <div className="space-y-4">
-                    <p className="text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                    <p className="text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                       {t('api-docs.sections.authentication.description')}
                     </p>
                     <div className="bg-[#111111] border border-[#2d2d2d] rounded-lg p-4 font-mono text-sm text-white">
@@ -233,7 +243,7 @@ const ApiDocs = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+                      className="bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-white/5 border border-white/10 transition-colors"
                     >
                       <Key className="h-4 w-4 mr-2" />
                       {t('api-docs.cta.getApiKey')}
@@ -251,7 +261,7 @@ const ApiDocs = () => {
                       <div className="flex items-center gap-3">
                         <Badge 
                           className={endpoint.method === 'GET' ? 'bg-green-600 text-white' : 
-                                  endpoint.method === 'POST' ? 'bg-[#404040] text-white' :
+                                  endpoint.method === 'POST' ? 'bg-white text-white' :
                                   endpoint.method === 'PUT' ? 'bg-yellow-600 text-white' : 'bg-red-600 text-white'}
                         >
                           {endpoint.method}
@@ -261,7 +271,7 @@ const ApiDocs = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-[#2d2d2d] transition-colors"
+                        className="bg-[#1a1a1a] border-[#2d2d2d] text-white hover:bg-white/5 border border-white/10 transition-colors"
                         onClick={() => copyToClipboard(endpoint.example, `endpoint-${index}`)}
                       >
                         {copiedCode === `endpoint-${index}` ? (
@@ -271,7 +281,7 @@ const ApiDocs = () => {
                         )}
                       </Button>
                     </div>
-                    <p className="text-[#808080] text-sm mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                    <p className="text-white/60 text-sm mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                       {endpoint.description}
                     </p>
                     <div className="space-y-4">
@@ -297,7 +307,7 @@ const ApiDocs = () => {
               <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-6">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <Code2 className="h-5 w-5 text-[#d9d9d9]" />
+                    <Code2 className="h-5 w-5 text-white" />
                     <h3 className="text-lg font-semibold text-white">JavaScript SDK</h3>
                   </div>
                   <div className="space-y-4">
@@ -327,8 +337,11 @@ const newExtension = await api.extensions.create({
           </Tabs>
         </div>
       </div>
+        </section>
+        </div>
       
       <Footer />
+      </div>
     </div>
   );
 };

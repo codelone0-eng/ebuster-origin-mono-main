@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Lock, Eye, FileText } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -60,10 +61,19 @@ const Privacy = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#111111]">
-      <Header />
-      
-      <div className="container mx-auto max-w-4xl px-4 py-16">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
+      <div className="relative">
+        <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-4xl px-4 py-16">
         <div ref={heroRef} className="text-center mb-12">
           <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
@@ -72,19 +82,19 @@ const Privacy = () => {
           }}>
             Политика конфиденциальности
           </h1>
-          <p className="hero-element text-[#808080]" style={{ fontSize: '14px' }}>
+          <p className="hero-element text-white/60" style={{ fontSize: '14px' }}>
             Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
           </p>
         </div>
 
         <div ref={cardsRef} className="space-y-6">
-          <Card className="privacy-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200">
+          <Card className="privacy-card rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Shield className="h-6 w-6 text-[#d9d9d9]" />
+                <Shield className="h-6 w-6 text-white" />
                 <h3 className="text-xl font-semibold text-white">Сбор информации</h3>
               </div>
-              <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <div className="space-y-4 text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 <p>
                   Мы собираем информацию, которую вы предоставляете при регистрации, включая имя, email и другие данные профиля.
                 </p>
@@ -95,13 +105,13 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="privacy-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200">
+          <Card className="privacy-card rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Lock className="h-6 w-6 text-[#d9d9d9]" />
+                <Lock className="h-6 w-6 text-white" />
                 <h3 className="text-xl font-semibold text-white">Использование данных</h3>
               </div>
-              <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <div className="space-y-4 text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 <p>
                   Ваши данные используются для:
                 </p>
@@ -115,13 +125,13 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="privacy-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200">
+          <Card className="privacy-card rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <Eye className="h-6 w-6 text-[#d9d9d9]" />
+                <Eye className="h-6 w-6 text-white" />
                 <h3 className="text-xl font-semibold text-white">Защита данных</h3>
               </div>
-              <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <div className="space-y-4 text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 <p>
                   Мы применяем современные методы шифрования и безопасности для защиты ваших данных.
                 </p>
@@ -132,13 +142,13 @@ const Privacy = () => {
             </CardContent>
           </Card>
 
-          <Card className="privacy-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200">
+          <Card className="privacy-card rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 mb-4">
-                <FileText className="h-6 w-6 text-[#d9d9d9]" />
+                <FileText className="h-6 w-6 text-white" />
                 <h3 className="text-xl font-semibold text-white">Ваши права</h3>
               </div>
-              <div className="space-y-4 text-[#808080]" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <div className="space-y-4 text-white/60" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 <p>
                   Вы имеете право:
                 </p>
@@ -150,15 +160,18 @@ const Privacy = () => {
                   <li>Возразить против обработки данных</li>
                 </ul>
                 <p className="mt-4">
-                  Для реализации этих прав свяжитесь с нами по адресу: <a href="mailto:techsupport@ebuster.ru" className="text-[#d9d9d9] hover:underline">techsupport@ebuster.ru</a>
+                  Для реализации этих прав свяжитесь с нами по адресу: <a href="mailto:techsupport@ebuster.ru" className="text-white hover:underline">techsupport@ebuster.ru</a>
                 </p>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+        </section>
+        </div>
       
       <Footer />
+      </div>
     </div>
   );
 };

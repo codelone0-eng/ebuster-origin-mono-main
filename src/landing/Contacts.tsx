@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+import Silk from '@/components/Silk';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -120,21 +121,30 @@ const Contacts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] flex flex-col">
+    <div className="min-h-screen bg-black overflow-x-hidden text-white flex flex-col">
       <SEO
         title="Контакты EBUSTER"
         description="Свяжитесь с командой EBUSTER: email поддержка, Discord сообщество и система тикетов."
         url="https://ebuster.ru/contacts"
       />
-      <Header />
-      
+      <div className="relative">
+        <Header />
+
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
       <main className="flex-1">
-        <div className="container mx-auto max-w-7xl px-4 py-16">
+        <section className="relative bg-black/80 px-4 py-32 z-10">
+          <div className="container mx-auto max-w-7xl px-4 py-16">
           {/* Hero Section */}
           <div ref={heroRef} className="text-center mb-16">
-            <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#2d2d2d] mb-8">
-              <Headphones className="h-4 w-4 text-[#d9d9d9]" />
-              <span className="text-xs text-[#808080] uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
+            <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+              <Headphones className="h-4 w-4 text-white" />
+              <span className="text-xs text-white/60 uppercase tracking-wider" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>
                 {t('contacts.hero.badge')}
               </span>
             </div>
@@ -147,7 +157,7 @@ const Contacts = () => {
               {t('contacts.hero.title')}
             </h1>
             
-            <p className="hero-element text-lg text-[#808080] max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+            <p className="hero-element text-lg text-white/60 max-w-3xl mx-auto mb-8 leading-relaxed" style={{ fontSize: '16px', lineHeight: '1.6' }}>
               {t('contacts.hero.description')}
             </p>
           </div>
@@ -160,21 +170,21 @@ const Contacts = () => {
               return (
                 <Card 
                   key={index} 
-                  className="contact-card bg-[#1a1a1a] border-[#2d2d2d] p-6 transition-colors duration-200"
+                  className="contact-card rounded-xl border border-white/10 bg-white/[0.02] p-6 transition-colors duration-200"
                 >
                   <CardContent className="p-0 text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#2d2d2d] mb-4">
-                      <IconComponent className="h-6 w-6 text-[#d9d9d9]" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-white/5 border border-white/10 mb-4">
+                      <IconComponent className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">{method.title}</h3>
-                    <p className="text-sm text-[#808080] mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                    <p className="text-sm text-white/60 mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                       {method.description}
                     </p>
                     <div className="space-y-3">
-                      <div className="font-mono text-sm bg-[#111111] border border-[#2d2d2d] px-3 py-2 rounded-lg text-white">
+                      <div className="font-mono text-sm bg-black/60 border border-white/10 px-3 py-2 rounded-lg text-white">
                         {method.contact}
                       </div>
-                      <div className="text-xs text-[#808080]">
+                      <div className="text-xs text-white/60">
                         {method.responseTime}
                       </div>
                     </div>
@@ -186,7 +196,7 @@ const Contacts = () => {
 
           {/* Contact Form */}
           <div className="max-w-2xl mx-auto">
-            <Card className="bg-[#1a1a1a] border-[#2d2d2d] p-8">
+            <Card className="rounded-xl border border-white/10 bg-white/[0.02] p-8">
               <CardContent className="p-0">
                 <h2 className="text-2xl font-bold mb-6 text-white">Отправить сообщение</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -199,7 +209,7 @@ const Contacts = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className="bg-[#111111] border-[#2d2d2d] text-white"
+                        className="bg-black/60 border-white/10 text-white"
                       />
                     </div>
                     <div className="space-y-2">
@@ -211,7 +221,7 @@ const Contacts = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="bg-[#111111] border-[#2d2d2d] text-white"
+                        className="bg-black/60 border-white/10 text-white"
                       />
                     </div>
                   </div>
@@ -223,7 +233,7 @@ const Contacts = () => {
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
-                      className="bg-[#111111] border-[#2d2d2d] text-white"
+                      className="bg-black/60 border-white/10 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -235,7 +245,7 @@ const Contacts = () => {
                       onChange={handleInputChange}
                       required
                       rows={6}
-                      className="bg-[#111111] border-[#2d2d2d] text-white"
+                      className="bg-black/60 border-white/10 text-white"
                     />
                   </div>
                   {submitStatus === 'success' && (
@@ -269,9 +279,13 @@ const Contacts = () => {
             </Card>
           </div>
         </div>
+        </div>
+        </section>
+        </div>
       </main>
       
       <Footer />
+      </div>
     </div>
   );
 };
