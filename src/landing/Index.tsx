@@ -12,8 +12,9 @@ import {
   Boxes, Puzzle, Orbit, Binary, Cpu, Cloud, User, RefreshCw,
   Sparkles, Terminal, Download, Globe, Send, Bell, Briefcase, 
   Database, Mail, Calendar, CheckCircle2, AlertCircle, Settings,
-  Play, Copy, Check, FileCode, Clock, Activity, TrendingUp, ChevronDown
+  Copy, Check, FileCode, Clock, Activity, TrendingUp, ChevronDown
 } from "lucide-react";
+import Beams from "@/components/Beams";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -140,10 +141,24 @@ const Index = () => {
         <section ref={heroRef} className="relative overflow-hidden border-b border-white/10">
           <div className="absolute inset-0 bg-black" />
           
+          {/* Beams background */}
+          <div className="absolute inset-0" style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <Beams
+              beamWidth={2}
+              beamHeight={15}
+              beamNumber={12}
+              lightColor="#ffffff"
+              speed={2}
+              noiseIntensity={1.75}
+              scale={0.2}
+              rotation={0}
+            />
+          </div>
+          
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black/95" />
           
-          <div className="relative py-40 px-4">
+          <div className="relative py-40 px-4 z-10">
             <div className="container mx-auto max-w-[1440px]">
               <div className="max-w-[672px] mx-auto text-center">
                 {/* Split heading like Nightwatch */}
@@ -170,20 +185,6 @@ const Index = () => {
                   >
                     {t('index.hero.documentation')}
                   </Button>
-                </div>
-              </div>
-
-              {/* Dashboard Preview - Exact Nightwatch style */}
-              <div className="mt-32 max-w-[1312px] mx-auto">
-                <div className="rounded-[32px] border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden relative">
-                  <div className="aspect-video bg-gradient-to-br from-white/5 to-white/[0.02] flex items-center justify-center">
-                    <div className="text-center space-y-4">
-                      <div className="w-20 h-20 mx-auto rounded-full bg-white/10 flex items-center justify-center">
-                        <Play className="h-10 w-10 text-white ml-1" />
-                      </div>
-                      <p className="text-white/60 text-sm">EBUSTER in 3 min</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
