@@ -737,7 +737,6 @@ const DashboardContent = () => {
                     </nav>
                   </div>
                 </div>
-              </div>
             </aside>
 
           <div className="flex-1 space-y-8">
@@ -756,19 +755,18 @@ const DashboardContent = () => {
             {activeTab === 'installed' && (
               <div className="space-y-6">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.installed')}</h2>
-                        <p className="text-sm text-white/60">Управление установленными скриптами</p>
-                      </div>
-                      <Button 
-                        className="bg-white text-black hover:bg-white/90 flex items-center gap-2 rounded-xl"
-                        onClick={() => handleTabChange('scripts')}
-                      >
-                        <Plus className="h-4 w-4" />
-                        {t('header.dashboard.installed.addScript')}
-                      </Button>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-2">{t('header.dashboard.tabs.installed')}</h2>
+                      <p className="text-sm text-white/60">Управление установленными скриптами</p>
                     </div>
+                    <Button 
+                      className="bg-white text-black hover:bg-white/90 flex items-center gap-2 rounded-xl"
+                      onClick={() => handleTabChange('scripts')}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t('header.dashboard.installed.addScript')}
+                    </Button>
                   </div>
                 </div>
 
