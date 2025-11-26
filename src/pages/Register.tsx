@@ -5,11 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, User, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift, Plus } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import Silk from '@/components/Silk';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -32,41 +29,31 @@ export default function Register() {
 
   useEffect(() => {
     const savedRefCode = localStorage.getItem('referral_code');
-    const urlRefCode = searchParams.get('ref');
-    
-    if (urlRefCode) {
-      setReferralCode(urlRefCode);
-      localStorage.setItem('referral_code', urlRefCode);
-    } else if (savedRefCode) {
+    if (savedRefCode && !referralCode) {
       setReferralCode(savedRefCode);
     }
-  }, [searchParams]);
+  }, []);
 
   const passwordRequirements = [
     { 
-      text: 'Минимум 8 символов', 
-      icon: Hash,
-      test: (pwd: string) => pwd.length >= 8 
+      label: 'At least 8 characters', 
+      test: (pwd: string) => pwd.length >= 8,
+      icon: Hash
     },
     { 
-      text: 'Заглавная буква', 
-      icon: Type,
-      test: (pwd: string) => /[A-Z]/.test(pwd) 
+      label: 'One uppercase letter', 
+      test: (pwd: string) => /[A-Z]/.test(pwd),
+      icon: Type
     },
     { 
-      text: 'Строчная буква', 
-      icon: CaseSensitive,
-      test: (pwd: string) => /[a-z]/.test(pwd) 
+      label: 'One lowercase letter', 
+      test: (pwd: string) => /[a-z]/.test(pwd),
+      icon: CaseSensitive
     },
     { 
-      text: 'Цифра', 
-      icon: Hash,
-      test: (pwd: string) => /\d/.test(pwd) 
-    },
-    { 
-      text: 'Спецсимвол (!@#$%^&*)', 
-      icon: Shield,
-      test: (pwd: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) 
+      label: 'One number', 
+      test: (pwd: string) => /\d/.test(pwd),
+      icon: Shield
     },
   ];
 
@@ -104,8 +91,6 @@ export default function Register() {
       title: "Пароль сгенерирован!",
       description: "Пароль скопирован в буфер обмена",
     });
-    
-    return password;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,291 +163,272 @@ export default function Register() {
     }
   };
 
+  const generateUserId = () => {
+    if (!formData.email) return '00000000-0000-0000-0000-000000000000';
+    return Array.from(formData.email)
+      .reduce((acc, char) => acc + char.charCodeAt(0).toString(16), '')
+      .substring(0, 36)
+      .match(/.{1,8}/g)
+      ?.join('-') || '00000000-0000-0000-0000-000000000000';
+  };
+
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden text-white">
-      <div className="relative">
-        <Header />
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+      backgroundSize: '60px 60px'
+    }}>
+      <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">
+        {/* Left: Form */}
+        <div className="w-full max-w-md mx-auto">
+          <h2 className="text-2xl font-semibold text-white mb-2">Create an account</h2>
+          <p className="text-sm text-white/60 mb-6">
+            Already have an account?{' '}
+            <Link to="/login" className="text-white/80 hover:text-white transition-colors">
+              Sign in
+            </Link>
+          </p>
 
-        {/* Silk background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-        </div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {referralCode && (
+              <div className="bg-white/5 border border-white/10 rounded p-3">
+                <p className="text-sm font-medium text-white flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Реферальный код: {referralCode}
+                </p>
+              </div>
+            )}
 
-        <div className="relative z-10">
-          <main className="flex-1">
-            <section className="relative bg-black/80 px-4 py-32 z-10">
-              <div className="container mx-auto max-w-[1440px]">
-                <div className="max-w-[1312px] mx-auto">
-                  <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start">
-                    {/* Left: Info */}
-                    <div className="space-y-6">
-                      <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                        Регистрация
-                      </span>
-                      <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-white" style={{
-                        fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-                        fontWeight: 600
-                      }}>
-                        Создайте аккаунт
-                      </h1>
-                      <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-                        Присоединяйтесь к EBUSTER и получите доступ к библиотеке скриптов, автоматизации браузера и API.
-                      </p>
-                    </div>
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className="text-white text-sm font-medium">Full name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                type="text"
+                placeholder="Enter full name"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded"
+                style={{
+                  WebkitTextFillColor: 'white',
+                  WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                }}
+                required
+                disabled={loading}
+              />
+            </div>
 
-                    {/* Right: Form Card */}
-                    <div className="space-y-6">
-                      <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                        <div className="rounded-2xl border border-white/10 bg-[#05090f] p-8">
-                          <form onSubmit={handleSubmit} className="space-y-6">
-              {referralCode && (
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                  <p className="text-sm font-medium text-white flex items-center gap-2">
-                    <Gift className="h-4 w-4" />
-                    Реферальный код: {referralCode}
-                  </p>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white text-sm font-medium">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded"
+                style={{
+                  WebkitTextFillColor: 'white',
+                  WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                }}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    generatePassword();
+                  }}
+                  className="h-7 px-2 text-xs bg-transparent border-0 text-white/60 hover:text-white hover:bg-white/5"
+                  disabled={loading}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Generate
+                </Button>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded pr-10"
+                  style={{
+                    WebkitTextFillColor: 'white',
+                    WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                  }}
+                  required
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-white/5 text-white/60 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+
+              {formData.password && (
+                <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded space-y-2">
+                  <p className="text-xs font-semibold text-white">Password requirements:</p>
+                  <div className="space-y-1.5">
+                    {passwordRequirements.map((req, index) => {
+                      const Icon = req.icon;
+                      const met = req.test(formData.password);
+                      return (
+                        <div 
+                          key={index}
+                          className={`flex items-center gap-2 text-xs ${
+                            met ? 'text-white' : 'text-white/40'
+                          }`}
+                        >
+                          {met ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <X className="h-3 w-3" />
+                          )}
+                          <Icon className="h-3 w-3" />
+                          <span>{req.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-white/80 text-sm font-medium">Полное имя *</Label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    placeholder="Иван Иванов"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="pl-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                    style={{
-                      WebkitTextFillColor: 'white',
-                      WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                    }}
-                    required
-                    disabled={loading}
-                  />
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-white text-sm font-medium">Confirm password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Enter password again"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded pr-10"
+                  style={{
+                    WebkitTextFillColor: 'white',
+                    WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                  }}
+                  required
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-white/5 text-white/60 hover:text-white"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/80 text-sm font-medium">Email *</Label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                    style={{
-                      WebkitTextFillColor: 'white',
-                      WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                    }}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-white/80 text-sm font-medium">Пароль *</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      generatePassword();
-                    }}
-                    className="h-8 px-3 text-xs bg-transparent border-white/10 text-white/60 hover:bg-white/5 hover:text-white"
-                    disabled={loading}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Генерировать
-                  </Button>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="pl-12 pr-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                    style={{
-                      WebkitTextFillColor: 'white',
-                      WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                    }}
-                    required
-                    disabled={loading}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={loading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-
-                {formData.password && (
-                  <div className="mt-4 p-4 bg-white/5 border border-white/10 rounded-lg space-y-2">
-                    <p className="text-sm font-semibold text-white">Требования к паролю:</p>
-                    <div className="space-y-2">
-                      {passwordRequirements.map((req, index) => {
-                        const Icon = req.icon;
-                        const met = req.test(formData.password);
-                        return (
-                          <div 
-                            key={index}
-                            className={`flex items-center gap-2 text-sm ${
-                              met ? 'text-white' : 'text-white/40'
-                            }`}
-                          >
-                            {met ? (
-                              <Check className="h-4 w-4" />
-                            ) : (
-                              <X className="h-4 w-4" />
-                            )}
-                            <Icon className="h-3 w-3" />
-                            <span>{req.text}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-white/80 text-sm font-medium">Подтвердите пароль *</Label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="pl-12 pr-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                    style={{
-                      WebkitTextFillColor: 'white',
-                      WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                    }}
-                    required
-                    disabled={loading}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    disabled={loading}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-
-                {formData.confirmPassword && (
-                  <div className={`flex items-center gap-2 text-sm mt-2 ${
-                    passwordsMatch ? 'text-white' : 'text-white/60'
-                  }`}>
-                    {passwordsMatch ? (
-                      <>
-                        <Check className="h-4 w-4" />
-                        <span className="font-medium">Пароли совпадают</span>
-                      </>
-                    ) : (
-                      <>
-                        <X className="h-4 w-4" />
-                        <span className="font-medium">Пароли не совпадают</span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {!referralCode && (
-                <div className="space-y-2">
-                  <Label htmlFor="referralCodeInput" className="text-white/80 text-sm font-medium flex items-center gap-2">
-                    <Gift className="h-4 w-4" />
-                    Реферальный код (опционально)
-                  </Label>
-                  <Input
-                    id="referralCodeInput"
-                    name="referralCodeInput"
-                    type="text"
-                    placeholder="Введите код, если есть"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    className="h-14 bg-black border-white/10 text-white placeholder:text-white/40 focus:border-white/30 uppercase"
-                    disabled={loading}
-                  />
-                  {referralCode && (
-                    <p className="text-xs text-white flex items-center gap-1">
+              {formData.confirmPassword && (
+                <div className={`flex items-center gap-2 text-xs mt-2 ${
+                  passwordsMatch ? 'text-white' : 'text-white/60'
+                }`}>
+                  {passwordsMatch ? (
+                    <>
                       <Check className="h-3 w-3" />
-                      Вы получите скидку при использовании этого кода!
-                    </p>
+                      <span className="font-medium">Passwords match</span>
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-3 w-3" />
+                      <span>Passwords do not match</span>
+                    </>
                   )}
                 </div>
               )}
+            </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-14 bg-white text-black hover:bg-white/90 transition-colors text-base font-medium rounded-lg" 
-                disabled={loading || !allRequirementsMet || !passwordsMatch}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Регистрация...
-                  </>
-                ) : (
-                  'Зарегистрироваться'
-                )}
-              </Button>
-                          </form>
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium rounded transition-colors" 
+              disabled={loading || !allRequirementsMet || !passwordsMatch}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                'Create account'
+              )}
+            </Button>
+          </form>
 
-                          <div className="text-center pt-6 mt-6 border-t border-white/10">
-                            <p className="text-sm text-white/60">
-                              Уже есть аккаунт?{' '}
-                              <Link to="/login" className="text-white hover:text-white/80 transition-colors font-medium">
-                                Войти
-                              </Link>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+          <p className="mt-4 text-xs text-white/60">
+            By signing up, you agree to our{' '}
+            <Link to="/terms" className="text-white/80 hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+          </p>
+        </div>
+
+        {/* Right: User Card */}
+        <div className="hidden lg:flex items-center justify-center">
+          <div className="w-full max-w-sm">
+            <div className="bg-[#1a1a1a]/80 backdrop-blur-sm border border-white/10 rounded-lg p-8 relative" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundSize: '60px 60px'
+            }}>
+              <div className="space-y-6">
+                {/* Avatar */}
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-lg border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center mb-3 relative">
+                    <Plus className="h-6 w-6 text-white/40 mb-1" />
+                    <span className="text-[10px] text-white/40">Avatar</span>
+                    <span className="text-[10px] text-white/30">Max 2MB</span>
                   </div>
+                  <h3 className="text-lg font-semibold text-white mb-1">New User</h3>
+                  <p className="text-white/60 text-sm font-mono">{formData.email || 'your@email.com'}</p>
+                </div>
+                
+                {/* Password dots */}
+                <div className="text-center">
+                  <div className="text-white/60 text-sm font-mono tracking-widest">*****</div>
+                </div>
+                
+                {/* Barcode */}
+                <div className="h-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-sm relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]"></div>
+                </div>
+                
+                {/* User ID */}
+                <div className="font-mono text-[10px] text-white/60 break-all text-center leading-relaxed">
+                  {generateUserId()}
                 </div>
               </div>
-            </section>
-          </main>
-          
-          <Footer />
+            </div>
+          </div>
         </div>
       </div>
     </div>

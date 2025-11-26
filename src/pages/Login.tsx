@@ -8,9 +8,6 @@ import { useAuth } from '@/contexts/CustomAuthContext';
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { RecentUsers } from '@/components/RecentUsers';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import Silk from '@/components/Silk';
 
 const generateAuthCode = () => {
   return 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -123,158 +120,114 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden text-white">
-      <div className="relative">
-        <Header />
-
-        {/* Silk background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+      backgroundSize: '60px 60px'
+    }}>
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white tracking-tight">EBUSTER</h1>
         </div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
 
-        <div className="relative z-10">
-          <main className="flex-1">
-            <section className="relative bg-black/80 px-4 py-32 z-10">
-              <div className="container mx-auto max-w-[1440px]">
-                <div className="max-w-[1312px] mx-auto">
-                  <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start">
-                    {/* Left: Info */}
-                    <div className="space-y-6">
-                      <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                        Авторизация
-                      </span>
-                      <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-white" style={{
-                        fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-                        fontWeight: 600
-                      }}>
-                        Вход в систему
-                      </h1>
-                      <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-                        Введите свои данные для входа в аккаунт EBUSTER
-                      </p>
-                    </div>
-
-                    {/* Right: Form Card */}
-                    <div className="space-y-6">
-                      <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                        <div className="rounded-2xl border border-white/10 bg-[#05090f] p-8">
-                          <form onSubmit={handleSubmit} className="space-y-6">
-                      <RecentUsers onUserSelect={handleUserSelect} />
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-white/80 text-sm font-medium">Email</Label>
-                        <div className="relative">
-                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            placeholder="your@email.com"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className="pl-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                            style={{
-                              WebkitTextFillColor: 'white',
-                              WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                            }}
-                            required
-                            disabled={loading}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="password" className="text-white/80 text-sm font-medium">Пароль</Label>
-                          <Link 
-                            to="/forgot-password" 
-                            className="text-sm text-white/60 hover:text-white transition-colors"
-                          >
-                            Забыли пароль?
-                          </Link>
-                        </div>
-                        <div className="relative">
-                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
-                          <Input
-                            id="password"
-                            name="password"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className="pl-12 pr-12 h-14 bg-white/[0.02] border-white/10 text-white placeholder:text-white/40 focus:border-white/30 rounded-lg"
-                            style={{
-                              WebkitTextFillColor: 'white',
-                              WebkitBoxShadow: '0 0 0px 1000px rgba(255, 255, 255, 0.02) inset'
-                            }}
-                            required
-                            disabled={loading}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 hover:bg-white/5 text-white/60 hover:text-white"
-                            onClick={() => setShowPassword(!showPassword)}
-                            disabled={loading}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-5 w-5" />
-                            ) : (
-                              <Eye className="h-5 w-5" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          id="rememberMe"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          className="h-4 w-4 rounded border-white/20 bg-black text-white focus:ring-white/20 focus:ring-2"
-                        />
-                        <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
-                          Запомнить меня
-                        </Label>
-                      </div>
-
-                      <Button 
-                        type="submit" 
-                        className="w-full h-14 bg-white text-black hover:bg-white/90 transition-colors text-base font-medium rounded-lg" 
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Вход...
-                          </>
-                        ) : (
-                          'Войти'
-                        )}
-                      </Button>
-                          </form>
-
-                          <div className="text-center pt-6 mt-6 border-t border-white/10">
-                            <p className="text-sm text-white/60">
-                              Нет аккаунта?{' '}
-                              <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
-                                Зарегистрироваться
-                              </Link>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </main>
+        {/* Form Card */}
+        <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-8 shadow-xl">
+          <h2 className="text-2xl font-semibold text-white mb-6">Sign in</h2>
           
-          <Footer />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <RecentUsers onUserSelect={handleUserSelect} />
+            
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white text-sm font-medium">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded"
+                style={{
+                  WebkitTextFillColor: 'white',
+                  WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                }}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-white/60 hover:text-white transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="h-11 bg-[#0a0a0a] border-white/20 text-white placeholder:text-white/40 focus:border-white/40 focus:ring-0 rounded pr-10"
+                  style={{
+                    WebkitTextFillColor: 'white',
+                    WebkitBoxShadow: '0 0 0px 1000px #0a0a0a inset'
+                  }}
+                  required
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-white/5 text-white/60 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium rounded transition-colors" 
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-white/60">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-white/80 hover:text-white transition-colors font-medium">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-white/40">© 2025 EBUSTER. All rights reserved.</p>
         </div>
       </div>
     </div>
