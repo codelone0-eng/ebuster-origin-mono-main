@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { RecentUsers } from '@/components/RecentUsers';
 
@@ -238,6 +238,7 @@ export default function Login() {
               </p>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Right: User Card */}
