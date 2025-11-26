@@ -26,7 +26,7 @@ export const CursorProvider = ({ children }: CursorProviderProps) => {
   // Load cursor preference from localStorage
   useEffect(() => {
     const savedCursor = localStorage.getItem('cursor-type') as CursorType;
-    const validCursors: CursorType[] = ['default', 'sparkles', 'lag', 'glow', 'particles', 'minimal', 'ring'];
+    const validCursors: CursorType[] = ['default', 'custom'];
     if (savedCursor && validCursors.includes(savedCursor)) {
       setCursorType(savedCursor);
     }

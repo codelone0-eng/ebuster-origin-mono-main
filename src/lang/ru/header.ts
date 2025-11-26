@@ -210,21 +210,11 @@ export const ru = {
         description: "Выберите стиль курсора",
         options: {
           default: "По умолчанию",
-          sparkles: "Блестки",
-          lag: "След",
-          glow: "Свечение",
-          particles: "Частицы",
-          minimal: "Минималистичный",
-          ring: "Кольцо"
+          custom: "Кастомный"
         },
         descriptions: {
-          default: "Классический круг",
-          sparkles: "Магические блестки",
-          lag: "Плавный след с задержкой",
-          glow: "Светящийся эффект",
-          particles: "Анимированные частицы",
-          minimal: "Тонкая точка",
-          ring: "Кольцо с тенью"
+          default: "Системный курсор",
+          custom: "Кольцо с тенью"
         }
       },
       forgotPassword: {

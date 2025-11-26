@@ -2,7 +2,6 @@ import { User, ChevronDown, LogIn, Shield, LogOut, Search, Menu, X } from "lucid
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 
-import { ThemeToggle } from "./ThemeToggle"
 import { CursorSelector } from "./CursorSelector"
 import { GlobalSearch } from "./GlobalSearch"
 import { useCursor } from "@/contexts/CursorContext"
@@ -240,11 +239,6 @@ export const Header = () => {
               <kbd className="ml-3 px-2 py-0.5 text-[10px] bg-white/5 border border-white/10 rounded text-white/50 font-mono">⌘K</kbd>
             </Button>
 
-            {/* Theme Toggle */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-
             {/* Cursor Selector */}
             <div className="hidden md:block">
               <CursorSelector 
@@ -421,7 +415,6 @@ export const Header = () => {
                   <span>Поиск</span>
                 </Button>
                 <div className="flex items-center gap-2">
-                  <ThemeToggle />
                   <CursorSelector 
                     currentCursor={cursorType}
                     onCursorChange={setCursorType}

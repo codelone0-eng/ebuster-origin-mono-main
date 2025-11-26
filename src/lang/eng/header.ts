@@ -212,21 +212,11 @@ export const eng = {
         description: "Select your preferred cursor style",
         options: {
           default: "Default",
-          sparkles: "Sparkles",
-          lag: "Lag",
-          glow: "Glow",
-          particles: "Particles",
-          minimal: "Minimal",
-          ring: "Ring"
+          custom: "Custom"
         },
         descriptions: {
-          default: "Classic circle",
-          sparkles: "Magical sparkles",
-          lag: "Smooth trail with delay",
-          glow: "Glowing effect",
-          particles: "Animated particles",
-          minimal: "Thin dot",
-          ring: "Ring with shadow"
+          default: "System cursor",
+          custom: "Ring with shadow"
         }
       },
       forgotPassword: {
