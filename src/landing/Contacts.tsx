@@ -279,7 +279,6 @@ const Contacts = () => {
             </Card>
           </div>
         </div>
-        </div>
         </section>
         </div>
       </main>

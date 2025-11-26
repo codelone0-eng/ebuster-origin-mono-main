@@ -161,8 +161,8 @@ const About = () => {
           </div>
         </div>
         </section>
-        </div>
       </main>
+      </div>
       
       <Footer />
       </div>
