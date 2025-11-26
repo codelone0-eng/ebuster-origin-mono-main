@@ -49,12 +49,11 @@ function extendMaterial(BaseMaterial, cfg) {
 
 const CanvasWrapper = ({ children }) => (
   <Canvas 
-    dpr={[1, 1.5]} 
+    dpr={[1, 2]} 
     frameloop="always" 
     className="beams-container"
-    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent' }}
+    style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'transparent' }}
     gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-    camera={{ position: [0, 0, 25], fov: 50 }}
   >
     {children}
   </Canvas>
@@ -219,8 +218,8 @@ const Beams = ({
         <PlaneNoise ref={meshRef} material={beamMaterial} count={beamNumber} width={beamWidth} height={beamHeight} />
         <DirLight color={lightColor} position={[0, 3, 10]} />
       </group>
-      <ambientLight intensity={0.5} />
-      <PerspectiveCamera makeDefault position={[0, 0, 30]} fov={60} />
+      <ambientLight intensity={0.7} />
+      <PerspectiveCamera makeDefault position={[0, 0, 20]} fov={45} />
     </CanvasWrapper>
   );
 };
@@ -277,7 +276,7 @@ const MergedPlanes = forwardRef(({ material, width, count, height }, ref) => {
   const mesh = useRef(null);
   useImperativeHandle(ref, () => mesh.current);
   const geometry = useMemo(
-    () => createStackedPlanesBufferGeometry(count, width, height, 0, 50),
+    () => createStackedPlanesBufferGeometry(count, width, height, 0, 80),
     [count, width, height]
   );
   useFrame((_, delta) => {

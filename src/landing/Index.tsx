@@ -137,24 +137,25 @@ const Index = () => {
         <AuthStatusChecker />
         <Header />
 
-        {/* Контейнер для всего контента с Beams фоном */}
-        <div className="relative min-h-screen">
-          {/* Beams background - покрывает весь контент между Header и Footer */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-            <Beams
-              beamWidth={0.3}
-              beamHeight={4}
-              beamNumber={30}
-              lightColor="#ffffff"
-              speed={0.8}
-              noiseIntensity={1.2}
-              scale={0.05}
-              rotation={0}
-            />
-          </div>
-          
-          {/* Gradient overlay - более прозрачный, чтобы Beams был виден */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-[1] pointer-events-none" />
+        {/* Beams background - fixed для покрытия всего экрана */}
+        <div className="fixed inset-0 z-0 pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
+          <Beams
+            beamWidth={1}
+            beamHeight={10}
+            beamNumber={15}
+            lightColor="#ffffff"
+            speed={1.5}
+            noiseIntensity={1.5}
+            scale={0.15}
+            rotation={0}
+          />
+        </div>
+        
+        {/* Gradient overlay - более прозрачный, чтобы Beams был виден */}
+        <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-[1] pointer-events-none" />
+
+        {/* Контейнер для всего контента */}
+        <div className="relative z-10">
 
             {/* Hero Section - Exact Nightwatch style from Figma */}
           <section ref={heroRef} className="relative overflow-hidden border-b border-white/10" style={{ minHeight: '600px' }}>
