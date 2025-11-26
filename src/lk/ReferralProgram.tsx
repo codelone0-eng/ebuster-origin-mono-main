@@ -401,28 +401,28 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
         <TabsContent value="payouts" className="mt-6">
           <div>
             <h3 className="text-lg font-semibold text-white mb-2">История выплат</h3>
-            <p className="text-sm text-[#808080] mb-4">
+            <p className="text-sm text-white/60 mb-4">
               Когда ваши рефералы оплачивают подписку, здесь появится начисление
             </p>
             {payouts.length === 0 ? (
               <div className="text-center py-10">
-                <DollarSign className="h-12 w-12 mx-auto mb-4 text-[#808080] opacity-40" />
-                <p className="text-[#808080]">Пока нет начислений</p>
-                <p className="text-sm text-[#808080] mt-2">Как только ваш реферал оплатит подписку, информация появится здесь.</p>
+                <DollarSign className="h-12 w-12 mx-auto mb-4 text-white/60 opacity-40" />
+                <p className="text-white/60">Пока нет начислений</p>
+                <p className="text-sm text-white/60 mt-2">Как только ваш реферал оплатит подписку, информация появится здесь.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {payouts.map((item) => (
-                  <div key={item.id} className="p-4 bg-[#1f1f1f] border border-[#2d2d2d] rounded-lg space-y-2">
+                  <div key={item.id} className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="font-medium text-white">
                         {item.referred_user?.full_name || maskEmail(item.referred_user?.email)}
                       </div>
-                      <div className="text-sm text-[#808080]">
+                      <div className="text-sm text-white/60">
                         {item.created_at ? new Date(item.created_at).toLocaleString('ru-RU') : '—'}
                       </div>
                     </div>
-                    <div className="text-sm text-[#808080] flex flex-col gap-1">
+                    <div className="text-sm text-white/60 flex flex-col gap-1">
                       <span>
                         Оформил подписку на сумму <span className="text-white font-medium">{formatAmount(item.purchase_amount, item.currency)}</span>
                       </span>
@@ -439,10 +439,12 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             )}
           </div>
         </TabsContent>
+        </div>
       </Tabs>
 
       {/* Как это работает */}
-      <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg p-6">
+      <div className="rounded-[24px] border border-white/10 bg-black/30 backdrop-blur-xl p-1">
+        <div className="rounded-[16px] border border-white/10 bg-black/70 p-6">
         <h3 className="text-lg font-semibold text-white mb-6">Как это работает?</h3>
         <div className="space-y-4">
           <div className="flex gap-4">
@@ -479,10 +481,11 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="bg-[#1a1a1a] border-[#2d2d2d] text-white">
+        <DialogContent className="bg-black/95 border-white/10 text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Поделиться ссылкой</DialogTitle>
             <DialogDescription className="text-[#808080]">
@@ -494,9 +497,9 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             <div>
               <p className="text-sm text-[#808080] mb-2">Реферальный код</p>
               <div className="flex gap-2">
-                <Input value={referralCode?.code ?? '—'} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
+                <Input value={referralCode?.code ?? '—'} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
                 <Button
-                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
                   onClick={() => {
                     void copyToClipboard(referralCode?.code ?? '', 'code');
                   }}
@@ -507,11 +510,11 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
             </div>
 
             <div>
-              <p className="text-sm text-[#808080] mb-2">Реферальная ссылка</p>
+              <p className="text-sm text-white/60 mb-2">Реферальная ссылка</p>
               <div className="flex gap-2">
-                <Input value={referralLink} readOnly className="bg-[#111111] border-[#2d2d2d] text-white" />
+                <Input value={referralLink} readOnly className="bg-white/5 border-white/15 text-white rounded-xl" />
                 <Button
-                  className="bg-[#2d2d2d] border-[#404040] text-white hover:bg-[#3d3d3d]"
+                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl"
                   onClick={() => {
                     void copyToClipboard(referralLink, 'link');
                   }}
@@ -521,13 +524,13 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
               </div>
             </div>
 
-            <p className="text-xs text-[#808080]">
+            <p className="text-xs text-white/60">
               Поделитесь ссылкой в соцсетях, мессенджерах или по email — каждое оформление подписки принесёт вам бонус.
             </p>
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setIsShareModalOpen(false)} className="bg-blue-600 hover:bg-blue-700 text-white">Готово</Button>
+            <Button onClick={() => setIsShareModalOpen(false)} className="bg-white text-black hover:bg-white/90 rounded-xl">Готово</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
