@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
-import { Loader2, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { RecentUsers } from '@/components/RecentUsers';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import Silk from '@/components/Silk';
-import { BeamsUpstream } from '@/components/ui/beams-upstream';
 
 const generateAuthCode = () => {
   return 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -123,37 +124,42 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden text-white">
-      {/* Silk background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-      </div>
-      <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
-      
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-32">
-        <div className="container mx-auto max-w-[1440px]">
-          <div className="max-w-[1312px] mx-auto">
-            <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start">
-              {/* Left: Form */}
-              <div className="space-y-6">
-                <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                  Авторизация
-                </span>
-                <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-white" style={{
-                  fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-                  fontWeight: 600
-                }}>
-                  Вход в систему
-                </h1>
-                <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-                  Введите свои данные для входа в аккаунт EBUSTER
-                </p>
-              </div>
+      <div className="relative">
+        <Header />
 
-              {/* Right: Form Card */}
-              <div className="space-y-6">
-                <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                  <div className="rounded-2xl border border-white/10 bg-[#05090f] p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Silk background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
+        </div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+
+        <div className="relative z-10">
+          <main className="flex-1">
+            <section className="relative bg-black/80 px-4 py-32 z-10">
+              <div className="container mx-auto max-w-[1440px]">
+                <div className="max-w-[1312px] mx-auto">
+                  <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start">
+                    {/* Left: Info */}
+                    <div className="space-y-6">
+                      <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
+                        Авторизация
+                      </span>
+                      <h1 className="text-4xl md:text-6xl font-semibold leading-tight text-white" style={{
+                        fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+                        fontWeight: 600
+                      }}>
+                        Вход в систему
+                      </h1>
+                      <p className="text-white/60 text-lg max-w-xl leading-relaxed">
+                        Введите свои данные для входа в аккаунт EBUSTER
+                      </p>
+                    </div>
+
+                    {/* Right: Form Card */}
+                    <div className="space-y-6">
+                      <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
+                        <div className="rounded-2xl border border-white/10 bg-[#05090f] p-8">
+                          <form onSubmit={handleSubmit} className="space-y-6">
                       <RecentUsers onUserSelect={handleUserSelect} />
                       
                       <div className="space-y-2">
@@ -249,21 +255,26 @@ export default function Login() {
                           'Войти'
                         )}
                       </Button>
-                    </form>
+                          </form>
 
-                    <div className="text-center pt-6 mt-6 border-t border-white/10">
-                      <p className="text-sm text-white/60">
-                        Нет аккаунта?{' '}
-                        <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
-                          Зарегистрироваться
-                        </Link>
-                      </p>
+                          <div className="text-center pt-6 mt-6 border-t border-white/10">
+                            <p className="text-sm text-white/60">
+                              Нет аккаунта?{' '}
+                              <Link to="/register" className="text-white hover:text-white/80 transition-colors font-medium">
+                                Зарегистрироваться
+                              </Link>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
+          </main>
+          
+          <Footer />
         </div>
       </div>
     </div>

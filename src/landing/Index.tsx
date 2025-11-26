@@ -197,16 +197,27 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {/* Code block */}
-                  <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                    <div className="rounded-2xl border border-white/10 bg-[#05090f] p-6">
-                      <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">{t('index.scripts.codeExample')}</div>
-                      <div className="font-mono text-sm text-white/80 space-y-2">
-                        <div className="text-emerald-300">{t('index.scripts.step1')}</div>
-                        <div className="text-white/40">{t('index.scripts.step2')}</div>
-                        <div className="text-white/40">{t('index.scripts.step3')}</div>
-                        <div className="text-white/40">{t('index.scripts.step4')}</div>
-                      </div>
+                  {/* Installation steps cards */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 1</div>
+                      <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step1')}</div>
+                      <div className="text-white/40 text-xs">Установка расширения</div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 2</div>
+                      <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step2')}</div>
+                      <div className="text-white/40 text-xs">Открытие интерфейса</div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 3</div>
+                      <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step3')}</div>
+                      <div className="text-white/40 text-xs">Просмотр библиотеки</div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Шаг 4</div>
+                      <div className="text-white text-lg font-semibold mb-1">{t('index.scripts.step4')}</div>
+                      <div className="text-white/40 text-xs">Установка скрипта</div>
                     </div>
                   </div>
 
