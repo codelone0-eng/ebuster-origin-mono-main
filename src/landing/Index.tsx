@@ -155,8 +155,8 @@ const Index = () => {
             />
           </div>
           
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/95 z-[1]" />
+          {/* Gradient overlay - более прозрачный, чтобы Beams был виден */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-[1]" />
           
           <div className="relative py-40 px-4 z-10">
             <div className="container mx-auto max-w-[1440px]">
