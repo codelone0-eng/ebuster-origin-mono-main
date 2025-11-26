@@ -248,7 +248,7 @@ const Roadmap = () => {
         keywords="ebuster roadmap, обновления ebuster, ebuster updates, chrome extension roadmap"
       />
       <div className="relative">
-        <Header />
+      <Header />
 
         {/* Silk background */}
         <div className="fixed inset-0 z-0 pointer-events-none">
@@ -258,7 +258,7 @@ const Roadmap = () => {
 
         <div className="relative z-10">
         <section className="relative bg-black/80 px-4 py-32 z-10">
-          <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
+      <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section ref={heroRef} className="text-center space-y-6">
           <div className="hero-element mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
             <Milestone className="h-4 w-4 text-white" />
@@ -300,16 +300,16 @@ const Roadmap = () => {
                   </div>
                 </div>
                 <ul className="space-y-2 text-white/60">
-                  {entry.items.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
+                    {entry.items.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
                       <Sparkles className="mt-1 h-4 w-4 text-white flex-shrink-0" />
                       <span style={{ fontSize: '14px', lineHeight: '1.5' }}>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
         </section>
 
         <div className="h-px bg-[#2d2d2d]" />
@@ -371,10 +371,10 @@ const Roadmap = () => {
             ))}
           </div>
         </section>
-      </div>
+          </div>
         </section>
-        </div>
-      
+      </div>
+
       <Footer />
       </div>
     </div>

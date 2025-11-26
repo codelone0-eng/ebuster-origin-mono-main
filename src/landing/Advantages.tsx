@@ -76,8 +76,8 @@ const Advantages = () => {
   return (
     <div className="min-h-screen bg-black overflow-x-hidden text-white">
       <div className="relative">
-        <Header />
-
+      <Header />
+      
         {/* Silk background */}
         <div className="fixed inset-0 z-0 pointer-events-none">
           <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
@@ -86,7 +86,7 @@ const Advantages = () => {
 
         <div className="relative z-10">
         <section className="relative bg-black/80 px-4 py-32 z-10">
-          <div className="container mx-auto max-w-7xl px-4 py-16">
+      <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div ref={heroRef} className="text-center mb-16">
           <div className="hero-element inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
@@ -149,26 +149,26 @@ const Advantages = () => {
                         ) : (
                           <IconComponent className="h-6 w-6 text-white" />
                         )}
-                      </div>
+                    </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-white mb-2">{advantage.title}</h3>
                         <p className="text-white/60 text-sm leading-relaxed" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                          {advantage.description}
+                        {advantage.description}
                         </p>
                       </div>
                     </div>
                     {advantage.features && Array.isArray(advantage.features) && (
                       <ul className="space-y-2 mt-4">
                         {advantage.features.map((feature: string, featureIndex: number) => (
-                          <li key={featureIndex} className="flex items-center gap-2 text-sm">
+                      <li key={featureIndex} className="flex items-center gap-2 text-sm">
                             <CheckCircle2 className="h-4 w-4 text-white flex-shrink-0" />
                             <span className="text-white/60" style={{ fontSize: '14px' }}>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      </li>
+                    ))}
+                  </ul>
                     )}
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               );
             })}
           </div>
@@ -206,7 +206,7 @@ const Advantages = () => {
         </div>
       </div>
         </section>
-        </div>
+      </div>
       
       <Footer />
       </div>
