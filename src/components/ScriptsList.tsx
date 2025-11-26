@@ -757,7 +757,6 @@ const ScriptsList: React.FC = () => {
                   <Download className="h-4 w-4 mr-2" />
                   {installedScriptIds.has(script.id) ? 'Установлен' : 'Установить'}
                 </Button>
-                </div>
               </div>
             </div>
           </div>
