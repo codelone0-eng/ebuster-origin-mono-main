@@ -474,7 +474,6 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
                 Получайте {referralCode?.discount_value}% от каждого платежа ваших рефералов. Выплаты в конце месяца
               </p>
             </div>
-            </div>
           </div>
         </div>
       </div>
