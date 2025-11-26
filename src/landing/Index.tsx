@@ -4,7 +4,7 @@ import { AuthStatusChecker } from "@/components/AuthStatusChecker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { SEO } from "@/components/SEO";
 import { Footer } from "@/components/Footer";
 import { 
@@ -94,17 +94,17 @@ const Index = () => {
     };
   }, []);
 
-  // Events section features - 9 cards in 3x3 grid (exact Nightwatch structure)
+  // Events section features - 9 cards in 3x3 grid
   const eventFeatures = [
-    { icon: Globe, title: "Requests", desc: "Trace requests with detailed interaction and performance metrics." },
-    { icon: Send, title: "Outgoing Requests", desc: "Trace external requests, API calls, and third-party service integrations." },
-    { icon: Bell, title: "Notifications", desc: "Monitors all available channels to ensure proper notification delivery." },
-    { icon: Briefcase, title: "Jobs", desc: "Monitor queues, executions, and job performance across your app." },
-    { icon: Database, title: "Queries", desc: "Measure query performance and identify problematic SQL." },
-    { icon: Mail, title: "Mail", desc: "Track email sending, recipients, sources, and rendering performance." },
-    { icon: Terminal, title: "Commands", desc: "Record Artisan command executions and their impact on system resources." },
-    { icon: Zap, title: "Cache", desc: "Monitor cache key hit rates, storage patterns, and invalidation events." },
-    { icon: Calendar, title: "Scheduled Tasks", desc: "Ensure your scheduler is running on time and tasks complete successfully." },
+    { icon: Globe, title: t('index.featuresGrid.structuredLibrary.title'), desc: t('index.featuresGrid.structuredLibrary.description') },
+    { icon: Send, title: t('index.featuresGrid.extensibility.title'), desc: t('index.featuresGrid.extensibility.description') },
+    { icon: Bell, title: t('index.featuresGrid.smoothUpdates.title'), desc: t('index.featuresGrid.smoothUpdates.description') },
+    { icon: Briefcase, title: t('index.featuresGrid.strongTyping.title'), desc: t('index.featuresGrid.strongTyping.description') },
+    { icon: Database, title: t('index.featuresGrid.rationalEfficiency.title'), desc: t('index.featuresGrid.rationalEfficiency.description') },
+    { icon: Mail, title: t('index.featuresGrid.proTools.title'), desc: t('index.featuresGrid.proTools.description') },
+    { icon: Terminal, title: t('index.extensionFeatures.scriptManager.title'), desc: t('index.extensionFeatures.scriptManager.description') },
+    { icon: Zap, title: t('index.extensionFeatures.cloudSync.title'), desc: t('index.extensionFeatures.cloudSync.description') },
+    { icon: Calendar, title: t('index.extensionFeatures.autoUpdates.title'), desc: t('index.extensionFeatures.autoUpdates.description') },
   ];
 
   // Issue tracking - sample issues (exact Nightwatch structure)
@@ -119,12 +119,12 @@ const Index = () => {
     { id: "SKY-132", type: "EXCEPTION", message: "Rate Limit Exceeded: API Key Request Limit Reached", date: "Mar 7, 2025", time: "2 min ago", user: "Jackie Haley" },
   ];
 
-  // Infrastructure features (exact Nightwatch structure)
-  const infrastructureFeatures = [
-    { icon: Code2, title: "The Nightwatch Agent", desc: "Our agent efficiently buffers and batches data, working invisibly in your application." },
-    { icon: Cloud, title: "Hosted Data Pipelines", desc: "Nightwatch processes, validates, and stores billions of events in near real-time." },
-    { icon: Zap, title: "Light speed performance", desc: "Our column-oriented architecture effortlessly queries billions of your events in less than 1s." },
-  ];
+  // Infrastructure features
+  const infrastructureFeatures = useMemo(() => [
+    { icon: Code2, title: t('index.infrastructure.agent'), desc: t('index.infrastructure.agentDesc') },
+    { icon: Cloud, title: t('index.infrastructure.pipelines'), desc: t('index.infrastructure.pipelinesDesc') },
+    { icon: Zap, title: t('index.infrastructure.performance'), desc: t('index.infrastructure.performanceDesc') },
+  ], [t]);
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden text-white">
@@ -197,13 +197,13 @@ const Index = () => {
               <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start mb-24" data-block>
                 <div className="space-y-6">
                   <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                    Events
+                    {t('index.monitoring.badge')}
                   </span>
                   <h2 className="text-4xl md:text-6xl font-semibold leading-tight text-white">
-                    Start monitoring in under a minute
+                    {t('index.monitoring.title')}
                   </h2>
                   <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-                    Purpose built for Laravel applications on any deployment platform, Laravel Nightwatch delivers instant monitoring with a single command. It's the monitoring experience developers love.
+                    {t('index.monitoring.description')}
                   </p>
                 </div>
 
@@ -211,7 +211,7 @@ const Index = () => {
                   {/* Code block */}
                   <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
                     <div className="rounded-2xl border border-white/10 bg-[#05090f] p-6">
-                      <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">Code Example</div>
+                      <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">{t('index.monitoring.codeExample')}</div>
                       <div className="font-mono text-sm text-white/80 space-y-2">
                         <div className="text-emerald-300">npm install @ebuster/sdk</div>
                         <div className="text-white/40">import {'{'} init {'}'} from '@ebuster/sdk';</div>
@@ -220,17 +220,17 @@ const Index = () => {
                     </div>
                   </div>
 
-                  {/* Metrics cards - Exact Nightwatch style */}
+                  {/* Metrics cards */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Routes</div>
-                      <div className="text-white text-3xl font-semibold mb-1">13 routes</div>
-                      <div className="text-white/40 text-xs">exceeded performance thresholds</div>
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.monitoring.routes')}</div>
+                      <div className="text-white text-3xl font-semibold mb-1">{t('index.monitoring.routesCount')}</div>
+                      <div className="text-white/40 text-xs">{t('index.monitoring.routesDesc')}</div>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Exceptions</div>
-                      <div className="text-white text-3xl font-semibold mb-1">149</div>
-                      <div className="text-white/40 text-xs">exceptions reported in 24 hours</div>
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.monitoring.exceptions')}</div>
+                      <div className="text-white text-3xl font-semibold mb-1">{t('index.monitoring.exceptionsCount')}</div>
+                      <div className="text-white/40 text-xs">{t('index.monitoring.exceptionsDesc')}</div>
                     </div>
                   </div>
                 </div>
@@ -271,10 +271,10 @@ const Index = () => {
                       <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                         <CheckCircle2 className="h-3 w-3 text-emerald-300" />
                       </div>
-                      <h4 className="text-lg font-semibold text-white">Smart alerts made simple</h4>
+                      <h4 className="text-lg font-semibold text-white">{t('index.monitoring.smartAlerts')}</h4>
                     </div>
                     <p className="text-white/60 text-sm leading-relaxed">
-                      Nightwatch intelligently groups related exceptions and issues, delivering only the notifications you need.
+                      {t('index.monitoring.smartAlertsDesc')}
                     </p>
                   </div>
                 </div>
@@ -320,10 +320,10 @@ const Index = () => {
                       <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                         <FileCode className="h-3 w-3 text-emerald-300" />
                       </div>
-                      <h4 className="text-lg font-semibold text-white">Detailed logs at your fingertips</h4>
+                      <h4 className="text-lg font-semibold text-white">{t('index.monitoring.detailedLogs')}</h4>
                     </div>
                     <p className="text-white/60 text-sm leading-relaxed">
-                      Instantly search and filter through logs to find exactly what you need, when you need it.
+                      {t('index.monitoring.detailedLogsDesc')}
                     </p>
                   </div>
                 </div>
@@ -386,10 +386,10 @@ const Index = () => {
                   <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Activity className="h-3 w-3 text-emerald-300" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">Your system health at a glance</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.monitoring.systemHealth')}</h4>
                 </div>
                 <p className="text-white/60 text-sm leading-relaxed max-w-2xl">
-                  Simplicity meets powerful insights. Nightwatch's dashboard provides a single, crystal-clear snapshot of your Laravel application's health.
+                  {t('index.monitoring.systemHealthDesc')}
                 </p>
               </div>
             </div>
@@ -402,10 +402,10 @@ const Index = () => {
             <div className="max-w-[1312px] mx-auto" data-block>
               <div className="text-center mb-16">
                 <h2 className="text-5xl md:text-7xl font-semibold mb-6 text-white">
-                  Every event, connected together
+                  {t('index.events.title')}
                 </h2>
                 <p className="text-white/60 text-lg max-w-3xl mx-auto">
-                  Connect every Laravel event in your application from requests and queries to jobs and cache operations, giving you a complete picture of your application health.
+                  {t('index.events.description')}
                 </p>
               </div>
 
@@ -431,15 +431,15 @@ const Index = () => {
                   <div className="text-4xl text-emerald-300/30 leading-none">"</div>
                 </div>
                 <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  Nightwatch has already caught a couple of things that we need to look further into. So already getting value out of it, within an hour of the first deployment!
+                  {t('index.events.testimonial1')}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    M
+                    {t('index.events.testimonial1Author').charAt(0)}
                   </div>
                   <div className="text-left">
-                    <div className="text-white font-medium">Mathias Hansen</div>
-                    <div className="text-white/50 text-sm">CTO & Co-Founder at Geocodio</div>
+                    <div className="text-white font-medium">{t('index.events.testimonial1Author')}</div>
+                    <div className="text-white/50 text-sm">{t('index.events.testimonial1Role')}</div>
                   </div>
                 </div>
               </div>
@@ -454,13 +454,13 @@ const Index = () => {
               <div className="grid lg:grid-cols-[1fr,1.2fr] gap-16 items-start" data-block>
                 <div className="space-y-5">
                   <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                    Issue tracking
+                    {t('index.issueTracking.badge')}
                   </span>
                   <h3 className="text-4xl md:text-5xl font-semibold leading-tight text-white">
-                    Track exceptions and performance issues
+                    {t('index.issueTracking.title')}
                   </h3>
                   <p className="text-white/60 text-lg">
-                    Detect exceptions and performance issues automatically in realtime. With powerful collaboration tools and smart insights, your team can resolve problems quickly and confidently.
+                    {t('index.issueTracking.description')}
                   </p>
                 </div>
 
@@ -515,9 +515,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <User className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">Collaborate with yourself or your team</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.collaborate')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    Bring your team together with intuitive collaboration tools. Easily assign tasks, comment, set priorities, and define responsibilities to ensure perfect alignment for yourself, or your team.
+                    {t('index.issueTracking.collaborateDesc')}
                   </p>
                 </div>
 
@@ -525,9 +525,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Settings className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">Configurable thresholds and rules</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.thresholds')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    Define custom performance thresholds to automatically monitor and detect when your application's metrics exceed acceptable limits.
+                    {t('index.issueTracking.thresholdsDesc')}
                   </p>
                 </div>
 
@@ -535,9 +535,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Bell className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">Instant alerts</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.alerts')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    Receive alerts as soon as problems occur, enabling quick responses to maintain peak performance.
+                    {t('index.issueTracking.alertsDesc')}
                   </p>
                 </div>
               </div>
@@ -549,15 +549,15 @@ const Index = () => {
                   <div className="text-4xl text-emerald-300/30 leading-none">"</div>
                 </div>
                 <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  We installed it on our production system and instantly loved using it. We were troubleshooting some database query latency issues and were able to make improvements to troublesome queries right away!
+                  {t('index.issueTracking.testimonial2')}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    R
+                    {t('index.issueTracking.testimonial2Author').charAt(0)}
                   </div>
                   <div className="text-left">
-                    <div className="text-white font-medium">Ravi Peiris</div>
-                    <div className="text-white/50 text-sm">Principal Software Engineer at BisectHosting</div>
+                    <div className="text-white font-medium">{t('index.issueTracking.testimonial2Author')}</div>
+                    <div className="text-white/50 text-sm">{t('index.issueTracking.testimonial2Role')}</div>
                   </div>
                 </div>
               </div>
@@ -571,11 +571,11 @@ const Index = () => {
             <div className="max-w-[1312px] mx-auto space-y-12" data-block>
               <div className="space-y-4">
                 <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                  Infrastructure
+                  {t('index.infrastructure.badge')}
                 </span>
-                <h3 className="text-4xl md:text-5xl font-semibold text-white">Built to scale for trillions of events</h3>
+                <h3 className="text-4xl md:text-5xl font-semibold text-white">{t('index.infrastructure.title')}</h3>
                 <p className="text-white/60 text-lg max-w-3xl">
-                  Engineered with an astonishingly powerful column-oriented architecture, Nightwatch processes data with remarkable efficiency. Analyze billions of events in near real-time, while maintaining peak Laravel performance.
+                  {t('index.infrastructure.description')}
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-6">
@@ -597,9 +597,9 @@ const Index = () => {
           <section data-section className="relative px-4 py-32 bg-black/80 z-10">
           <div className="container mx-auto max-w-[1280px] space-y-10">
             <div className="text-center space-y-4">
-              <h3 className="text-4xl font-semibold text-white">FAQs</h3>
+              <h3 className="text-4xl font-semibold text-white">{t('index.faq.title')}</h3>
               <p className="text-white/60">
-                Can't find your answer? <a href="/documentation" className="text-emerald-300 hover:text-emerald-200">Read our docs →</a>
+                {t('index.faq.subtitle')} <a href="/documentation" className="text-emerald-300 hover:text-emerald-200">{t('index.faq.docsLink')}</a>
               </p>
             </div>
             <FAQ />
@@ -611,15 +611,15 @@ const Index = () => {
                 <div className="text-4xl text-emerald-300/30 leading-none">"</div>
               </div>
               <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                After we first installed Nightwatch we found an issue in our application we've likely had for years.
+                {t('index.infrastructure.testimonial3')}
               </p>
               <div className="flex items-center justify-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                  S
+                  {t('index.infrastructure.testimonial3Author').charAt(0)}
                 </div>
                 <div className="text-left">
-                  <div className="text-white font-medium">Sebastian Schlein</div>
-                  <div className="text-white/50 text-sm">CEO BeyondCode</div>
+                  <div className="text-white font-medium">{t('index.infrastructure.testimonial3Author')}</div>
+                  <div className="text-white/50 text-sm">{t('index.infrastructure.testimonial3Role')}</div>
                 </div>
               </div>
             </div>
@@ -633,7 +633,7 @@ const Index = () => {
                 <div className="rounded-[32px] border border-white/10 bg-black/70 p-12 backdrop-blur-xl text-center space-y-6">
                   <h3 className="text-4xl md:text-5xl font-semibold text-white">{t('index.hero.title')}</h3>
                   <p className="text-white/60 text-lg">
-                    Get started for free
+                    {t('index.finalCta.subtitle')}
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
                     <Button 

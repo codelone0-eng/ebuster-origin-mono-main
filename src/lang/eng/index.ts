@@ -177,5 +177,66 @@ export const eng = {
       title: "Pro Tools",
       description: "Concise commands and hints, unified style"
     }
+  },
+  monitoring: {
+    badge: "Events",
+    title: "Start monitoring in under a minute",
+    description: "EBUSTER is built for browser automation. Install the extension and start using all features right away.",
+    codeExample: "Code Example",
+    routes: "Routes",
+    routesCount: "13 routes",
+    routesDesc: "exceeded performance thresholds",
+    exceptions: "Exceptions",
+    exceptionsCount: "149",
+    exceptionsDesc: "exceptions reported in 24 hours",
+    smartAlerts: "Smart alerts made simple",
+    smartAlertsDesc: "EBUSTER intelligently groups related events and issues, delivering only the notifications you need.",
+    detailedLogs: "Detailed logs at your fingertips",
+    detailedLogsDesc: "Instantly search and filter through logs to find exactly what you need, when you need it.",
+    systemHealth: "Your system health at a glance",
+    systemHealthDesc: "Simplicity meets powerful insights. EBUSTER's dashboard provides a single, crystal-clear snapshot of your work."
+  },
+  events: {
+    title: "Every event, connected together",
+    description: "Connect every event in your browser from requests and scripts to automation and sync, giving you a complete picture of your work.",
+    testimonial1: "EBUSTER has already caught a couple of things that we need to look further into. So already getting value out of it, within an hour of the first deployment!",
+    testimonial1Author: "Alex Ivanov",
+    testimonial1Role: "Developer"
+  },
+  issueTracking: {
+    badge: "Issue tracking",
+    title: "Track exceptions and performance issues",
+    description: "Detect exceptions and performance issues automatically in realtime. With powerful collaboration tools and smart insights, you can resolve problems quickly and confidently.",
+    collaborate: "Collaborate with yourself or your team",
+    collaborateDesc: "Bring your team together with intuitive collaboration tools. Easily assign tasks, comment, set priorities, and define responsibilities.",
+    thresholds: "Configurable thresholds and rules",
+    thresholdsDesc: "Define custom performance thresholds to automatically monitor and detect when your metrics exceed acceptable limits.",
+    alerts: "Instant alerts",
+    alertsDesc: "Receive alerts as soon as problems occur, enabling quick responses to maintain peak performance.",
+    testimonial2: "We installed it on our system and instantly loved using it. We were troubleshooting some issues and were able to make improvements right away!",
+    testimonial2Author: "Maria Petrova",
+    testimonial2Role: "Lead Developer"
+  },
+  infrastructure: {
+    badge: "Infrastructure",
+    title: "Built to scale for trillions of events",
+    description: "Engineered with an astonishingly powerful architecture, EBUSTER processes data with remarkable efficiency. Analyze billions of events in near real-time, while maintaining peak performance.",
+    agent: "The EBUSTER Agent",
+    agentDesc: "Our agent efficiently buffers and batches data, working invisibly in your browser.",
+    pipelines: "Hosted Data Pipelines",
+    pipelinesDesc: "EBUSTER processes, validates, and stores billions of events in near real-time.",
+    performance: "Light speed performance",
+    performanceDesc: "Our architecture effortlessly queries billions of your events in less than 1s.",
+    testimonial3: "After we first installed EBUSTER we found an issue in our application we've likely had for years.",
+    testimonial3Author: "Dmitry Sidorov",
+    testimonial3Role: "CTO"
+  },
+  faq: {
+    title: "FAQs",
+    subtitle: "Can't find your answer?",
+    docsLink: "Read our docs →"
+  },
+  finalCta: {
+    subtitle: "Get started for free"
   }
 };
