@@ -107,23 +107,12 @@ const Index = () => {
     { icon: Calendar, title: t('index.extensionFeatures.autoUpdates.title'), desc: t('index.extensionFeatures.autoUpdates.description') },
   ];
 
-  // Issue tracking - sample issues (exact Nightwatch structure)
-  const sampleIssues = [
-    { id: "SKY-171", type: "EXCEPTION", message: "SQL Integrity Constraint Violation: Duplicate Entry Error on Flight Data Insert", date: "Feb 26, 2025", time: "2 min ago", user: "Jackie Haley" },
-    { id: "SKY-102", type: "EXCEPTION", message: "SQL Integrity Constraint Violation: Duplicate Entry Error on Flight Data Insert", date: "Feb 28, 2025", time: "4 days ago", user: "Mary Freund" },
-    { id: "SKY-76", type: "EXCEPTION", message: "Method Not Allowed: Unsupported HTTP Verb for This Route", date: "Feb 28, 2025", time: "1 hr ago", user: "Laura Mennell" },
-    { id: "SKY-113", type: "EXCEPTION", message: "Method Not Allowed: Invalid HTTP Method Used for Endpoint", date: "Feb 28, 2025", time: "2 min ago", user: "Patrick Wilson" },
-    { id: "SKY-182", type: "EXCEPTION", message: "Rate Limit Exceeded: Excessive Requests from IP Address", date: "Mar 2, 2025", time: "2 min ago", user: "Glenn Ennis" },
-    { id: "SKY-125", type: "EXCEPTION", message: "Method Not Allowed: Endpoint Does Not Support This Method", date: "Mar 3, 2025", time: "2 min ago", user: "Gerald Butler" },
-    { id: "SKY-1", type: "EXCEPTION", message: "Rate Limit Exceeded: Too Many Concurrent Connections", date: "Mar 3, 2025", time: "2 min ago", user: "Jean Smart" },
-    { id: "SKY-132", type: "EXCEPTION", message: "Rate Limit Exceeded: API Key Request Limit Reached", date: "Mar 7, 2025", time: "2 min ago", user: "Jackie Haley" },
-  ];
 
   // Infrastructure features
   const infrastructureFeatures = useMemo(() => [
-    { icon: Code2, title: t('index.infrastructure.agent'), desc: t('index.infrastructure.agentDesc') },
-    { icon: Cloud, title: t('index.infrastructure.pipelines'), desc: t('index.infrastructure.pipelinesDesc') },
-    { icon: Zap, title: t('index.infrastructure.performance'), desc: t('index.infrastructure.performanceDesc') },
+    { icon: Code2, title: t('index.infrastructure.performance'), desc: t('index.infrastructure.performanceDesc') },
+    { icon: Cloud, title: t('index.infrastructure.storage'), desc: t('index.infrastructure.storageDesc') },
+    { icon: Zap, title: t('index.infrastructure.api'), desc: t('index.infrastructure.apiDesc') },
   ], [t]);
 
   return (
@@ -197,13 +186,13 @@ const Index = () => {
               <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start mb-24" data-block>
                 <div className="space-y-6">
                   <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                    {t('index.monitoring.badge')}
+                    {t('index.scripts.badge')}
                   </span>
                   <h2 className="text-4xl md:text-6xl font-semibold leading-tight text-white">
-                    {t('index.monitoring.title')}
+                    {t('index.scripts.title')}
                   </h2>
                   <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-                    {t('index.monitoring.description')}
+                    {t('index.scripts.description')}
                   </p>
                 </div>
 
@@ -211,11 +200,12 @@ const Index = () => {
                   {/* Code block */}
                   <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
                     <div className="rounded-2xl border border-white/10 bg-[#05090f] p-6">
-                      <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">{t('index.monitoring.codeExample')}</div>
+                      <div className="text-white/50 text-xs uppercase tracking-[0.3em] mb-4">{t('index.scripts.codeExample')}</div>
                       <div className="font-mono text-sm text-white/80 space-y-2">
-                        <div className="text-emerald-300">npm install @ebuster/sdk</div>
-                        <div className="text-white/40">import {'{'} init {'}'} from '@ebuster/sdk';</div>
-                        <div className="text-white/40">init({'{'} dsn: 'YOUR_DSN' {'}'});</div>
+                        <div className="text-emerald-300">1. Install EBUSTER extension</div>
+                        <div className="text-white/40">2. Open extension popup</div>
+                        <div className="text-white/40">3. Browse script library</div>
+                        <div className="text-white/40">4. Click "Install" on any script</div>
                       </div>
                     </div>
                   </div>
@@ -223,123 +213,30 @@ const Index = () => {
                   {/* Metrics cards */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.monitoring.routes')}</div>
-                      <div className="text-white text-3xl font-semibold mb-1">{t('index.monitoring.routesCount')}</div>
-                      <div className="text-white/40 text-xs">{t('index.monitoring.routesDesc')}</div>
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.installedScripts')}</div>
+                      <div className="text-white text-3xl font-semibold mb-1">{t('index.scripts.installedCount')}</div>
+                      <div className="text-white/40 text-xs">{t('index.scripts.installedDesc')}</div>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.monitoring.exceptions')}</div>
-                      <div className="text-white text-3xl font-semibold mb-1">{t('index.monitoring.exceptionsCount')}</div>
-                      <div className="text-white/40 text-xs">{t('index.monitoring.exceptionsDesc')}</div>
+                      <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.libraryScripts')}</div>
+                      <div className="text-white text-3xl font-semibold mb-1">{t('index.scripts.libraryCount')}</div>
+                      <div className="text-white/40 text-xs">{t('index.scripts.libraryDesc')}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Dashboard mockup - Exact Nightwatch style */}
-              <div className="grid lg:grid-cols-[1fr,1.1fr] gap-8" data-block>
-                {/* Left: Issues list */}
-                <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                  <div className="space-y-2">
-                    {sampleIssues.slice(0, 6).map((issue, i) => (
-                      <div key={i} className="rounded-lg border border-white/10 bg-black/60 p-4 hover:border-white/20 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0">
-                            <span className="text-white font-semibold text-sm">{issue.id}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-white/20 rounded text-white/70 bg-white/5">
-                                {issue.type}
-                              </span>
-                            </div>
-                            <p className="text-white/70 text-sm mb-2 line-clamp-1">{issue.message}</p>
-                            <div className="flex items-center gap-3 text-xs text-white/50">
-                              <span>{issue.date}</span>
-                              <span>{issue.time}</span>
-                              <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-semibold ml-auto">
-                                {issue.user.charAt(0)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                        <CheckCircle2 className="h-3 w-3 text-emerald-300" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-white">{t('index.monitoring.smartAlerts')}</h4>
-                    </div>
-                    <p className="text-white/60 text-sm leading-relaxed">
-                      {t('index.monitoring.smartAlertsDesc')}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right: Logs */}
-                <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                  <div className="space-y-2 font-mono text-sm">
-                    {[
-                      { time: "2025-11-22 02:05:53 UTC", type: "COMMAND", level: "[ALERT]", msg: "Query executed: SELECT * FROM flights WHERE id = 24421 returned 0 results." },
-                      { time: "2025-11-22 02:05:53 UTC", type: "COMMAND", level: "[INFO]", msg: "Invalid login attempt detected for user ID 12345, incorrect password entered." },
-                      { time: "2025-11-22 02:05:53 UTC", type: "COMMAND", level: "[ALERT]", msg: "Query executed: SELECT * FROM flights WHERE id = 24421 returned 0 results." },
-                      { time: "2025-11-22 02:05:53 UTC", type: "COMMAND", level: "[INFO]", msg: "User logged in successfully. User ID: 45" },
-                      { time: "2025-11-22 02:05:53 UTC", type: "COMMAND", level: "[WARN]", msg: "Query executed: SELECT * FROM flights WHERE id = 24421 returned 0 results.", expanded: true },
-                    ].map((log, i) => (
-                      <div key={i} className={`rounded-lg border border-white/10 bg-black/60 p-4 ${log.expanded ? 'bg-white/[0.02]' : ''}`}>
-                        <div className="flex items-start gap-3">
-                          <span className="text-white/40 text-xs flex-shrink-0">{log.time}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-white/20 rounded text-white/70 bg-white/5">
-                                {log.type}
-                              </span>
-                              <span className="text-white/60 text-xs">{log.level}</span>
-                            </div>
-                            <p className="text-white/70 text-sm">{log.msg}</p>
-                            {log.expanded && (
-                              <div className="mt-3 pl-4 border-l border-white/10 space-y-1 text-xs text-white/60">
-                                <div>"flight_id": "98765",</div>
-                                <div>"user_id": {'{'}</div>
-                                <div className="pl-4">"id": "9d6f9c72-2894-454e-b15f-a097a1832574",</div>
-                                <div className="pl-4">"name": "Jeremy Butler",</div>
-                                <div className="pl-4">"username": "jeremy.butler@laravel.com"</div>
-                                <div>{'}'}</div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                        <FileCode className="h-3 w-3 text-emerald-300" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-white">{t('index.monitoring.detailedLogs')}</h4>
-                    </div>
-                    <p className="text-white/60 text-sm leading-relaxed">
-                      {t('index.monitoring.detailedLogsDesc')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dashboard metrics - Exact Nightwatch style */}
+              {/* Script metrics cards - unified style */}
               <div className="mt-16 grid md:grid-cols-3 gap-6" data-block>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Routes</div>
-                  <div className="text-white text-2xl font-semibold mb-1">13 routes</div>
-                  <div className="text-white/40 text-xs mb-4">exceeded performance thresholds</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.installedScripts')}</div>
+                  <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.installedCount')}</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.installedDesc')}</div>
                   <div className="space-y-2">
-                    {['PATCH /tasks/{task}', 'GET|HEAD /dashboard', 'DELETE /tasks/{task}'].map((route, i) => (
+                    {['Auto-fill forms', 'Page enhancer', 'API integration'].map((script, i) => (
                       <div key={i} className="flex items-center justify-between text-sm">
-                        <span className="text-white/70">{route}</span>
-                        <span className="text-white/50">MAX {['3.74s', '4.25s', '5.94s'][i]}</span>
+                        <span className="text-white/70">{script}</span>
+                        <span className="text-white/50">{['Active', 'Active', 'Active'][i]}</span>
                       </div>
                     ))}
                   </div>
@@ -349,16 +246,16 @@ const Index = () => {
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Exceptions</div>
-                  <div className="text-white text-2xl font-semibold mb-1">149</div>
-                  <div className="text-white/40 text-xs mb-4">exceptions reported in 24 hours</div>
-                  <div className="text-white/40 text-xs mb-4">Errors have impacted 1398 users.</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.libraryScripts')}</div>
+                  <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.libraryCount')}</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.libraryDesc')}</div>
+                  <div className="text-white/40 text-xs mb-4">New scripts added daily.</div>
                   <div className="h-[150px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
                     <div className="text-white/30 text-xs">Chart</div>
                   </div>
                   <div className="flex items-center gap-4 mt-4 text-xs text-white/50">
-                    <span>128 HANDLED</span>
-                    <span>88 UNHANDLED</span>
+                    <span>8,234 PUBLISHED</span>
+                    <span>4,315 BETA</span>
                   </div>
                   <Button variant="outline" size="sm" className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5">
                     View
@@ -366,13 +263,13 @@ const Index = () => {
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Job Attempts</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Script Executions</div>
                   <div className="text-white text-2xl font-semibold mb-1">24.2k</div>
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
                     <div className="text-white/30 text-xs">Chart</div>
                   </div>
                   <div className="mt-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Job Duration</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Avg Execution</div>
                     <div className="text-white text-lg font-semibold">4.1ms — 2.1s</div>
                     <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
                       <div className="text-white/30 text-xs">Chart</div>
@@ -386,10 +283,10 @@ const Index = () => {
                   <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Activity className="h-3 w-3 text-emerald-300" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.monitoring.systemHealth')}</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.scripts.scriptManager')}</h4>
                 </div>
                 <p className="text-white/60 text-sm leading-relaxed max-w-2xl">
-                  {t('index.monitoring.systemHealthDesc')}
+                  {t('index.scripts.scriptManagerDesc')}
                 </p>
               </div>
             </div>
@@ -402,10 +299,10 @@ const Index = () => {
             <div className="max-w-[1312px] mx-auto" data-block>
               <div className="text-center mb-16">
                 <h2 className="text-5xl md:text-7xl font-semibold mb-6 text-white">
-                  {t('index.events.title')}
+                  {t('index.ecosystem.title')}
                 </h2>
                 <p className="text-white/60 text-lg max-w-3xl mx-auto">
-                  {t('index.events.description')}
+                  {t('index.ecosystem.description')}
                 </p>
               </div>
 
@@ -431,15 +328,15 @@ const Index = () => {
                   <div className="text-4xl text-emerald-300/30 leading-none">"</div>
                 </div>
                 <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  {t('index.events.testimonial1')}
+                  {t('index.ecosystem.testimonial1')}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    {t('index.events.testimonial1Author').charAt(0)}
+                    {t('index.ecosystem.testimonial1Author').charAt(0)}
                   </div>
                   <div className="text-left">
-                    <div className="text-white font-medium">{t('index.events.testimonial1Author')}</div>
-                    <div className="text-white/50 text-sm">{t('index.events.testimonial1Role')}</div>
+                    <div className="text-white font-medium">{t('index.ecosystem.testimonial1Author')}</div>
+                    <div className="text-white/50 text-sm">{t('index.ecosystem.testimonial1Role')}</div>
                   </div>
                 </div>
               </div>
@@ -451,62 +348,33 @@ const Index = () => {
           <section className="relative px-4 py-32 bg-black/80 z-10" data-section>
           <div className="container mx-auto max-w-[1440px]">
             <div className="max-w-[1312px] mx-auto space-y-16">
-              <div className="grid lg:grid-cols-[1fr,1.2fr] gap-16 items-start" data-block>
+              <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start" data-block>
                 <div className="space-y-5">
                   <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                    {t('index.issueTracking.badge')}
+                    {t('index.features.badge')}
                   </span>
                   <h3 className="text-4xl md:text-5xl font-semibold leading-tight text-white">
-                    {t('index.issueTracking.title')}
+                    {t('index.features.title')}
                   </h3>
                   <p className="text-white/60 text-lg">
-                    {t('index.issueTracking.description')}
+                    {t('index.features.description')}
                   </p>
                 </div>
 
-                {/* Issues list - Exact Nightwatch style */}
-                <div className="rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-xl p-8">
-                  <div className="space-y-2">
-                    {sampleIssues.map((issue, i) => (
-                      <div key={i} className="rounded-lg border border-white/10 bg-black/60 p-4 hover:border-white/20 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0">
-                            <span className="text-white font-semibold text-sm">{issue.id}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-white/20 rounded text-white/70 bg-white/5">
-                                {issue.type}
-                              </span>
-                            </div>
-                            <p className="text-white/70 text-sm mb-2 line-clamp-1">{issue.message}</p>
-                            <div className="flex items-center gap-3 text-xs text-white/50">
-                              <span>{issue.date}</span>
-                              <span>{issue.time}</span>
-                              <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-semibold ml-auto">
-                                {issue.user.charAt(0)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {/* Features metrics cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.installedScripts')}</div>
+                    <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.installedCount')}</div>
+                    <div className="text-white/40 text-xs">{t('index.scripts.installedDesc')}</div>
                   </div>
-                  
-                  {/* Team members sidebar */}
-                  <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-                    <div className="space-y-2">
-                      {['Jackie Haley', 'Mary Freund', 'Laura Mennell', 'Patrick Wilson', 'Glenn Ennis', 'Gerald Butler', 'Jean Smart'].map((name, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-semibold">
-                            {name.charAt(0)}
-                          </div>
-                          <span className="text-white/70 text-sm">{name}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.libraryScripts')}</div>
+                    <div className="text-white text-2xl font-semibold mb-1">{t('index.scripts.libraryCount')}</div>
+                    <div className="text-white/40 text-xs">{t('index.scripts.libraryDesc')}</div>
                   </div>
                 </div>
+
               </div>
 
               {/* Collaborate section - Exact Nightwatch style */}
@@ -515,9 +383,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <User className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.collaborate')}</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.features.cloudSync')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.issueTracking.collaborateDesc')}
+                    {t('index.features.cloudSyncDesc')}
                   </p>
                 </div>
 
@@ -525,9 +393,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Settings className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.thresholds')}</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.features.autoUpdates')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.issueTracking.thresholdsDesc')}
+                    {t('index.features.autoUpdatesDesc')}
                   </p>
                 </div>
 
@@ -535,9 +403,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <Bell className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white">{t('index.issueTracking.alerts')}</h4>
+                  <h4 className="text-lg font-semibold text-white">{t('index.features.security')}</h4>
                   <p className="text-white/60 text-sm leading-relaxed">
-                    {t('index.issueTracking.alertsDesc')}
+                    {t('index.features.securityDesc')}
                   </p>
                 </div>
               </div>
@@ -549,15 +417,15 @@ const Index = () => {
                   <div className="text-4xl text-emerald-300/30 leading-none">"</div>
                 </div>
                 <p className="text-xl text-white/80 mb-6 leading-relaxed">
-                  {t('index.issueTracking.testimonial2')}
+                  {t('index.features.testimonial2')}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
-                    {t('index.issueTracking.testimonial2Author').charAt(0)}
+                    {t('index.features.testimonial2Author').charAt(0)}
                   </div>
                   <div className="text-left">
-                    <div className="text-white font-medium">{t('index.issueTracking.testimonial2Author')}</div>
-                    <div className="text-white/50 text-sm">{t('index.issueTracking.testimonial2Role')}</div>
+                    <div className="text-white font-medium">{t('index.features.testimonial2Author')}</div>
+                    <div className="text-white/50 text-sm">{t('index.features.testimonial2Role')}</div>
                   </div>
                 </div>
               </div>
@@ -580,12 +448,13 @@ const Index = () => {
               </div>
               <div className="grid md:grid-cols-3 gap-6">
                 {infrastructureFeatures.map((item) => (
-                  <div key={item.title} className="rounded-2xl border border-white/10 bg-black/60 p-6">
-                    <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                      <item.icon className="h-6 w-6 text-white" />
+                  <div key={item.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{item.title}</div>
+                    <div className="text-white text-2xl font-semibold mb-1">—</div>
+                    <div className="text-white/40 text-xs mb-4">{item.desc}</div>
+                    <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                      <div className="text-white/30 text-xs">Chart</div>
                     </div>
-                    <h4 className="text-lg font-semibold mb-2 text-white">{item.title}</h4>
-                    <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
               </div>
