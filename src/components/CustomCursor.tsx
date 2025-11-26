@@ -1,156 +1,339 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCursor } from '@/contexts/CursorContext';
 
 export const CustomCursor = () => {
   const { cursorType } = useCursor();
   const cursorRef = useRef<HTMLDivElement>(null);
-  const hasMovedRef = useRef(false);
-  const lastPositionRef = useRef({ x: 0, y: 0 });
+  const trailRef = useRef<HTMLDivElement>(null);
+  const particlesRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [trailPos, setTrailPos] = useState({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number>();
 
-      useEffect(() => {
-        const cursor = cursorRef.current;
-        if (!cursor) return;
+  useEffect(() => {
+    const cursor = cursorRef.current;
+    const trail = trailRef.current;
+    if (!cursor) return;
 
-        // Show cursor immediately on page load
-        cursor.style.opacity = '1';
+    // Smooth lerp function
+    const lerp = (start: number, end: number, factor: number) => {
+      return start + (end - start) * factor;
+    };
 
-        // Try to restore last known position from localStorage
-        const savedPosition = localStorage.getItem('cursorPosition');
-        if (savedPosition) {
-          try {
-            const { x, y } = JSON.parse(savedPosition);
-            cursor.style.left = `${x}px`;
-            cursor.style.top = `${y}px`;
-            lastPositionRef.current = { x, y };
-          } catch (e) {
-            // Ignore invalid saved position
-          }
-        }
+    let currentX = mousePos.x;
+    let currentY = mousePos.y;
+    let trailX = trailPos.x;
+    let trailY = trailPos.y;
 
-        const handleMouseMove = (e: MouseEvent) => {
-          cursor.style.left = `${e.clientX}px`;
-          cursor.style.top = `${e.clientY}px`;
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      
+      // Check if hovering over interactive elements
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('button, a, input, textarea, select, [role="button"], [tabindex]');
+      setIsHovering(!!isInteractive);
+    };
 
-          // Save position to localStorage
-          lastPositionRef.current = { x: e.clientX, y: e.clientY };
-          localStorage.setItem('cursorPosition', JSON.stringify(lastPositionRef.current));
-        };
+    const animate = () => {
+      // Smooth cursor movement
+      currentX = lerp(currentX, mousePos.x, 0.15);
+      currentY = lerp(currentY, mousePos.y, 0.15);
+      
+      cursor.style.left = `${currentX}px`;
+      cursor.style.top = `${currentY}px`;
 
-        const handleMouseEnter = () => {
-          cursor.style.opacity = '1';
-        };
+      // Trail movement (for lag effect)
+      if (trail && (cursorType === 'lag' || cursorType === 'glow' || cursorType === 'particles')) {
+        trailX = lerp(trailX, mousePos.x, 0.08);
+        trailY = lerp(trailY, mousePos.y, 0.08);
+        trail.style.left = `${trailX}px`;
+        trail.style.top = `${trailY}px`;
+      }
 
-        const handleMouseLeave = () => {
-          cursor.style.opacity = '0';
-        };
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
 
-        // Handle visibility when window regains focus
-        const handleVisibilityChange = () => {
-          if (!document.hidden) {
-            cursor.style.opacity = '1';
-          }
-        };
-
-        // Handle window focus/blur
-        const handleWindowFocus = () => {
-          cursor.style.opacity = '1';
-        };
-
-        const handleWindowBlur = () => {
-          cursor.style.opacity = '0';
-        };
+    animate();
 
     const handleMouseDown = () => {
-      cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      if (cursor) {
+        cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      }
+      if (trail) {
+        trail.style.transform = 'translate(-50%, -50%) scale(1.2)';
+      }
     };
 
     const handleMouseUp = () => {
-      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      if (cursor) {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      }
+      if (trail) {
+        trail.style.transform = 'translate(-50%, -50%) scale(1)';
+      }
     };
 
-        // Add event listeners
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseenter', handleMouseEnter);
-        document.addEventListener('mouseleave', handleMouseLeave);
-        document.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('mouseup', handleMouseUp);
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', handleWindowFocus);
-        window.addEventListener('blur', handleWindowBlur);
-
-        // Cleanup function
-        const cleanup = () => {
-          document.removeEventListener('mousemove', handleMouseMove);
-          document.removeEventListener('mouseenter', handleMouseEnter);
-          document.removeEventListener('mouseleave', handleMouseLeave);
-          document.removeEventListener('mousedown', handleMouseDown);
-          document.removeEventListener('mouseup', handleMouseUp);
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-          window.removeEventListener('focus', handleWindowFocus);
-          window.removeEventListener('blur', handleWindowBlur);
-        };
-
-    // Save position before page unload
-    const handleBeforeUnload = () => {
-      localStorage.setItem('cursorPosition', JSON.stringify(lastPositionRef.current));
+    // Handle visibility
+    const handleMouseEnter = () => {
+      if (cursor) cursor.style.opacity = '1';
+      if (trail) trail.style.opacity = '0.6';
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    const handleMouseLeave = () => {
+      if (cursor) cursor.style.opacity = '0';
+      if (trail) trail.style.opacity = '0';
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && cursor) {
+        cursor.style.opacity = '1';
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      cleanup();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
+  }, [cursorType, mousePos, trailPos]);
+
+  // Generate particles for particles cursor
+  useEffect(() => {
+    if (cursorType === 'particles' && particlesRef.current) {
+      const particles = particlesRef.current;
+      particles.innerHTML = '';
+      
+      for (let i = 0; i < 5; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'cursor-particle';
+        particle.style.cssText = `
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.6);
+          border-radius: 50%;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          animation: particle-float ${1 + i * 0.2}s ease-out infinite;
+          animation-delay: ${i * 0.1}s;
+        `;
+        particles.appendChild(particle);
+      }
+    }
   }, [cursorType]);
 
-      const getCursorStyle = () => {
-        const baseStyle = {
-          position: 'fixed' as const,
-          pointerEvents: 'none' as const,
-          zIndex: 2147483651, // Максимальный z-index для курсора
-          transition: 'transform 0.1s ease',
-          transform: 'translate(-50%, -50%)',
-          opacity: '1', // Always visible
-        };
+  const getCursorStyle = () => {
+    const baseStyle = {
+      position: 'fixed' as const,
+      pointerEvents: 'none' as const,
+      zIndex: 2147483651,
+      transform: 'translate(-50%, -50%)',
+      opacity: '1',
+      transition: cursorType === 'lag' || cursorType === 'glow' || cursorType === 'particles' 
+        ? 'none' 
+        : 'transform 0.1s ease, width 0.2s ease, height 0.2s ease',
+    };
+
+    const hoverScale = isHovering ? 1.5 : 1;
 
     switch (cursorType) {
       case 'sparkles':
         return {
           ...baseStyle,
-          width: '12px',
-          height: '12px',
-          background: 'rgba(96, 96, 96, 0.9)',
+          width: `${12 * hoverScale}px`,
+          height: `${12 * hoverScale}px`,
+          background: 'rgba(255, 255, 255, 0.9)',
           borderRadius: '50%',
-          boxShadow: '0 0 4px rgba(96, 96, 96, 0.5)',
+          boxShadow: '0 0 8px rgba(255, 255, 255, 0.6), 0 0 16px rgba(255, 255, 255, 0.3)',
         };
       
+      case 'lag':
+        return {
+          ...baseStyle,
+          width: `${8 * hoverScale}px`,
+          height: `${8 * hoverScale}px`,
+          border: '2px solid rgba(255, 255, 255, 0.9)',
+          borderRadius: '50%',
+          background: 'transparent',
+        };
+
+      case 'glow':
+        return {
+          ...baseStyle,
+          width: `${10 * hoverScale}px`,
+          height: `${10 * hoverScale}px`,
+          background: 'rgba(255, 255, 255, 0.8)',
+          borderRadius: '50%',
+          boxShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)',
+        };
+
+      case 'particles':
+        return {
+          ...baseStyle,
+          width: `${6 * hoverScale}px`,
+          height: `${6 * hoverScale}px`,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '50%',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.6)',
+        };
+
+      case 'minimal':
+        return {
+          ...baseStyle,
+          width: `${2 * hoverScale}px`,
+          height: `${2 * hoverScale}px`,
+          background: 'rgba(255, 255, 255, 1)',
+          borderRadius: '50%',
+        };
+
+      case 'ring':
+        return {
+          ...baseStyle,
+          width: `${20 * hoverScale}px`,
+          height: `${20 * hoverScale}px`,
+          border: '2px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: '50%',
+          background: 'transparent',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+        };
+
       default:
         return {
           ...baseStyle,
-          width: '12px',
-          height: '12px',
-          border: '2px solid rgba(96, 96, 96, 0.9)',
+          width: `${12 * hoverScale}px`,
+          height: `${12 * hoverScale}px`,
+          border: '2px solid rgba(255, 255, 255, 0.9)',
           borderRadius: '50%',
           background: 'transparent',
         };
     }
   };
 
+  const getTrailStyle = () => {
+    if (cursorType !== 'lag' && cursorType !== 'glow' && cursorType !== 'particles') {
+      return { display: 'none' };
+    }
+
+    const baseStyle = {
+      position: 'fixed' as const,
+      pointerEvents: 'none' as const,
+      zIndex: 2147483650,
+      transform: 'translate(-50%, -50%)',
+      opacity: '0.6',
+    };
+
+    switch (cursorType) {
+      case 'lag':
+        return {
+          ...baseStyle,
+          width: '16px',
+          height: '16px',
+          border: '2px solid rgba(255, 255, 255, 0.4)',
+          borderRadius: '50%',
+          background: 'transparent',
+        };
+
+      case 'glow':
+        return {
+          ...baseStyle,
+          width: '30px',
+          height: '30px',
+          background: 'rgba(255, 255, 255, 0.2)',
+          borderRadius: '50%',
+          boxShadow: '0 0 30px rgba(255, 255, 255, 0.5)',
+        };
+
+      case 'particles':
+        return {
+          ...baseStyle,
+          width: '20px',
+          height: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+        };
+
+      default:
+        return baseStyle;
+    }
+  };
+
   return (
     <>
+      {/* Trail (for lag, glow, particles) */}
+      {(cursorType === 'lag' || cursorType === 'glow' || cursorType === 'particles') && (
+        <div
+          ref={trailRef}
+          className="custom-cursor-trail"
+          style={getTrailStyle()}
+        />
+      )}
+
+      {/* Main cursor */}
       <div
         ref={cursorRef}
         className="custom-cursor"
         style={getCursorStyle()}
       />
-      
-      {/* Dark theme styles */}
+
+      {/* Particles container */}
+      {cursorType === 'particles' && (
+        <div
+          ref={particlesRef}
+          className="custom-cursor-particles"
+          style={{
+            position: 'fixed',
+            pointerEvents: 'none',
+            zIndex: 2147483649,
+            left: `${mousePos.x}px`,
+            top: `${mousePos.y}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      )}
+
       <style>
         {`
           .custom-cursor {
             z-index: 2147483651 !important;
             pointer-events: none !important;
             position: fixed !important;
+          }
+          
+          .custom-cursor-trail {
+            z-index: 2147483650 !important;
+            pointer-events: none !important;
+            position: fixed !important;
+          }
+
+          .custom-cursor-particles {
+            z-index: 2147483649 !important;
+            pointer-events: none !important;
+            position: fixed !important;
+          }
+          
+          @keyframes particle-float {
+            0% {
+              opacity: 1;
+              transform: translate(-50%, -50%) translate(0, 0) scale(1);
+            }
+            100% {
+              opacity: 0;
+              transform: translate(-50%, -50%) translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) scale(0);
+            }
           }
           
           /* Force cursor above all elements */
@@ -169,18 +352,6 @@ export const CustomCursor = () => {
           .custom-cursor[data-radix-toast-root] {
             z-index: 2147483651 !important;
             pointer-events: none !important;
-          }
-          
-          .dark .custom-cursor {
-            border-color: rgba(160, 160, 160, 0.9) !important;
-          }
-          
-          .dark .custom-cursor[style*="background: rgba(96, 96, 96, 0.9)"] {
-            background: rgba(160, 160, 160, 0.9) !important;
-          }
-          
-          .dark .custom-cursor[style*="box-shadow"] {
-            box-shadow: 0 0 6px rgba(160, 160, 160, 0.5) !important;
           }
         `}
       </style>

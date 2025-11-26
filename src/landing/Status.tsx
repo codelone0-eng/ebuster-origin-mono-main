@@ -89,31 +89,40 @@ const Status = () => {
         };
       }
 
-      // Check Database (via API)
+      // Check Database (real connection check)
       try {
         const dbStartTime = performance.now();
-        const dbResponse = await fetch(`${API_CONFIG.BASE_URL}/api/system-monitor`, {
+        const dbResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health/database`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(5000)
         });
         const dbResponseTime = Math.round(performance.now() - dbStartTime);
+        const dbData = await dbResponse.json();
         
-        if (dbResponse.ok) {
+        if (dbResponse.ok && dbData.status === 'operational') {
           newStatus.database = {
             name: 'Database',
             status: 'operational',
             responseTime: dbResponseTime,
             lastChecked: new Date().toISOString(),
-            message: 'Connected'
+            message: dbData.message || 'Connected'
           };
-        } else {
+        } else if (dbData.status === 'degraded') {
           newStatus.database = {
             name: 'Database',
             status: 'degraded',
             responseTime: dbResponseTime,
             lastChecked: new Date().toISOString(),
-            message: 'Limited connectivity'
+            message: dbData.message || 'Limited connectivity'
+          };
+        } else {
+          newStatus.database = {
+            name: 'Database',
+            status: 'down',
+            responseTime: dbResponseTime,
+            lastChecked: new Date().toISOString(),
+            message: dbData.message || 'Connection failed'
           };
         }
       } catch (error) {

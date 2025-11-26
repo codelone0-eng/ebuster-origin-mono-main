@@ -6,7 +6,7 @@ import { queryClickHouse } from './clickhouse';
 // Ленивая инициализация Supabase клиента
 let supabaseClient: any = null;
 
-const getSupabaseClient = () => {
+export const getSupabaseClient = () => {
   if (supabaseClient) {
     return supabaseClient;
   }

@@ -20,6 +20,7 @@ import * as apiKeysController from './src/api/apikeys.controller';
 import { authenticateUser } from './src/api/auth.middleware';
 import { startAllCronJobs } from './src/api/cron-jobs';
 import { logRequestToClickHouse } from './src/api/clickhouse.middleware';
+import { getSupabaseClient } from './src/api/admin.controller';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -81,6 +82,55 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Database health check endpoint
+app.get('/api/health/database', async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      return res.status(503).json({
+        status: 'down',
+        message: 'Database client not configured',
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Простой запрос для проверки подключения
+    const { data, error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
+
+    const responseTime = Date.now() - startTime;
+
+    if (error) {
+      return res.status(503).json({
+        status: 'degraded',
+        message: error.message || 'Database query failed',
+        responseTime,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      status: 'operational',
+      message: 'Database connected',
+      responseTime,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error: any) {
+    const responseTime = Date.now() - startTime;
+    res.status(503).json({
+      status: 'down',
+      message: error.message || 'Database connection failed',
+      responseTime,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // 404 handler - используем middleware вместо catch-all роута
