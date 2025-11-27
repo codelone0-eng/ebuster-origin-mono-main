@@ -389,6 +389,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
               закрыть
             </span>
           </div>
+        </div>
       </div>
     </div>
   );
