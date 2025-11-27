@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BanGuard } from '@/components/BanGuard';
-import Silk from '@/components/Silk';
+import { SilkBackground } from '@/components/SilkBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -616,19 +616,7 @@ const DashboardContent = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden text-white relative">
-      {/* Silk background - fixed для покрытия всего экрана */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk
-          speed={5}
-          scale={1}
-          color="#ffffff"
-          noiseIntensity={4.3}
-          rotation={0}
-        />
-      </div>
-      
-      {/* Gradient overlay - более прозрачный, чтобы Silk был виден */}
-      <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+      <SilkBackground />
       
       {/* Контейнер для всего контента */}
       <div className="relative z-10 min-h-screen flex flex-col">
