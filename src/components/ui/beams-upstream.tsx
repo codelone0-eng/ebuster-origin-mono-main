@@ -22,7 +22,6 @@ export const BeamsUpstream = React.memo(
           "pointer-events-none fixed inset-0 z-background overflow-hidden",
           className
         )}
-        style={{ background: "hsl(var(--background))" }}
       >
         <svg
           className="absolute inset-0 h-full w-full"
