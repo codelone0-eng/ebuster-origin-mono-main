@@ -15,7 +15,7 @@ export const SilkBackground = () => {
       </div>
       
       {/* Gradient overlay - затемнение для темного фона */}
-      <div className="fixed inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80 z-[1] pointer-events-none" />
+      <div className="fixed inset-0 bg-gradient-to-b from-black/90 via-black/80 to-black/95 z-[1] pointer-events-none" />
     </>
   );
 };
