@@ -615,7 +615,7 @@ const DashboardContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden text-white relative">
+    <div className="min-h-screen overflow-x-hidden text-white relative">
       {/* Silk background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
