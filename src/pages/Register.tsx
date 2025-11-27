@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/CustomAuthContext';
 import { Loader2, Check, X, Hash, Type, CaseSensitive, Shield, RefreshCw, Eye, EyeOff, Gift, Plus } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import Silk from '@/components/Silk';
+import { SilkBackground } from '@/components/SilkBackground';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -176,11 +176,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-      </div>
-      <div className="fixed inset-0 bg-gradient-to-b from-black via-black/80 to-black z-[1]" />
+      <SilkBackground />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Top navigation */}

@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/CustomAuthContext';
 import { Loader2, Eye, EyeOff, Plus } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { RecentUsers } from '@/components/RecentUsers';
-import Silk from '@/components/Silk';
+import { SilkBackground } from '@/components/SilkBackground';
 
 const generateAuthCode = () => {
   return 'auth_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -132,10 +132,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-      </div>
-      <div className="fixed inset-0 bg-gradient-to-b from-black via-black/80 to-black z-[1]" />
+      <SilkBackground />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="px-6 lg:px-10 py-6 flex items-center justify-between border-b border-white/5">

@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
-import Silk from '@/components/Silk';
+import { SilkBackground } from '@/components/SilkBackground';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -65,11 +65,7 @@ const Terms = () => {
       <div className="relative">
         <Header />
 
-        {/* Silk background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-        </div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+        <SilkBackground />
 
         <div className="relative z-10">
       <main className="flex-1">

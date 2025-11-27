@@ -13,7 +13,7 @@ import {
   Award,
   Code2
 } from 'lucide-react';
-import Silk from '@/components/Silk';
+import { SilkBackground } from '@/components/SilkBackground';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -78,11 +78,7 @@ const Advantages = () => {
       <div className="relative">
       <Header />
       
-        {/* Silk background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk speed={5} scale={1} color="#ffffff" noiseIntensity={4.3} rotation={0} />
-        </div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1] pointer-events-none" />
+        <SilkBackground />
 
         <div className="relative z-10">
         <section className="relative bg-black/80 px-4 py-32 z-10">
