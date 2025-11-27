@@ -5,6 +5,7 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/CustomAuthContext';
+import { SilkBackground } from '@/components/SilkBackground';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -30,10 +31,13 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   if (loading) {
     console.log('⏳ ProtectedRoute: Loading...');
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">Загрузка...</p>
+      <div className="min-h-screen bg-black overflow-x-hidden text-white">
+        <SilkBackground />
+        <div className="relative z-10 min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <p className="text-white/60">Загрузка...</p>
+          </div>
         </div>
       </div>
     );

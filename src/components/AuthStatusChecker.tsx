@@ -7,6 +7,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/CustomAuthContext';
 import { Loader2 } from 'lucide-react';
+import { SilkBackground } from '@/components/SilkBackground';
 
 export const AuthStatusChecker = () => {
   const { user, loading } = useAuth();
@@ -31,10 +32,13 @@ export const AuthStatusChecker = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Проверка авторизации...</p>
+      <div className="min-h-screen bg-black overflow-x-hidden text-white">
+        <SilkBackground />
+        <div className="relative z-10 min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-white" />
+            <p className="text-white/60">Проверка авторизации...</p>
+          </div>
         </div>
       </div>
     );

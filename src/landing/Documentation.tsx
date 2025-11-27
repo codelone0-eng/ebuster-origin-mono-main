@@ -94,7 +94,7 @@ const Documentation = () => {
         <SilkBackground />
 
         <div className="relative z-10">
-        <section className="relative bg-black/80 px-4 py-32 z-10">
+        <section className="relative px-4 py-32 z-10">
           <div className="container mx-auto max-w-7xl px-4 py-16">
         {/* Hero Section */}
         <div ref={heroRef} className="text-center mb-16">

@@ -253,7 +253,7 @@ const Roadmap = () => {
         <SilkBackground />
 
         <div className="relative z-10">
-        <section className="relative bg-black/80 px-4 py-32 z-10">
+        <section className="relative px-4 py-32 z-10">
       <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
         <section ref={heroRef} className="text-center space-y-6">
           <div className="hero-element mx-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">

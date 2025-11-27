@@ -68,7 +68,7 @@ const Privacy = () => {
         <SilkBackground />
 
         <div className="relative z-10">
-        <section className="relative bg-black/80 px-4 py-32 z-10">
+        <section className="relative px-4 py-32 z-10">
           <div className="container mx-auto max-w-4xl px-4 py-16">
         <div ref={heroRef} className="text-center mb-12">
           <h1 className="hero-element text-4xl md:text-6xl font-bold mb-6 text-white" style={{

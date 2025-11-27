@@ -16,7 +16,7 @@ const Error500 = () => {
 
         <div className="relative z-10">
           <main className="flex-1">
-            <section className="relative bg-black/80 px-4 py-32 z-10">
+            <section className="relative px-4 py-32 z-10">
               <div className="container mx-auto max-w-4xl px-4 py-16">
                 <div className="text-center">
               {/* Цифра 500 */}
