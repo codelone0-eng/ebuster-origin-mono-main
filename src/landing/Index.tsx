@@ -333,13 +333,13 @@ const Index = () => {
               <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start" data-block>
                 <div className="space-y-5">
                   <span className="inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.4em] text-emerald-300/70 font-medium border border-emerald-300/20 rounded bg-emerald-300/5">
-                    {t('index.features.badge')}
+                    {t('index.featuresSection.badge')}
                   </span>
                   <h3 className="text-4xl md:text-5xl font-semibold leading-tight text-white">
-                    {t('index.features.title')}
+                    {t('index.featuresSection.title')}
                   </h3>
                   <p className="text-white/60 text-lg">
-                    {t('index.features.description')}
+                    {t('index.featuresSection.description')}
                   </p>
                 </div>
 
@@ -362,9 +362,9 @@ const Index = () => {
               {/* Features cards - unified style */}
               <div className="grid md:grid-cols-3 gap-6" data-block>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.cloudSync')}</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.featuresSection.cloudSync')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">—</div>
-                  <div className="text-white/40 text-xs mb-4">{t('index.features.cloudSyncDesc')}</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.featuresSection.cloudSyncDesc')}</div>
                   {/* TODO: Заменить на график синхронизации (линия с точками синхронизации) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
                     <div className="text-white/30 text-xs">Chart</div>
@@ -372,9 +372,9 @@ const Index = () => {
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.autoUpdates')}</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.featuresSection.autoUpdates')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">—</div>
-                  <div className="text-white/40 text-xs mb-4">{t('index.features.autoUpdatesDesc')}</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.featuresSection.autoUpdatesDesc')}</div>
                   {/* TODO: Заменить на график обновлений (столбчатая диаграмма с количеством обновлений) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
                     <div className="text-white/30 text-xs">Chart</div>
@@ -382,9 +382,9 @@ const Index = () => {
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.features.security')}</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.featuresSection.security')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">—</div>
-                  <div className="text-white/40 text-xs mb-4">{t('index.features.securityDesc')}</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.featuresSection.securityDesc')}</div>
                   {/* TODO: Заменить на график безопасности (индикатор уровня безопасности или круговая диаграмма) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
                     <div className="text-white/30 text-xs">Chart</div>
@@ -426,12 +426,12 @@ const Index = () => {
         </section>
 
           {/* FAQ - Exact Nightwatch style */}
-          <section data-section className="relative px-4 py-32 bg-black/80 z-10">
+          <section data-section className="relative px-4 py-32 z-10">
           <div className="container mx-auto max-w-[1280px] space-y-10">
             <div className="text-center space-y-4">
-              <h3 className="text-4xl font-semibold text-white">{t('index.faq.title')}</h3>
+              <h3 className="text-4xl font-semibold text-white">{t('index.faqSection.title')}</h3>
               <p className="text-white/60">
-                {t('index.faq.subtitle')} <a href="/documentation" className="text-emerald-300 hover:text-emerald-200">{t('index.faq.docsLink')}</a>
+                {t('index.faqSection.subtitle')} <a href="/documentation" className="text-emerald-300 hover:text-emerald-200">{t('index.faqSection.docsLink')}</a>
               </p>
             </div>
             <FAQ />

@@ -19,7 +19,7 @@ if (supabaseUrl && supabaseServiceKey) {
   console.warn('⚠️ Supabase logging disabled: missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
 }
 
-export const logRequestToClickHouse = (req: Request, res: Response, next: NextFunction) => {
+export const logRequestToSupabase = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   
   // Перехватываем окончание запроса
