@@ -615,9 +615,10 @@ const DashboardContent = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden text-white relative">
-      <SilkBackground />
-      
+    <div className="min-h-screen bg-black overflow-x-hidden text-white">
+      <div className="relative">
+        <SilkBackground />
+
       {/* Контейнер для всего контента */}
       <div className="relative z-10 min-h-screen flex flex-col">
         <Header />
@@ -1217,6 +1218,7 @@ response = requests.get('https://api.ebuster.ru/api/v1/scripts', headers=headers
             onClose={() => setChangelogScript(null)}
           />
         )}
+      </div>
     </div>
   );
 };
