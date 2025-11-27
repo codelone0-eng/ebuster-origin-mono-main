@@ -244,6 +244,7 @@
     overflow-x: hidden !important; /* Предотвращаем горизонтальный скролл */
     min-height: 100vh; /* Гарантируем высоту для scrollbar */
     width: 100vw; /* Фиксируем ширину */
+    background: transparent;
   }
   
   body {
@@ -251,6 +252,11 @@
     overflow-x: hidden !important;
     width: 100%;
     position: relative;
+    background: transparent;
+  }
+  
+  #root {
+    background: transparent;
   }
   
   /* Дополнительный фикс для dropdown контейнеров */
