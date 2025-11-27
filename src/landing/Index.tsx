@@ -227,54 +227,54 @@ const Index = () => {
               {/* Script metrics cards - unified style */}
               <div className="mt-16 grid md:grid-cols-3 gap-6" data-block>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Script Executions</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.scriptExecutions')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">24.2k</div>
-                  <div className="text-white/40 text-xs mb-4">executions today</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.metrics.executionsToday')}</div>
                   {/* TODO: Заменить на график выполнения скриптов (линейный график с временной шкалой) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
-                    <div className="text-white/30 text-xs">Chart</div>
+                    <div className="text-white/30 text-xs">{t('index.scripts.metrics.chart')}</div>
                   </div>
                   <div className="mt-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Avg Execution</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.avgExecution')}</div>
                     <div className="text-white text-lg font-semibold">4.1ms — 2.1s</div>
                     {/* TODO: Заменить на график среднего времени выполнения (гистограмма) */}
                     <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
-                      <div className="text-white/30 text-xs">Chart</div>
+                      <div className="text-white/30 text-xs">{t('index.scripts.metrics.chart')}</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Active Users</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.activeUsers')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">8,234</div>
-                  <div className="text-white/40 text-xs mb-4">users online</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.metrics.usersOnline')}</div>
                   {/* TODO: Заменить на график активных пользователей (area chart с линией тренда) */}
                   <div className="h-[150px] bg-white/5 rounded border border-white/10 flex items-center justify-center">
-                    <div className="text-white/30 text-xs">Chart</div>
+                    <div className="text-white/30 text-xs">{t('index.scripts.metrics.chart')}</div>
                   </div>
                   <div className="flex items-center gap-4 mt-4 text-xs text-white/50">
-                    <span>5,123 ACTIVE</span>
-                    <span>3,111 IDLE</span>
+                    <span>5,123 {t('index.scripts.metrics.active')}</span>
+                    <span>3,111 {t('index.scripts.metrics.idle')}</span>
                   </div>
                   <Button variant="outline" size="sm" className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5">
-                    View
+                    {t('index.scripts.metrics.view')}
                   </Button>
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Script Updates</div>
+                  <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.scriptUpdates')}</div>
                   <div className="text-white text-2xl font-semibold mb-1">1,549</div>
-                  <div className="text-white/40 text-xs mb-4">updates this week</div>
+                  <div className="text-white/40 text-xs mb-4">{t('index.scripts.metrics.updatesThisWeek')}</div>
                   {/* TODO: Заменить на график обновлений скриптов (столбчатая диаграмма) */}
                   <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
-                    <div className="text-white/30 text-xs">Chart</div>
+                    <div className="text-white/30 text-xs">{t('index.scripts.metrics.chart')}</div>
                   </div>
                   <div className="mt-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">New Scripts</div>
-                    <div className="text-white text-lg font-semibold">+127 today</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.newScripts')}</div>
+                    <div className="text-white text-lg font-semibold">+127 {t('index.scripts.metrics.today')}</div>
                     {/* TODO: Заменить на график новых скриптов (линейный график роста) */}
                     <div className="h-[80px] bg-white/5 rounded border border-white/10 flex items-center justify-center mt-4">
-                      <div className="text-white/30 text-xs">Chart</div>
+                      <div className="text-white/30 text-xs">{t('index.scripts.metrics.chart')}</div>
                     </div>
                   </div>
                 </div>
@@ -346,14 +346,14 @@ const Index = () => {
                 {/* Features metrics cards */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Cloud Sync</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.cloudSync')}</div>
                     <div className="text-white text-2xl font-semibold mb-1">100%</div>
-                    <div className="text-white/40 text-xs">automatic sync</div>
+                    <div className="text-white/40 text-xs">{t('index.scripts.metrics.automaticSync')}</div>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">Auto Updates</div>
+                    <div className="text-white/40 text-xs mb-2 uppercase tracking-[0.2em]">{t('index.scripts.metrics.autoUpdates')}</div>
                     <div className="text-white text-2xl font-semibold mb-1">24/7</div>
-                    <div className="text-white/40 text-xs">always up to date</div>
+                    <div className="text-white/40 text-xs">{t('index.scripts.metrics.alwaysUpToDate')}</div>
                   </div>
                 </div>
 

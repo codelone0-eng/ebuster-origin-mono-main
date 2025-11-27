@@ -201,7 +201,26 @@ export const eng = {
     scriptEditor: "Script Editor",
     scriptEditorDesc: "Create and edit scripts right in your browser with syntax highlighting and autocomplete.",
     scriptManager: "Script Management",
-    scriptManagerDesc: "Simplicity meets power in one interface. EBUSTER's control panel gives you full control over all your scripts."
+    scriptManagerDesc: "Simplicity meets power in one interface. EBUSTER's control panel gives you full control over all your scripts.",
+    metrics: {
+      scriptExecutions: "Script Executions",
+      executionsToday: "executions today",
+      chart: "Chart",
+      avgExecution: "Avg Execution",
+      activeUsers: "Active Users",
+      usersOnline: "users online",
+      active: "ACTIVE",
+      idle: "IDLE",
+      view: "View",
+      scriptUpdates: "Script Updates",
+      updatesThisWeek: "updates this week",
+      newScripts: "New Scripts",
+      today: "today",
+      cloudSync: "Cloud Sync",
+      automaticSync: "automatic sync",
+      autoUpdates: "Auto Updates",
+      alwaysUpToDate: "always up to date"
+    }
   },
   ecosystem: {
     title: "The entire script ecosystem in one place",
