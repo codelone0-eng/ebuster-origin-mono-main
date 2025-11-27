@@ -33,15 +33,15 @@ export function Toaster() {
   const getIcon = (variant?: string) => {
     switch (variant) {
       case 'destructive':
-        return <XCircle className="h-5 w-5 text-destructive-foreground flex-shrink-0" />
+        return <XCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
       case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-green-50 flex-shrink-0" />
+        return <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-50 flex-shrink-0" />
+        return <AlertTriangle className="h-5 w-5 text-yellow-400 flex-shrink-0" />
       case 'info':
-        return <Info className="h-5 w-5 text-blue-50 flex-shrink-0" />
+        return <Info className="h-5 w-5 text-blue-400 flex-shrink-0" />
       default:
-        return <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+        return <Info className="h-5 w-5 text-white/60 flex-shrink-0" />
     }
   }
 
@@ -71,21 +71,20 @@ export function Toaster() {
               variant={variant}
             >
               <div className="flex items-start gap-3 w-full">
-                {/* Animated icon with subtle pulse */}
-                <div className="relative">
+                {/* Icon */}
+                <div className="flex-shrink-0 mt-0.5">
                   {getIcon(variant)}
-                  <div className="absolute inset-0 rounded-full bg-current opacity-20 animate-ping" />
                 </div>
                 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   {title && (
-                    <ToastTitle className="font-semibold text-foreground mb-1">
+                    <ToastTitle className="font-semibold text-white mb-1">
                       {title}
                     </ToastTitle>
                   )}
                   {description && (
-                    <ToastDescription className="text-sm text-muted-foreground">
+                    <ToastDescription className="text-sm text-white/70">
                       {description}
                     </ToastDescription>
                   )}
