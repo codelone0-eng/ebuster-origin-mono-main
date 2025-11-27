@@ -7,7 +7,8 @@
  *   toaster.dismiss()
  */
 
-import { toast as baseToast, useToast as useBaseToast } from "@/hooks/use-toast";
+import { toast as baseToast } from "@/hooks/use-toast";
+import { dispatch } from "@/hooks/use-toast";
 
 export type ToastType = "success" | "error" | "warning" | "info" | "default";
 
@@ -52,8 +53,7 @@ class Toaster {
    * Dismiss all toast notifications
    */
   dismiss() {
-    const { dismiss } = useBaseToast();
-    dismiss();
+    dispatch({ type: "DISMISS_TOAST" });
   }
 
   /**
