@@ -78,3 +78,6 @@ class Toaster {
 // Export singleton instance
 export const toaster = new Toaster();
 
+// Re-export Toaster component from toaster.tsx
+export { Toaster } from './toaster.tsx';
+

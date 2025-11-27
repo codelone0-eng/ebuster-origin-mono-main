@@ -132,7 +132,7 @@ export const eng = {
     getStarted: "Get Started Now"
   },
   footer: {
-    description: "The professional Chrome extension that sets the standard for design and performance.",
+    description: "Userscript manager for Chrome. Browser automation, script library and API.",
     navigation: "Navigation",
     home: "Home",
     contacts: "Contacts",
@@ -151,12 +151,9 @@ export const eng = {
     documentation: "Documentation",
     support: "Support",
     faq: "FAQ",
-    description: "Userscript manager for Chrome. Browser automation, script library and API.",
     emailPlaceholder: "Email address",
     subscribe: "Stay updated",
-    status: "All systems operational",
-    contacts: "Contacts",
-    roadmap: "Roadmap"
+    status: "All systems operational"
   },
   featuresGrid: {
     structuredLibrary: {
@@ -213,7 +210,7 @@ export const eng = {
     testimonial1Author: "Alex Ivanov",
     testimonial1Role: "Developer"
   },
-  features: {
+  featuresSection: {
     badge: "Features",
     title: "Manage scripts with ease",
     description: "Create, install and manage userscripts with an intuitive interface. Configure execution rules and script priorities.",
@@ -241,7 +238,7 @@ export const eng = {
     testimonial3Author: "Dmitry Sidorov",
     testimonial3Role: "CTO"
   },
-  faq: {
+  faqSection: {
     title: "FAQs",
     subtitle: "Can't find your answer?",
     docsLink: "Read our docs →"

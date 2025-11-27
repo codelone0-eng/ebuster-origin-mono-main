@@ -205,7 +205,7 @@ export const ru = {
     testimonial1Author: "Алексей Иванов",
     testimonial1Role: "Разработчик"
   },
-  features: {
+  featuresSection: {
     badge: "Возможности",
     title: "Управляйте скриптами с легкостью",
     description: "Создавайте, устанавливайте и управляйте пользовательскими скриптами с интуитивным интерфейсом. Настраивайте правила выполнения и приоритеты скриптов.",
@@ -233,7 +233,7 @@ export const ru = {
     testimonial3Author: "Дмитрий Сидоров",
     testimonial3Role: "CTO"
   },
-  faq: {
+  faqSection: {
     title: "Часто задаваемые вопросы",
     subtitle: "Не нашли ответ?",
     docsLink: "Читайте нашу документацию →"
