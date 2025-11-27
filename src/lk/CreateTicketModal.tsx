@@ -83,76 +83,88 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6">
         <DialogHeader>
-          <DialogTitle>Создать новый тикет</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-white text-2xl font-semibold">Создать новый тикет</DialogTitle>
+          <DialogDescription className="text-white/60 text-sm mt-2">
             Опишите вашу проблему или вопрос. Мы постараемся ответить как можно скорее.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Тема */}
-          <div className="space-y-2">
-            <Label htmlFor="subject">
-              Тема <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="subject"
-              placeholder="Кратко опишите проблему"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              maxLength={500}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              {subject.length}/500 символов
-            </p>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+            {/* Тема */}
+            <div className="space-y-2">
+              <Label htmlFor="subject" className="text-white text-sm font-medium">
+                Тема <span className="text-red-400">*</span>
+              </Label>
+              <Input
+                id="subject"
+                placeholder="Кратко опишите проблему"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                maxLength={500}
+                required
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 rounded-xl h-11"
+              />
+              <p className="text-xs text-white/40">
+                {subject.length}/500 символов
+              </p>
+            </div>
 
-          {/* Описание */}
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              Описание <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              placeholder="Подробно опишите вашу проблему или вопрос..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={6}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Чем подробнее вы опишете проблему, тем быстрее мы сможем помочь
-            </p>
-          </div>
+            {/* Описание */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-white text-sm font-medium">
+                Описание <span className="text-red-400">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Подробно опишите вашу проблему или вопрос..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={6}
+                required
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 rounded-xl resize-none"
+              />
+              <p className="text-xs text-white/40">
+                Чем подробнее вы опишете проблему, тем быстрее мы сможем помочь
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="priority">Приоритет</Label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Выберите приоритет" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Низкий</SelectItem>
-                <SelectItem value="medium">Средний</SelectItem>
-                <SelectItem value="high">Высокий</SelectItem>
-                <SelectItem value="critical">Критический</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority" className="text-white text-sm font-medium">Приоритет</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="w-full bg-white/5 border-white/10 text-white rounded-xl h-11 focus:ring-0 focus:border-white/30">
+                  <SelectValue placeholder="Выберите приоритет" />
+                </SelectTrigger>
+                <SelectContent className="bg-white/[0.02] border-white/10 text-white rounded-xl">
+                  <SelectItem value="low" className="focus:bg-white/10 text-white">Низкий</SelectItem>
+                  <SelectItem value="medium" className="focus:bg-white/10 text-white">Средний</SelectItem>
+                  <SelectItem value="high" className="focus:bg-white/10 text-white">Высокий</SelectItem>
+                  <SelectItem value="critical" className="focus:bg-white/10 text-white">Критический</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Кнопки */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              Отмена
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Создание...' : 'Создать тикет'}
-            </Button>
-          </div>
-        </form>
+            {/* Кнопки */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onClose} 
+                disabled={loading}
+                className="border-white/10 text-white hover:bg-white/10 rounded-xl"
+              >
+                Отмена
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="bg-white text-black hover:bg-white/90 font-medium rounded-xl"
+              >
+                {loading ? 'Создание...' : 'Создать тикет'}
+              </Button>
+            </div>
+          </form>
       </DialogContent>
     </Dialog>
   );

@@ -273,31 +273,31 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
   return (
     <div 
-      className="fixed inset-0 z-global-search bg-background/80 backdrop-blur-sm"
+      className="fixed inset-0 z-global-search bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4">
         <div 
-          className="bg-card border border-border/60 rounded-xl shadow-2xl"
+          className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Поле поиска */}
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-border/40">
-            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-            <Input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Поиск настроек, функций, документации..."
-              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base h-auto p-0"
-            />
-            <button
-              onClick={onClose}
-              className="flex-shrink-0 p-1 hover:bg-accent rounded-md transition-colors"
-            >
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10">
+              <Search className="h-5 w-5 text-white/60 flex-shrink-0" />
+              <Input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Поиск настроек, функций, документации..."
+                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base h-auto p-0 text-white placeholder:text-white/40"
+              />
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 p-1 hover:bg-white/10 rounded-md transition-colors"
+              >
+                <X className="h-4 w-4 text-white/60" />
+              </button>
           </div>
 
           {/* Результаты */}
@@ -315,81 +315,80 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
                     }}
                     onClick={() => handleSelect(result)}
                     className={cn(
-                      "relative w-full flex items-center gap-4 px-4 py-3 text-left transition-all border-b border-border/20 last:border-0 focus:outline-none",
+                      "relative w-full flex items-center gap-4 px-4 py-3 text-left transition-all border-b border-white/10 last:border-0 focus:outline-none",
                       isSelected
-                        ? "bg-primary/10 border-primary/40 ring-2 ring-primary/40 shadow-lg scale-[1.01] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-primary"
-                        : "hover:bg-accent/30"
+                        ? "bg-white/10 border-white/20"
+                        : "hover:bg-white/5"
                     )}
                     aria-selected={index === selectedIndex}
                   >
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white/60">
                       {result.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className={cn("font-medium text-sm truncate", isSelected ? "text-primary" : "text-foreground") }>
+                        <h4 className="font-medium text-sm truncate text-white">
                           {result.title}
                         </h4>
                         <Badge 
                           variant="outline" 
-                          className={cn("text-xs px-2 py-0", categoryInfo.color, isSelected && "border-primary bg-primary/20 text-primary")}
+                          className="text-xs px-2 py-0 border-white/10 bg-white/5 text-white/70"
                         >
                           {categoryInfo.label}
                         </Badge>
                       </div>
-                      <p className={cn("text-xs truncate", isSelected ? "text-primary/80" : "text-muted-foreground") }>
+                      <p className="text-xs truncate text-white/60">
                         {result.description}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-white/40 flex-shrink-0" />
                   </button>
                 );
               })}
             </div>
           ) : query.trim() ? (
             <div className="px-4 py-12 text-center">
-              <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                Ничего не найдено по запросу "<span className="font-medium">{query}</span>"
+              <Search className="h-12 w-12 mx-auto text-white/30 mb-3" />
+              <p className="text-sm text-white/60">
+                Ничего не найдено по запросу "<span className="font-medium text-white">{query}</span>"
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-white/40 mt-2">
                 Попробуйте изменить запрос или использовать другие ключевые слова
               </p>
             </div>
           ) : (
             <div className="px-4 py-12 text-center">
-              <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground mb-4">
+              <Search className="h-12 w-12 mx-auto text-white/30 mb-3" />
+              <p className="text-sm text-white/60 mb-4">
                 Начните вводить для поиска
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
-                <Badge variant="secondary" className="text-xs">Настройки</Badge>
-                <Badge variant="secondary" className="text-xs">Профиль</Badge>
-                <Badge variant="secondary" className="text-xs">Скрипты</Badge>
-                <Badge variant="secondary" className="text-xs">Поддержка</Badge>
+                <Badge variant="outline" className="text-xs border-white/10 bg-white/5 text-white/70">Настройки</Badge>
+                <Badge variant="outline" className="text-xs border-white/10 bg-white/5 text-white/70">Профиль</Badge>
+                <Badge variant="outline" className="text-xs border-white/10 bg-white/5 text-white/70">Скрипты</Badge>
+                <Badge variant="outline" className="text-xs border-white/10 bg-white/5 text-white/70">Поддержка</Badge>
               </div>
             </div>
           )}
 
           {/* Подсказки */}
-          <div className="px-4 py-2 bg-muted/30 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground rounded-b-xl">
+          <div className="px-4 py-2 bg-white/5 border-t border-white/10 flex items-center justify-between text-xs text-white/40 rounded-b-xl">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">↑</kbd>
-                <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">↓</kbd>
+                <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-white/60">↑</kbd>
+                <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-white/60">↓</kbd>
                 навигация
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">Enter</kbd>
+                <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-white/60">Enter</kbd>
                 выбрать
               </span>
             </div>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">Esc</kbd>
+              <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-white/60">Esc</kbd>
               закрыть
             </span>
           </div>
-        </div>
       </div>
     </div>
   );
