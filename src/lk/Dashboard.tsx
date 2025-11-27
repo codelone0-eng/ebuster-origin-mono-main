@@ -620,9 +620,6 @@ const DashboardContent = () => {
         <Header />
 
         <SilkBackground />
-        
-        {/* Дополнительный слой затемнения для соответствия лендингу */}
-        <div className="fixed inset-0 bg-black/20 z-[2] pointer-events-none" />
 
         {/* Контейнер для всего контента */}
         <div className="relative z-10 min-h-screen flex flex-col">
