@@ -284,7 +284,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
     font-family: var(--font-sans);
     font-smooth: always;
     -webkit-font-smoothing: antialiased;
