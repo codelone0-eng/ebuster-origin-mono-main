@@ -30,7 +30,7 @@ const DashboardApp = () => (
           <TooltipProvider>
             <BeamsUpstream />
             <CustomCursor />
-            <div className="relative z-content min-h-screen bg-black">
+            <div className="relative z-content min-h-screen">
               <Toaster />
               <Sonner />
               <BrowserRouter>
