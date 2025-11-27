@@ -133,7 +133,6 @@ const Index = () => {
 
             {/* Hero Section - Minimalist Nightwatch style */}
           <section ref={heroRef} className="relative overflow-hidden border-b border-white/10" style={{ minHeight: '600px' }}>
-            <div className="absolute inset-0 bg-black/80" />
             
             <div className="relative py-40 px-4 z-10">
               <div className="container mx-auto max-w-[1440px]">
@@ -168,7 +167,7 @@ const Index = () => {
           </section>
 
           {/* Start monitoring section - Exact Nightwatch style from Figma */}
-          <section ref={featureBlocksRef} className="relative bg-black/80 px-4 py-32 z-10" data-section>
+          <section ref={featureBlocksRef} className="relative px-4 py-32 z-10" data-section>
           <div className="container mx-auto max-w-[1440px]">
             <div className="max-w-[1312px] mx-auto">
               <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start mb-24" data-block>
@@ -297,7 +296,7 @@ const Index = () => {
         </section>
 
           {/* Every event, connected together - Exact Nightwatch style from Figma */}
-          <section className="relative bg-black/80 px-4 py-32 z-10" data-section>
+          <section className="relative px-4 py-32 z-10" data-section>
           <div className="container mx-auto max-w-[1440px]">
             <div className="max-w-[1312px] mx-auto" data-block>
               <div className="text-center mb-16">
@@ -328,7 +327,7 @@ const Index = () => {
         </section>
 
           {/* Issue tracking - Exact Nightwatch style from Figma */}
-          <section className="relative px-4 py-32 bg-black/80 z-10" data-section>
+          <section className="relative px-4 py-32 z-10" data-section>
           <div className="container mx-auto max-w-[1440px]">
             <div className="max-w-[1312px] mx-auto space-y-16">
               <div className="grid lg:grid-cols-[1fr,1fr] gap-16 items-start" data-block>
@@ -397,7 +396,7 @@ const Index = () => {
         </section>
 
           {/* Infrastructure - Exact Nightwatch style from Figma */}
-          <section className="relative px-4 py-32 bg-black/80 z-10" data-section>
+          <section className="relative px-4 py-32 z-10" data-section>
           <div className="container mx-auto max-w-[1440px]">
             <div className="max-w-[1312px] mx-auto space-y-12" data-block>
               <div className="space-y-4">
@@ -440,7 +439,7 @@ const Index = () => {
         </section>
 
           {/* Final CTA - unified style */}
-          <section className="relative overflow-hidden border-y border-white/10 bg-black/80 z-10">
+          <section className="relative overflow-hidden border-y border-white/10 z-10">
             <div className="relative px-4 py-28">
               <div className="container mx-auto max-w-[768px]">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-12 text-center space-y-6">
