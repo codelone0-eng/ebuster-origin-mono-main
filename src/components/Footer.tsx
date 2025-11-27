@@ -9,7 +9,7 @@ export const Footer = () => {
   const f = (key: string) => t(`index.footer.${key}`);
 
   return (
-    <footer className="relative z-50 py-16 px-4 border-t border-white/10 bg-[#0a0a0a]">
+    <footer className="relative z-50 py-16 px-4 border-t border-white/10">
       {/* Noise effect */}
       <div 
         className="absolute inset-0 opacity-[0.03] pointer-events-none"

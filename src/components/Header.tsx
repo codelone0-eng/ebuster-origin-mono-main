@@ -152,7 +152,7 @@ export const Header = () => {
   }, [location, navigate]);
 
   return (
-    <header className="relative z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
+    <header className="relative z-50 backdrop-blur-xl border-b border-white/10">
       {/* Noise effect */}
       <div 
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
