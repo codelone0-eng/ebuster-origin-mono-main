@@ -617,11 +617,12 @@ const DashboardContent = () => {
   return (
     <div className="min-h-screen bg-black overflow-x-hidden text-white">
       <div className="relative">
+        <Header />
+
         <SilkBackground />
 
-      {/* Контейнер для всего контента */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        <Header />
+        {/* Контейнер для всего контента */}
+        <div className="relative z-10 min-h-screen flex flex-col">
 
         <main className="flex-1">
           <div className="container mx-auto max-w-[1440px] px-6 lg:px-10 py-12">
