@@ -305,6 +305,7 @@ export default function Login() {
                       {generateUserId()}
                     </div>
                 </div>
+                  </div>
               </div>
             </div>
           </div>
