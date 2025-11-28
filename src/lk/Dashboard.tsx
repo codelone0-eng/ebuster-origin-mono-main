@@ -319,6 +319,87 @@ const DashboardContent = () => {
     }
   }, [authUser?.id]);
   
+  // Функция удаления скрипта из расширения и с сервера
+  const handleUninstallScript = async (scriptId: string) => {
+    try {
+      console.log('🗑️ [handleUninstallScript] Начинаем удаление скрипта:', scriptId);
+      
+      // Проверяем наличие расширения
+      const hasExtension = typeof (window as any).EbusterBridge !== 'undefined';
+      
+      if (hasExtension) {
+        // Отправляем команду расширению на удаление скрипта
+        console.log('📤 [handleUninstallScript] Отправляем команду расширению на удаление');
+        (window as any).EbusterBridge.sendMessage({
+          action: 'uninstallScript',
+          script_id: scriptId
+        }, (response: any, error: any) => {
+          if (error) {
+            console.error('❌ [handleUninstallScript] Ошибка удаления из расширения:', error);
+          } else {
+            console.log('✅ [handleUninstallScript] Скрипт удален из расширения');
+          }
+        });
+      } else {
+        console.log('⚠️ [handleUninstallScript] Расширение не найдено, удаляем только с сервера');
+      }
+      
+      // Удаляем скрипт с сервера
+      const token = localStorage.getItem('ebuster_token');
+      if (token) {
+        const response = await fetch(`https://api.ebuster.ru/api/scripts/user/uninstall/${scriptId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          console.log('✅ [handleUninstallScript] Скрипт удален с сервера');
+          
+          // Отправляем событие удаления для синхронизации
+          window.postMessage({
+            type: 'EBUSTER_SCRIPT_UNINSTALLED',
+            scriptId: scriptId
+          }, '*');
+          
+          // Обновляем список установленных скриптов
+          const installedResponse = await fetch('https://api.ebuster.ru/api/scripts/user/installed', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (installedResponse.ok) {
+            const data = await installedResponse.json();
+            if (data.success && data.data) {
+              const filtered = data.data.filter((item: any) => item.script !== null && item.script !== undefined);
+              setInstalledScripts(filtered);
+            } else {
+              setInstalledScripts([]);
+            }
+          }
+          
+          toast({
+            title: 'Скрипт удален',
+            description: 'Скрипт успешно удален из расширения и с сервера',
+            variant: 'success'
+          });
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Ошибка удаления скрипта');
+        }
+      }
+    } catch (error: any) {
+      console.error('❌ [handleUninstallScript] Ошибка:', error);
+      toast({
+        title: 'Ошибка удаления',
+        description: error.message || 'Не удалось удалить скрипт',
+        variant: 'destructive'
+      });
+    }
+  };
+
   // Слушатель событий от расширения для синхронизации удаления и установки
   useEffect(() => {
     const handleExtensionSync = async (event: MessageEvent) => {
@@ -847,6 +928,11 @@ const DashboardContent = () => {
                               variant="outline"
                               size="sm"
                                 className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl"
+                              onClick={() => {
+                                if (confirm('Вы уверены, что хотите удалить этот скрипт?')) {
+                                  handleUninstallScript(item.script_id);
+                                }
+                              }}
                             >
                               <Trash2 className="h-3 w-3 mr-1" />
                               Удалить
