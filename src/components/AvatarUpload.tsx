@@ -151,13 +151,13 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
   };
 
   return (
-    <div className="glass-effect rounded-lg p-6 max-w-md">
-      <h3 className="text-lg font-semibold mb-4">{t('header.dashboard.profile.photo')}</h3>
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+      <h3 className="text-lg font-semibold mb-4 text-white">{t('header.dashboard.profile.photo')}</h3>
       
       <div className="flex items-center gap-4">
-        <Avatar className="h-20 w-20 border-2 border-border">
+        <Avatar className="h-20 w-20 border-2 border-white/10">
           <AvatarImage src={preview} alt="Profile" />
-          <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
+          <AvatarFallback className="bg-white/5 text-white/60 text-2xl">
             {preview ? "" : "?"}
           </AvatarFallback>
         </Avatar>
@@ -176,7 +176,7 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
             <Button 
               variant="secondary" 
               size="sm" 
-              className="w-full" 
+              className="w-full bg-white text-black hover:bg-white/90 rounded-xl" 
               disabled={uploading}
               asChild
             >
@@ -196,7 +196,7 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
               variant="ghost"
               size="sm"
               onClick={handleRemove}
-              className="w-full"
+              className="w-full border border-white/10 text-white hover:bg-white/10 rounded-xl"
             >
               <X className="h-4 w-4 mr-2" />
               {t('header.dashboard.profile.remove')}
@@ -205,7 +205,7 @@ export const AvatarUpload = ({ currentAvatar, onUpload, onRemove, onAvatarUpdate
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-4">
+      <p className="text-xs text-white/60 mt-4">
         {t('header.dashboard.profile.recommendation')}
       </p>
     </div>
