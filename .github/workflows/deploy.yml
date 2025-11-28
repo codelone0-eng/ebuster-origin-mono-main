@@ -9,6 +9,8 @@ on:
 env:
   SERVER_IP: ${{ secrets.SERVER_IP }}
   SERVER_USER: ${{ secrets.SERVER_USER }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
   deploy:
@@ -18,13 +20,41 @@ jobs:
     
     steps:
       # ============================================
-      # ЭТАП 1: ПОДГОТОВКА ОКРУЖЕНИЯ
+      # ЭТАП 0: УВЕДОМЛЕНИЕ О НАЧАЛЕ ДЕПЛОЯ
       # ============================================
       
       - name: 📥 Получение кода из репозитория
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      
+      - name: 📱 Уведомление о начале деплоя
+        if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          
+          MESSAGE="🚀 <b>Начало деплоя EBUSTER</b>
+          
+          📌 <b>Коммит:</b> <code>$COMMIT_HASH</code>
+          📝 <b>Сообщение:</b> $COMMIT_MSG
+          👤 <b>Автор:</b> $COMMIT_AUTHOR
+          🌿 <b>Ветка:</b> $BRANCH
+          🕐 <b>Время:</b> $(date '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ⏳ Деплой начат..."
+          
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML" \
+            -d disable_web_page_preview=true || echo "⚠️ Не удалось отправить уведомление в Telegram"
+      
+      # ============================================
+      # ЭТАП 1: ПОДГОТОВКА ОКРУЖЕНИЯ
+      # ============================================
       
       - name: 🔐 Настройка SSH подключения
         uses: webfactory/ssh-agent@v0.9.0
@@ -352,6 +382,35 @@ jobs:
             echo ""
           ENDSSH
       
+      - name: ✅ Уведомление об успешном деплое
+        if: success() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+          MESSAGE="✅ <b>Деплой успешно завершён!</b>
+          
+          📌 <b>Коммит:</b> <code>$COMMIT_HASH</code>
+          📝 <b>Сообщение:</b> $COMMIT_MSG
+          👤 <b>Автор:</b> $COMMIT_AUTHOR
+          🕐 <b>Время:</b> $(date '+%Y-%m-%d %H:%M:%S UTC')
+          
+          🌐 <b>Сервисы:</b>
+          • API: <a href='https://api.ebuster.ru'>api.ebuster.ru</a>
+          • Лендинг: <a href='https://ebuster.ru'>ebuster.ru</a>
+          • ЛК: <a href='https://lk.ebuster.ru'>lk.ebuster.ru</a>
+          • Админка: <a href='https://admin.ebuster.ru'>admin.ebuster.ru</a>
+          
+          📊 <a href='$WORKFLOW_RUN_URL'>Детали деплоя</a>"
+          
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML" \
+            -d disable_web_page_preview=false || echo "⚠️ Не удалось отправить уведомление в Telegram"
+      
       - name: ❌ Отчёт об ошибке деплоя
         if: failure()
         run: |
@@ -372,3 +431,29 @@ jobs:
             echo "   docker compose up -d"
             echo ""
           ENDSSH
+      
+      - name: ❌ Уведомление об ошибке деплоя
+        if: failure() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s' || echo "неизвестно")
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an' || echo "неизвестно")
+          COMMIT_HASH=$(git rev-parse --short HEAD || echo "неизвестно")
+          WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          FAILED_STEP="${{ job.status }}"
+          
+          MESSAGE="❌ <b>Деплой завершился с ошибкой!</b>
+          
+          📌 <b>Коммит:</b> <code>$COMMIT_HASH</code>
+          📝 <b>Сообщение:</b> $COMMIT_MSG
+          👤 <b>Автор:</b> $COMMIT_AUTHOR
+          🕐 <b>Время:</b> $(date '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ⚠️ <b>Требуется проверка!</b>
+          
+          📊 <a href='$WORKFLOW_RUN_URL'>Посмотреть логи</a>"
+          
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML" \
+            -d disable_web_page_preview=false || echo "⚠️ Не удалось отправить уведомление в Telegram"
