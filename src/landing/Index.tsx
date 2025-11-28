@@ -126,7 +126,7 @@ const Index = () => {
         <AuthStatusChecker />
         <Header />
 
-        <SilkBackground />
+        <SilkBackground />В
 
         {/* Контейнер для всего контента */}
         <div className="relative z-10">

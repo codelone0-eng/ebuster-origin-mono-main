@@ -330,15 +330,21 @@ const DashboardContent = () => {
       if (hasExtension) {
         // Отправляем команду расширению на удаление скрипта
         console.log('📤 [handleUninstallScript] Отправляем команду расширению на удаление');
-        (window as any).EbusterBridge.sendMessage({
-          action: 'uninstallScript',
-          script_id: scriptId
-        }, (response: any, error: any) => {
-          if (error) {
-            console.error('❌ [handleUninstallScript] Ошибка удаления из расширения:', error);
-          } else {
-            console.log('✅ [handleUninstallScript] Скрипт удален из расширения');
-          }
+        await new Promise<void>((resolve) => {
+          (window as any).EbusterBridge.sendMessage({
+            action: 'uninstallScript',
+            script_id: scriptId
+          }, (response: any, error: any) => {
+            if (error) {
+              console.error('❌ [handleUninstallScript] Ошибка удаления из расширения:', error);
+              // Продолжаем удаление на сервере даже если расширение не ответило
+            } else if (response && response.success) {
+              console.log('✅ [handleUninstallScript] Скрипт удален из расширения');
+            } else {
+              console.log('⚠️ [handleUninstallScript] Расширение не подтвердило удаление, но продолжаем');
+            }
+            resolve();
+          });
         });
       } else {
         console.log('⚠️ [handleUninstallScript] Расширение не найдено, удаляем только с сервера');
@@ -929,8 +935,25 @@ const DashboardContent = () => {
                               size="sm"
                                 className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl"
                               onClick={() => {
+                                const scriptIdToDelete = item.script_id || item.script?.id || item.id;
+                                console.log('🗑️ [Dashboard] Удаление скрипта:', {
+                                  item_script_id: item.script_id,
+                                  item_script_id_field: item.script?.id,
+                                  item_id: item.id,
+                                  scriptIdToDelete,
+                                  fullItem: item
+                                });
                                 if (confirm('Вы уверены, что хотите удалить этот скрипт?')) {
-                                  handleUninstallScript(item.script_id);
+                                  if (scriptIdToDelete) {
+                                    handleUninstallScript(scriptIdToDelete);
+                                  } else {
+                                    console.error('❌ [Dashboard] Не найден ID скрипта для удаления');
+                                    toast({
+                                      title: 'Ошибка',
+                                      description: 'Не удалось определить ID скрипта',
+                                      variant: 'destructive'
+                                    });
+                                  }
                                 }
                               }}
                             >
