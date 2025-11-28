@@ -1,4 +1,4 @@
-name: 🚀 Деплой в Production
+name: 🚀 Умный Деплой в Production
 
 on:
   push:
@@ -13,10 +13,105 @@ env:
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
+  # ============================================
+  # JOB 1: ОПРЕДЕЛЕНИЕ ИЗМЕНЕННЫХ КОМПОНЕНТОВ
+  # ============================================
+  detect-changes:
+    name: 🔍 Определение изменений
+    runs-on: ubuntu-latest
+    outputs:
+      api-changed: ${{ steps.changes.outputs.api }}
+      frontend-changed: ${{ steps.changes.outputs.frontend }}
+      autotest-changed: ${{ steps.changes.outputs.autotest }}
+      docker-changed: ${{ steps.changes.outputs.docker }}
+      all-changed: ${{ steps.changes.outputs.all }}
+    steps:
+      - name: 📥 Получение кода
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Нужно для сравнения с предыдущим коммитом
+      
+      - name: 🔍 Определение измененных файлов
+        id: changes
+        run: |
+          # Получаем список измененных файлов
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # При ручном запуске деплоим все
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo "frontend=true" >> $GITHUB_OUTPUT
+            echo "autotest=true" >> $GITHUB_OUTPUT
+            echo "docker=true" >> $GITHUB_OUTPUT
+            echo "all=true" >> $GITHUB_OUTPUT
+            echo "✅ Ручной запуск - деплоим все компоненты"
+          else
+            # Определяем изменения относительно предыдущего коммита
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            echo "📋 Измененные файлы:"
+            echo "$CHANGED_FILES"
+            
+            # Проверяем изменения в API
+            if echo "$CHANGED_FILES" | grep -qE "(^src/api/|^server\.ts|^Dockerfile\.api|^\.github/workflows/deploy\.yml)"; then
+              echo "api=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения в API"
+            else
+              echo "api=false" >> $GITHUB_OUTPUT
+            fi
+            
+            # Проверяем изменения во фронтенде
+            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)|^src/.*\.(tsx|ts|css)|^Dockerfile\.frontend|^vite\.config|^tailwind\.config|^index\.html)"; then
+              echo "frontend=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения во фронтенде"
+            else
+              echo "frontend=false" >> $GITHUB_OUTPUT
+            fi
+            
+            # Проверяем изменения в autotest
+            if echo "$CHANGED_FILES" | grep -qE "(^tests/|^Dockerfile\.autotest|^Dockerfile\.autotest-stream)"; then
+              echo "autotest=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения в autotest"
+            else
+              echo "autotest=false" >> $GITHUB_OUTPUT
+            fi
+            
+            # Проверяем изменения в Docker конфигурации
+            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile|^nginx\.conf)"; then
+              echo "docker=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения в Docker конфигурации"
+            else
+              echo "docker=false" >> $GITHUB_OUTPUT
+            fi
+            
+            # Если изменены общие файлы или оба компонента - деплоим все
+            if echo "$CHANGED_FILES" | grep -qE "(^package\.json|^package-lock\.json|^tsconfig|^\.env)" || \
+               ([ "$(echo "$CHANGED_FILES" | grep -qE '^src/api/' && echo true || echo false)" = "true" ] && \
+                [ "$(echo "$CHANGED_FILES" | grep -qE '^src/(components|pages|landing|lk|admin)' && echo true || echo false)" = "true" ]); then
+              echo "all=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения в общих файлах или в обоих компонентах - деплоим все"
+            else
+              echo "all=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+          echo ""
+          echo "📊 Результаты анализа:"
+          echo "   API: ${{ steps.changes.outputs.api }}"
+          echo "   Frontend: ${{ steps.changes.outputs.frontend }}"
+          echo "   Autotest: ${{ steps.changes.outputs.autotest }}"
+          echo "   Docker: ${{ steps.changes.outputs.docker }}"
+          echo "   All: ${{ steps.changes.outputs.all }}"
+
+  # ============================================
+  # JOB 2: ДЕПЛОЙ
+  # ============================================
   deploy:
     name: 📦 Деплой EBUSTER на Production сервер
     runs-on: ubuntu-latest
+    needs: detect-changes
     timeout-minutes: 30
+    env:
+      DEPLOY_API: ${{ needs.detect-changes.outputs.api-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
+      DEPLOY_FRONTEND: ${{ needs.detect-changes.outputs.frontend-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
+      DEPLOY_AUTOTEST: ${{ needs.detect-changes.outputs.autotest-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
     
     steps:
       # ============================================
@@ -36,13 +131,30 @@ jobs:
           COMMIT_HASH=$(git rev-parse --short HEAD)
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           
-          MESSAGE="🚀 <b>Начало деплоя EBUSTER</b>
+          DEPLOY_INFO=""
+          if [ "${{ env.DEPLOY_API }}" = "true" ]; then
+            DEPLOY_INFO="${DEPLOY_INFO}• API Backend\n"
+          fi
+          if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
+            DEPLOY_INFO="${DEPLOY_INFO}• Frontend (Лендинг, ЛК, Админка)\n"
+          fi
+          if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
+            DEPLOY_INFO="${DEPLOY_INFO}• Autotest\n"
+          fi
+          if [ -z "$DEPLOY_INFO" ]; then
+            DEPLOY_INFO="• Нет изменений для деплоя"
+          fi
+          
+          MESSAGE="🚀 <b>Начало умного деплоя EBUSTER</b>
           
           📌 <b>Коммит:</b> <code>$COMMIT_HASH</code>
           📝 <b>Сообщение:</b> $COMMIT_MSG
           👤 <b>Автор:</b> $COMMIT_AUTHOR
           🌿 <b>Ветка:</b> $BRANCH
           🕐 <b>Время:</b> $(date '+%Y-%m-%d %H:%M:%S UTC')
+          
+          📦 <b>Компоненты для деплоя:</b>
+          $DEPLOY_INFO
           
           ⏳ Деплой начат..."
           
@@ -119,19 +231,41 @@ jobs:
           ENDSSH
       
       # ============================================
-      # ЭТАП 4: ОСТАНОВКА СТАРЫХ КОНТЕЙНЕРОВ
+      # ЭТАП 4: ОСТАНОВКА СТАРЫХ КОНТЕЙНЕРОВ (только измененных)
       # ============================================
       
-      - name: ⏸️  Остановка текущих контейнеров
+      - name: ⏸️  Остановка измененных контейнеров
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
             cd /srv/ebuster
-            echo "⏸️  Останавливаю текущие контейнеры..."
-            docker compose down || echo "⚠️  Контейнеры уже остановлены"
+            echo "⏸️  Останавливаю измененные контейнеры..."
+            
+            # Останавливаем только те контейнеры, которые нужно пересобрать
+            if [ "${{ env.DEPLOY_API }}" = "true" ]; then
+              echo "🛑 Останавливаю API контейнер..."
+              docker compose stop api || echo "⚠️  API контейнер уже остановлен"
+            fi
+            
+            if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
+              echo "🛑 Останавливаю Frontend контейнер..."
+              docker compose stop frontend || echo "⚠️  Frontend контейнер уже остановлен"
+            fi
+            
+            if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
+              echo "🛑 Останавливаю Autotest контейнеры..."
+              docker compose stop autotest-stream autotest-dashboard-init || echo "⚠️  Autotest контейнеры уже остановлены"
+            fi
+            
+            # Если изменена Docker конфигурация - останавливаем все
+            if [ "${{ needs.detect-changes.outputs.docker-changed }}" = "true" ]; then
+              echo "🛑 Изменена Docker конфигурация - останавливаю все контейнеры..."
+              docker compose down || echo "⚠️  Контейнеры уже остановлены"
+            fi
           ENDSSH
       
-      - name: 🧹 Автоматическая очистка Docker перед сборкой
+      - name: 🧹 Автоматическая очистка Docker (только при необходимости)
+        if: env.DEPLOY_API == 'true' || env.DEPLOY_FRONTEND == 'true' || env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -150,10 +284,11 @@ jobs:
           ENDSSH
       
       # ============================================
-      # ЭТАП 5: СБОРКА КОМПОНЕНТОВ
+      # ЭТАП 5: СБОРКА КОМПОНЕНТОВ (только измененных)
       # ============================================
       
       - name: 🔨 Сборка API Backend сервера
+        if: env.DEPLOY_API == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -165,42 +300,22 @@ jobs:
             echo "✅ API Backend успешно собран"
           ENDSSH
       
-      - name: 🎨 Сборка UI Лендинга (ebuster.ru)
+      - name: 🎨 Сборка UI (Frontend - Лендинг, ЛК, Админка)
+        if: env.DEPLOY_FRONTEND == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
             cd /srv/ebuster
-            echo "🎨 Начинаю сборку UI Лендинга..."
+            echo "🎨 Начинаю сборку UI..."
             echo "📦 Dockerfile: Dockerfile.frontend"
             echo "📋 Компоненты: React приложение, Tailwind CSS, Vite сборка"
-            echo "🌐 Домены: ebuster.ru, www.ebuster.ru"
+            echo "🌐 Домены: ebuster.ru, lk.ebuster.ru, admin.ebuster.ru"
             docker compose build --no-cache frontend
-            echo "✅ UI Лендинга успешно собран"
-          ENDSSH
-      
-      - name: 👤 Сборка UI Личного кабинета (lk.ebuster.ru)
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
-            set -e
-            cd /srv/ebuster
-            echo "👤 UI Личного кабинета собирается вместе с фронтендом"
-            echo "📋 Компоненты: DashboardApp, пользовательские скрипты, биллинг"
-            echo "🌐 Домен: lk.ebuster.ru"
-            echo "✅ UI Личного кабинета готов (использует тот же образ frontend)"
-          ENDSSH
-      
-      - name: 🛡️  Сборка UI Админ Панели (admin.ebuster.ru)
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
-            set -e
-            cd /srv/ebuster
-            echo "🛡️  UI Админ Панели собирается вместе с фронтендом"
-            echo "📋 Компоненты: AdminApp, управление пользователями, ролями, скриптами"
-            echo "🌐 Домен: admin.ebuster.ru"
-            echo "✅ UI Админ Панели готов (использует тот же образ frontend)"
+            echo "✅ UI успешно собран"
           ENDSSH
       
       - name: 📡 Сборка Autotest Stream Server
+        if: env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -214,6 +329,7 @@ jobs:
           ENDSSH
       
       - name: 📊 Сборка Autotest Dashboard Init
+        if: env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -230,7 +346,7 @@ jobs:
       # ЭТАП 6: ЗАПУСК СЕРВИСОВ
       # ============================================
       
-      - name: ▶️  Запуск всех сервисов
+      - name: ▶️  Запуск сервисов
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -243,14 +359,31 @@ jobs:
               docker network create ebuster-network || true
             fi
             
-            echo "▶️  Запускаю все сервисы..."
-            echo "📋 Порядок запуска:"
-            echo "   1. autotest-stream (WebSocket сервер)"
-            echo "   2. autotest-dashboard-init (генерация placeholder)"
-            echo "   3. api (Backend API)"
-            echo "   4. frontend (Nginx + все UI приложения)"
-            docker compose up -d
-            echo "✅ Все сервисы запущены"
+            echo "▶️  Запускаю сервисы..."
+            
+            # Запускаем только измененные или все если изменена Docker конфигурация
+            if [ "${{ needs.detect-changes.outputs.docker-changed }}" = "true" ]; then
+              echo "📋 Запускаю все сервисы (изменена Docker конфигурация)..."
+              docker compose up -d
+            else
+              # Запускаем только измененные контейнеры
+              if [ "${{ env.DEPLOY_API }}" = "true" ]; then
+                echo "▶️  Запускаю API..."
+                docker compose up -d api
+              fi
+              
+              if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
+                echo "▶️  Запускаю Frontend..."
+                docker compose up -d frontend
+              fi
+              
+              if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
+                echo "▶️  Запускаю Autotest..."
+                docker compose up -d autotest-stream autotest-dashboard-init
+              fi
+            fi
+            
+            echo "✅ Сервисы запущены"
           ENDSSH
       
       # ============================================
@@ -287,6 +420,7 @@ jobs:
       # ============================================
       
       - name: 🔍 Проверка API Backend (api.ebuster.ru)
+        if: env.DEPLOY_API == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -305,6 +439,7 @@ jobs:
           ENDSSH
       
       - name: 🌐 Проверка Лендинга (ebuster.ru)
+        if: env.DEPLOY_FRONTEND == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -318,6 +453,7 @@ jobs:
           ENDSSH
       
       - name: 👤 Проверка Личного кабинета (lk.ebuster.ru)
+        if: env.DEPLOY_FRONTEND == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -331,6 +467,7 @@ jobs:
           ENDSSH
       
       - name: 🛡️  Проверка Админ Панели (admin.ebuster.ru)
+        if: env.DEPLOY_FRONTEND == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -344,6 +481,7 @@ jobs:
           ENDSSH
       
       - name: 📡 Проверка Autotest Stream Server
+        if: env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -376,12 +514,18 @@ jobs:
             echo "👤 Автор: $(git log -1 --pretty=format:'%an')"
             echo "🕐 Время: $(date '+%Y-%m-%d %H:%M:%S')"
             echo ""
-            echo "✅ Все сервисы запущены и работают:"
-            echo "   • API Backend: https://api.ebuster.ru"
-            echo "   • Лендинг: https://ebuster.ru"
-            echo "   • Личный кабинет: https://lk.ebuster.ru"
-            echo "   • Админ Панель: https://admin.ebuster.ru"
-            echo "   • Autotest Dashboard: https://autotest.ebuster.ru"
+            echo "✅ Развёрнутые компоненты:"
+            if [ "${{ env.DEPLOY_API }}" = "true" ]; then
+              echo "   • API Backend: https://api.ebuster.ru"
+            fi
+            if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
+              echo "   • Лендинг: https://ebuster.ru"
+              echo "   • Личный кабинет: https://lk.ebuster.ru"
+              echo "   • Админ Панель: https://admin.ebuster.ru"
+            fi
+            if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
+              echo "   • Autotest Dashboard: https://autotest.ebuster.ru"
+            fi
             echo ""
             echo "📊 Статус контейнеров:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
@@ -396,6 +540,17 @@ jobs:
           COMMIT_HASH=$(git rev-parse --short HEAD)
           WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           
+          DEPLOYED_SERVICES=""
+          if [ "${{ env.DEPLOY_API }}" = "true" ]; then
+            DEPLOYED_SERVICES="${DEPLOYED_SERVICES}• API: <a href='https://api.ebuster.ru'>api.ebuster.ru</a>\n"
+          fi
+          if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
+            DEPLOYED_SERVICES="${DEPLOYED_SERVICES}• Лендинг: <a href='https://ebuster.ru'>ebuster.ru</a>\n• ЛК: <a href='https://lk.ebuster.ru'>lk.ebuster.ru</a>\n• Админка: <a href='https://admin.ebuster.ru'>admin.ebuster.ru</a>\n"
+          fi
+          if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
+            DEPLOYED_SERVICES="${DEPLOYED_SERVICES}• Autotest: <a href='https://autotest.ebuster.ru'>autotest.ebuster.ru</a>\n"
+          fi
+          
           MESSAGE="✅ <b>Деплой успешно завершён!</b>
           
           📌 <b>Коммит:</b> <code>$COMMIT_HASH</code>
@@ -403,11 +558,8 @@ jobs:
           👤 <b>Автор:</b> $COMMIT_AUTHOR
           🕐 <b>Время:</b> $(date '+%Y-%m-%d %H:%M:%S UTC')
           
-          🌐 <b>Сервисы:</b>
-          • API: <a href='https://api.ebuster.ru'>api.ebuster.ru</a>
-          • Лендинг: <a href='https://ebuster.ru'>ebuster.ru</a>
-          • ЛК: <a href='https://lk.ebuster.ru'>lk.ebuster.ru</a>
-          • Админка: <a href='https://admin.ebuster.ru'>admin.ebuster.ru</a>
+          🌐 <b>Развёрнутые сервисы:</b>
+          $DEPLOYED_SERVICES
           
           📊 <a href='$WORKFLOW_RUN_URL'>Детали деплоя</a>"
           

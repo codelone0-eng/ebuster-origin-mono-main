@@ -1,3 +1,11 @@
+/**
+ * User Controller
+ * Управление профилем пользователя, настройками и данными
+ * 
+ * @module user.controller
+ * @description Контроллер для работы с пользовательскими данными
+ */
+
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
