@@ -8,7 +8,7 @@ export const SilkBackground = () => {
         <Silk
           speed={5}
           scale={1}
-          color="#3a3843"
+          color="#7e7d82" // RGB(126, 125, 130)
           noiseIntensity={1.5}
           rotation={0}
         />
