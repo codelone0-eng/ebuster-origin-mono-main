@@ -17,15 +17,64 @@ if (!TELEGRAM_BOT_TOKEN) {
   process.exit(1);
 }
 
-async function getUpdates() {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
-  
+async function getForumTopics() {
+  if (!TELEGRAM_CHAT_ID) {
+    console.log('⚠️  TELEGRAM_CHAT_ID не задан, пытаемся получить темы из обновлений...');
+    return null;
+  }
+
   try {
+    // Пытаемся получить список тем форума через getForumTopics (если доступно)
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getForumTopics`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        allowed_updates: ['message']
+        chat_id: TELEGRAM_CHAT_ID
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.ok && data.result && data.result.topics) {
+      console.log('\n📋 Найденные темы форума:\n');
+      console.log('═'.repeat(60));
+      
+      data.result.topics.forEach((topic) => {
+        console.log(`\n📌 Тема ID: ${topic.message_thread_id}`);
+        console.log(`   Название: ${topic.name || '(без названия)'}`);
+        console.log(`   Иконка: ${topic.icon_color ? '🎨' : '⚪'}`);
+        console.log(`   Сообщений: ${topic.message_count || 0}`);
+        console.log('─'.repeat(60));
+      });
+
+      if (data.result.topics.length > 0) {
+        console.log('\n✅ Используйте message_thread_id из вывода выше');
+        console.log('\n📝 Пример использования в deploy.yml:');
+        console.log(`   -d message_thread_id="${data.result.topics[0].message_thread_id}"`);
+        return data.result.topics;
+      }
+    } else if (data.error_code === 400) {
+      console.log('ℹ️  getForumTopics не доступен (возможно, группа не является форумом)');
+    }
+  } catch (error) {
+    console.log('ℹ️  Не удалось получить темы через getForumTopics:', error.message);
+  }
+  
+  return null;
+}
+
+async function getUpdates() {
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+  
+  try {
+    // Сначала получаем все обновления без offset, чтобы увидеть последние сообщения
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowed_updates: ['message'],
+        timeout: 1 // Короткий таймаут для быстрого ответа
       })
     });
 
@@ -70,10 +119,21 @@ async function getUpdates() {
     });
 
     if (topics.size === 0) {
-      console.log('⚠️  Сообщений в темах не найдено.');
+      console.log('⚠️  Сообщений в темах не найдено в последних обновлениях.');
       console.log('\n💡 Как получить ID темы:');
-      console.log('   1. Отправьте любое сообщение в нужную тему');
-      console.log('   2. Запустите скрипт снова');
+      console.log('   Метод 1 (рекомендуется):');
+      console.log('   1. Отправьте любое сообщение в нужную тему прямо сейчас');
+      console.log('   2. Подождите 2-3 секунды');
+      console.log('   3. Запустите скрипт снова: node scripts/get-telegram-topic-id.js');
+      console.log('\n   Метод 2 (через веб-версию):');
+      console.log('   1. Откройте группу в web.telegram.org');
+      console.log('   2. Откройте нужную тему');
+      console.log('   3. Посмотрите в консоли браузера (F12) Network запросы');
+      console.log('   4. Найдите message_thread_id в запросах');
+      console.log('\n   Метод 3 (через бота @userinfobot):');
+      console.log('   1. Добавьте @userinfobot в группу');
+      console.log('   2. Перешлите сообщение из темы боту');
+      console.log('   3. Бот покажет message_thread_id');
       return;
     }
 
@@ -115,12 +175,22 @@ async function clearUpdates() {
 }
 
 // Запуск
-getUpdates().then(() => {
+async function main() {
+  // Сначала пытаемся получить темы через getForumTopics
+  const forumTopics = await getForumTopics();
+  
+  // Если не получилось, используем getUpdates
+  if (!forumTopics || forumTopics.length === 0) {
+    await getUpdates();
+  }
+  
   console.log('\n💡 Совет: После получения ID темы можно очистить обновления:');
   console.log('   node scripts/get-telegram-topic-id.js --clear');
   
   if (process.argv.includes('--clear')) {
     clearUpdates();
   }
-});
+}
+
+main();
 

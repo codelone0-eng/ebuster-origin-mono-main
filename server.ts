@@ -27,6 +27,9 @@ import { getSupabaseClient } from './src/api/admin.controller';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy для корректной работы rate limiting за nginx/cloudflare
+app.set('trust proxy', true);
+
 // Security Middleware - ДОЛЖНО БЫТЬ ПЕРВЫМ
 app.use(helmet({
   contentSecurityPolicy: {
