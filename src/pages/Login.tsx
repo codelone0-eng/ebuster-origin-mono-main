@@ -165,8 +165,7 @@ export default function Login() {
                 </div>
             </div>
             
-              <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-1">
-                <div className="rounded-[24px] border border-white/10 bg-black/70 p-8 space-y-8">
+              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <RecentUsers onUserSelect={handleUserSelect} />
               
@@ -181,7 +180,7 @@ export default function Login() {
                         placeholder={t('header.modals.login.emailPlaceholder')}
                     value={formData.email}
                     onChange={handleInputChange}
-                        className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl"
+                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 rounded-xl"
                     required
                     disabled={loading}
                   />
@@ -207,7 +206,7 @@ export default function Login() {
                           placeholder={t('header.modals.login.passwordPlaceholder')}
                     value={formData.password}
                     onChange={handleInputChange}
-                          className="h-12 bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white focus:ring-0 rounded-xl pr-12"
+                          className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 rounded-xl pr-12"
                     required
                     disabled={loading}
                   />
@@ -234,7 +233,7 @@ export default function Login() {
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                        className="h-4 w-4 rounded border-white/30 bg-black text-white focus:ring-white/20 focus:ring-2"
+                        className="h-4 w-4 rounded border-white/30 bg-white/5 text-white focus:ring-white/20 focus:ring-2"
                 />
                 <Label htmlFor="rememberMe" className="text-sm text-white/60 cursor-pointer">
                         {t('header.modals.login.rememberMe')}
@@ -257,7 +256,7 @@ export default function Login() {
               </Button>
             </form>
 
-                  <div className="flex flex-col gap-4 text-xs text-white/60 pt-4 border-t border-white/5">
+                  <div className="flex flex-col gap-4 text-xs text-white/60 pt-4 border-t border-white/10">
                     <p>{isRu ? "© 2025 EBUSTER. Все права защищены." : "© 2025 EBUSTER. All rights reserved."}</p>
                     <div className="flex items-center gap-6">
                       <Link to="/docs" className="hover:text-white transition-colors">
@@ -271,45 +270,40 @@ export default function Login() {
                 </Link>
                     </div>
                   </div>
-            </div>
-          </div>
         </div>
 
             <div className="hidden lg:flex items-center justify-center px-8 py-16">
               <div className="w-full max-w-[460px]">
-                <div className="rounded-[32px] border border-white/10 bg-black/60 backdrop-blur-xl p-10 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/5 opacity-20 pointer-events-none" />
-                  <div className="relative z-10 space-y-10">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 space-y-6">
               <div className="flex flex-col items-center">
-                      <div className="w-24 h-28 rounded-2xl border-2 border-dashed border-emerald-300/50 bg-emerald-400/5 flex flex-col items-center justify-center">
-                        <Plus className="h-6 w-6 text-emerald-200 mb-1" />
-                        <span className="text-[11px] text-emerald-100/70 font-medium uppercase tracking-wide">
+                      <div className="w-24 h-28 rounded-xl border border-white/10 bg-white/5 flex flex-col items-center justify-center">
+                        <Plus className="h-6 w-6 text-white/60 mb-1" />
+                        <span className="text-[11px] text-white/60 font-medium uppercase tracking-wide">
                           {translate("Аватар", "Avatar")}
                         </span>
-                        <span className="text-[10px] text-emerald-100/60">
+                        <span className="text-[10px] text-white/40">
                           {translate("Макс 2 МБ", "Max 2MB")}
                         </span>
                       </div>
                 </div>
 
                     <div className="text-center space-y-2">
-                      <p className="text-sm text-white/50 uppercase tracking-[0.4em]">
+                      <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">
                         {translate("Новый пользователь", "New User")}
                       </p>
                       <p className="text-xl text-white font-mono tracking-[0.8em]">•••••</p>
               </div>
               
-                    <div className="h-3 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-full relative overflow-hidden">
+                    <div className="h-3 bg-white/10 rounded-full relative overflow-hidden">
                       <div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
                         style={{ animation: 'shimmer 2s linear infinite' }}
                       />
                     </div>
 
-                    <div className="font-mono text-xs text-white/70 text-center tracking-widest">
+                    <div className="font-mono text-xs text-white/60 text-center tracking-widest">
                       {generateUserId()}
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
