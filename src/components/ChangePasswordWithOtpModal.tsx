@@ -170,7 +170,7 @@ export const ChangePasswordWithOtpModal = ({ isOpen, onClose }: ChangePasswordWi
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border border-border/30">
+      <DialogContent className="sm:max-w-md text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Key className="h-5 w-5 text-primary" />

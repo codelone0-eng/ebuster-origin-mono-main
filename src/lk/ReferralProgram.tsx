@@ -479,7 +479,7 @@ export const ReferralProgram: React.FC<{ userId: string }> = ({ userId }) => {
       </div>
 
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="bg-black/95 border-white/10 text-white">
+        <DialogContent className="text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Поделиться ссылкой</DialogTitle>
             <DialogDescription className="text-[#808080]">

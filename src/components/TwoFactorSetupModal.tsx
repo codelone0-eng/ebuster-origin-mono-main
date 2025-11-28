@@ -381,7 +381,7 @@ export const TwoFactorSetupModal = ({ isOpen, onClose, onComplete, userEmail }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-card/95 backdrop-blur-xl border border-border/30">
+      <DialogContent className="sm:max-w-lg text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Shield className="h-5 w-5 text-primary" />

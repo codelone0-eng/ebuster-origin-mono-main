@@ -776,7 +776,7 @@ const ScriptsList: React.FC = () => {
 
       {/* Диалог просмотра скрипта */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-black text-white">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               {selectedScript?.title}
