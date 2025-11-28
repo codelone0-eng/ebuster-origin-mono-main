@@ -278,7 +278,11 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
     >
       <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4">
         <div 
-          className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl"
+          className="rounded-xl border border-white/10 bg-[#1a1a1a] backdrop-blur-xl shadow-2xl"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundBlendMode: 'overlay'
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Поле поиска */}
