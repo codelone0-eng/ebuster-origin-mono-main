@@ -273,7 +273,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
 
   return (
     <div 
-      className="fixed inset-0 z-global-search bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-global-search bg-black/90 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="fixed left-1/2 top-[20%] -translate-x-1/2 w-full max-w-2xl px-4">
