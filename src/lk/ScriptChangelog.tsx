@@ -54,7 +54,7 @@ export const ScriptChangelog: React.FC<ScriptChangelogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] rounded-xl border border-white/10 bg-black/80 backdrop-blur-xl text-white">
+      <DialogContent className="max-w-2xl max-h-[80vh] rounded-xl border border-white/10 bg-black text-white">
         <DialogHeader>
           <DialogTitle className="text-white">История версий: {scriptName}</DialogTitle>
         </DialogHeader>

@@ -18,9 +18,9 @@ export const Z_INDEX = {
   TOOLTIP: 950,
   
   // Modal layers
-  OVERLAY: 1000,        // Dialog overlay (dim background)
-  MODAL: 1010,          // Dialog content
-  GLOBAL_SEARCH: 1020,  // Global search (above modals)
+  OVERLAY: 10000,        // Dialog overlay (dim background)
+  MODAL: 10010,          // Dialog content
+  GLOBAL_SEARCH: 10020,  // Global search (above modals)
   
   // Special layers
   CURSOR: 2147483651,   // Custom cursor (highest priority)

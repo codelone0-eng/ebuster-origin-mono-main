@@ -59,7 +59,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md rounded-xl border border-white/10 bg-black/80 backdrop-blur-xl text-white">
+      <DialogContent className="max-w-md rounded-xl border border-white/10 bg-black text-white">
         <DialogHeader>
           <DialogTitle className="text-white">Оценить скрипт</DialogTitle>
         </DialogHeader>

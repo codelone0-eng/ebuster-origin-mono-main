@@ -83,7 +83,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-black p-6">
         <DialogHeader>
           <DialogTitle className="text-white text-2xl font-semibold">Создать новый тикет</DialogTitle>
           <DialogDescription className="text-white/60 text-sm mt-2">

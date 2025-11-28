@@ -12,9 +12,9 @@
   --z-dropdown: 800;
   --z-popover: 900;
   --z-tooltip: 950;
-  --z-overlay: 1000;
-  --z-modal: 1010;
-  --z-global-search: 1020;
+  --z-overlay: 10000;
+  --z-modal: 10010;
+  --z-global-search: 10020;
   --z-hero-bg: 0;
   --z-hero: 10;
   --z-logo: 20;
