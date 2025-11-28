@@ -35,8 +35,20 @@ jobs:
         id: changes
         run: |
           # Получаем список измененных файлов
+          # Инициализируем переменные
+          API_CHANGED=false
+          FRONTEND_CHANGED=false
+          AUTOTEST_CHANGED=false
+          DOCKER_CHANGED=false
+          ALL_CHANGED=false
+          
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # При ручном запуске деплоим все
+            API_CHANGED=true
+            FRONTEND_CHANGED=true
+            AUTOTEST_CHANGED=true
+            DOCKER_CHANGED=true
+            ALL_CHANGED=true
             echo "api=true" >> $GITHUB_OUTPUT
             echo "frontend=true" >> $GITHUB_OUTPUT
             echo "autotest=true" >> $GITHUB_OUTPUT
@@ -49,16 +61,18 @@ jobs:
             echo "📋 Измененные файлы:"
             echo "$CHANGED_FILES"
             
-            # Проверяем изменения в API
-            if echo "$CHANGED_FILES" | grep -qE "(^src/api/|^server\.ts|^Dockerfile\.api|^\.github/workflows/deploy\.yml)"; then
+            # Проверяем изменения в API (исключаем .github/workflows/deploy.yml)
+            if echo "$CHANGED_FILES" | grep -qE "(^src/api/|^server\.ts|^Dockerfile\.api)"; then
+              API_CHANGED=true
               echo "api=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в API"
             else
               echo "api=false" >> $GITHUB_OUTPUT
             fi
             
-            # Проверяем изменения во фронтенде
-            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)|^src/.*\.(tsx|ts|css)|^Dockerfile\.frontend|^vite\.config|^tailwind\.config|^index\.html)"; then
+            # Проверяем изменения во фронтенде (исключаем src/api/)
+            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)/|^Dockerfile\.frontend|^vite\.config|^tailwind\.config|^index\.html)"; then
+              FRONTEND_CHANGED=true
               echo "frontend=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения во фронтенде"
             else
@@ -67,6 +81,7 @@ jobs:
             
             # Проверяем изменения в autotest
             if echo "$CHANGED_FILES" | grep -qE "(^tests/|^Dockerfile\.autotest|^Dockerfile\.autotest-stream)"; then
+              AUTOTEST_CHANGED=true
               echo "autotest=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в autotest"
             else
@@ -75,6 +90,7 @@ jobs:
             
             # Проверяем изменения в Docker конфигурации
             if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile|^nginx\.conf)"; then
+              DOCKER_CHANGED=true
               echo "docker=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в Docker конфигурации"
             else
@@ -82,11 +98,14 @@ jobs:
             fi
             
             # Если изменены общие файлы или оба компонента - деплоим все
-            if echo "$CHANGED_FILES" | grep -qE "(^package\.json|^package-lock\.json|^tsconfig|^\.env)" || \
-               ([ "$(echo "$CHANGED_FILES" | grep -qE '^src/api/' && echo true || echo false)" = "true" ] && \
-                [ "$(echo "$CHANGED_FILES" | grep -qE '^src/(components|pages|landing|lk|admin)' && echo true || echo false)" = "true" ]); then
+            if echo "$CHANGED_FILES" | grep -qE "(^package\.json|^package-lock\.json|^tsconfig|^\.env)"; then
+              ALL_CHANGED=true
               echo "all=true" >> $GITHUB_OUTPUT
-              echo "✅ Обнаружены изменения в общих файлах или в обоих компонентах - деплоим все"
+              echo "✅ Обнаружены изменения в общих файлах - деплоим все"
+            elif [ "$API_CHANGED" = "true" ] && [ "$FRONTEND_CHANGED" = "true" ]; then
+              ALL_CHANGED=true
+              echo "all=true" >> $GITHUB_OUTPUT
+              echo "✅ Обнаружены изменения в обоих компонентах - деплоим все"
             else
               echo "all=false" >> $GITHUB_OUTPUT
             fi
@@ -94,11 +113,11 @@ jobs:
           
           echo ""
           echo "📊 Результаты анализа:"
-          echo "   API: ${{ steps.changes.outputs.api }}"
-          echo "   Frontend: ${{ steps.changes.outputs.frontend }}"
-          echo "   Autotest: ${{ steps.changes.outputs.autotest }}"
-          echo "   Docker: ${{ steps.changes.outputs.docker }}"
-          echo "   All: ${{ steps.changes.outputs.all }}"
+          echo "   API: ${API_CHANGED:-false}"
+          echo "   Frontend: ${FRONTEND_CHANGED:-false}"
+          echo "   Autotest: ${AUTOTEST_CHANGED:-false}"
+          echo "   Docker: ${DOCKER_CHANGED:-false}"
+          echo "   All: ${ALL_CHANGED:-false}"
 
   # ============================================
   # JOB 2: ДЕПЛОЙ
