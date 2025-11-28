@@ -65,13 +65,13 @@
 [data-radix-select-content][data-state="closed"],
 body > [data-radix-select-content],
 [data-radix-select-content] { 
-  z-index: 9999 !important; 
+  z-index: 10020 !important; 
   pointer-events: auto !important;
 }
 
 /* Ensure Select portal is above Dialog overlay */
 [data-radix-popper-content-wrapper] {
-  z-index: 9999 !important;
+  z-index: 10020 !important;
   pointer-events: auto !important;
 }
 
