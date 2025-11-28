@@ -589,13 +589,23 @@ export const getScriptRatings = async (req: Request, res: Response) => {
       .eq('script_id', id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      // Если таблица не существует, возвращаем пустой массив
+      if (error.code === 'PGRST205' || error.message?.includes('not found')) {
+        console.log('⚠️ Таблица script_ratings не найдена, возвращаем пустой массив');
+        return res.json({
+          success: true,
+          data: []
+        });
+      }
+      throw error;
+    }
 
     res.json({
       success: true,
       data: ratings || []
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Ошибка получения оценок:', error);
     res.status(500).json({
       success: false,
