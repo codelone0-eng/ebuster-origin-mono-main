@@ -621,7 +621,7 @@ const ScriptsList: React.FC = () => {
               <SelectTrigger className="w-48 bg-white/5 border-white/15 text-white rounded-xl">
               <SelectValue placeholder={t('header.dashboard.scripts.allCategories')} />
             </SelectTrigger>
-              <SelectContent className="bg-black/95 border-white/10 text-white">
+              <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white rounded-xl">
               <SelectItem value="all">{t('header.dashboard.scripts.allCategories')}</SelectItem>
               <SelectItem value="ui">UI</SelectItem>
               <SelectItem value="privacy">Privacy</SelectItem>
@@ -633,7 +633,7 @@ const ScriptsList: React.FC = () => {
               <SelectTrigger className="w-48 bg-white/5 border-white/15 text-white rounded-xl">
               <SelectValue placeholder="Сортировка" />
             </SelectTrigger>
-              <SelectContent className="bg-black/95 border-white/10 text-white">
+              <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white rounded-xl">
               <SelectItem value="created_at">По дате</SelectItem>
               <SelectItem value="downloads_count">По загрузкам</SelectItem>
               <SelectItem value="rating">По рейтингу</SelectItem>
@@ -644,7 +644,7 @@ const ScriptsList: React.FC = () => {
               <SelectTrigger className="w-32 bg-white/5 border-white/15 text-white rounded-xl">
               <SelectValue />
             </SelectTrigger>
-              <SelectContent className="bg-black/95 border-white/10 text-white">
+              <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white rounded-xl">
               <SelectItem value="desc">↓ Убывание</SelectItem>
               <SelectItem value="asc">↑ Возрастание</SelectItem>
             </SelectContent>
@@ -776,7 +776,7 @@ const ScriptsList: React.FC = () => {
 
       {/* Диалог просмотра скрипта */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#1a1a1a] border-[#2d2d2d] text-white">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-black/80 backdrop-blur-xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               {selectedScript?.title}

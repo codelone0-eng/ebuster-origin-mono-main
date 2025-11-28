@@ -59,20 +59,20 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-xl border border-white/10 bg-black/80 backdrop-blur-xl text-white">
         <DialogHeader>
-          <DialogTitle>Оценить скрипт</DialogTitle>
+          <DialogTitle className="text-white">Оценить скрипт</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           <div>
-            <h3 className="font-medium text-sm text-muted-foreground mb-2">
+            <h3 className="font-medium text-sm text-white/60 mb-2">
               {scriptTitle}
             </h3>
           </div>
 
           <div className="space-y-3">
-            <Label>Ваша оценка</Label>
+            <Label className="text-white">Ваша оценка</Label>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -90,7 +90,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
                   />
                 </button>
               ))}
-              <span className="ml-2 text-sm text-muted-foreground">
+              <span className="ml-2 text-sm text-white/60">
                 {rating > 0 && (
                   <>
                     {rating === 1 && 'Ужасно'}
@@ -105,14 +105,14 @@ const RatingModal: React.FC<RatingModalProps> = ({
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="review">Отзыв (необязательно)</Label>
+            <Label htmlFor="review" className="text-white">Отзыв (необязательно)</Label>
             <Textarea
               id="review"
               placeholder="Расскажите о вашем опыте использования скрипта..."
               value={review}
               onChange={(e) => setReview(e.target.value)}
               rows={4}
-              className="resize-none"
+              className="resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 rounded-xl"
             />
           </div>
 
@@ -120,7 +120,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
             <Button
               variant="outline"
               onClick={handleClose}
-              className="flex-1"
+              className="flex-1 border-white/10 text-white hover:bg-white/10 rounded-xl"
               disabled={isSubmitting}
             >
               Отмена
@@ -128,7 +128,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
             <Button
               onClick={handleSubmit}
               disabled={rating === 0 || isSubmitting}
-              className="flex-1"
+              className="flex-1 bg-white text-black hover:bg-white/90 font-medium rounded-xl"
             >
               {isSubmitting ? 'Отправка...' : 'Отправить оценку'}
             </Button>

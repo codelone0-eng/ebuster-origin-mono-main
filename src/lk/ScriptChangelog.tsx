@@ -54,28 +54,28 @@ export const ScriptChangelog: React.FC<ScriptChangelogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[80vh] rounded-xl border border-white/10 bg-black/80 backdrop-blur-xl text-white">
         <DialogHeader>
-          <DialogTitle>История версий: {scriptName}</DialogTitle>
+          <DialogTitle className="text-white">История версий: {scriptName}</DialogTitle>
         </DialogHeader>
         
         <ScrollArea className="h-[60vh] pr-4">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-white/60">
               Загрузка...
             </div>
           ) : versions.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg font-medium mb-2">Пока нет обновлений</p>
-              <p className="text-sm text-muted-foreground">Это первая версия скрипта. История изменений появится после первого обновления.</p>
+              <FileText className="h-12 w-12 mx-auto mb-4 text-white/40" />
+              <p className="text-lg font-medium mb-2 text-white">Пока нет обновлений</p>
+              <p className="text-sm text-white/60">Это первая версия скрипта. История изменений появится после первого обновления.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {versions.map((version, index) => (
                 <div 
                   key={version.version} 
-                  className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                  className="border border-white/10 rounded-xl p-4 bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant={index === 0 ? "default" : "outline"}>
@@ -88,17 +88,17 @@ export const ScriptChangelog: React.FC<ScriptChangelogProps> = ({
                   
                   {version.changelog ? (
                     <div className="mb-3">
-                      <p className="text-sm whitespace-pre-line">
+                      <p className="text-sm whitespace-pre-line text-white/80">
                         {version.changelog}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-white/60 mb-3">
                       Описание изменений отсутствует
                     </p>
                   )}
                   
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs text-white/60">
                     <Clock className="h-3 w-3" />
                     {new Date(version.published_at || version.created_at).toLocaleString('ru-RU')}
                   </div>
