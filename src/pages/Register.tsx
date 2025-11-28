@@ -426,9 +426,10 @@ export default function Register() {
                       </Link>
                     </div>
                   </div>
-        </div>
+              </div>
+            </div>
 
-        {/* Right: User Card */}
+            {/* Right: User Card */}
             <div className="hidden lg:flex items-center justify-center px-8 py-16">
               <div className="w-full max-w-[460px]">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 space-y-6">
