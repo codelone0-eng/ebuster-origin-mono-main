@@ -41,27 +41,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // Для работы с Supabase
 }));
 
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов с одного IP
-  message: 'Слишком много запросов с этого IP, попробуйте позже.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Строгий rate limit для аутентификации
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 5, // максимум 5 попыток входа/регистрации
-  message: 'Слишком много попыток входа. Попробуйте через 15 минут.',
-  skipSuccessfulRequests: true,
-});
-
-app.use('/api/', limiter);
-app.use('/api/auth/', authLimiter);
-
-// CORS Middleware
+// CORS Middleware - ДОЛЖЕН БЫТЬ ПЕРЕД RATE LIMITING для обработки OPTIONS запросов
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
@@ -74,8 +54,32 @@ app.use(cors({
     : ['http://localhost:8081', 'http://localhost:8080', 'http://localhost:3000', 'http://localhost'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Rate Limiting - исключаем OPTIONS запросы
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 100, // максимум 100 запросов с одного IP
+  message: 'Слишком много запросов с этого IP, попробуйте позже.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS', // Пропускаем OPTIONS запросы
+});
+
+// Строгий rate limit для аутентификации - исключаем OPTIONS
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 5, // максимум 5 попыток входа/регистрации
+  message: 'Слишком много попыток входа. Попробуйте через 15 минут.',
+  skipSuccessfulRequests: true,
+  skip: (req) => req.method === 'OPTIONS', // Пропускаем OPTIONS запросы
+});
+
+app.use('/api/', limiter);
+app.use('/api/auth/', authLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
