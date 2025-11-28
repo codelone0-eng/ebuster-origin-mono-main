@@ -386,3 +386,117 @@ export const adminRevokeAccess = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Не удалось отозвать доступ' });
   }
 };
+
+// Загрузка иконки скрипта в Supabase Storage
+export const adminUploadScriptIcon = async (req: Request, res: Response) => {
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase credentials not configured on server.' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+    
+    const { scriptId } = req.body;
+    if (!scriptId) {
+      return res.status(400).json({ error: 'scriptId is required' });
+    }
+
+    // Проверяем, что файл загружен
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Генерируем уникальное имя файла
+    const fileExtension = req.file.originalname.split('.').pop();
+    const fileName = `script-icon-${scriptId}-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+    const filePath = `script-icons/${fileName}`;
+
+    // Загружаем файл в Supabase Storage
+    const { data: uploadData, error: uploadError } = await admin.storage
+      .from('script-icons')
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.log('❌ [adminUploadScriptIcon] Storage upload error:', uploadError);
+      return res.status(500).json({ error: `Upload failed: ${uploadError.message}` });
+    }
+
+    console.log('✅ [adminUploadScriptIcon] File uploaded to storage:', uploadData);
+
+    // Получаем публичный URL
+    const { data: urlData } = admin.storage
+      .from('script-icons')
+      .getPublicUrl(filePath);
+
+    const iconUrl = urlData.publicUrl;
+    console.log('🔗 [adminUploadScriptIcon] Generated icon URL:', iconUrl);
+
+    return res.json({ 
+      success: true, 
+      data: { 
+        icon_url: iconUrl
+      } 
+    });
+
+  } catch (e: any) {
+    console.error('[adminUploadScriptIcon] Error:', e);
+    return res.status(500).json({ error: e?.message || 'Server error' });
+  }
+};
+
+// Удаление иконки скрипта
+export const adminRemoveScriptIcon = async (req: Request, res: Response) => {
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return res.status(500).json({ error: 'Supabase credentials not configured on server.' });
+    }
+
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+    
+    const { iconUrl } = req.body;
+    if (!iconUrl) {
+      return res.status(400).json({ error: 'iconUrl is required' });
+    }
+
+    // Извлекаем путь из URL
+    const urlParts = iconUrl.split('/storage/v1/object/public/script-icons/');
+    if (urlParts.length !== 2) {
+      return res.status(400).json({ error: 'Invalid icon URL format' });
+    }
+
+    const filePath = `script-icons/${urlParts[1]}`;
+
+    // Удаляем файл из Supabase Storage
+    const { error: deleteError } = await admin.storage
+      .from('script-icons')
+      .remove([filePath]);
+
+    if (deleteError) {
+      console.log('❌ [adminRemoveScriptIcon] Storage delete error:', deleteError);
+      return res.status(500).json({ error: `Delete failed: ${deleteError.message}` });
+    }
+
+    console.log('✅ [adminRemoveScriptIcon] File deleted from storage');
+
+    return res.json({ 
+      success: true
+    });
+
+  } catch (e: any) {
+    console.error('[adminRemoveScriptIcon] Error:', e);
+    return res.status(500).json({ error: e?.message || 'Server error' });
+  }
+};

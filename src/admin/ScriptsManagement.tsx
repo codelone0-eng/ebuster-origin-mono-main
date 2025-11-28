@@ -172,11 +172,11 @@ export default function ScriptsManagement() {
                 >
                   <div className="flex items-center justify-between w-full mb-1">
                     <div className="flex items-center gap-2 truncate max-w-[180px]">
-                      <div className="flex-none w-5 h-5 rounded-md bg-[#333] flex items-center justify-center text-[10px] overflow-hidden">
+                      <div className="flex-none w-5 h-5 rounded-md bg-[#333] flex items-center justify-center text-[10px] overflow-hidden border border-[#444]">
                         {script.icon_url ? (
                           <img src={script.icon_url} alt="icon" className="w-full h-full object-cover" />
                         ) : (
-                          script.icon || '⚡'
+                          <ImageIcon className="h-3 w-3 text-neutral-500" />
                         )}
                       </div>
                       <span className={cn(
@@ -316,7 +316,6 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
       allowed_roles: draft.allowed_roles,
       metadata: {
         ...(draft.metadata || {}),
-        icon: draft.icon || '⚡',
         icon_url: draft.icon_url || null
       }
     };
@@ -333,7 +332,7 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
               {draft.icon_url ? (
                 <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
               ) : (
-                draft.icon || '⚡'
+                <ImageIcon className="h-8 w-8 text-neutral-500" />
               )}
             </div>
             <h1 className="text-xl font-bold text-white">{draft.name}</h1>
@@ -416,9 +415,115 @@ function ScriptEditor({ scriptId, onDeleted }: { scriptId: string, onDeleted: ()
 // --- Tab Components ---
 
 function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) => void }) {
+  const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const API_CONFIG = { BASE_URL: import.meta.env.VITE_API_URL || 'https://api.ebuster.ru' };
+
   const handleTagsChange = (val: string) => {
     const tags = val.split(',').map(t => t.trim());
     onChange({ tags });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Проверяем размер файла (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Ошибка загрузки",
+        description: "Размер файла не должен превышать 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Ошибка загрузки",
+        description: "Пожалуйста, выберите изображение",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('icon', file);
+      formData.append('scriptId', draft.id || '');
+
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/scripts/admin/upload-icon`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        onChange({ icon_url: data.data.icon_url });
+        toast({
+          title: "Иконка загружена",
+          description: "Изображение успешно загружено",
+          variant: "success"
+        });
+      } else {
+        throw new Error(data.error || 'Ошибка загрузки');
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка загрузки",
+        description: error instanceof Error ? error.message : "Не удалось загрузить изображение",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!draft.icon_url) return;
+    
+    setUploading(true);
+    try {
+      const token = localStorage.getItem('ebuster_token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/scripts/admin/remove-icon`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ scriptId: draft.id, iconUrl: draft.icon_url }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        onChange({ icon_url: null });
+        toast({
+          title: "Иконка удалена",
+          description: "Изображение успешно удалено",
+          variant: "success"
+        });
+      } else {
+        throw new Error(data.error || 'Ошибка удаления');
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка удаления",
+        description: error instanceof Error ? error.message : "Не удалось удалить иконку",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -433,36 +538,58 @@ function GeneralTab({ draft, onChange }: { draft: any, onChange: (updates: any) 
           />
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Icon (Emoji)</Label>
-            <Input 
-              value={draft.icon || '⚡'} 
-              onChange={e => onChange({ icon: e.target.value })}
-              className="bg-[#111111] border-[#2d2d2d] text-white text-center text-lg"
-              placeholder="⚡"
-              maxLength={4}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Avatar URL</Label>
-            <div className="flex gap-2">
-               <div className="w-10 h-10 rounded bg-[#2d2d2d] flex items-center justify-center text-lg overflow-hidden border border-[#333] flex-shrink-0">
-                  {draft.icon_url ? (
-                    <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xs">{draft.icon || '⚡'}</span>
-                  )}
-               </div>
-               <Input 
-                  value={draft.icon_url || ''} 
-                  onChange={e => onChange({ icon_url: e.target.value })}
-                  className="bg-[#111111] border-[#2d2d2d] text-white text-xs flex-1"
-                  placeholder="https://... (опционально)"
-               />
+        <div className="space-y-2">
+          <Label>Script Icon</Label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-lg bg-[#2d2d2d] flex items-center justify-center overflow-hidden border border-[#333] flex-shrink-0">
+              {draft.icon_url ? (
+                <img src={draft.icon_url} alt="icon" className="w-full h-full object-cover" />
+              ) : (
+                <ImageIcon className="h-8 w-8 text-neutral-500" />
+              )}
             </div>
-            <p className="text-xs text-neutral-500">Если указан URL, он будет использоваться вместо эмодзи</p>
+            <div className="flex-1 space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="script-icon-upload"
+              />
+              <label htmlFor="script-icon-upload">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full bg-[#2d2d2d] hover:bg-[#333] text-white border border-[#444]" 
+                  disabled={uploading}
+                  asChild
+                >
+                  <span className="cursor-pointer">
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    {uploading ? 'Загрузка...' : 'Загрузить изображение'}
+                  </span>
+                </Button>
+              </label>
+              {draft.icon_url && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemove}
+                  className="w-full border border-[#444] text-white hover:bg-[#333]"
+                  disabled={uploading}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Удалить
+                </Button>
+              )}
+            </div>
           </div>
+          <p className="text-xs text-neutral-500">Рекомендуется: Квадратное изображение, минимум 200x200px</p>
         </div>
       </div>
 
