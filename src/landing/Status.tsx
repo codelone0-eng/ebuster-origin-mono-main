@@ -58,8 +58,60 @@ const Status = () => {
     const TIMEOUT_MS = 20000;
 
     try {
-      // Выполняем все проверки параллельно для ускорения
-      const [apiResult, dbResult, emailResult] = await Promise.allSettled([
+      // Сначала пытаемся получить статус через серверный эндпоинт (быстрее и надежнее)
+      // Если не получается, делаем проверки с клиента
+      let serverStatus: any = null;
+      try {
+        const serverResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health/all`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(TIMEOUT_MS)
+        });
+        
+        if (serverResponse.ok) {
+          const serverData = await serverResponse.json();
+          if (serverData.success && serverData.data) {
+            serverStatus = serverData.data;
+          }
+        }
+      } catch (error) {
+        // Если серверный эндпоинт недоступен, делаем проверки с клиента
+        console.log('Server health endpoint unavailable, using client-side checks');
+      }
+
+      // Если получили статус с сервера, используем его
+      if (serverStatus) {
+        newStatus.api = {
+          name: 'API Backend',
+          status: serverStatus.api.status,
+          responseTime: serverStatus.api.responseTime || 0,
+          lastChecked: new Date().toISOString(),
+          message: serverStatus.api.message || 'OK'
+        };
+        newStatus.database = {
+          name: 'Database',
+          status: serverStatus.database.status,
+          responseTime: serverStatus.database.responseTime || 0,
+          lastChecked: new Date().toISOString(),
+          message: serverStatus.database.message || ''
+        };
+        newStatus.email = {
+          name: 'Email Service',
+          status: serverStatus.email.status,
+          responseTime: serverStatus.email.responseTime || 0,
+          lastChecked: new Date().toISOString(),
+          message: serverStatus.email.message || ''
+        };
+        newStatus.frontend = {
+          name: 'Frontend',
+          status: 'operational',
+          responseTime: 0,
+          lastChecked: new Date().toISOString(),
+          message: 'Online'
+        };
+      } else {
+        // Fallback: проверки с клиента (если серверный эндпоинт недоступен)
+        const [apiResult, dbResult, emailResult, frontendResult] = await Promise.allSettled([
         // Check API Health
         (async () => {
           const startTime = performance.now();
@@ -270,69 +322,18 @@ const Status = () => {
         };
       }
 
-        if (frontendResult.status === 'fulfilled') {
-          newStatus.frontend = frontendResult.value;
-        } else {
-          // Если проверка фронтенда упала, считаем его доступным (т.к. страница уже загружена)
-          newStatus.frontend = {
-            name: 'Frontend',
-            status: 'operational',
-            responseTime: 0,
-            lastChecked: new Date().toISOString(),
-            message: 'Online (cached)'
-          };
-        }
-      }
-
-      // Проверка Frontend всегда делается отдельно (проверяем доступность главной страницы)
-      if (!serverStatus) {
-        const frontendCheck = (async () => {
-          const frontendStartTime = performance.now();
-          try {
-            const frontendResponse = await fetch(`${window.location.origin}/`, {
-              method: 'HEAD',
-              signal: AbortSignal.timeout(TIMEOUT_MS),
-              cache: 'no-cache'
-            });
-            const frontendResponseTime = Math.round(performance.now() - frontendStartTime);
-            
-            if (frontendResponse.ok) {
-              return {
-                name: 'Frontend',
-                status: 'operational' as const,
-                responseTime: frontendResponseTime,
-                lastChecked: new Date().toISOString(),
-                message: 'Online'
-              };
-            } else {
-              return {
-                name: 'Frontend',
-                status: 'degraded' as const,
-                responseTime: frontendResponseTime,
-                lastChecked: new Date().toISOString(),
-                message: `HTTP ${frontendResponse.status}`
-              };
-            }
-          } catch (error: any) {
-            return {
-              name: 'Frontend',
-              status: 'operational' as const,
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-              message: 'Online (cached)'
-            };
-          }
-        })();
-        newStatus.frontend = await frontendCheck;
+      if (frontendResult.status === 'fulfilled') {
+        newStatus.frontend = frontendResult.value;
       } else {
-        // Если использовали серверный статус, Frontend всегда доступен (т.к. страница загружена)
+        // Если проверка фронтенда упала, считаем его доступным (т.к. страница уже загружена)
         newStatus.frontend = {
           name: 'Frontend',
           status: 'operational',
           responseTime: 0,
           lastChecked: new Date().toISOString(),
-          message: 'Online'
+          message: 'Online (cached)'
         };
+      }
       }
 
       // Get system uptime if available (не блокируем основную проверку)
