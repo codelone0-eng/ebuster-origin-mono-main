@@ -353,12 +353,7 @@ const ScriptsList: React.FC = () => {
             });
           } else {
             console.log('✅ [installScriptInExtension] Скрипт установлен через Bridge');
-            
-            toast({
-              title: t('header.dashboard.scripts.installSuccess') || 'Скрипт установлен!',
-              description: t('header.dashboard.scripts.installSuccessDesc') || 'Скрипт успешно установлен в расширение Ebuster',
-              variant: 'success'
-            });
+            // Уведомление показывается в handleDownloadScript, чтобы избежать дублирования
           }
           resolve(true);
         });

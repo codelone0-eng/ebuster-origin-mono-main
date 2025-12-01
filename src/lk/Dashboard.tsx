@@ -388,7 +388,7 @@ const DashboardContent = () => {
           
           toast({
             title: 'Скрипт удален',
-            description: 'Скрипт успешно удален из расширения и с сервера',
+            description: 'Скрипт успешно удален из расширения',
             variant: 'success'
           });
         } else {
