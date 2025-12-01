@@ -127,6 +127,82 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Comprehensive health check endpoint (проверяет все сервисы на сервере)
+// Это позволяет клиенту сделать один запрос вместо нескольких
+app.get('/api/health/all', async (req, res) => {
+  const results: any = {
+    api: { status: 'operational', responseTime: 0, message: 'OK' },
+    database: { status: 'checking', responseTime: 0, message: '' },
+    email: { status: 'checking', responseTime: 0, message: '' },
+    timestamp: new Date().toISOString()
+  };
+
+  // Проверка Database
+  const dbStartTime = Date.now();
+  try {
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      results.database = {
+        status: 'down',
+        responseTime: Date.now() - dbStartTime,
+        message: 'Database client not configured'
+      };
+    } else {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id')
+        .limit(1);
+
+      const dbResponseTime = Date.now() - dbStartTime;
+
+      if (error) {
+        results.database = {
+          status: 'degraded',
+          responseTime: dbResponseTime,
+          message: error.message || 'Database query failed'
+        };
+      } else {
+        results.database = {
+          status: 'operational',
+          responseTime: dbResponseTime,
+          message: 'Connected'
+        };
+      }
+    }
+  } catch (error: any) {
+    results.database = {
+      status: 'down',
+      responseTime: Date.now() - dbStartTime,
+      message: error.message || 'Connection failed'
+    };
+  }
+
+  // Проверка Email Service
+  const emailStartTime = Date.now();
+  try {
+    const { emailService } = await import('./src/services/email.service');
+    const isConnected = await emailService.verifyConnection();
+    
+    results.email = {
+      status: isConnected ? 'operational' : 'degraded',
+      responseTime: Date.now() - emailStartTime,
+      message: isConnected ? 'SMTP connected' : 'SMTP disconnected'
+    };
+  } catch (error: any) {
+    results.email = {
+      status: 'down',
+      responseTime: Date.now() - emailStartTime,
+      message: error.message || 'Connection failed'
+    };
+  }
+
+  res.json({
+    success: true,
+    data: results
+  });
+});
+
 // Database health check endpoint
 app.get('/api/health/database', async (req, res) => {
   const startTime = Date.now();

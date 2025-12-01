@@ -50,152 +50,310 @@ const Status = () => {
       email: { name: 'Email Service', status: 'checking' },
       frontend: { name: 'Frontend', status: 'checking' }
     };
+    
+    // Обновляем состояние сразу, чтобы показать индикаторы загрузки
+    setStatus(newStatus);
+
+    // Увеличенный таймаут для медленных соединений (20 секунд)
+    const TIMEOUT_MS = 20000;
 
     try {
-      // Check API Health
-      const startTime = performance.now();
-      try {
-        const healthResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000)
-        });
-        const responseTime = Math.round(performance.now() - startTime);
-        
-        if (healthResponse.ok) {
-          const healthData = await healthResponse.json();
-          newStatus.api = {
-            name: 'API Backend',
-            status: 'operational',
-            responseTime,
-            lastChecked: new Date().toISOString(),
-            message: `Uptime: ${Math.floor(healthData.uptime / 3600)}h`
-          };
-        } else {
-          newStatus.api = {
-            name: 'API Backend',
-            status: 'down',
-            responseTime,
-            lastChecked: new Date().toISOString(),
-            message: `HTTP ${healthResponse.status}`
-          };
-        }
-      } catch (error) {
+      // Выполняем все проверки параллельно для ускорения
+      const [apiResult, dbResult, emailResult] = await Promise.allSettled([
+        // Check API Health
+        (async () => {
+          const startTime = performance.now();
+          try {
+            const healthResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              signal: AbortSignal.timeout(TIMEOUT_MS)
+            });
+            const responseTime = Math.round(performance.now() - startTime);
+            
+            if (healthResponse.ok) {
+              const healthData = await healthResponse.json();
+              return {
+                name: 'API Backend',
+                status: 'operational' as const,
+                responseTime,
+                lastChecked: new Date().toISOString(),
+                message: `Uptime: ${Math.floor(healthData.uptime / 3600)}h`
+              };
+            } else {
+              return {
+                name: 'API Backend',
+                status: 'down' as const,
+                responseTime,
+                lastChecked: new Date().toISOString(),
+                message: `HTTP ${healthResponse.status}`
+              };
+            }
+          } catch (error: any) {
+            const errorMessage = error.name === 'TimeoutError' || error.name === 'AbortError' 
+              ? 'Connection timeout (проверьте интернет-соединение)' 
+              : error.message || 'Connection failed';
+            return {
+              name: 'API Backend',
+              status: 'down' as const,
+              lastChecked: new Date().toISOString(),
+              message: errorMessage
+            };
+          }
+        })(),
+
+        // Check Database
+        (async () => {
+          const dbStartTime = performance.now();
+          try {
+            const dbResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health/database`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              signal: AbortSignal.timeout(TIMEOUT_MS)
+            });
+            const dbResponseTime = Math.round(performance.now() - dbStartTime);
+            const dbData = await dbResponse.json();
+            
+            if (dbResponse.ok && dbData.status === 'operational') {
+              return {
+                name: 'Database',
+                status: 'operational' as const,
+                responseTime: dbResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: dbData.message || 'Connected'
+              };
+            } else if (dbData.status === 'degraded') {
+              return {
+                name: 'Database',
+                status: 'degraded' as const,
+                responseTime: dbResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: dbData.message || 'Limited connectivity'
+              };
+            } else {
+              return {
+                name: 'Database',
+                status: 'down' as const,
+                responseTime: dbResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: dbData.message || 'Connection failed'
+              };
+            }
+          } catch (error: any) {
+            const errorMessage = error.name === 'TimeoutError' || error.name === 'AbortError'
+              ? 'Connection timeout (проверьте интернет-соединение)'
+              : error.message || 'Connection failed';
+            return {
+              name: 'Database',
+              status: 'down' as const,
+              lastChecked: new Date().toISOString(),
+              message: errorMessage
+            };
+          }
+        })(),
+
+        // Check Email Service
+        (async () => {
+          const emailStartTime = performance.now();
+          try {
+            const emailResponse = await fetch(`${API_CONFIG.EMAIL_URL}/status`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              signal: AbortSignal.timeout(TIMEOUT_MS)
+            });
+            const emailResponseTime = Math.round(performance.now() - emailStartTime);
+            
+            if (emailResponse.ok) {
+              const emailData = await emailResponse.json();
+              return {
+                name: 'Email Service',
+                status: (emailData.smtpConnected ? 'operational' : 'degraded') as const,
+                responseTime: emailResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: emailData.smtpConnected ? 'SMTP connected' : 'SMTP disconnected'
+              };
+            } else {
+              return {
+                name: 'Email Service',
+                status: 'degraded' as const,
+                responseTime: emailResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: 'Service unavailable'
+              };
+            }
+          } catch (error: any) {
+            const errorMessage = error.name === 'TimeoutError' || error.name === 'AbortError'
+              ? 'Connection timeout (проверьте интернет-соединение)'
+              : error.message || 'Connection failed';
+            return {
+              name: 'Email Service',
+              status: 'down' as const,
+              lastChecked: new Date().toISOString(),
+              message: errorMessage
+            };
+          }
+        })(),
+
+        // Check Frontend (проверяем реальную доступность через fetch главной страницы)
+        (async () => {
+          const frontendStartTime = performance.now();
+          try {
+            // Проверяем доступность главной страницы через тот же домен
+            const frontendResponse = await fetch(`${window.location.origin}/`, {
+              method: 'HEAD',
+              signal: AbortSignal.timeout(TIMEOUT_MS),
+              cache: 'no-cache'
+            });
+            const frontendResponseTime = Math.round(performance.now() - frontendStartTime);
+            
+            if (frontendResponse.ok) {
+              return {
+                name: 'Frontend',
+                status: 'operational' as const,
+                responseTime: frontendResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: 'Online'
+              };
+            } else {
+              return {
+                name: 'Frontend',
+                status: 'degraded' as const,
+                responseTime: frontendResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: `HTTP ${frontendResponse.status}`
+              };
+            }
+          } catch (error: any) {
+            // Если не можем проверить фронтенд, считаем его доступным (т.к. страница уже загружена)
+            return {
+              name: 'Frontend',
+              status: 'operational' as const,
+              responseTime: 0,
+              lastChecked: new Date().toISOString(),
+              message: 'Online (cached)'
+            };
+          }
+        })()
+      ]);
+
+      // Обрабатываем результаты
+      if (apiResult.status === 'fulfilled') {
+        newStatus.api = apiResult.value;
+      } else {
         newStatus.api = {
           name: 'API Backend',
           status: 'down',
           lastChecked: new Date().toISOString(),
-          message: 'Connection timeout'
+          message: 'Unexpected error'
         };
       }
 
-      // Check Database (real connection check)
-      try {
-        const dbStartTime = performance.now();
-        const dbResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health/database`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000)
-        });
-        const dbResponseTime = Math.round(performance.now() - dbStartTime);
-        const dbData = await dbResponse.json();
-        
-        if (dbResponse.ok && dbData.status === 'operational') {
-          newStatus.database = {
-            name: 'Database',
-            status: 'operational',
-            responseTime: dbResponseTime,
-            lastChecked: new Date().toISOString(),
-            message: dbData.message || 'Connected'
-          };
-        } else if (dbData.status === 'degraded') {
-          newStatus.database = {
-            name: 'Database',
-            status: 'degraded',
-            responseTime: dbResponseTime,
-            lastChecked: new Date().toISOString(),
-            message: dbData.message || 'Limited connectivity'
-          };
-        } else {
-          newStatus.database = {
-            name: 'Database',
-            status: 'down',
-            responseTime: dbResponseTime,
-            lastChecked: new Date().toISOString(),
-            message: dbData.message || 'Connection failed'
-          };
-        }
-      } catch (error) {
+      if (dbResult.status === 'fulfilled') {
+        newStatus.database = dbResult.value;
+      } else {
         newStatus.database = {
           name: 'Database',
           status: 'down',
           lastChecked: new Date().toISOString(),
-          message: 'Connection failed'
+          message: 'Unexpected error'
         };
       }
 
-      // Check Email Service
-      try {
-        const emailStartTime = performance.now();
-        const emailResponse = await fetch(`${API_CONFIG.EMAIL_URL}/status`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000)
-        });
-        const emailResponseTime = Math.round(performance.now() - emailStartTime);
-        
-        if (emailResponse.ok) {
-          const emailData = await emailResponse.json();
-          newStatus.email = {
-            name: 'Email Service',
-            status: emailData.smtpConnected ? 'operational' : 'degraded',
-            responseTime: emailResponseTime,
-            lastChecked: new Date().toISOString(),
-            message: emailData.smtpConnected ? 'SMTP connected' : 'SMTP disconnected'
-          };
-        } else {
-          newStatus.email = {
-            name: 'Email Service',
-            status: 'degraded',
-            responseTime: emailResponseTime,
-            lastChecked: new Date().toISOString(),
-            message: 'Service unavailable'
-          };
-        }
-      } catch (error) {
+      if (emailResult.status === 'fulfilled') {
+        newStatus.email = emailResult.value;
+      } else {
         newStatus.email = {
           name: 'Email Service',
           status: 'down',
           lastChecked: new Date().toISOString(),
-          message: 'Connection failed'
+          message: 'Unexpected error'
         };
       }
 
-      // Check Frontend (self-check)
-      newStatus.frontend = {
-        name: 'Frontend',
-        status: 'operational',
-        responseTime: 0,
-        lastChecked: new Date().toISOString(),
-        message: 'Online'
-      };
-
-      // Get system uptime if available
-      try {
-        const monitorResponse = await fetch(`${API_CONFIG.BASE_URL}/api/system-monitor`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000)
-        });
-        if (monitorResponse.ok) {
-          const monitorData = await monitorResponse.json();
-          if (monitorData.data?.uptime) {
-            newStatus.uptime = monitorData.data.uptime;
-          }
+        if (frontendResult.status === 'fulfilled') {
+          newStatus.frontend = frontendResult.value;
+        } else {
+          // Если проверка фронтенда упала, считаем его доступным (т.к. страница уже загружена)
+          newStatus.frontend = {
+            name: 'Frontend',
+            status: 'operational',
+            responseTime: 0,
+            lastChecked: new Date().toISOString(),
+            message: 'Online (cached)'
+          };
         }
-      } catch (error) {
-        // Ignore
       }
+
+      // Проверка Frontend всегда делается отдельно (проверяем доступность главной страницы)
+      if (!serverStatus) {
+        const frontendCheck = (async () => {
+          const frontendStartTime = performance.now();
+          try {
+            const frontendResponse = await fetch(`${window.location.origin}/`, {
+              method: 'HEAD',
+              signal: AbortSignal.timeout(TIMEOUT_MS),
+              cache: 'no-cache'
+            });
+            const frontendResponseTime = Math.round(performance.now() - frontendStartTime);
+            
+            if (frontendResponse.ok) {
+              return {
+                name: 'Frontend',
+                status: 'operational' as const,
+                responseTime: frontendResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: 'Online'
+              };
+            } else {
+              return {
+                name: 'Frontend',
+                status: 'degraded' as const,
+                responseTime: frontendResponseTime,
+                lastChecked: new Date().toISOString(),
+                message: `HTTP ${frontendResponse.status}`
+              };
+            }
+          } catch (error: any) {
+            return {
+              name: 'Frontend',
+              status: 'operational' as const,
+              responseTime: 0,
+              lastChecked: new Date().toISOString(),
+              message: 'Online (cached)'
+            };
+          }
+        })();
+        newStatus.frontend = await frontendCheck;
+      } else {
+        // Если использовали серверный статус, Frontend всегда доступен (т.к. страница загружена)
+        newStatus.frontend = {
+          name: 'Frontend',
+          status: 'operational',
+          responseTime: 0,
+          lastChecked: new Date().toISOString(),
+          message: 'Online'
+        };
+      }
+
+      // Get system uptime if available (не блокируем основную проверку)
+      fetch(`${API_CONFIG.BASE_URL}/api/system-monitor`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(TIMEOUT_MS)
+      })
+        .then(monitorResponse => {
+          if (monitorResponse.ok) {
+            return monitorResponse.json();
+          }
+        })
+        .then(monitorData => {
+          if (monitorData?.data?.uptime) {
+            setStatus(prev => ({ ...prev, uptime: monitorData.data.uptime }));
+          }
+        })
+        .catch(() => {
+          // Ignore - это не критично
+        });
 
       newStatus.timestamp = new Date().toISOString();
       setStatus(newStatus);
