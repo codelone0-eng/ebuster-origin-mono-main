@@ -61,9 +61,11 @@ app.use(cors({
     : ['http://localhost:8081', 'http://localhost:8080', 'http://localhost:3000', 'http://localhost'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'Content-Type'],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  maxAge: 86400 // Кэшируем preflight запросы на 24 часа
 }));
 
 // Rate Limiting - исключаем OPTIONS запросы и health check
@@ -94,10 +96,22 @@ const limiter = rateLimit({
 // Строгий rate limit для аутентификации - исключаем OPTIONS
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 5, // максимум 5 попыток входа/регистрации
+  max: 10, // Увеличено до 10 попыток (было 5) - для удобства пользователей
   message: 'Слишком много попыток входа. Попробуйте через 15 минут.',
   skipSuccessfulRequests: true,
-  skip: (req) => req.method === 'OPTIONS', // Пропускаем OPTIONS запросы
+  // Правильно определяем IP за nginx
+  keyGenerator: (req) => {
+    return (req.headers['x-real-ip'] as string) || 
+           (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 
+           req.ip || 
+           req.socket.remoteAddress || 
+           'unknown';
+  },
+  skip: (req) => {
+    // Пропускаем OPTIONS запросы
+    if (req.method === 'OPTIONS') return true;
+    return false;
+  },
 });
 
 // Применяем rate limiting, но исключаем health check эндпоинты
