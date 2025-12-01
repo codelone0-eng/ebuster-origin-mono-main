@@ -104,7 +104,8 @@ export const ru = {
       updated: "Обновлен",
       configure: "Настройки",
       update: "Обновить",
-      remove: "Удалить"
+      remove: "Удалить",
+      descriptionPlaceholder: "Описание скоро будет добавлено"
     },
     support: {
       open: "Открыть",

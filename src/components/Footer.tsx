@@ -67,26 +67,27 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-white">{f('product')}</h4>
             <ul className="space-y-3">
-              <li><a href="/price" className="text-white/60 hover:text-white transition-colors text-sm">{f('pricing')}</a></li>
-              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
-              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('contacts')}</a></li>
+              <li><a href="https://ebuster.ru/price" className="text-white/60 hover:text-white transition-colors text-sm">{f('pricing')}</a></li>
+              <li><a href="https://ebuster.ru/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
+              <li><a href="https://ebuster.ru/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('contacts')}</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4 text-white">{f('resources')}</h4>
             <ul className="space-y-3">
-              <li><a href="/advantages" className="text-white/60 hover:text-white transition-colors text-sm">{f('features')}</a></li>
-              <li><a href="/about" className="text-white/60 hover:text-white transition-colors text-sm">{f('about')}</a></li>
+              <li><a href="https://ebuster.ru/advantages" className="text-white/60 hover:text-white transition-colors text-sm">{f('features')}</a></li>
+              <li><a href="https://ebuster.ru/about" className="text-white/60 hover:text-white transition-colors text-sm">{f('about')}</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4 text-white">{f('company')}</h4>
             <ul className="space-y-3">
-              <li><a href="/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
-              <li><a href="/roadmap" className="text-white/60 hover:text-white transition-colors text-sm">{f('roadmap')}</a></li>
-              <li><a href="/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('support')}</a></li>
+              <li><a href="https://ebuster.ru/documentation" className="text-white/60 hover:text-white transition-colors text-sm">{f('documentation')}</a></li>
+              <li><a href="https://ebuster.ru/roadmap" className="text-white/60 hover:text-white transition-colors text-sm">{f('roadmap')}</a></li>
+              <li><a href="https://ebuster.ru/status" className="text-white/60 hover:text-white transition-colors text-sm">{f('statusPage')}</a></li>
+              <li><a href="https://ebuster.ru/contacts" className="text-white/60 hover:text-white transition-colors text-sm">{f('support')}</a></li>
             </ul>
           </div>
         </div>
@@ -96,8 +97,8 @@ export const Footer = () => {
             {f('copyright')}
           </div>
           <div className="flex gap-6 text-sm">
-            <a href="/privacy" className="text-white/60 hover:text-white transition-colors">{f('legal')}</a>
-            <a href="/terms" className="text-white/60 hover:text-white transition-colors">{f('terms')}</a>
+            <a href="https://ebuster.ru/privacy" className="text-white/60 hover:text-white transition-colors">{f('legal')}</a>
+            <a href="https://ebuster.ru/terms" className="text-white/60 hover:text-white transition-colors">{f('terms')}</a>
           </div>
         </div>
       </div>

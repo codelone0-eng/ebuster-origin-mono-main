@@ -153,7 +153,8 @@ export const eng = {
     faq: "FAQ",
     emailPlaceholder: "Email address",
     subscribe: "Stay updated",
-    status: "All systems operational"
+    status: "All systems operational",
+    statusPage: "Status"
   },
   featuresGrid: {
     structuredLibrary: {

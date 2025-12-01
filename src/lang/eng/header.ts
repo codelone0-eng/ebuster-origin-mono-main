@@ -104,7 +104,8 @@ export const eng = {
       updated: "Updated",
       configure: "Configure",
       update: "Update",
-      remove: "Remove"
+      remove: "Remove",
+      descriptionPlaceholder: "Description will be added soon"
     },
     support: {
       open: "Open",

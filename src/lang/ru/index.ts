@@ -136,6 +136,7 @@ export const ru = {
     emailPlaceholder: "Email адрес",
     subscribe: "Подписаться",
     status: "Все системы работают",
+    statusPage: "Статус системы",
     product: "Продукт",
     pricing: "Цены",
     documentation: "Документация",

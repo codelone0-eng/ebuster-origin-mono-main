@@ -656,11 +656,15 @@ const ScriptsList: React.FC = () => {
           >
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 overflow-hidden">
                   {script.icon_url ? (
-                    <img src={script.icon_url} alt={script.title} className="w-full h-full object-cover" />
+                    <img
+                      src={script.icon_url}
+                      alt={script.title}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <span className="text-lg">{script.icon || '⚡'}</span>
+                    <Code className="h-6 w-6 text-emerald-400" />
                   )}
                 </div>
 
