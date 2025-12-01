@@ -267,13 +267,13 @@ const Status = () => {
   const getStatusColor = (status: ServiceStatus['status']) => {
     switch (status) {
       case 'operational':
-        return 'border-emerald-400/20 bg-emerald-400/5';
+        return 'border-emerald-400/20';
       case 'degraded':
-        return 'border-yellow-400/20 bg-yellow-400/5';
+        return 'border-yellow-400/20';
       case 'down':
-        return 'border-red-400/20 bg-red-400/5';
+        return 'border-red-400/20';
       default:
-        return 'border-white/10 bg-white/5';
+        return 'border-white/10';
     }
   };
 
@@ -298,8 +298,9 @@ const Status = () => {
     return <Activity className="h-5 w-5" />;
   };
 
-  const allOperational = Object.values(status).every(
-    (service) => typeof service === 'object' && service.status === 'operational'
+  // Проверяем только сервисы (api, database, email, frontend), исключая uptime и timestamp
+  const allOperational = [status.api, status.database, status.email, status.frontend].every(
+    (service) => service.status === 'operational'
   );
 
   return (
@@ -374,7 +375,7 @@ const Status = () => {
                   ).map((service, index) => (
                     <Card
                       key={index}
-                      className={`rounded-xl border p-6 ${getStatusColor(service.status)} backdrop-blur-sm`}
+                      className={`rounded-xl border border-white/10 bg-white/[0.02] p-6 ${getStatusColor(service.status)}`}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -417,7 +418,7 @@ const Status = () => {
 
                 {/* System Info */}
                 {status.uptime && (
-                  <Card className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-6">
+                  <Card className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                         <Activity className="h-5 w-5" />
