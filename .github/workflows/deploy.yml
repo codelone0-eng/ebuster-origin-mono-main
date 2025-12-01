@@ -71,7 +71,7 @@ jobs:
             fi
             
             # Проверяем изменения во фронтенде (исключаем src/api/)
-            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)/|^Dockerfile\.frontend|^vite\.config|^tailwind\.config|^index\.html)"; then
+            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)/|^Dockerfile\.frontend|^nginx\.conf|^vite\.config|^tailwind\.config|^index\.html)"; then
               FRONTEND_CHANGED=true
               echo "frontend=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения во фронтенде"
@@ -88,8 +88,8 @@ jobs:
               echo "autotest=false" >> $GITHUB_OUTPUT
             fi
             
-            # Проверяем изменения в Docker конфигурации
-            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile|^nginx\.conf)"; then
+            # Проверяем изменения в Docker конфигурации (nginx.conf исключен, т.к. он только для frontend)
+            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile\.(api|autotest|autotest-stream))"; then
               DOCKER_CHANGED=true
               echo "docker=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в Docker конфигурации"
