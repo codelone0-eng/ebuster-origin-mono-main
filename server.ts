@@ -28,7 +28,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Trust proxy для корректной работы rate limiting за nginx/cloudflare
-app.set('trust proxy', true);
+// Указываем количество прокси-серверов перед приложением
+app.set('trust proxy', 1); // Только nginx, не Cloudflare (если Cloudflare отключен)
 
 // Security Middleware - ДОЛЖНО БЫТЬ ПЕРВЫМ
 app.use(helmet({
@@ -38,10 +39,13 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", process.env.SUPABASE_URL || ""],
+      connectSrc: ["'self'", process.env.SUPABASE_URL || "", "https://api.ebuster.ru", "https://ebuster.ru"],
     },
   },
   crossOriginEmbedderPolicy: false, // Для работы с Supabase
+  // Отключаем некоторые строгие политики, которые могут блокировать запросы
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: false,
 }));
 
 // CORS Middleware - ДОЛЖЕН БЫТЬ ПЕРЕД RATE LIMITING для обработки OPTIONS запросов
@@ -62,14 +66,29 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Rate Limiting - исключаем OPTIONS запросы
+// Rate Limiting - исключаем OPTIONS запросы и health check
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов с одного IP
+  max: 200, // Увеличено до 200 запросов с одного IP (было 100)
   message: 'Слишком много запросов с этого IP, попробуйте позже.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.method === 'OPTIONS', // Пропускаем OPTIONS запросы
+  // Правильно определяем IP за nginx
+  keyGenerator: (req) => {
+    // Используем X-Real-IP если есть (от nginx), иначе X-Forwarded-For, иначе обычный IP
+    return (req.headers['x-real-ip'] as string) || 
+           (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 
+           req.ip || 
+           req.socket.remoteAddress || 
+           'unknown';
+  },
+  skip: (req) => {
+    // Пропускаем OPTIONS запросы
+    if (req.method === 'OPTIONS') return true;
+    // Пропускаем health check эндпоинты
+    if (req.path.startsWith('/health')) return true;
+    return false;
+  },
 });
 
 // Строгий rate limit для аутентификации - исключаем OPTIONS
@@ -81,7 +100,14 @@ const authLimiter = rateLimit({
   skip: (req) => req.method === 'OPTIONS', // Пропускаем OPTIONS запросы
 });
 
-app.use('/api/', limiter);
+// Применяем rate limiting, но исключаем health check эндпоинты
+app.use('/api/', (req, res, next) => {
+  // Исключаем health check эндпоинты из rate limiting
+  if (req.path.startsWith('/health')) {
+    return next();
+  }
+  return limiter(req, res, next);
+});
 app.use('/api/auth/', authLimiter);
 
 app.use(express.json({ limit: '10mb' }));
