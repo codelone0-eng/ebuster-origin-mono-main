@@ -65,8 +65,13 @@ const Dashboard = () => {
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // WebSocket через API сервер
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host.replace(':80', '').replace(':443', '')}/ws`;
+    const apiHost = window.location.hostname === 'autotest.ebuster.ru' || window.location.hostname === 'localhost'
+      ? 'api.ebuster.ru'
+      : window.location.host.replace(':80', '').replace(':443', '');
+    const wsUrl = `${protocol}//${apiHost}/ws`;
+    console.log('🔌 Подключение к WebSocket:', wsUrl);
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
