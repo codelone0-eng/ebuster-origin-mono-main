@@ -6,6 +6,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import http from 'http';
+import { WebSocketServer } from 'ws';
 import emailRoutes from './src/api/email.routes';
 import authRoutes from './src/api/auth.routes';
 import userRoutes from './src/api/user.routes';
@@ -19,6 +21,7 @@ import ticketsRoutes from './src/api/tickets-new.routes';
 import rolesRoutes from './src/api/roles.routes';
 import subscriptionsRoutes from './src/api/subscriptions.routes';
 import autotestRoutes from './src/api/autotest.routes';
+import { getTestState } from './src/api/autotest.routes';
 import * as apiKeysController from './src/api/apikeys.controller';
 import { authenticateUser } from './src/api/auth.middleware';
 import { startAllCronJobs } from './src/api/cron-jobs';
@@ -26,7 +29,6 @@ import { logRequestToSupabase } from './src/api/clickhouse.middleware';
 import { getSupabaseClient } from './src/api/admin.controller';
 
 const app = express();
-const http = require('http');
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 
@@ -319,19 +321,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // WebSocket сервер для автотестов (инициализируем после запуска сервера)
-let wss: any = null;
+let wss: WebSocketServer | null = null;
 function initWebSocket() {
   try {
-    const { WebSocketServer } = require('ws');
     wss = new WebSocketServer({ server, path: '/ws' });
     
-    wss.on('connection', (ws: any) => {
+    wss.on('connection', (ws) => {
       console.log('✅ WebSocket клиент подключен (autotest)');
       
       // Отправляем текущее состояние при подключении
       try {
-        const autotestRoutes = require('./src/api/autotest.routes');
-        const currentState = autotestRoutes.getTestState?.() || { 
+        const currentState = getTestState?.() || { 
           status: 'idle', 
           summary: { total: 0, passed: 0, failed: 0, skipped: 0 }, 
           logs: [] 
@@ -345,7 +345,7 @@ function initWebSocket() {
         console.log('❌ WebSocket клиент отключен (autotest)');
       });
       
-      ws.on('error', (error: any) => {
+      ws.on('error', (error: Error) => {
         console.error('❌ WebSocket ошибка:', error);
       });
     });
