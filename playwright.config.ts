@@ -21,8 +21,9 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Используем системный chromium в Alpine
-        channel: process.env.CI ? 'chromium' : 'chrome'
+        // Используем системный chromium в Alpine Linux
+        executablePath: process.env.CI ? '/usr/bin/chromium-browser' : undefined,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
       },
     },
   ],
