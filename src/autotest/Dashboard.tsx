@@ -500,53 +500,59 @@ const Dashboard = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Array.isArray(testSuites) && testSuites.length > 0 ? testSuites.map((suite) => (
-                      <Card key={suite.id} className="bg-white/[0.02] border-white/10 backdrop-blur-xl hover:border-white/20 transition-colors">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg text-white mb-1">
-                                {suite.name}
-                              </CardTitle>
-                              <p className="text-sm text-white/60 line-clamp-2">
-                                {suite.description}
-                              </p>
+                    {Array.isArray(testSuites) && testSuites.length > 0 ? (
+                      testSuites.map((suite) => (
+                        <Card key={suite.id} className="bg-white/[0.02] border-white/10 backdrop-blur-xl hover:border-white/20 transition-colors">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <CardTitle className="text-lg text-white mb-1">
+                                  {suite.name}
+                                </CardTitle>
+                                <p className="text-sm text-white/60 line-clamp-2">
+                                  {suite.description}
+                                </p>
+                              </div>
+                              {suite.status && (
+                                <Badge className={getStatusColor(suite.status)}>
+                                  {suite.status === 'passed' ? '✓' : suite.status === 'failed' ? '✗' : '○'}
+                                </Badge>
+                              )}
                             </div>
-                            {suite.status && (
-                              <Badge className={getStatusColor(suite.status)}>
-                                {suite.status === 'passed' ? '✓' : suite.status === 'failed' ? '✗' : '○'}
-                              </Badge>
-                            )}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between text-sm text-white/60 mb-4">
-                            <span className="flex items-center gap-2">
-                              <FileCode className="h-4 w-4" />
-                              {suite.file}
-                            </span>
-                            {suite.duration && (
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center justify-between text-sm text-white/60 mb-4">
                               <span className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                {formatDuration(suite.duration)}
+                                <FileCode className="h-4 w-4" />
+                                {suite.file}
                               </span>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1 bg-white/5 border-white/10">
-                              <Play className="h-3 w-3 mr-2" />
-                              Запустить
-                            </Button>
-                            <Button variant="outline" size="sm" className="bg-white/5 border-white/10">
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="bg-white/5 border-white/10">
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                              {suite.duration && (
+                                <span className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4" />
+                                  {formatDuration(suite.duration)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="flex-1 bg-white/5 border-white/10">
+                                <Play className="h-3 w-3 mr-2" />
+                                Запустить
+                              </Button>
+                              <Button variant="outline" size="sm" className="bg-white/5 border-white/10">
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button variant="outline" size="sm" className="bg-white/5 border-white/10">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-8">
+                        <p className="text-white/60">Тест-сьюты не найдены</p>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
