@@ -67,7 +67,7 @@ jobs:
             fi
             
             # Проверяем изменения во фронтенде (исключаем src/api/)
-            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|DashboardApp|LandingApp|AdminApp|main\.tsx|App\.tsx)/|^Dockerfile\.frontend|^nginx\.conf|^vite\.config|^tailwind\.config|^index\.html)"; then
+            if echo "$CHANGED_FILES" | grep -qE "(^src/(components|pages|landing|lk|admin|autotest|DashboardApp|LandingApp|AdminApp|AutotestApp|main\.tsx|App\.tsx)/|^Dockerfile\.frontend|^nginx\.conf|^vite\.config|^tailwind\.config|^index\.html)"; then
               FRONTEND_CHANGED=true
               echo "frontend=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения во фронтенде"
