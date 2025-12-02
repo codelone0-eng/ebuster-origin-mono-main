@@ -21,6 +21,8 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
+        // Используем системный chromium из Alpine Linux
+        executablePath: '/usr/bin/chromium-browser',
         // Флаги для работы в Docker
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
       },
