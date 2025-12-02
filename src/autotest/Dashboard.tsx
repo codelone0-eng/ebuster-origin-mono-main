@@ -559,7 +559,7 @@ const Dashboard = () => {
                 {/* History Tab */}
                 <TabsContent value="history" className="space-y-4">
                   <div className="space-y-4">
-                    {history.map((run) => (
+                    {Array.isArray(history) && history.length > 0 ? history.map((run) => (
                       <Card key={run.id} className="bg-white/[0.02] border-white/10 backdrop-blur-xl">
                         <CardHeader>
                           <div className="flex items-center justify-between">
@@ -567,7 +567,7 @@ const Dashboard = () => {
                               {getStatusIcon(run.status)}
                               <div>
                                 <CardTitle className="text-white">
-                                  Запуск #{run.id.slice(-8)}
+                                  Запуск #{run?.id ? String(run.id).slice(-8) : 'N/A'}
                                 </CardTitle>
                                 <p className="text-sm text-white/60">
                                   {new Date(run.startTime).toLocaleString('ru-RU')}

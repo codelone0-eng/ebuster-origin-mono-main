@@ -254,15 +254,20 @@ router.post('/recorder/start', async (req, res) => {
 // GET /api/autotest/suites - Получить список тест-сьютов
 router.get('/suites', async (req, res) => {
   try {
-    const testsDir = path.resolve(__dirname, '../../../tests');
+    // Используем абсолютный путь от корня проекта
+    const testsDir = path.join(process.cwd(), 'tests');
     const suites: any[] = [];
 
+    console.log('🔍 Проверяю директорию tests:', testsDir);
+    
     if (fs.existsSync(testsDir)) {
       try {
         const files = fs.readdirSync(testsDir, { recursive: true });
         const specFiles = files.filter((f: string) => 
           typeof f === 'string' && (f.endsWith('.spec.ts') || f.endsWith('.spec.js'))
         );
+
+        console.log(`📁 Найдено ${specFiles.length} тест-файлов`);
 
         for (const file of specFiles) {
           try {
@@ -278,20 +283,24 @@ router.get('/suites', async (req, res) => {
                 duration: null
               });
             }
-          } catch (fileError) {
-            console.warn(`⚠️ Ошибка обработки файла ${file}:`, fileError);
+          } catch (fileError: any) {
+            console.warn(`⚠️ Ошибка обработки файла ${file}:`, fileError?.message);
           }
         }
-      } catch (readError) {
-        console.warn('⚠️ Ошибка чтения директории tests:', readError);
+      } catch (readError: any) {
+        console.warn('⚠️ Ошибка чтения директории tests:', readError?.message);
         // Возвращаем пустой массив вместо ошибки
       }
+    } else {
+      console.warn('⚠️ Директория tests не существует:', testsDir);
     }
 
+    console.log(`✅ Возвращаю ${suites.length} тест-сьютов`);
     res.json(suites);
   } catch (error: any) {
     console.error('❌ Ошибка в /api/autotest/suites:', error);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+    // Всегда возвращаем массив, даже при ошибке
+    res.json([]);
   }
 });
 
