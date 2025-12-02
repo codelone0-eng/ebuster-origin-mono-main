@@ -18,6 +18,7 @@ import categoriesRoutes from './src/api/categories.routes';
 import ticketsRoutes from './src/api/tickets-new.routes';
 import rolesRoutes from './src/api/roles.routes';
 import subscriptionsRoutes from './src/api/subscriptions.routes';
+import autotestRoutes from './src/api/autotest.routes';
 import * as apiKeysController from './src/api/apikeys.controller';
 import { authenticateUser } from './src/api/auth.middleware';
 import { startAllCronJobs } from './src/api/cron-jobs';
@@ -56,6 +57,7 @@ app.use(cors({
         'https://www.ebuster.ru',
         'https://lk.ebuster.ru',
         'https://admin.ebuster.ru',
+        'https://autotest.ebuster.ru',
         'https://api.ebuster.ru'
       ]
     : ['http://localhost:8081', 'http://localhost:8080', 'http://localhost:3000', 'http://localhost'],

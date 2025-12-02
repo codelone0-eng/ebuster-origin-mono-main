@@ -98,6 +98,7 @@ const Dashboard = () => {
     setWs(websocket);
     loadStatus();
     loadHistory();
+    loadTestSuites();
 
     return () => {
       websocket.close();
@@ -110,7 +111,7 @@ const Dashboard = () => {
 
   const loadStatus = async () => {
     try {
-      const res = await fetch('/api/status');
+      const res = await fetch('/api/autotest/status');
       const data = await res.json();
       setTestState(data);
     } catch (err) {
@@ -120,7 +121,7 @@ const Dashboard = () => {
 
   const loadHistory = async () => {
     try {
-      const res = await fetch('/api/history');
+      const res = await fetch('/api/autotest/history');
       const data = await res.json();
       setHistory(data);
     } catch (err) {
@@ -128,11 +129,21 @@ const Dashboard = () => {
     }
   };
 
+  const loadTestSuites = async () => {
+    try {
+      const res = await fetch('/api/autotest/suites');
+      const data = await res.json();
+      setTestSuites(data);
+    } catch (err) {
+      console.error('Ошибка загрузки тест-сьютов:', err);
+    }
+  };
+
   const runTests = async () => {
     if (testState.status === 'running') return;
     
     try {
-      const res = await fetch('/api/run', { method: 'POST' });
+      const res = await fetch('/api/autotest/run', { method: 'POST' });
       if (!res.ok) throw new Error('Ошибка запуска');
     } catch (err) {
       console.error('Ошибка запуска тестов:', err);
@@ -142,7 +153,7 @@ const Dashboard = () => {
 
   const stopTests = async () => {
     try {
-      await fetch('/api/stop', { method: 'POST' });
+      await fetch('/api/autotest/stop', { method: 'POST' });
     } catch (err) {
       console.error('Ошибка остановки:', err);
     }
@@ -150,7 +161,7 @@ const Dashboard = () => {
 
   const resetState = async () => {
     try {
-      await fetch('/api/reset', { method: 'POST' });
+      await fetch('/api/autotest/reset', { method: 'POST' });
     } catch (err) {
       console.error('Ошибка сброса:', err);
     }

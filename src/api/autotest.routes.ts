@@ -1,0 +1,278 @@
+import express from 'express';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { WebSocketServer } from 'ws';
+import http from 'http';
+
+const router = express.Router();
+
+// Состояние тестов (в памяти, в продакшене лучше использовать Redis)
+let testState = {
+  status: 'idle' as 'idle' | 'running' | 'passed' | 'failed' | 'skipped',
+  startTime: null as string | null,
+  endTime: null as string | null,
+  summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
+  logs: [] as Array<{ timestamp: string; level: 'info' | 'success' | 'error' | 'warning'; message: string }>,
+  suites: [] as any[]
+};
+
+// История запусков (последние 50)
+let history: typeof testState[] = [];
+
+// WebSocket клиенты
+const clients = new Set<any>();
+
+// Функция для broadcast всем WebSocket клиентам
+function broadcast(data: any) {
+  const message = JSON.stringify(data);
+  clients.forEach(client => {
+    if (client.readyState === 1) { // OPEN
+      try {
+        client.send(message);
+      } catch (error) {
+        console.error('WebSocket send error:', error);
+      }
+    }
+  });
+}
+
+// Функция добавления лога
+function addLog(level: 'info' | 'success' | 'error' | 'warning', message: string) {
+  const log = {
+    timestamp: new Date().toISOString(),
+    level,
+    message
+  };
+  testState.logs.push(log);
+  if (testState.logs.length > 1000) {
+    testState.logs = testState.logs.slice(-1000);
+  }
+  broadcast({ type: 'log', data: log });
+}
+
+// Парсинг результатов тестов
+function parseTestResults(output: string) {
+  const passedMatch = output.match(/(\d+)\s+passed/i);
+  const failedMatch = output.match(/(\d+)\s+failed/i);
+  const skippedMatch = output.match(/(\d+)\s+skipped/i);
+  
+  if (passedMatch) testState.summary.passed = parseInt(passedMatch[1]);
+  if (failedMatch) testState.summary.failed = parseInt(failedMatch[1]);
+  if (skippedMatch) testState.summary.skipped = parseInt(skippedMatch[1]);
+  
+  testState.summary.total = 
+    testState.summary.passed + 
+    testState.summary.failed + 
+    testState.summary.skipped;
+}
+
+// GET /api/autotest/status - Получить текущий статус
+router.get('/status', (req, res) => {
+  res.json(testState);
+});
+
+// POST /api/autotest/run - Запустить тесты
+router.post('/run', async (req, res) => {
+  if (testState.status === 'running') {
+    return res.status(409).json({ error: 'Тесты уже выполняются' });
+  }
+
+  // Сброс состояния
+  testState = {
+    status: 'running',
+    startTime: new Date().toISOString(),
+    endTime: null,
+    summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
+    logs: [],
+    suites: []
+  };
+
+  addLog('info', '🚀 Запуск тестов...');
+  broadcast({ type: 'state', data: testState });
+  res.json({ success: true, message: 'Тесты запущены' });
+
+  // Запускаем тесты через Docker
+  const dockerCommand = [
+    'docker', 'run', '--rm',
+    '--name', 'autotest-runner-on-demand',
+    '--network', 'ebuster_ebuster-network',
+    '-v', 'ebuster_autotest_reports:/app/tests/public/autotest',
+    '-v', 'ebuster_autotest_storage:/app/tests/storage',
+    'ebuster-autotest-runner',
+    'npm', 'run', 'test:all'
+  ];
+
+  console.log('🎬 Запуск тестов:', dockerCommand.join(' '));
+
+  const testProcess = spawn('docker', dockerCommand.slice(1), {
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+
+  let stdout = '';
+  let stderr = '';
+
+  testProcess.stdout.on('data', (data) => {
+    const text = data.toString();
+    stdout += text;
+    const lines = text.split('\n').filter(l => l.trim());
+    lines.forEach(line => addLog('info', line));
+  });
+
+  testProcess.stderr.on('data', (data) => {
+    const text = data.toString();
+    stderr += text;
+    const lines = text.split('\n').filter(l => l.trim());
+    lines.forEach(line => addLog('error', line));
+  });
+
+  testProcess.on('close', (code) => {
+    testState.status = code === 0 ? 'passed' : 'failed';
+    testState.endTime = new Date().toISOString();
+    
+    if (code === 0) {
+      addLog('success', '✅ Тесты завершены успешно');
+    } else {
+      addLog('error', `❌ Тесты завершены с ошибкой (код: ${code})`);
+    }
+
+    parseTestResults(stdout);
+    
+    // Добавляем в историю
+    history.unshift({ ...testState });
+    if (history.length > 50) history = history.slice(0, 50);
+    
+    broadcast({ type: 'state', data: testState });
+    broadcast({ type: 'end', data: testState });
+  });
+
+  testProcess.on('error', (error) => {
+    addLog('error', `❌ Ошибка запуска тестов: ${error.message}`);
+    testState.status = 'idle';
+    broadcast({ type: 'state', data: testState });
+  });
+});
+
+// POST /api/autotest/stop - Остановить тесты
+router.post('/stop', async (req, res) => {
+  if (testState.status !== 'running') {
+    return res.status(400).json({ error: 'Тесты не выполняются' });
+  }
+
+  try {
+    const { exec } = require('child_process');
+    exec('docker stop autotest-runner-on-demand', (error: any) => {
+      if (error) {
+        console.error('Ошибка остановки:', error);
+      }
+    });
+    
+    testState.status = 'idle';
+    testState.endTime = new Date().toISOString();
+    addLog('warning', '⏸️ Тесты остановлены пользователем');
+    
+    broadcast({ type: 'state', data: testState });
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/autotest/reset - Сбросить состояние
+router.post('/reset', (req, res) => {
+  testState = {
+    status: 'idle',
+    startTime: null,
+    endTime: null,
+    summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
+    logs: [],
+    suites: []
+  };
+  broadcast({ type: 'state', data: testState });
+  res.json({ success: true });
+});
+
+// GET /api/autotest/history - Получить историю запусков
+router.get('/history', (req, res) => {
+  res.json(history);
+});
+
+// POST /api/autotest/recorder/start - Запустить запись теста
+router.post('/recorder/start', async (req, res) => {
+  const { url, outputFile, language = 'typescript', target = 'test', device } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL обязателен' });
+  }
+
+  const recordingId = `recording-${Date.now()}`;
+  const recordedDir = path.resolve(__dirname, '../../../recorded');
+  if (!fs.existsSync(recordedDir)) {
+    fs.mkdirSync(recordedDir, { recursive: true });
+  }
+
+  const outputPath = outputFile 
+    ? path.resolve(recordedDir, outputFile)
+    : path.resolve(recordedDir, `${recordingId}.spec.ts`);
+
+  const args = [
+    'playwright',
+    'codegen',
+    url,
+    `--target=${target}`,
+    `--output=${outputPath}`,
+    `--lang=${language}`
+  ];
+
+  if (device) {
+    args.push(`--device=${device}`);
+  }
+
+  console.log('🎬 Запуск записи:', args.join(' '));
+
+  const process = spawn('npx', args, {
+    cwd: path.resolve(__dirname, '../../..'),
+    stdio: 'inherit',
+    shell: true
+  });
+
+  res.json({ 
+    success: true, 
+    recordingId,
+    message: 'Браузер открыт. Выполните действия на сайте, затем закройте браузер.'
+  });
+});
+
+// GET /api/autotest/suites - Получить список тест-сьютов
+router.get('/suites', async (req, res) => {
+  try {
+    const testsDir = path.resolve(__dirname, '../../../tests');
+    const suites: any[] = [];
+
+    if (fs.existsSync(testsDir)) {
+      const files = fs.readdirSync(testsDir, { recursive: true });
+      const specFiles = files.filter((f: string) => f.endsWith('.spec.ts') || f.endsWith('.spec.js'));
+
+      for (const file of specFiles) {
+        const filePath = path.join(testsDir, file);
+        const stats = fs.statSync(filePath);
+        suites.push({
+          id: file,
+          name: path.basename(file, path.extname(file)),
+          description: `Тест из файла ${file}`,
+          file: file,
+          lastRun: null,
+          status: 'not-run' as const,
+          duration: null
+        });
+      }
+    }
+
+    res.json(suites);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
+
