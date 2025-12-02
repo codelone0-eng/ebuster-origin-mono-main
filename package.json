@@ -23,7 +23,8 @@
     "test:all": "tsx tests/scripts/run-all-tests.ts",
     "test:dashboard": "tsx tests/scripts/generate-dashboard.ts",
     "test:dashboard:live": "tsx tests/scripts/generate-professional-dashboard.ts",
-    "test:serve": "tsx tests/scripts/serve-reports.ts"
+    "test:serve": "tsx tests/scripts/serve-reports.ts",
+    "test:record": "tsx tests/scripts/recorder.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
