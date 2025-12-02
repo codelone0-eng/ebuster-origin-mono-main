@@ -100,22 +100,46 @@ router.post('/run', async (req, res) => {
   broadcast({ type: 'state', data: testState });
   res.json({ success: true, message: 'Тесты запущены' });
 
-  // Запускаем тесты через Docker
-  const dockerCommand = [
-    'docker', 'run', '--rm',
-    '--name', 'autotest-runner-on-demand',
-    '--network', 'ebuster_ebuster-network',
-    '-v', 'ebuster_autotest_reports:/app/tests/public/autotest',
-    '-v', 'ebuster_autotest_storage:/app/tests/storage',
-    'ebuster-autotest-runner',
-    'npm', 'run', 'test:all'
+  // Запускаем тесты через docker-compose exec или через Docker API
+  // Используем docker-compose, так как он доступен в контейнере
+  const dockerComposeCommand = [
+    'docker-compose',
+    'exec',
+    '-T',
+    'autotest-runner',
+    'npm',
+    'run',
+    'test:all'
   ];
 
-  console.log('🎬 Запуск тестов:', dockerCommand.join(' '));
+  console.log('🎬 Запуск тестов через docker-compose:', dockerComposeCommand.join(' '));
 
-  const testProcess = spawn('docker', dockerCommand.slice(1), {
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
+  // Альтернатива: если docker-compose недоступен, используем прямой вызов через docker CLI
+  // Но сначала проверяем доступность
+  let testProcess;
+  try {
+    // Пробуем через docker-compose exec
+    testProcess = spawn('docker-compose', dockerComposeCommand.slice(1), {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      cwd: process.cwd()
+    });
+  } catch (error: any) {
+    // Если docker-compose не работает, пробуем через docker run
+    console.warn('⚠️ docker-compose недоступен, пробую docker run...');
+    const dockerCommand = [
+      'docker', 'run', '--rm',
+      '--name', 'autotest-runner-on-demand',
+      '--network', 'ebuster_ebuster-network',
+      '-v', 'ebuster_autotest_reports:/app/tests/public/autotest',
+      '-v', 'ebuster_autotest_storage:/app/tests/storage',
+      'ebuster-autotest-runner',
+      'npm', 'run', 'test:all'
+    ];
+    
+    testProcess = spawn('docker', dockerCommand.slice(1), {
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+  }
 
   let stdout = '';
   let stderr = '';
@@ -154,9 +178,12 @@ router.post('/run', async (req, res) => {
     broadcast({ type: 'end', data: testState });
   });
 
-  testProcess.on('error', (error) => {
-    addLog('error', `❌ Ошибка запуска тестов: ${error.message}`);
+  testProcess.on('error', (error: any) => {
+    const errorMsg = error.message || String(error);
+    addLog('error', `❌ Ошибка запуска тестов: ${errorMsg}`);
+    addLog('warning', '💡 Убедитесь, что Docker доступен в контейнере API');
     testState.status = 'idle';
+    testState.endTime = new Date().toISOString();
     broadcast({ type: 'state', data: testState });
   });
 });
