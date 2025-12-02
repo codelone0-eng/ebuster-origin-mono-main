@@ -110,7 +110,8 @@ const Dashboard = () => {
   }, [testState.logs]);
 
   const getApiUrl = (endpoint: string) => {
-    if (process.env.NODE_ENV === 'production') {
+    // Всегда используем api.ebuster.ru для autotest API
+    if (window.location.hostname === 'autotest.ebuster.ru' || window.location.hostname === 'localhost') {
       return `https://api.ebuster.ru/api/autotest${endpoint}`;
     }
     return `/api/autotest${endpoint}`;
@@ -119,6 +120,10 @@ const Dashboard = () => {
   const loadStatus = async () => {
     try {
       const res = await fetch(getApiUrl('/status'));
+      if (!res.ok) {
+        console.warn('⚠️ Не удалось загрузить статус:', res.status, res.statusText);
+        return;
+      }
       const data = await res.json();
       setTestState(data);
     } catch (err) {
@@ -129,20 +134,42 @@ const Dashboard = () => {
   const loadHistory = async () => {
     try {
       const res = await fetch(getApiUrl('/history'));
+      if (!res.ok) {
+        console.warn('⚠️ Не удалось загрузить историю:', res.status, res.statusText);
+        return;
+      }
       const data = await res.json();
-      setHistory(data);
+      // Убеждаемся, что data - это массив
+      if (Array.isArray(data)) {
+        setHistory(data);
+      } else {
+        console.warn('⚠️ API вернул не массив:', data);
+        setHistory([]);
+      }
     } catch (err) {
       console.error('Ошибка загрузки истории:', err);
+      setHistory([]);
     }
   };
 
   const loadTestSuites = async () => {
     try {
       const res = await fetch(getApiUrl('/suites'));
+      if (!res.ok) {
+        console.warn('⚠️ Не удалось загрузить тест-сьюты:', res.status, res.statusText);
+        return;
+      }
       const data = await res.json();
-      setTestSuites(data);
+      // Убеждаемся, что data - это массив
+      if (Array.isArray(data)) {
+        setTestSuites(data);
+      } else {
+        console.warn('⚠️ API вернул не массив:', data);
+        setTestSuites([]);
+      }
     } catch (err) {
       console.error('Ошибка загрузки тест-сьютов:', err);
+      setTestSuites([]);
     }
   };
 
