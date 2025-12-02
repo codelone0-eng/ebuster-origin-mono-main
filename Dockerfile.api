@@ -8,6 +8,9 @@ COPY package*.json ./
 # Устанавливаем зависимости (включая dev для Playwright)
 RUN npm install && npm cache clean --force
 
+# Устанавливаем браузеры Playwright (если Playwright установлен)
+RUN npx playwright install --with-deps || echo "Playwright не установлен, пропускаем установку браузеров"
+
 # Копируем исходники API
 COPY server.ts ./
 COPY start-server.ts ./
