@@ -20,8 +20,8 @@ COPY package*.json ./
 # Устанавливаем зависимости (включая dev для Playwright)
 RUN npm install && npm cache clean --force
 
-# Устанавливаем браузеры Playwright (не требуется, используем системный chromium из apk)
-# RUN npx playwright install chromium || echo "Playwright браузеры не установлены"
+# Устанавливаем браузеры Playwright
+RUN npx playwright install chromium || echo "Playwright браузеры не установлены"
 
 # Копируем исходники API
 COPY server.ts ./
