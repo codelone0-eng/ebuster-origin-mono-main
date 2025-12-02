@@ -269,7 +269,7 @@ jobs:
           ENDSSH
       
       - name: 🧹 Автоматическая очистка Docker (только при необходимости)
-        if: env.DEPLOY_API == 'true' || env.DEPLOY_FRONTEND == 'true' || env.DEPLOY_AUTOTEST == 'true'
+        if: env.DEPLOY_API == 'true' || env.DEPLOY_FRONTEND == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
@@ -318,20 +318,6 @@ jobs:
             echo "✅ UI успешно собран"
           ENDSSH
       
-      - name: 📡 Сборка Autotest Server
-        if: env.DEPLOY_AUTOTEST == 'true'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
-            set -e
-            cd /srv/ebuster
-            echo "📡 Начинаю сборку Autotest Server..."
-            echo "📦 Dockerfile: Dockerfile.autotest-server"
-            echo "📋 Компоненты: Express сервер, WebSocket, дашборд, recorder"
-            echo "🌐 Порт: 3002"
-            docker compose build --no-cache autotest-server
-            echo "✅ Autotest Server успешно собран"
-          ENDSSH
-      
       # ============================================
       # ЭТАП 6: ЗАПУСК СЕРВИСОВ
       # ============================================
@@ -365,11 +351,6 @@ jobs:
               if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
                 echo "▶️  Запускаю Frontend..."
                 docker compose up -d frontend
-              fi
-              
-              if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
-                echo "▶️  Запускаю Autotest..."
-                docker compose up -d autotest-server
               fi
             fi
             
@@ -470,20 +451,6 @@ jobs:
             fi
           ENDSSH
       
-      - name: 📡 Проверка Autotest Server
-        if: env.DEPLOY_AUTOTEST == 'true'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
-            set -e
-            echo "📡 Проверяю Autotest Server..."
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3002/api/status || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "✅ Autotest Server работает (HTTP $STATUS)"
-            else
-              echo "⚠️  Autotest Server вернул статус: $STATUS"
-            fi
-          ENDSSH
-      
       # ============================================
       # ЭТАП 10: ФИНАЛЬНАЯ ПРОВЕРКА И ОТЧЁТ
       # ============================================
@@ -513,9 +480,6 @@ jobs:
               echo "   • Личный кабинет: https://lk.ebuster.ru"
               echo "   • Админ Панель: https://admin.ebuster.ru"
             fi
-            if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
-              echo "   • Autotest Dashboard: https://autotest.ebuster.ru"
-            fi
             echo ""
             echo "📊 Статус контейнеров:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
@@ -536,9 +500,6 @@ jobs:
           fi
           if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
             DEPLOYED_SERVICES="${DEPLOYED_SERVICES}• Лендинг: <a href='https://ebuster.ru'>ebuster.ru</a>\n• ЛК: <a href='https://lk.ebuster.ru'>lk.ebuster.ru</a>\n• Админка: <a href='https://admin.ebuster.ru'>admin.ebuster.ru</a>\n"
-          fi
-          if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
-            DEPLOYED_SERVICES="${DEPLOYED_SERVICES}• Autotest: <a href='https://autotest.ebuster.ru'>autotest.ebuster.ru</a>\n"
           fi
           
           MESSAGE="✅ <b>Деплой успешно завершён!</b>
