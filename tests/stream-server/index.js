@@ -528,7 +528,15 @@ if (!fs.existsSync(recordedDir)) {
 }
 
 // Статический сервер для UI recorder
-app.use('/recorder', express.static(path.resolve(__dirname, '../recorder-ui')));
+app.use('/recorder/', express.static(path.resolve(__dirname, '../recorder-ui'), {
+  index: 'index.html',
+  fallthrough: false
+}));
+
+// Редирект с /recorder на /recorder/
+app.get('/recorder', (req, res) => {
+  res.redirect('/recorder/');
+});
 
 // Запуск записи
 app.post('/api/recorder/start', (req, res) => {
