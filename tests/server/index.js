@@ -209,6 +209,52 @@ app.post('/api/reset', (req, res) => {
   res.json({ success: true });
 });
 
+// Recorder API
+app.post('/api/recorder/start', async (req, res) => {
+  const { url, outputFile, language = 'typescript', target = 'test', device } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL обязателен' });
+  }
+
+  const recordingId = `recording-${Date.now()}`;
+  const recordedDir = path.resolve(__dirname, '../recorded');
+  if (!fs.existsSync(recordedDir)) {
+    fs.mkdirSync(recordedDir, { recursive: true });
+  }
+
+  const outputPath = outputFile 
+    ? path.resolve(recordedDir, outputFile)
+    : path.resolve(recordedDir, `${recordingId}.spec.ts`);
+
+  const args = [
+    'playwright',
+    'codegen',
+    url,
+    `--target=${target}`,
+    `--output=${outputPath}`,
+    `--lang=${language}`
+  ];
+
+  if (device) {
+    args.push(`--device=${device}`);
+  }
+
+  console.log('🎬 Запуск записи:', args.join(' '));
+
+  const process = spawn('npx', args, {
+    cwd: path.resolve(__dirname, '../../'),
+    stdio: 'inherit',
+    shell: true
+  });
+
+  res.json({ 
+    success: true, 
+    recordingId,
+    message: 'Браузер открыт. Выполните действия на сайте, затем закройте браузер.'
+  });
+});
+
 const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
   console.log(`🚀 Autotest Server запущен на порту ${PORT}`);
