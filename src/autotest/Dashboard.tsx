@@ -6,7 +6,7 @@ import {
   Plus, Search, Filter, Calendar, TrendingUp, TrendingDown,
   Zap, Database, Server, Globe, Code2, Terminal,
   BarChart3, PieChart, LineChart, History, Bell,
-  Save, FolderOpen, Share2, Copy, Eye, EyeOff
+  Save, FolderOpen, Share2, Copy, Eye, EyeOff, Film
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -196,7 +196,6 @@ const Dashboard = () => {
         url="https://autotest.ebuster.ru"
       />
       <div className="relative">
-        <Header />
         <SilkBackground />
         
         <div className="relative z-10">
@@ -259,28 +258,46 @@ const Dashboard = () => {
           <section className="relative px-4 py-12">
             <div className="container mx-auto max-w-[1440px]">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                <TabsList className="bg-white/5 border border-white/10 p-1">
-                  <TabsTrigger value="dashboard" className="data-[state=active]:bg-white/10">
+                <TabsList className="bg-white/[0.02] border border-white/10 p-1.5 gap-1.5 backdrop-blur-xl">
+                  <TabsTrigger 
+                    value="dashboard" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
                     <Activity className="h-4 w-4 mr-2" />
                     Дашборд
                   </TabsTrigger>
-                  <TabsTrigger value="tests" className="data-[state=active]:bg-white/10">
+                  <TabsTrigger 
+                    value="tests" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
                     <FileCode className="h-4 w-4 mr-2" />
                     Тесты
                   </TabsTrigger>
-                  <TabsTrigger value="history" className="data-[state=active]:bg-white/10">
+                  <TabsTrigger 
+                    value="history" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
                     <History className="h-4 w-4 mr-2" />
                     История
                   </TabsTrigger>
-                  <TabsTrigger value="reports" className="data-[state=active]:bg-white/10">
+                  <TabsTrigger 
+                    value="reports" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Отчеты
                   </TabsTrigger>
-                  <TabsTrigger value="recorder" className="data-[state=active]:bg-white/10">
-                    <Video className="h-4 w-4 mr-2" />
+                  <TabsTrigger 
+                    value="recorder" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
+                    <Film className="h-4 w-4 mr-2" />
                     Recorder
                   </TabsTrigger>
-                  <TabsTrigger value="settings" className="data-[state=active]:bg-white/10">
+                  <TabsTrigger 
+                    value="settings" 
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:border-white/20 text-white/60 border border-transparent px-4 py-2.5 rounded-lg transition-all hover:text-white/80 hover:bg-white/5"
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     Настройки
                   </TabsTrigger>
@@ -535,7 +552,10 @@ const Dashboard = () => {
                 <TabsContent value="recorder">
                   <Card className="bg-white/[0.02] border-white/10 backdrop-blur-xl">
                     <CardHeader>
-                      <CardTitle>🎬 Playwright Test Recorder</CardTitle>
+                      <div className="flex items-center gap-3">
+                        <Film className="h-5 w-5 text-white" />
+                        <CardTitle className="text-white">Playwright Test Recorder</CardTitle>
+                      </div>
                       <p className="text-white/60 mt-2">
                         Записывайте действия в браузере и генерируйте готовые тесты
                       </p>
@@ -559,7 +579,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <Button className="w-full bg-white text-black hover:bg-white/90">
-                        <Video className="h-4 w-4 mr-2" />
+                        <Film className="h-4 w-4 mr-2" />
                         Начать запись
                       </Button>
                     </CardContent>
@@ -581,8 +601,6 @@ const Dashboard = () => {
             </div>
           </section>
         </div>
-
-        <Footer />
       </div>
     </div>
   );
