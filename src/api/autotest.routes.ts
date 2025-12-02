@@ -115,10 +115,15 @@ router.post('/run', async (req, res) => {
   }
 
   // Запускаем тесты через npx playwright test
+  // Устанавливаем переменную окружения для использования системного chromium
   const testProcess = spawn('npx', ['playwright', 'test'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd: process.cwd(),
-    shell: true
+    shell: true,
+    env: {
+      ...process.env,
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: '/usr/bin/chromium'
+    }
   });
 
   let stdout = '';
