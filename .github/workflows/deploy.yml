@@ -22,7 +22,6 @@ jobs:
     outputs:
       api-changed: ${{ steps.changes.outputs.api }}
       frontend-changed: ${{ steps.changes.outputs.frontend }}
-      autotest-changed: ${{ steps.changes.outputs.autotest }}
       docker-changed: ${{ steps.changes.outputs.docker }}
       all-changed: ${{ steps.changes.outputs.all }}
     steps:
@@ -38,7 +37,6 @@ jobs:
           # Инициализируем переменные
           API_CHANGED=false
           FRONTEND_CHANGED=false
-          AUTOTEST_CHANGED=false
           DOCKER_CHANGED=false
           ALL_CHANGED=false
           
@@ -46,12 +44,10 @@ jobs:
             # При ручном запуске деплоим все
             API_CHANGED=true
             FRONTEND_CHANGED=true
-            AUTOTEST_CHANGED=true
             DOCKER_CHANGED=true
             ALL_CHANGED=true
             echo "api=true" >> $GITHUB_OUTPUT
             echo "frontend=true" >> $GITHUB_OUTPUT
-            echo "autotest=true" >> $GITHUB_OUTPUT
             echo "docker=true" >> $GITHUB_OUTPUT
             echo "all=true" >> $GITHUB_OUTPUT
             echo "✅ Ручной запуск - деплоим все компоненты"
@@ -79,17 +75,8 @@ jobs:
               echo "frontend=false" >> $GITHUB_OUTPUT
             fi
             
-            # Проверяем изменения в autotest
-            if echo "$CHANGED_FILES" | grep -qE "(^tests/|^Dockerfile\.autotest|^Dockerfile\.autotest-server)"; then
-              AUTOTEST_CHANGED=true
-              echo "autotest=true" >> $GITHUB_OUTPUT
-              echo "✅ Обнаружены изменения в autotest"
-            else
-              echo "autotest=false" >> $GITHUB_OUTPUT
-            fi
-            
             # Проверяем изменения в Docker конфигурации (nginx.conf исключен, т.к. он только для frontend)
-            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile\.(api|autotest|autotest-server))"; then
+            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile\.api)"; then
               DOCKER_CHANGED=true
               echo "docker=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в Docker конфигурации"
@@ -115,7 +102,6 @@ jobs:
           echo "📊 Результаты анализа:"
           echo "   API: ${API_CHANGED:-false}"
           echo "   Frontend: ${FRONTEND_CHANGED:-false}"
-          echo "   Autotest: ${AUTOTEST_CHANGED:-false}"
           echo "   Docker: ${DOCKER_CHANGED:-false}"
           echo "   All: ${ALL_CHANGED:-false}"
 
@@ -130,7 +116,6 @@ jobs:
     env:
       DEPLOY_API: ${{ needs.detect-changes.outputs.api-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
       DEPLOY_FRONTEND: ${{ needs.detect-changes.outputs.frontend-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
-      DEPLOY_AUTOTEST: ${{ needs.detect-changes.outputs.autotest-changed == 'true' || needs.detect-changes.outputs.all-changed == 'true' || needs.detect-changes.outputs.docker-changed == 'true' }}
     
     steps:
       # ============================================

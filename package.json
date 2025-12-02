@@ -12,7 +12,6 @@
     "server": "tsx start-server.ts",
     "server:dev": "tsx watch start-server.ts",
     "dev:full": "concurrently \"npm run dev\" \"npm run server:dev\"",
-    "test:all": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
