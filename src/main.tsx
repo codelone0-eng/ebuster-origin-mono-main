@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import LandingApp from "./LandingApp.tsx";
 import DashboardApp from "./DashboardApp.tsx";
 import AdminApp from "./AdminApp.tsx";
+import AutotestApp from "./AutotestApp.tsx";
 import "./index.css";
 import { HelmetProvider } from 'react-helmet-async';
 
@@ -17,12 +18,17 @@ if (hostname === 'lk.ebuster.ru') {
 } else if (hostname === 'admin.ebuster.ru') {
   // Админка
   AppComponent = AdminApp;
+} else if (hostname === 'autotest.ebuster.ru') {
+  // Автотестирование
+  AppComponent = AutotestApp;
 } else if (hostname === 'localhost') {
   // Localhost - выбираем по пути
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/ticket')) {
     AppComponent = DashboardApp;
   } else if (pathname.startsWith('/admin')) {
     AppComponent = AdminApp;
+  } else if (pathname.startsWith('/autotest')) {
+    AppComponent = AutotestApp;
   } else {
     AppComponent = LandingApp;
   }
