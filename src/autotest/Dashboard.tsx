@@ -109,9 +109,16 @@ const Dashboard = () => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [testState.logs]);
 
+  const getApiUrl = (endpoint: string) => {
+    if (process.env.NODE_ENV === 'production') {
+      return `https://api.ebuster.ru/api/autotest${endpoint}`;
+    }
+    return `/api/autotest${endpoint}`;
+  };
+
   const loadStatus = async () => {
     try {
-      const res = await fetch('/api/autotest/status');
+      const res = await fetch(getApiUrl('/status'));
       const data = await res.json();
       setTestState(data);
     } catch (err) {
@@ -121,7 +128,7 @@ const Dashboard = () => {
 
   const loadHistory = async () => {
     try {
-      const res = await fetch('/api/autotest/history');
+      const res = await fetch(getApiUrl('/history'));
       const data = await res.json();
       setHistory(data);
     } catch (err) {
@@ -131,7 +138,7 @@ const Dashboard = () => {
 
   const loadTestSuites = async () => {
     try {
-      const res = await fetch('/api/autotest/suites');
+      const res = await fetch(getApiUrl('/suites'));
       const data = await res.json();
       setTestSuites(data);
     } catch (err) {
@@ -143,7 +150,7 @@ const Dashboard = () => {
     if (testState.status === 'running') return;
     
     try {
-      const res = await fetch('/api/autotest/run', { method: 'POST' });
+      const res = await fetch(getApiUrl('/run'), { method: 'POST' });
       if (!res.ok) throw new Error('Ошибка запуска');
     } catch (err) {
       console.error('Ошибка запуска тестов:', err);
@@ -153,7 +160,7 @@ const Dashboard = () => {
 
   const stopTests = async () => {
     try {
-      await fetch('/api/autotest/stop', { method: 'POST' });
+      await fetch(getApiUrl('/stop'), { method: 'POST' });
     } catch (err) {
       console.error('Ошибка остановки:', err);
     }
@@ -161,7 +168,7 @@ const Dashboard = () => {
 
   const resetState = async () => {
     try {
-      await fetch('/api/autotest/reset', { method: 'POST' });
+      await fetch(getApiUrl('/reset'), { method: 'POST' });
     } catch (err) {
       console.error('Ошибка сброса:', err);
     }

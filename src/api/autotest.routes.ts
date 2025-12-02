@@ -2,8 +2,6 @@ import express from 'express';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { WebSocketServer } from 'ws';
-import http from 'http';
 
 const router = express.Router();
 
@@ -20,13 +18,18 @@ let testState = {
 // История запусков (последние 50)
 let history: typeof testState[] = [];
 
-// WebSocket клиенты
-const clients = new Set<any>();
+// Функция для получения WebSocket сервера
+function getWSS() {
+  return (global as any).autotestWSS;
+}
 
 // Функция для broadcast всем WebSocket клиентам
 function broadcast(data: any) {
+  const wss = getWSS();
+  if (!wss) return;
+  
   const message = JSON.stringify(data);
-  clients.forEach(client => {
+  wss.clients.forEach((client: any) => {
     if (client.readyState === 1) { // OPEN
       try {
         client.send(message);
@@ -35,6 +38,11 @@ function broadcast(data: any) {
       }
     }
   });
+}
+
+// Экспортируем функцию для получения состояния (для WebSocket)
+export function getTestState() {
+  return testState;
 }
 
 // Функция добавления лога

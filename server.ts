@@ -26,6 +26,7 @@ import { logRequestToSupabase } from './src/api/clickhouse.middleware';
 import { getSupabaseClient } from './src/api/admin.controller';
 
 const app = express();
+const server = require('http').createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Trust proxy для корректной работы rate limiting за nginx/cloudflare
