@@ -100,21 +100,25 @@ router.post('/run', async (req, res) => {
   broadcast({ type: 'state', data: testState });
   res.json({ success: true, message: 'Тесты запущены' });
 
-  // Запускаем тесты через Docker (Docker socket монтирован в контейнер)
-  const dockerCommand = [
-    'docker', 'run', '--rm',
-    '--name', 'autotest-runner-on-demand',
-    '--network', 'ebuster_ebuster-network',
-    '-v', 'ebuster_autotest_reports:/app/tests/public/autotest',
-    '-v', 'ebuster_autotest_storage:/app/tests/storage',
-    'ebuster-autotest-runner',
-    'npm', 'run', 'test:all'
-  ];
+  // Запускаем тесты напрямую через npm (Playwright должен быть установлен в контейнере API)
+  // Или можно запустить через docker-compose exec в существующий контейнер
+  console.log('🎬 Запуск тестов через npm...');
 
-  console.log('🎬 Запуск тестов:', dockerCommand.join(' '));
+  // Проверяем, есть ли тесты в проекте
+  const testsDir = path.join(process.cwd(), 'tests');
+  if (!fs.existsSync(testsDir)) {
+    addLog('warning', '⚠️ Директория tests не найдена');
+    testState.status = 'idle';
+    testState.endTime = new Date().toISOString();
+    broadcast({ type: 'state', data: testState });
+    return;
+  }
 
-  const testProcess = spawn('docker', dockerCommand.slice(1), {
-    stdio: ['ignore', 'pipe', 'pipe']
+  // Запускаем тесты через npx playwright test
+  const testProcess = spawn('npx', ['playwright', 'test'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: process.cwd(),
+    shell: true
   });
 
   let stdout = '';

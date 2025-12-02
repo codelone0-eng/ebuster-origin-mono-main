@@ -2,14 +2,11 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Устанавливаем Docker CLI для запуска тестов
-RUN apk add --no-cache docker-cli
-
 # Копируем package files
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --omit=dev && npm cache clean --force
+# Устанавливаем зависимости (включая dev для Playwright)
+RUN npm install && npm cache clean --force
 
 # Копируем исходники API
 COPY server.ts ./
@@ -20,6 +17,9 @@ COPY src/config ./src/config
 COPY src/services ./src/services
 COPY src/utils ./src/utils
 COPY tsconfig*.json ./
+
+# Копируем тесты (если есть)
+COPY tests ./tests
 
 # Устанавливаем tsx для запуска TypeScript
 RUN npm install -g tsx
