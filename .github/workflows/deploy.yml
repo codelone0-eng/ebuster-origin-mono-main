@@ -273,7 +273,7 @@ jobs:
             
             if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
               echo "🛑 Останавливаю Autotest контейнеры..."
-              docker compose stop autotest-stream autotest-dashboard-init || echo "⚠️  Autotest контейнеры уже остановлены"
+              docker compose stop autotest-server || echo "⚠️  Autotest контейнеры уже остановлены"
             fi
             
             # Если изменена Docker конфигурация - останавливаем все
