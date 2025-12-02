@@ -6,6 +6,8 @@ import { exec, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const server = http.createServer(app);
@@ -514,9 +516,126 @@ app.post('/reset', (req, res) => {
   res.json({ success: true });
 });
 
+// Recorder endpoints
+const recordings = new Map(); // Хранилище активных записей
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const recordedDir = path.resolve(__dirname, '../recorded');
+
+// Создаём директорию для записей
+if (!fs.existsSync(recordedDir)) {
+  fs.mkdirSync(recordedDir, { recursive: true });
+}
+
+// Статический сервер для UI recorder
+app.use('/recorder', express.static(path.resolve(__dirname, '../recorder-ui')));
+
+// Запуск записи
+app.post('/api/recorder/start', (req, res) => {
+  const { url, outputFile, language = 'typescript', target = 'test', device, viewport } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL обязателен' });
+  }
+
+  const recordingId = `recording-${Date.now()}`;
+  const outputPath = outputFile 
+    ? path.resolve(recordedDir, outputFile)
+    : path.resolve(recordedDir, `${recordingId}.spec.ts`);
+
+  // Формируем команду для Playwright Codegen
+  const args = [
+    'playwright',
+    'codegen',
+    url,
+    `--target=${target}`,
+    `--output=${outputPath}`,
+    `--lang=${language}`
+  ];
+
+  if (device) {
+    args.push(`--device=${device}`);
+  }
+
+  if (viewport && viewport.width && viewport.height) {
+    args.push(`--viewport-size=${viewport.width},${viewport.height}`);
+  }
+
+  console.log(`🎬 Запуск записи ${recordingId}:`, args.join(' '));
+
+  // Запускаем Playwright Codegen
+  const process = spawn('npx', args, {
+    cwd: path.resolve(__dirname, '../../'),
+    stdio: 'inherit',
+    shell: true
+  });
+
+  recordings.set(recordingId, {
+    id: recordingId,
+    process,
+    outputPath,
+    startTime: new Date().toISOString(),
+    completed: false,
+    code: null
+  });
+
+  // Отслеживаем завершение процесса
+  process.on('close', (code) => {
+    const recording = recordings.get(recordingId);
+    if (recording) {
+      recording.completed = true;
+      
+      // Читаем сгенерированный код
+      try {
+        if (fs.existsSync(outputPath)) {
+          recording.code = fs.readFileSync(outputPath, 'utf-8');
+          console.log(`✅ Запись ${recordingId} завершена, код сохранён`);
+        }
+      } catch (err) {
+        console.error(`❌ Ошибка чтения файла записи:`, err);
+      }
+    }
+  });
+
+  res.json({ 
+    success: true, 
+    recordingId,
+    message: 'Браузер открыт. Выполните действия на сайте, затем закройте браузер.'
+  });
+});
+
+// Проверка статуса записи
+app.get('/api/recorder/status/:recordingId', (req, res) => {
+  const { recordingId } = req.params;
+  const recording = recordings.get(recordingId);
+
+  if (!recording) {
+    return res.status(404).json({ error: 'Запись не найдена' });
+  }
+
+  res.json({
+    id: recording.id,
+    completed: recording.completed,
+    code: recording.code,
+    startTime: recording.startTime
+  });
+});
+
+// Получение списка записей
+app.get('/api/recorder/list', (req, res) => {
+  const list = Array.from(recordings.values()).map(r => ({
+    id: r.id,
+    completed: r.completed,
+    startTime: r.startTime,
+    outputPath: r.outputPath
+  }));
+  res.json({ recordings: list });
+});
+
 const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
   console.log(`🔴 Live stream server running on port ${PORT}`);
   console.log(`WebSocket: ws://localhost:${PORT}`);
   console.log(`REST API: http://localhost:${PORT}/status`);
+  console.log(`🎬 Recorder UI: http://localhost:${PORT}/recorder`);
 });
