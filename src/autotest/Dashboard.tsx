@@ -90,7 +90,7 @@ const Dashboard = () => {
           }));
         } else if (type === 'end') {
           setTestState(data);
-          setHistory(prev => [data, ...prev].slice(0, 50));
+          setHistory(prev => Array.isArray(prev) ? [data, ...prev].slice(0, 50) : [data]);
         }
       } catch (err) {
         console.error('Ошибка парсинга WebSocket:', err);
@@ -500,7 +500,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {testSuites.map((suite) => (
+                    {Array.isArray(testSuites) && testSuites.length > 0 ? testSuites.map((suite) => (
                       <Card key={suite.id} className="bg-white/[0.02] border-white/10 backdrop-blur-xl hover:border-white/20 transition-colors">
                         <CardHeader>
                           <div className="flex items-start justify-between">

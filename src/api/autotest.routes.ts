@@ -258,27 +258,40 @@ router.get('/suites', async (req, res) => {
     const suites: any[] = [];
 
     if (fs.existsSync(testsDir)) {
-      const files = fs.readdirSync(testsDir, { recursive: true });
-      const specFiles = files.filter((f: string) => f.endsWith('.spec.ts') || f.endsWith('.spec.js'));
+      try {
+        const files = fs.readdirSync(testsDir, { recursive: true });
+        const specFiles = files.filter((f: string) => 
+          typeof f === 'string' && (f.endsWith('.spec.ts') || f.endsWith('.spec.js'))
+        );
 
-      for (const file of specFiles) {
-        const filePath = path.join(testsDir, file);
-        const stats = fs.statSync(filePath);
-        suites.push({
-          id: file,
-          name: path.basename(file, path.extname(file)),
-          description: `Тест из файла ${file}`,
-          file: file,
-          lastRun: null,
-          status: 'not-run' as const,
-          duration: null
-        });
+        for (const file of specFiles) {
+          try {
+            const filePath = path.join(testsDir, file);
+            if (fs.existsSync(filePath)) {
+              suites.push({
+                id: file,
+                name: path.basename(file, path.extname(file)),
+                description: `Тест из файла ${file}`,
+                file: file,
+                lastRun: null,
+                status: 'not-run' as const,
+                duration: null
+              });
+            }
+          } catch (fileError) {
+            console.warn(`⚠️ Ошибка обработки файла ${file}:`, fileError);
+          }
+        }
+      } catch (readError) {
+        console.warn('⚠️ Ошибка чтения директории tests:', readError);
+        // Возвращаем пустой массив вместо ошибки
       }
     }
 
     res.json(suites);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Ошибка в /api/autotest/suites:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 
