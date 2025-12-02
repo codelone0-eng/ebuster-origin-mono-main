@@ -144,6 +144,9 @@ router.post('/run', async (req, res) => {
     
     if (code === 0) {
       addLog('success', '✅ Тесты завершены успешно');
+    } else if (code === 1 && stdout.includes('No tests found')) {
+      addLog('warning', '⚠️ Тесты не найдены. Добавьте тесты в директорию tests/');
+      testState.status = 'skipped';
     } else {
       addLog('error', `❌ Тесты завершены с ошибкой (код: ${code})`);
     }
