@@ -142,9 +142,6 @@ jobs:
           if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
             DEPLOY_INFO="${DEPLOY_INFO}• Frontend (Лендинг, ЛК, Админка)\n"
           fi
-          if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
-            DEPLOY_INFO="${DEPLOY_INFO}• Autotest\n"
-          fi
           if [ -z "$DEPLOY_INFO" ]; then
             DEPLOY_INFO="• Нет изменений для деплоя"
           fi
@@ -254,11 +251,6 @@ jobs:
             if [ "${{ env.DEPLOY_FRONTEND }}" = "true" ]; then
               echo "🛑 Останавливаю Frontend контейнер..."
               docker compose stop frontend || echo "⚠️  Frontend контейнер уже остановлен"
-            fi
-            
-            if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
-              echo "🛑 Останавливаю Autotest контейнеры..."
-              docker compose stop autotest-server || echo "⚠️  Autotest контейнеры уже остановлены"
             fi
             
             # Если изменена Docker конфигурация - останавливаем все
