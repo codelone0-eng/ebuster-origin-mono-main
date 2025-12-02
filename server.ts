@@ -154,6 +154,7 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/tickets', ticketsRoutes); // Новая система тикетов
 app.use('/api/roles', rolesRoutes); // Система ролей
 app.use('/api/subscriptions', subscriptionsRoutes); // Подписки
+app.use('/api/autotest', autotestRoutes); // Автотестирование
 
 // API Keys routes
 app.get('/api/user/api-keys', authenticateUser, apiKeysController.getUserApiKeys);
