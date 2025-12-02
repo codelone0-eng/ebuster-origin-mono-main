@@ -559,36 +559,42 @@ const Dashboard = () => {
                 {/* History Tab */}
                 <TabsContent value="history" className="space-y-4">
                   <div className="space-y-4">
-                    {Array.isArray(history) && history.length > 0 ? history.map((run) => (
-                      <Card key={run.id} className="bg-white/[0.02] border-white/10 backdrop-blur-xl">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              {getStatusIcon(run.status)}
-                              <div>
-                                <CardTitle className="text-white">
-                                  Запуск #{run?.id ? String(run.id).slice(-8) : 'N/A'}
-                                </CardTitle>
-                                <p className="text-sm text-white/60">
-                                  {new Date(run.startTime).toLocaleString('ru-RU')}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <div className="text-sm text-white/60">Длительность</div>
-                                <div className="text-white font-medium">
-                                  {formatDuration(run.duration)}
+                    {Array.isArray(history) && history.length > 0 ? (
+                      history.map((run) => (
+                        <Card key={run?.id || Math.random()} className="bg-white/[0.02] border-white/10 backdrop-blur-xl">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                {getStatusIcon(run?.status || 'idle')}
+                                <div>
+                                  <CardTitle className="text-white">
+                                    Запуск #{run?.id ? String(run.id).slice(-8) : 'N/A'}
+                                  </CardTitle>
+                                  <p className="text-sm text-white/60">
+                                    {run?.startTime ? new Date(run.startTime).toLocaleString('ru-RU') : 'Неизвестно'}
+                                  </p>
                                 </div>
                               </div>
-                              <Badge className={getStatusColor(run.status)}>
-                                {run.summary.passed}/{run.summary.total}
-                              </Badge>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <div className="text-sm text-white/60">Длительность</div>
+                                  <div className="text-white font-medium">
+                                    {formatDuration(run?.duration || 0)}
+                                  </div>
+                                </div>
+                                <Badge className={getStatusColor(run?.status || 'idle')}>
+                                  {run?.summary?.passed || 0}/{run?.summary?.total || 0}
+                                </Badge>
+                              </div>
                             </div>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    ))}
+                          </CardHeader>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-white/60">
+                        История запусков пуста
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
