@@ -15,15 +15,15 @@ export default defineConfig({
     baseURL: process.env.TEST_BASE_URL || 'https://ebuster.ru',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Используем системный chromium в Alpine Linux
+    executablePath: process.env.CI ? '/usr/bin/chromium-browser' : undefined,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   },
   projects: [
     {
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Используем системный chromium в Alpine Linux
-        executablePath: process.env.CI ? '/usr/bin/chromium-browser' : undefined,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
       },
     },
   ],
