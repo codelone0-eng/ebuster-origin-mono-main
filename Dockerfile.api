@@ -24,8 +24,8 @@ RUN npm install && npm cache clean --force
 COPY tests ./tests
 COPY playwright.config.ts ./playwright.config.ts
 
-# Устанавливаем браузеры Playwright с зависимостями
-RUN npx playwright install --with-deps chromium
+# Устанавливаем браузеры Playwright (без --with-deps, т.к. зависимости уже установлены через apk)
+RUN npx playwright install chromium
 
 # Копируем исходники API
 COPY server.ts ./
