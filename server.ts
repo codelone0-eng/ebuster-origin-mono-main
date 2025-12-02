@@ -317,11 +317,46 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
+// WebSocket сервер для автотестов
+let wss: any = null;
+try {
+  const { WebSocketServer } = require('ws');
+  wss = new WebSocketServer({ server, path: '/ws' });
+  
+  wss.on('connection', (ws: any) => {
+    console.log('✅ WebSocket клиент подключен (autotest)');
+    
+    // Отправляем текущее состояние при подключении
+    const autotestRoutes = require('./src/api/autotest.routes');
+    const currentState = autotestRoutes.getTestState?.() || { 
+      status: 'idle', 
+      summary: { total: 0, passed: 0, failed: 0, skipped: 0 }, 
+      logs: [] 
+    };
+    ws.send(JSON.stringify({ type: 'state', data: currentState }));
+    
+    ws.on('close', () => {
+      console.log('❌ WebSocket клиент отключен (autotest)');
+    });
+    
+    ws.on('error', (error: any) => {
+      console.error('❌ WebSocket ошибка:', error);
+    });
+  });
+  
+  // Экспортируем WebSocket сервер для использования в autotest.routes
+  (global as any).autotestWSS = wss;
+  console.log('🔌 WebSocket server initialized on /ws');
+} catch (error) {
+  console.warn('⚠️ WebSocket server not available (ws package may not be installed)');
+}
+
 // Запуск сервера
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Email API Server running on port ${PORT}`);
   console.log(`📧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS enabled for: ${process.env.NODE_ENV === 'production' ? 'production domains' : 'localhost'}`);
+  console.log(`🔌 WebSocket server running on /ws`);
   
   // Запускаем cron jobs для автоматической разблокировки
   startAllCronJobs();

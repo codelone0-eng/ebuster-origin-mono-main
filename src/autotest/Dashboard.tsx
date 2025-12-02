@@ -583,6 +583,7 @@ const Dashboard = () => {
                         <div>
                           <label className="text-sm text-white/60 mb-2 block">URL для тестирования</label>
                           <Input
+                            id="recorder-url"
                             placeholder="https://lk.ebuster.ru"
                             className="bg-white/5 border-white/10 text-white"
                             defaultValue="https://lk.ebuster.ru"
@@ -591,12 +592,39 @@ const Dashboard = () => {
                         <div>
                           <label className="text-sm text-white/60 mb-2 block">Имя файла</label>
                           <Input
+                            id="recorder-file"
                             placeholder="my-test.spec.ts"
                             className="bg-white/5 border-white/10 text-white"
                           />
                         </div>
                       </div>
-                      <Button className="w-full bg-white text-black hover:bg-white/90">
+                      <Button 
+                        className="w-full bg-white text-black hover:bg-white/90"
+                        onClick={async () => {
+                          const urlInput = document.getElementById('recorder-url') as HTMLInputElement;
+                          const fileInput = document.getElementById('recorder-file') as HTMLInputElement;
+                          
+                          try {
+                            const apiUrl = getApiUrl('/recorder/start');
+                            const res = await fetch(apiUrl, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                url: urlInput?.value || 'https://lk.ebuster.ru',
+                                outputFile: fileInput?.value || undefined
+                              })
+                            });
+                            const data = await res.json();
+                            if (res.ok) {
+                              alert(data.message || 'Браузер открыт. Выполните действия и закройте браузер.');
+                            } else {
+                              alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                            }
+                          } catch (err: any) {
+                            alert('Ошибка: ' + err.message);
+                          }
+                        }}
+                      >
                         <Film className="h-4 w-4 mr-2" />
                         Начать запись
                       </Button>
