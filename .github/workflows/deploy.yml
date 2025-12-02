@@ -80,7 +80,7 @@ jobs:
             fi
             
             # Проверяем изменения в autotest
-            if echo "$CHANGED_FILES" | grep -qE "(^tests/|^Dockerfile\.autotest|^Dockerfile\.autotest-stream)"; then
+            if echo "$CHANGED_FILES" | grep -qE "(^tests/|^Dockerfile\.autotest|^Dockerfile\.autotest-server)"; then
               AUTOTEST_CHANGED=true
               echo "autotest=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в autotest"
@@ -89,7 +89,7 @@ jobs:
             fi
             
             # Проверяем изменения в Docker конфигурации (nginx.conf исключен, т.к. он только для frontend)
-            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile\.(api|autotest|autotest-stream))"; then
+            if echo "$CHANGED_FILES" | grep -qE "(^docker-compose\.yml|^Dockerfile\.(api|autotest|autotest-server))"; then
               DOCKER_CHANGED=true
               echo "docker=true" >> $GITHUB_OUTPUT
               echo "✅ Обнаружены изменения в Docker конфигурации"
@@ -333,32 +333,18 @@ jobs:
             echo "✅ UI успешно собран"
           ENDSSH
       
-      - name: 📡 Сборка Autotest Stream Server
+      - name: 📡 Сборка Autotest Server
         if: env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
             cd /srv/ebuster
-            echo "📡 Начинаю сборку Autotest Stream Server..."
-            echo "📦 Dockerfile: Dockerfile.autotest-stream"
-            echo "📋 Компоненты: WebSocket сервер, live-обновления тестов"
+            echo "📡 Начинаю сборку Autotest Server..."
+            echo "📦 Dockerfile: Dockerfile.autotest-server"
+            echo "📋 Компоненты: Express сервер, WebSocket, дашборд, recorder"
             echo "🌐 Порт: 3002"
-            docker compose build --no-cache autotest-stream
-            echo "✅ Autotest Stream Server успешно собран"
-          ENDSSH
-      
-      - name: 📊 Сборка Autotest Dashboard Init
-        if: env.DEPLOY_AUTOTEST == 'true'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
-            set -e
-            cd /srv/ebuster
-            echo "📊 Начинаю сборку Autotest Dashboard Init..."
-            echo "📦 Dockerfile: Dockerfile.autotest"
-            echo "📋 Компоненты: Playwright, генератор начального дашборда"
-            echo "🎯 Назначение: Создание placeholder для autotest.ebuster.ru"
-            docker compose build --no-cache autotest-dashboard-init
-            echo "✅ Autotest Dashboard Init успешно собран"
+            docker compose build --no-cache autotest-server
+            echo "✅ Autotest Server успешно собран"
           ENDSSH
       
       # ============================================
@@ -398,7 +384,7 @@ jobs:
               
               if [ "${{ env.DEPLOY_AUTOTEST }}" = "true" ]; then
                 echo "▶️  Запускаю Autotest..."
-                docker compose up -d autotest-stream autotest-dashboard-init
+                docker compose up -d autotest-server
               fi
             fi
             
@@ -499,17 +485,17 @@ jobs:
             fi
           ENDSSH
       
-      - name: 📡 Проверка Autotest Stream Server
+      - name: 📡 Проверка Autotest Server
         if: env.DEPLOY_AUTOTEST == 'true'
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
             set -e
-            echo "📡 Проверяю Autotest Stream Server..."
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3002/status || echo "000")
+            echo "📡 Проверяю Autotest Server..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3002/api/status || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Autotest Stream Server работает (HTTP $STATUS)"
+              echo "✅ Autotest Server работает (HTTP $STATUS)"
             else
-              echo "⚠️  Autotest Stream Server вернул статус: $STATUS"
+              echo "⚠️  Autotest Server вернул статус: $STATUS"
             fi
           ENDSSH
       
