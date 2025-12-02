@@ -258,45 +258,45 @@ const Dashboard = () => {
           <section className="relative px-4 py-12">
             <div className="container mx-auto max-w-[1440px]">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                <TabsList className="bg-white/[0.08] border border-white/30 p-1.5 gap-1.5 backdrop-blur-xl shadow-lg">
+                <TabsList className="bg-[#2a2a2a] border border-white/10 p-1.5 gap-1.5 rounded-lg">
                   <TabsTrigger 
                     value="dashboard" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <Activity className="h-4 w-4 mr-2" />
                     Дашборд
                   </TabsTrigger>
                   <TabsTrigger 
                     value="tests" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <FileCode className="h-4 w-4 mr-2" />
                     Тесты
                   </TabsTrigger>
                   <TabsTrigger 
                     value="history" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <History className="h-4 w-4 mr-2" />
                     История
                   </TabsTrigger>
                   <TabsTrigger 
                     value="reports" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Отчеты
                   </TabsTrigger>
                   <TabsTrigger 
                     value="recorder" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <Film className="h-4 w-4 mr-2" />
                     Recorder
                   </TabsTrigger>
                   <TabsTrigger 
                     value="settings" 
-                    className="data-[state=active]:bg-white/30 data-[state=active]:text-white data-[state=active]:border-white/60 data-[state=active]:shadow-xl data-[state=active]:font-semibold text-white border border-white/20 px-4 py-2.5 rounded-lg transition-all hover:text-white hover:bg-white/15 hover:border-white/30 font-medium"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 px-4 py-2.5 rounded-md transition-all hover:text-white hover:bg-white/5 font-medium"
                   >
                     <Settings className="h-4 w-4 mr-2" />
                     Настройки
