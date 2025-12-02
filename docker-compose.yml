@@ -39,10 +39,8 @@ services:
     depends_on:
       api:
         condition: service_started
-      autotest-stream:
+      autotest-server:
         condition: service_started
-      autotest-dashboard-init:
-        condition: service_completed_successfully
     networks:
       - ebuster-network
     volumes:
@@ -55,12 +53,12 @@ services:
       timeout: 10s
       retries: 3
 
-  # Autotest Stream Server (Live updates)
-  autotest-stream:
+  # Autotest Server (WebSocket + Dashboard)
+  autotest-server:
     build:
       context: .
-      dockerfile: Dockerfile.autotest-stream
-    container_name: ebuster-autotest-stream
+      dockerfile: Dockerfile.autotest-server
+    container_name: ebuster-autotest-server
     restart: unless-stopped
     ports:
       - "3002:3002"
@@ -69,30 +67,13 @@ services:
     volumes:
       - .:/workspace:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - autotest_reports:/app/tests/public/autotest
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/status"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/api/status"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Initial dashboard generator (runs once to seed volume)
-  autotest-dashboard-init:
-    build:
-      context: .
-      dockerfile: Dockerfile.autotest
-    container_name: ebuster-autotest-dashboard-init
-    restart: "no"
-    command: ["npm", "run", "test:dashboard:live"]
-    env_file:
-      - .env.autotest
-    environment:
-      - NODE_ENV=production
-      - CI=true
-      - STREAM_URL=http://autotest-stream:3002
-    networks:
-      - ebuster-network
-    volumes:
-      - autotest_reports:/app/tests/public/autotest
 
   # Autotest Runner (запускается по требованию)
   autotest-runner:
@@ -105,7 +86,7 @@ services:
     environment:
       - NODE_ENV=production
       - CI=true
-      - STREAM_URL=http://autotest-stream:3002
+      - STREAM_URL=http://autotest-server:3002
     networks:
       - ebuster-network
     volumes:
@@ -113,7 +94,7 @@ services:
       - autotest_storage:/app/tests/storage
     depends_on:
       - api
-      - autotest-stream
+      - autotest-server
     profiles:
       - testing
 

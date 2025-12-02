@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Устанавливаем системные пакеты
+RUN apk update && \
+    apk add --no-cache bash wget
+
+# Копируем package files
+COPY package*.json ./
+
+# Устанавливаем зависимости для сервера
+RUN npm install express cors ws
+
+# Копируем сервер
+COPY tests/server ./tests/server
+COPY tests/public ./tests/public
+
+# Создаём директорию для записей
+RUN mkdir -p tests/recorded
+
+EXPOSE 3002
+
+CMD ["node", "tests/server/index.js"]
+
