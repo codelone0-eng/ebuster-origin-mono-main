@@ -2,31 +2,16 @@ FROM mcr.microsoft.com/playwright:v1.56.1-jammy
 
 WORKDIR /app
 
-# Копируем package files
 COPY package*.json ./
-
-# Устанавливаем зависимости
 RUN npm install
 
-# Копируем исходники тестов и скрипты
 COPY tests ./tests
 COPY tsconfig*.json ./
 COPY .env.autotest* ./
 
-# Создаём директории для отчётов
 RUN mkdir -p tests/public/autotest tests/reports tests/storage
 
-# Устанавливаем переменные окружения
 ENV NODE_ENV=production
 ENV CI=true
 
-# Создаём init-скрипт для генерации плейсхолдера
-RUN echo '#!/bin/sh\n\
-if [ ! -f /app/tests/public/autotest/index.html ]; then\n\
-  echo "📝 Generating initial dashboard placeholder..."\n\
-  npm run test:dashboard:live || echo "⚠️  Failed to generate placeholder"\n\
-fi\n\
-exec "$@"' > /app/init.sh && chmod +x /app/init.sh
-
-ENTRYPOINT ["/app/init.sh"]
 CMD ["npm", "run", "test:all"]

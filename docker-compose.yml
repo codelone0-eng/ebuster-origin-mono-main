@@ -53,7 +53,7 @@ services:
       timeout: 10s
       retries: 3
 
-  # Autotest Server (WebSocket + Dashboard)
+  # Autotest Server
   autotest-server:
     build:
       context: .
