@@ -20,10 +20,12 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        // Используем системный chromium из Alpine
-        // Явно указываем путь, чтобы Playwright не искал свои браузеры
+        // Принудительно используем системный chromium, отключаем headless shell
+        channel: undefined, // Отключаем каналы Playwright
         executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
-        // Флаги для работы в Docker
+        // Отключаем использование headless shell
+        headless: true,
+        // Флаги для работы в Docker (без --headless, т.к. headless задан отдельно)
         args: [
           '--no-sandbox', 
           '--disable-setuid-sandbox', 
@@ -31,35 +33,7 @@ export default defineConfig({
           '--headless=new',
           '--disable-gpu',
           '--disable-software-rasterizer',
-          '--disable-extensions',
-          '--disable-background-networking',
-          '--disable-background-timer-throttling',
-          '--disable-renderer-backgrounding',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-breakpad',
-          '--disable-client-side-phishing-detection',
-          '--disable-component-update',
-          '--disable-default-apps',
-          '--disable-domain-reliability',
-          '--disable-features=AudioServiceOutOfProcess',
-          '--disable-hang-monitor',
-          '--disable-ipc-flooding-protection',
-          '--disable-notifications',
-          '--disable-offer-store-unmasked-wallet-cards',
-          '--disable-popup-blocking',
-          '--disable-print-preview',
-          '--disable-prompt-on-repost',
-          '--disable-speech-api',
-          '--disable-sync',
-          '--hide-scrollbars',
-          '--ignore-gpu-blacklist',
-          '--metrics-recording-only',
-          '--mute-audio',
-          '--no-first-run',
-          '--no-pings',
-          '--no-zygote',
-          '--password-store=basic',
-          '--use-mock-keychain'
+          '--disable-extensions'
         ],
         // Базовые настройки
         viewport: { width: 1280, height: 720 },
