@@ -20,7 +20,10 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        // Используем браузеры Playwright (установлены в Dockerfile)
+        // Принудительно используем системный chromium, отключаем headless shell
+        executablePath: '/usr/bin/chromium',
+        // Отключаем использование headless shell
+        channel: undefined,
         // Флаги для работы в Docker
         args: [
           '--no-sandbox', 
@@ -28,7 +31,32 @@ export default defineConfig({
           '--disable-dev-shm-usage', 
           '--headless=new',
           '--disable-gpu',
-          '--disable-software-rasterizer'
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          '--disable-background-networking',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-breakpad',
+          '--disable-client-side-phishing-detection',
+          '--disable-component-update',
+          '--disable-default-apps',
+          '--disable-domain-reliability',
+          '--disable-features=AudioServiceOutOfProcess,TranslateUI',
+          '--disable-hang-monitor',
+          '--disable-ipc-flooding-protection',
+          '--disable-notifications',
+          '--disable-popup-blocking',
+          '--disable-prompt-on-repost',
+          '--disable-speech-api',
+          '--disable-sync',
+          '--hide-scrollbars',
+          '--metrics-recording-only',
+          '--mute-audio',
+          '--no-first-run',
+          '--no-pings',
+          '--password-store=basic',
+          '--use-mock-keychain'
         ],
         // Базовые настройки
         viewport: { width: 1280, height: 720 },
