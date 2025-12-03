@@ -3,7 +3,9 @@ FROM node:20-alpine AS base
 WORKDIR /app
 
 # Устанавливаем системные зависимости для Playwright
-RUN apk add --no-cache \
+# Разделяем на шаги для лучшей кешируемости и меньшего риска таймаутов
+RUN apk update && \
+    apk add --no-cache \
     chromium \
     nss \
     freetype \
@@ -12,7 +14,7 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont \
     font-noto-emoji \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/*
 
 # Копируем package files
 COPY package*.json ./
