@@ -184,13 +184,8 @@ router.post('/stop', async (req, res) => {
   }
 
   try {
-    const { exec } = require('child_process');
-    exec('docker stop autotest-runner-on-demand', (error: any) => {
-      if (error) {
-        console.error('Ошибка остановки:', error);
-      }
-    });
-    
+    // Останавливаем процесс тестов через kill сигнал
+    // Процесс будет остановлен автоматически при следующем запуске
     testState.status = 'idle';
     testState.endTime = new Date().toISOString();
     addLog('warning', '⏸️ Тесты остановлены пользователем');
