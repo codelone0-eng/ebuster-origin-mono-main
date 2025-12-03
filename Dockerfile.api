@@ -26,13 +26,17 @@ RUN npm install && npm cache clean --force
 COPY tests ./tests
 COPY playwright.config.ts ./playwright.config.ts
 
-# Устанавливаем браузеры Playwright полностью
+# Устанавливаем браузеры Playwright полностью (включая headless shell)
 RUN echo "=== Установка браузеров Playwright ===" && \
     npx playwright install chromium && \
+    npx playwright install chromium-headless-shell || \
+    (echo "⚠️ Не удалось установить headless shell, пробуем установить все браузеры" && \
+     npx playwright install --with-deps chromium || \
+     echo "⚠️ Установка с зависимостями не удалась, продолжаем") && \
     echo "=== Проверка установки ===" && \
-    ls -la /root/.cache/ms-playwright/chromium*/*/chrome* 2>/dev/null | head -3 || \
-    find /root/.cache/ms-playwright -name "*chrome*" -type f 2>/dev/null | head -3 || \
-    echo "⚠️ Браузеры не найдены, но продолжаем"
+    (ls -la /root/.cache/ms-playwright/chromium*/*/chrome* 2>/dev/null | head -5 || \
+     find /root/.cache/ms-playwright -name "*chrome*" -type f 2>/dev/null | head -5 || \
+     echo "⚠️ Браузеры не найдены")
 
 # Копируем исходники API
 COPY server.ts ./
