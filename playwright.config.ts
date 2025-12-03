@@ -20,10 +20,9 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        // Используем системный chromium из Alpine Linux
-        // В Alpine chromium обычно находится в /usr/bin/chromium
-        channel: undefined, // Отключаем использование каналов Playwright
-        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
+        // Используем браузеры Playwright (установлены в Dockerfile)
+        // Если нужно использовать системный chromium, раскомментируйте executablePath
+        // executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
         // Флаги для работы в Docker
         args: [
           '--no-sandbox', 
