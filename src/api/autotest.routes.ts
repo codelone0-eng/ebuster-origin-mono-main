@@ -299,10 +299,12 @@ router.get('/reports', async (req, res) => {
 });
 
 // GET /api/autotest/reports/view/* - Получить HTML отчет
+// Используем req.url для получения полного пути
 router.get('/reports/view/*', (req, res) => {
   try {
-    // Получаем путь из запроса (все после /reports/view/)
-    const requestedPath = req.params[0] || '';
+    // Получаем путь из URL (все после /api/autotest/reports/view/)
+    const urlPath = req.url.replace('/api/autotest/reports/view/', '');
+    const requestedPath = decodeURIComponent(urlPath);
     const filePath = path.join(process.cwd(), 'tests/public/autotest/reports', requestedPath);
     
     // Проверка безопасности - только файлы из reports директории
