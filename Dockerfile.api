@@ -26,17 +26,20 @@ RUN npm install && npm cache clean --force
 COPY tests ./tests
 COPY playwright.config.ts ./playwright.config.ts
 
-# Устанавливаем браузеры Playwright полностью (включая headless shell)
-RUN echo "=== Установка браузеров Playwright ===" && \
-    npx playwright install chromium && \
-    npx playwright install chromium-headless-shell || \
-    (echo "⚠️ Не удалось установить headless shell, пробуем установить все браузеры" && \
-     npx playwright install --with-deps chromium || \
-     echo "⚠️ Установка с зависимостями не удалась, продолжаем") && \
-    echo "=== Проверка установки ===" && \
-    (ls -la /root/.cache/ms-playwright/chromium*/*/chrome* 2>/dev/null | head -5 || \
-     find /root/.cache/ms-playwright -name "*chrome*" -type f 2>/dev/null | head -5 || \
-     echo "⚠️ Браузеры не найдены")
+# Создаем структуру кеша Playwright и симлинк на системный chromium
+RUN echo "=== Создание структуры для Playwright ===" && \
+    mkdir -p /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64 && \
+    (test -f /usr/bin/chromium && \
+     ln -sf /usr/bin/chromium /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell && \
+     echo "✅ Создан симлинк chrome-headless-shell -> /usr/bin/chromium" || \
+     (test -f /usr/bin/chromium-browser && \
+      ln -sf /usr/bin/chromium-browser /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell && \
+      echo "✅ Создан симлинк chrome-headless-shell -> /usr/bin/chromium-browser" || \
+      echo "❌ Chromium не найден")) && \
+    chmod +x /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell && \
+    echo "=== Проверка ===" && \
+    ls -la /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/ && \
+    /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell --version || echo "⚠️ Симлинк не работает"
 
 # Копируем исходники API
 COPY server.ts ./
