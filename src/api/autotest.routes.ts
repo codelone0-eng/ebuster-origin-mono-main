@@ -298,10 +298,12 @@ router.get('/reports', async (req, res) => {
   }
 });
 
-// GET /api/autotest/reports/view/:file - Получить HTML отчет
-router.get('/reports/view/:file(*)', (req, res) => {
+// GET /api/autotest/reports/view/* - Получить HTML отчет
+router.get('/reports/view/*', (req, res) => {
   try {
-    const filePath = path.join(process.cwd(), 'tests/public/autotest/reports', req.params.file);
+    // Получаем путь из запроса (все после /reports/view/)
+    const requestedPath = req.params[0] || '';
+    const filePath = path.join(process.cwd(), 'tests/public/autotest/reports', requestedPath);
     
     // Проверка безопасности - только файлы из reports директории
     const reportsDir = path.resolve(process.cwd(), 'tests/public/autotest/reports');
