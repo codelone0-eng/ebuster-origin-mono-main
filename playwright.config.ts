@@ -20,9 +20,10 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        // Используем браузеры Playwright (установлены в Dockerfile)
-        // Если нужно использовать системный chromium, раскомментируйте executablePath
-        // executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
+        // Отключаем использование headless shell, используем обычный chromium
+        channel: undefined,
+        // Используем системный chromium из Alpine
+        executablePath: '/usr/bin/chromium',
         // Флаги для работы в Docker
         args: [
           '--no-sandbox', 
@@ -30,7 +31,8 @@ export default defineConfig({
           '--disable-dev-shm-usage', 
           '--headless=new',
           '--disable-gpu',
-          '--disable-software-rasterizer'
+          '--disable-software-rasterizer',
+          '--disable-extensions'
         ],
         // Базовые настройки
         viewport: { width: 1280, height: 720 },
