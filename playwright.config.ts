@@ -22,10 +22,18 @@ export default defineConfig({
       use: { 
         // Используем системный chromium из Alpine Linux
         // В Alpine chromium обычно находится в /usr/bin/chromium
+        channel: undefined, // Отключаем использование каналов Playwright
         executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
         // Флаги для работы в Docker
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--headless=new'],
-        // Базовые настройки из Desktop Chrome, но без переопределения executablePath
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox', 
+          '--disable-dev-shm-usage', 
+          '--headless=new',
+          '--disable-gpu',
+          '--disable-software-rasterizer'
+        ],
+        // Базовые настройки
         viewport: { width: 1280, height: 720 },
         ignoreHTTPSErrors: true,
       },
