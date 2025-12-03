@@ -20,12 +20,14 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        ...devices['Desktop Chrome'],
         // Используем системный chromium из Alpine Linux
         // В Alpine chromium обычно находится в /usr/bin/chromium
         executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
         // Флаги для работы в Docker
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--headless=new']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--headless=new'],
+        // Базовые настройки из Desktop Chrome, но без переопределения executablePath
+        viewport: { width: 1280, height: 720 },
+        ignoreHTTPSErrors: true,
       },
     },
   ],

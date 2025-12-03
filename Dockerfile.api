@@ -24,6 +24,9 @@ RUN npm install && npm cache clean --force
 COPY tests ./tests
 COPY playwright.config.ts ./playwright.config.ts
 
+# Устанавливаем браузеры Playwright (нужно для работы, но будем использовать системный chromium)
+RUN npx playwright install chromium || echo "Не удалось установить браузеры Playwright"
+
 # Проверяем, что chromium установлен и находим правильный путь
 RUN which chromium-browser || which chromium || echo "Chromium не найден" && \
     ls -la /usr/bin/chromium* || echo "Файлы chromium не найдены"
