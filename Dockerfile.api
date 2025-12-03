@@ -26,12 +26,13 @@ RUN npm install && npm cache clean --force
 COPY tests ./tests
 COPY playwright.config.ts ./playwright.config.ts
 
-# Проверяем наличие системного chromium и создаем симлинк если нужно
-RUN echo "=== Проверка системного chromium ===" && \
-    (test -f /usr/bin/chromium && echo "✅ /usr/bin/chromium существует" || \
-     (test -f /usr/bin/chromium-browser && ln -sf /usr/bin/chromium-browser /usr/bin/chromium && echo "✅ Создан симлинк /usr/bin/chromium" || \
-      echo "❌ Chromium не найден")) && \
-    /usr/bin/chromium --version || echo "⚠️ Chromium не запускается"
+# Устанавливаем браузеры Playwright полностью
+RUN echo "=== Установка браузеров Playwright ===" && \
+    npx playwright install chromium && \
+    echo "=== Проверка установки ===" && \
+    ls -la /root/.cache/ms-playwright/chromium*/*/chrome* 2>/dev/null | head -3 || \
+    find /root/.cache/ms-playwright -name "*chrome*" -type f 2>/dev/null | head -3 || \
+    echo "⚠️ Браузеры не найдены, но продолжаем"
 
 # Копируем исходники API
 COPY server.ts ./

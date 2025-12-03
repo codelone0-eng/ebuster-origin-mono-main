@@ -20,20 +20,15 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { 
-        // Принудительно используем системный chromium, отключаем headless shell
-        channel: undefined, // Отключаем каналы Playwright
-        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium',
-        // Отключаем использование headless shell
-        headless: true,
-        // Флаги для работы в Docker (без --headless, т.к. headless задан отдельно)
+        // Используем браузеры Playwright (установлены в Dockerfile)
+        // Флаги для работы в Docker
         args: [
           '--no-sandbox', 
           '--disable-setuid-sandbox', 
           '--disable-dev-shm-usage', 
           '--headless=new',
           '--disable-gpu',
-          '--disable-software-rasterizer',
-          '--disable-extensions'
+          '--disable-software-rasterizer'
         ],
         // Базовые настройки
         viewport: { width: 1280, height: 720 },
