@@ -15,7 +15,7 @@ test.describe('Ebuster Landing Page', () => {
 
 test.describe('Ebuster Login Page', () => {
   test('should load login page', async ({ page }) => {
-    await page.goto('https://lk.ebuster.ru');
+    await page.goto('https://lk.ebuster.ru', { waitUntil: 'networkidle' });
     // Проверяем, что страница загрузилась (может быть редирект на ebuster.ru)
     const url = page.url();
     expect(url).toMatch(/ebuster\.ru/);
