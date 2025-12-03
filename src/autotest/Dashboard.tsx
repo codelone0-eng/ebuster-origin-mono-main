@@ -602,10 +602,41 @@ const Dashboard = () => {
                 <TabsContent value="reports">
                   <Card className="bg-white/[0.02] border-white/10 backdrop-blur-xl">
                     <CardHeader>
-                      <CardTitle>Отчеты</CardTitle>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileCode className="h-5 w-5" />
+                        Отчеты
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-white/60">Функционал отчетов в разработке</p>
+                      <div className="space-y-4">
+                        {testState.summary.total > 0 && (
+                          <div className="flex gap-4">
+                            <a 
+                              href={`https://api.ebuster.ru/api/autotest/reports/view/index.html`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-2 transition-colors"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Открыть HTML отчет
+                            </a>
+                          </div>
+                        )}
+                        <div className="text-white/60">
+                          {testState.summary.total === 0 ? (
+                            <p>Запустите тесты, чтобы увидеть отчеты</p>
+                          ) : (
+                            <div className="space-y-2">
+                              <p>Всего тестов: {testState.summary.total}</p>
+                              <p className="text-emerald-400">Пройдено: {testState.summary.passed}</p>
+                              <p className="text-red-400">Провалено: {testState.summary.failed}</p>
+                              {testState.summary.skipped > 0 && (
+                                <p className="text-yellow-400">Пропущено: {testState.summary.skipped}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>

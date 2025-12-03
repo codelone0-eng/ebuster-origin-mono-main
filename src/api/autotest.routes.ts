@@ -267,6 +267,66 @@ router.post('/recorder/start', async (req, res) => {
   });
 });
 
+// GET /api/autotest/reports - Получить список отчетов
+router.get('/reports', async (req, res) => {
+  try {
+    const reportsDir = path.join(process.cwd(), 'tests/public/autotest/reports');
+    const reports: any[] = [];
+
+    if (fs.existsSync(reportsDir)) {
+      try {
+        const files = fs.readdirSync(reportsDir, { recursive: true });
+        const htmlFiles = files.filter((f: string) => 
+          typeof f === 'string' && f.endsWith('.html')
+        );
+
+        for (const file of htmlFiles) {
+          const filePath = path.join(reportsDir, file);
+          const stats = fs.statSync(filePath);
+          reports.push({
+            name: path.basename(file),
+            path: file,
+            size: stats.size,
+            modified: stats.mtime.toISOString(),
+            url: `/api/autotest/reports/view/${file}`
+          });
+        }
+      } catch (readError: any) {
+        console.warn('⚠️ Ошибка чтения директории reports:', readError?.message);
+      }
+    }
+
+    res.json(reports);
+  } catch (error: any) {
+    console.error('❌ Ошибка получения отчетов:', error);
+    res.status(500).json({ error: error?.message || 'Ошибка получения отчетов' });
+  }
+});
+
+// GET /api/autotest/reports/view/:file - Получить HTML отчет
+router.get('/reports/view/:file(*)', (req, res) => {
+  try {
+    const filePath = path.join(process.cwd(), 'tests/public/autotest/reports', req.params.file);
+    
+    // Проверка безопасности - только файлы из reports директории
+    const reportsDir = path.resolve(process.cwd(), 'tests/public/autotest/reports');
+    const resolvedPath = path.resolve(filePath);
+    
+    if (!resolvedPath.startsWith(reportsDir)) {
+      return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Отчет не найден' });
+    }
+
+    res.sendFile(filePath);
+  } catch (error: any) {
+    console.error('❌ Ошибка получения отчета:', error);
+    res.status(500).json({ error: error?.message || 'Ошибка получения отчета' });
+  }
+});
+
 // GET /api/autotest/suites - Получить список тест-сьютов
 router.get('/suites', async (req, res) => {
   try {
